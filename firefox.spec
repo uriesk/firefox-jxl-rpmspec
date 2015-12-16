@@ -77,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        43.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -255,7 +255,7 @@ cd %{tarballdir}
 #%patch220 -p1 -b .rhbz-1014858
 %patch221 -p2 -b .fedora-ua
 %if 0%{?fedora} > 23
-%patch222 -p2 -b .gtk3-20
+%patch222 -p1 -b .gtk3-20
 %endif
 
 %patch500 -p1
@@ -751,8 +751,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Dec 16 2015 Martin Stransky <stransky@redhat.com> - 43.0-2
-- partial fix for Gtk3.19 (rhbz#1286953)
+* Wed Dec 16 2015 Martin Stransky <stransky@redhat.com> - 43.0-3
+- fix for Gtk3.19 (rhbz#1286953)
 
 * Thu Dec 10 2015 Martin Stransky <stransky@redhat.com> - 43.0-1
 - Update to 43.0
