@@ -2,20 +2,11 @@
 %define system_nss        1
 
 # Use system sqlite?
-%if 0%{?fedora} < 20
-%define system_sqlite     0
-%define system_ffi        0
-%else
 %define system_sqlite     1
 %define system_ffi        1
-%endif
 
 # Build for Gtk3?
-%if 0%{?fedora} <= 21
-%define toolkit_gtk3      0
-%else
 %define toolkit_gtk3      1
-%endif
 
 # Use system cairo?
 %define system_cairo      0
@@ -86,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        43.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -122,6 +113,7 @@ Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
 Patch220:        rhbz-1014858.patch
 Patch221:        firefox-fedora-ua.patch
+Patch222:        firefox-gtk3-20.patch
 
 # Upstream patches
 
@@ -262,6 +254,9 @@ cd %{tarballdir}
 %patch219 -p2 -b .rhbz-1173156
 #%patch220 -p1 -b .rhbz-1014858
 %patch221 -p2 -b .fedora-ua
+%if 0%{?fedora} > 23
+%patch222 -p2 -b .gtk3-20
+%endif
 
 %patch500 -p1
 
@@ -756,6 +751,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 16 2015 Martin Stransky <stransky@redhat.com> - 43.0-2
+- partial fix for Gtk3.19 (rhbz#1286953)
+
 * Thu Dec 10 2015 Martin Stransky <stransky@redhat.com> - 43.0-1
 - Update to 43.0
 
