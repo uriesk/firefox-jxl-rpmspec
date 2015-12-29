@@ -76,14 +76,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        43.0
-Release:        3%{?pre_tag}%{?dist}
+Version:        43.0.3
+Release:        1%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        ftp://ftp.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20151210.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20151229.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -751,6 +751,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 29 2015 Martin Stransky <stransky@redhat.com> - 43.0.3-1
+- Update to 43.0.3
+
 * Wed Dec 16 2015 Martin Stransky <stransky@redhat.com> - 43.0-3
 - fix for Gtk3.19 (rhbz#1286953)
 
