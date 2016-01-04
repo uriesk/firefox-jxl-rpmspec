@@ -120,6 +120,8 @@ Patch222:        firefox-gtk3-20.patch
 # Gtk3 upstream patches
 
 # Fix Skia Neon stuff on AArch64
+# Update https://bugzilla.mozilla.org/show_bug.cgi?id=1142056
+# when removed
 Patch500:        aarch64-fix-skia.patch
 
 %if %{?system_nss}
