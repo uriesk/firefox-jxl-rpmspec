@@ -77,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        43.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -753,6 +753,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 4 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-2
+- Enabled Skia (rhbz#1282134)
+
 * Tue Dec 29 2015 Martin Stransky <stransky@redhat.com> - 43.0.3-1
 - Update to 43.0.3
 
