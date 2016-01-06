@@ -77,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        43.0.3
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -123,6 +123,8 @@ Patch222:        firefox-gtk3-20.patch
 # Update https://bugzilla.mozilla.org/show_bug.cgi?id=1142056
 # when removed
 Patch500:        aarch64-fix-skia.patch
+# Add AArch64 architecture definition for webrtc
+Patch501:        firefox-webrtc-aarch64.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -261,6 +263,7 @@ cd %{tarballdir}
 %endif
 
 %patch500 -p1
+%patch501 -p1
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -753,6 +756,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 05 2016 Marcin Juszkiewicz <mjuszkiewicz@redhat.com> - 43.0.3-3
+- Fix build on AArch64.
+
 * Mon Jan 4 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-2
 - Enabled Skia (rhbz#1282134)
 
