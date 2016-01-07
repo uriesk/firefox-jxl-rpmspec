@@ -1,0 +1,57 @@
+From 01c739425470990efd607fdf57c9b24033c71300 Mon Sep 17 00:00:00 2001
+From: Mike Hommey <mh+mozilla@glandium.org>
+Date: Wed, 23 Dec 2015 12:11:45 +0900
+Subject: [PATCH] Bug 1234026 - Pass a --display option to gtk_init in content
+ processes
+
+---
+ dom/ipc/ContentChild.cpp | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/dom/ipc/ContentChild.cpp b/dom/ipc/ContentChild.cpp
+index 14a7302..cfec4b7 100644
+--- a/dom/ipc/ContentChild.cpp
++++ b/dom/ipc/ContentChild.cpp
+@@ -615,17 +615,38 @@ NS_INTERFACE_MAP_BEGIN(ContentChild)
+ NS_INTERFACE_MAP_END
+ 
+ bool
+ ContentChild::Init(MessageLoop* aIOLoop,
+                    base::ProcessId aParentPid,
+                    IPC::Channel* aChannel)
+ {
+ #ifdef MOZ_WIDGET_GTK
+-    gtk_init(nullptr, nullptr);
++    // We need to pass a display down to gtk_init because it's not going to
++    // use the one from the environment on its own when deciding which backend
++    // to use, and when starting under XWayland, it may choose to start with
++    // the wayland backend instead of the x11 backend.
++    // We could use gdk_display_open, and gdk_display_manager_set_default_display
++    // but then we'd have to hold onto it and gdk_display_close it at the
++    // right moment, so it's simpler to just pass down a fake argv list.
++    // The DISPLAY environment variable is normally set by the parent process.
++    const char *display_name = PR_GetEnv("DISPLAY");
++    if (display_name) {
++        int argc = 3;
++        const char *argv[] = {
++            nullptr,
++            "--display",
++            display_name,
++            nullptr
++        };
++        char** argv_ = const_cast<char**>(argv);
++        gtk_init(&argc, &argv_);
++    } else {
++        gtk_init(nullptr, nullptr);
++    }
+ #endif
+ 
+ #ifdef MOZ_WIDGET_QT
+     // sigh, seriously
+     nsQAppInstance::AddRef();
+ #endif
+ 
+ #ifdef MOZ_X11
+-- 
+2.6.1
+

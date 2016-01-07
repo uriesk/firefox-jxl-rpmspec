@@ -77,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        43.0.3
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -116,6 +116,7 @@ Patch221:        firefox-fedora-ua.patch
 Patch222:        firefox-gtk3-20.patch
 
 # Upstream patches
+Patch300:        mozilla-1234026.patch
 
 # Gtk3 upstream patches
 
@@ -261,6 +262,8 @@ cd %{tarballdir}
 %if 0%{?fedora} > 23
 %patch222 -p1 -b .gtk3-20
 %endif
+
+%patch300 -p1 -b .1234026
 
 %patch500 -p1
 %patch501 -p1
@@ -756,6 +759,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jan 7 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-4
+- Added fix for mozbz#1234026 - crashes on XWayland
+
 * Tue Jan 05 2016 Marcin Juszkiewicz <mjuszkiewicz@redhat.com> - 43.0.3-3
 - Fix build on AArch64.
 
