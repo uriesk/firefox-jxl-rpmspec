@@ -77,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        43.0.3
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -761,6 +761,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 13 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-5
+- Updated progress bars rendering for Gtk 3.20
+
 * Thu Jan 7 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-4
 - Added fix for mozbz#1234026 - crashes on XWayland
 
