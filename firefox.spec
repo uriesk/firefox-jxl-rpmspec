@@ -136,7 +136,9 @@ BuildRequires:  nss-static >= %{nss_version}
 BuildRequires:  pkgconfig(cairo) >= %{cairo_version}
 %endif
 BuildRequires:  pkgconfig(libpng)
+%if %{?system_jpeg}
 BuildRequires:  libjpeg-devel
+%endif
 BuildRequires:  zip
 BuildRequires:  bzip2-devel
 BuildRequires:  pkgconfig(zlib)
