@@ -76,14 +76,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        43.0.3
-Release:        5%{?pre_tag}%{?dist}
+Version:        43.0.4
+Release:        1%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        ftp://ftp.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20151229.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160114.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -761,6 +761,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jan 14 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-6
+- Update to 43.0.4
+
 * Wed Jan 13 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-5
 - Updated progress bars rendering for Gtk 3.20
 
