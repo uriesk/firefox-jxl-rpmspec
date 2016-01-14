@@ -77,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        43.0.4
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -761,7 +761,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Jan 14 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-6
+* Thu Jan 14 2016 Martin Stransky <stransky@redhat.com> - 43.0.4-2
+- Fixed the progress bar rendering
+
+* Thu Jan 14 2016 Martin Stransky <stransky@redhat.com> - 43.0.4-1
 - Update to 43.0.4
 
 * Wed Jan 13 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-5
