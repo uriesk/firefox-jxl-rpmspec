@@ -77,13 +77,13 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        44.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            http://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        ftp://ftp.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160121.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160125.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -761,6 +761,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 25 2016 Martin Stransky <stransky@redhat.com> - 44.0-2
+- Update to 44.0 B3
+
 * Thu Jan 21 2016 Jan Horak <jhorak@redhat.com> - 44.0-1
 - Update to 44.0
 
