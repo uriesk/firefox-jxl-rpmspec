@@ -762,7 +762,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Jan 26 Ralph Giles <giles@mozilla.com> - 44.0-3
+* Tue Jan 26 2016 Ralph Giles <giles@mozilla.com> - 44.0-3
 - Medadata update, require pulseaudio
 
 * Mon Jan 25 2016 Martin Stransky <stransky@redhat.com> - 44.0-2
