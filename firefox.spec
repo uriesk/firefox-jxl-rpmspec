@@ -95,7 +95,6 @@ Source25:       firefox-symbolic.svg
 
 #Build patches
 Patch0:         firefox-install-dir.patch
-#Patch1:         firefox-build.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
 Patch18:        xulrunner-24.0-jemalloc-ppc.patch
@@ -241,7 +240,6 @@ cd %{tarballdir}
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
 %patch0 -p1
-#%patch1 -p2 -b .build
 
 %patch18 -p2 -b .jemalloc-ppc
 %patch19 -p2 -b .s390-inlines
