@@ -77,11 +77,11 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        44.0
-Release:        2%{?pre_tag}%{?dist}
-URL:            http://www.mozilla.org/projects/firefox/
+Release:        3%{?pre_tag}%{?dist}
+URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
-Source0:        ftp://ftp.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
+Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
 Source1:        firefox-langpacks-%{version}%{?pre_version}-20160125.tar.xz
 %endif
@@ -166,6 +166,7 @@ BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
 
 Requires:       mozilla-filesystem
+Requires:       pulseaudio
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
@@ -761,6 +762,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 26 Ralph Giles <giles@mozilla.com> - 44.0-3
+- Medadata update, require pulseaudio
+
 * Mon Jan 25 2016 Martin Stransky <stransky@redhat.com> - 44.0-2
 - Update to 44.0 B3
 
