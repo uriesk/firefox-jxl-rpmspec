@@ -77,7 +77,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        44.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -165,7 +165,6 @@ BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
 
 Requires:       mozilla-filesystem
-Requires:       pulseaudio
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
@@ -760,6 +759,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 1 2016 Martin Stransky <stransky@redhat.com> - 44.0-4
+- Removed pulseaudio hard dependency (rhbz#1303620)
+
 * Tue Jan 26 2016 Ralph Giles <giles@mozilla.com> - 44.0-3
 - Medadata update, require pulseaudio
 
