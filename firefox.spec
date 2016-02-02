@@ -762,7 +762,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Feb 2 2016 Martin Stransky <stransky@redhat.com> - 44.0-5
+* Tue Feb 2 2016 Martin Stransky <stransky@redhat.com> - 44.0-5
 - GCC 6.0 build patch
 - Disabled mozilla crashreporter to catch Gtk3 crashes
 
