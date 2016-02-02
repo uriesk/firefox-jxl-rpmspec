@@ -1,0 +1,13 @@
+diff -up firefox-44.0/nsprpub/config/make-system-wrappers.pl.back firefox-44.0/nsprpub/config/make-system-wrappers.pl
+--- firefox-44.0/nsprpub/config/make-system-wrappers.pl.back	2016-01-24 00:23:49.000000000 +0100
++++ firefox-44.0/nsprpub/config/make-system-wrappers.pl	2016-02-02 14:58:45.064112655 +0100
+@@ -19,7 +19,9 @@ while (<STDIN>) {
+     open OUT, ">$output_dir/$_";
+     print OUT "#pragma GCC system_header\n";  # suppress include_next warning
+     print OUT "#pragma GCC visibility push(default)\n";
++    print OUT "#define _GLIBCXX_INCLUDE_NEXT_C_HEADERS\n";
+     print OUT "#include_next \<$_\>\n";
++    print OUT "#undef _GLIBCXX_INCLUDE_NEXT_C_HEADERS\n";
+     print OUT "#pragma GCC visibility pop\n";
+     close OUT;
+ }

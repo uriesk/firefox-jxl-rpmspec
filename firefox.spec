@@ -70,14 +70,15 @@
 %define enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
-%define enable_mozilla_crashreporter       1
+# Temporary disable to catch Gtk3 crashes in Fedora (mozbz#1239962)
+%define enable_mozilla_crashreporter       0
 %endif
 %endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        44.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -104,6 +105,7 @@ Patch20:        firefox-build-prbool.patch
 Patch21:        firefox-ppc64le.patch
 Patch24:        firefox-debug.patch
 Patch25:        rhbz-1219542-s390-build.patch
+Patch26:        firefox-gcc-6.0.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -248,6 +250,7 @@ cd %{tarballdir}
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
+%patch26 -p1 -b .gcc-6.0
 
 %patch3  -p2 -b .arm
 
@@ -759,6 +762,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 2 2016 Martin Stransky <stransky@redhat.com> - 44.0-5
+- GCC 6.0 build patch
+- Disabled mozilla crashreporter to catch Gtk3 crashes
+
 * Mon Feb 1 2016 Martin Stransky <stransky@redhat.com> - 44.0-4
 - Removed pulseaudio hard dependency (rhbz#1303620)
 
