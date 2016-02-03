@@ -11,3 +11,16 @@ diff -up firefox-44.0/nsprpub/config/make-system-wrappers.pl.back firefox-44.0/n
      print OUT "#pragma GCC visibility pop\n";
      close OUT;
  }
+diff -up firefox-44.0/mozglue/build/arm.cpp.old firefox-44.0/mozglue/build/arm.cpp
+--- firefox-44.0/mozglue/build/arm.cpp.old	2016-02-03 10:07:29.879526500 +0100
++++ firefox-44.0/mozglue/build/arm.cpp	2016-02-03 10:08:11.062697517 +0100
+@@ -104,7 +104,9 @@ check_neon(void)
+ 
+ #  elif defined(__linux__) || defined(ANDROID)
+ #    include <stdio.h>
++#define _GLIBCXX_INCLUDE_NEXT_C_HEADERS
+ #    include <stdlib.h>
++#undef _GLIBCXX_INCLUDE_NEXT_C_HEADERS
+ #    include <string.h>
+ 
+ enum{
