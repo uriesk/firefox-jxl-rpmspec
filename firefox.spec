@@ -115,6 +115,7 @@ Patch219:        rhbz-1173156.patch
 Patch220:        rhbz-1014858.patch
 Patch221:        firefox-fedora-ua.patch
 Patch222:        firefox-gtk3-20.patch
+Patch223:        rhbz-1291190-appchooser-crash.patch
 
 # Upstream patches
 Patch300:        mozilla-1234026.patch
@@ -265,6 +266,7 @@ cd %{tarballdir}
 %if 0%{?fedora} > 23
 %patch222 -p1 -b .gtk3-20
 %endif
+%patch223 -p1 -b .appchooser-crash
 
 %patch300 -p1 -b .1234026
 
