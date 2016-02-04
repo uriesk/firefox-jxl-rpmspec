@@ -78,7 +78,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        44.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -769,6 +769,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Feb  4 2016 Jan Horak <jhorak@redhat.com> - 44.0-6
+- Workaround for crash when closing application chooser and Fedora 23
+  (rhbz#1291190)
+
 * Tue Feb 2 2016 Martin Stransky <stransky@redhat.com> - 44.0-5
 - GCC 6.0 build patch
 - Disabled mozilla crashreporter to catch Gtk3 crashes
