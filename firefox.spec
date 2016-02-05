@@ -77,14 +77,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        44.0
-Release:        6%{?pre_tag}%{?dist}
+Version:        44.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160125.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160205.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -769,6 +769,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Feb 5 2016 Martin Stransky <stransky@redhat.com> - 44.0.1-1
+- Update to 44.0.1
+
 * Thu Feb  4 2016 Jan Horak <jhorak@redhat.com> - 44.0-6
 - Workaround for crash when closing application chooser and Fedora 23
   (rhbz#1291190)
