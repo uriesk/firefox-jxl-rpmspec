@@ -78,7 +78,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        44.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -119,6 +119,7 @@ Patch223:        rhbz-1291190-appchooser-crash.patch
 
 # Upstream patches
 Patch300:        mozilla-1234026.patch
+Patch301:        mozilla-1205199.patch
 
 # Gtk3 upstream patches
 
@@ -269,6 +270,7 @@ cd %{tarballdir}
 %patch223 -p1 -b .appchooser-crash
 
 %patch300 -p1 -b .1234026
+%patch301 -p1 -b .1205199
 
 %patch500 -p1
 %patch501 -p1
@@ -769,6 +771,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Feb 11 2016 Martin Stransky <stransky@redhat.com> - 44.0.2-3
+- Added patch for mozbz#1205199
+
 * Thu Feb 11 2016 Martin Stransky <stransky@redhat.com> - 44.0.2-2
 - Update to 44.0.2 (B3)
 
