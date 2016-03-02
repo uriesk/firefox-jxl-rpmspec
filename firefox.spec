@@ -11,6 +11,13 @@
 # Use system cairo?
 %define system_cairo      0
 
+# Use system libvpx?
+%if 0%{?fedora} > 22
+%define system_libvpx      1
+%else
+%define system_libvpx      0
+%endif
+
 # Hardened build?
 %if 0%{?fedora} > 20
 %define hardened_build    1
@@ -44,7 +51,9 @@
 %global cairo_version 1.13.1
 %global freetype_version 2.1.9
 %global libnotify_version 0.7.0
-%global libvpx_version 1.3.0
+%if %{?system_libvpx}
+%global libvpx_version 1.4.0
+%endif
 
 %if %{?system_nss}
 %global nspr_version 4.10.10
@@ -78,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -158,7 +167,9 @@ BuildRequires:  pkgconfig(alsa)
 BuildRequires:  pkgconfig(libnotify) >= %{libnotify_version}
 BuildRequires:  pkgconfig(dri)
 BuildRequires:  pkgconfig(libcurl)
+%if %{?system_libvpx}
 BuildRequires:  libvpx-devel >= %{libvpx_version}
+%endif
 BuildRequires:  autoconf213
 BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  pkgconfig(icu-i18n)
@@ -378,6 +389,12 @@ echo "ac_add_options --enable-tests" >> .mozconfig
 echo "ac_add_options --without-system-jpeg" >> .mozconfig
 %else
 echo "ac_add_options --with-system-jpeg" >> .mozconfig
+%endif
+
+%if %{?system_libvpx}
+echo "ac_add_options --with-system-libvpx" >> .mozconfig
+%else
+echo "ac_add_options --without-system-libvpx" >> .mozconfig
 %endif
 
 #---------------------------------------------------------------------
@@ -766,6 +783,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 2 2016 Martin Stransky <stransky@redhat.com> - 45.0-2
+- Disabled system libvpx on Fedora 22 where is 1.3.0
+
 * Wed Mar 2 2016 Martin Stransky <stransky@redhat.com> - 45.0-1
 - Update to 45.0
 
