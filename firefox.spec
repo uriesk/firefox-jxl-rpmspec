@@ -77,14 +77,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        44.0.2
-Release:        3%{?pre_tag}%{?dist}
+Version:        45.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160211.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160302.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -118,7 +118,6 @@ Patch222:        firefox-gtk3-20.patch
 Patch223:        rhbz-1291190-appchooser-crash.patch
 
 # Upstream patches
-Patch300:        mozilla-1234026.patch
 Patch301:        mozilla-1205199.patch
 
 # Gtk3 upstream patches
@@ -127,8 +126,6 @@ Patch301:        mozilla-1205199.patch
 # Update https://bugzilla.mozilla.org/show_bug.cgi?id=1142056
 # when removed
 Patch500:        aarch64-fix-skia.patch
-# Add AArch64 architecture definition for webrtc
-Patch501:        firefox-webrtc-aarch64.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -242,7 +239,7 @@ cd %{tarballdir}
 # Build patches, can't change backup suffix from default because during build
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
-%patch0 -p1
+%patch0  -p1
 
 %patch18 -p2 -b .jemalloc-ppc
 %patch19 -p2 -b .s390-inlines
@@ -269,11 +266,9 @@ cd %{tarballdir}
 %endif
 %patch223 -p1 -b .appchooser-crash
 
-%patch300 -p1 -b .1234026
 %patch301 -p1 -b .1205199
 
 %patch500 -p1
-%patch501 -p1
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -771,6 +766,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 2 2016 Martin Stransky <stransky@redhat.com> - 45.0-1
+- Update to 45.0
+
 * Thu Feb 11 2016 Martin Stransky <stransky@redhat.com> - 44.0.2-3
 - Added patch for mozbz#1205199
 
