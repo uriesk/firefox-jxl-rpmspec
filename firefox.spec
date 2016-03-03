@@ -130,6 +130,7 @@ Patch223:        rhbz-1291190-appchooser-crash.patch
 Patch301:        mozilla-1205199.patch
 Patch302:        mozilla-1228540.patch
 Patch303:        mozilla-1228540-1.patch
+Patch304:        mozilla-1253216.patch
 
 # Gtk3 upstream patches
 
@@ -282,6 +283,7 @@ cd %{tarballdir}
 %patch301 -p1 -b .1205199
 %patch302 -p1 -b .1228540
 %patch303 -p1 -b .1228540-1
+%patch304 -p2 -b .1253216
 
 %patch500 -p1
 
