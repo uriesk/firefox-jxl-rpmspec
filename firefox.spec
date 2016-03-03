@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -283,7 +283,9 @@ cd %{tarballdir}
 %patch301 -p1 -b .1205199
 %patch302 -p1 -b .1228540
 %patch303 -p1 -b .1228540-1
+%if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
+%endif
 
 %patch500 -p1
 
@@ -788,6 +790,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 3 2016 Martin Stransky <stransky@redhat.com> - 45.0-3
+- Added run-time fix for JIT (mozbz#1253216)
+
 * Wed Mar 2 2016 Martin Stransky <stransky@redhat.com> - 45.0-2
 - Disabled system libvpx on Fedora 22 where is 1.3.0
 
