@@ -128,6 +128,8 @@ Patch223:        rhbz-1291190-appchooser-crash.patch
 
 # Upstream patches
 Patch301:        mozilla-1205199.patch
+Patch302:        mozilla-1228540.patch
+Patch303:        mozilla-1228540-1.patch
 
 # Gtk3 upstream patches
 
@@ -278,6 +280,8 @@ cd %{tarballdir}
 %patch223 -p1 -b .appchooser-crash
 
 %patch301 -p1 -b .1205199
+%patch302 -p1 -b .1228540
+%patch303 -p1 -b .1228540-1
 
 %patch500 -p1
 
@@ -730,6 +734,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/components/*.so
 %{mozappdir}/browser/components/components.manifest
 %{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
+%{mozappdir}/browser/features/loop@mozilla.org.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
 %dir %{mozappdir}/browser/extensions
 %{mozappdir}/browser/extensions/*
@@ -762,8 +767,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %if %{toolkit_gtk3}
 %{mozappdir}/gtk2/*.so
 %endif
-%{mozappdir}/chrome.manifest
-%{mozappdir}/components
 %{mozappdir}/defaults/pref/channel-prefs.js
 %{mozappdir}/dependentlibs.list
 %{mozappdir}/dictionaries
