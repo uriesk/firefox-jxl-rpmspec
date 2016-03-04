@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -790,6 +790,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 4 2016 Martin Stransky <stransky@redhat.com> - 45.0-4
+- Update to 45.0 (B2)
+
 * Thu Mar 3 2016 Martin Stransky <stransky@redhat.com> - 45.0-3
 - Added run-time fix for JIT (mozbz#1253216)
 
