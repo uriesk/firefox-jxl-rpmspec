@@ -121,7 +121,6 @@ Patch26:        firefox-gcc-6.0.patch
 Patch204:        rhbz-966424.patch
 Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
-Patch220:        rhbz-1014858.patch
 Patch221:        firefox-fedora-ua.patch
 Patch222:        firefox-gtk3-20.patch
 Patch223:        rhbz-1291190-appchooser-crash.patch
@@ -273,7 +272,6 @@ cd %{tarballdir}
 %patch204 -p2 -b .966424
 %patch215 -p1 -b .addons
 %patch219 -p2 -b .rhbz-1173156
-#%patch220 -p1 -b .rhbz-1014858
 %patch221 -p2 -b .fedora-ua
 %if 0%{?fedora} > 23
 %patch222 -p1 -b .gtk3-20
