@@ -1330,14 +1330,6 @@ diff -up firefox-45.0/widget/gtk/gtkdrawing.h.gtk3-20 firefox-45.0/widget/gtk/gt
 diff -up firefox-45.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0/widget/gtk/mozgtk/mozgtk.c
 --- firefox-45.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20	2016-03-03 22:48:07.000000000 +0100
 +++ firefox-45.0/widget/gtk/mozgtk/mozgtk.c	2016-03-15 13:58:06.914489856 +0100
-@@ -388,6 +388,7 @@ STUB(gtk_settings_get_for_screen)
- STUB(gtk_socket_add_id)
- STUB(gtk_socket_get_id)
- STUB(gtk_socket_get_type)
-+STUB(gtk_socket_get_plug_window)
- STUB(gtk_socket_new)
- STUB(gtk_spin_button_new)
- STUB(gtk_statusbar_new)
 @@ -502,6 +503,11 @@ STUB(gtk_window_set_type_hint)
  STUB(gtk_window_set_wmclass)
  STUB(gtk_window_unfullscreen)
