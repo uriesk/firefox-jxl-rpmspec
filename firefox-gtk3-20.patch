@@ -1,6 +1,6 @@
-diff -up firefox-45.0/widget/gtk/gtk3drawing.c.gtk3-20 firefox-45.0/widget/gtk/gtk3drawing.c
---- firefox-45.0/widget/gtk/gtk3drawing.c.gtk3-20	2016-03-03 22:48:07.000000000 +0100
-+++ firefox-45.0/widget/gtk/gtk3drawing.c	2016-03-15 14:49:49.567688010 +0100
+diff -up firefox-45.0.1/widget/gtk/gtk3drawing.c.gtk3-20 firefox-45.0.1/widget/gtk/gtk3drawing.c
+--- firefox-45.0.1/widget/gtk/gtk3drawing.c.gtk3-20	2016-03-15 23:37:46.000000000 +0100
++++ firefox-45.0.1/widget/gtk/gtk3drawing.c	2016-03-17 11:24:09.290483042 +0100
 @@ -17,32 +17,78 @@
  
  #include <math.h>
@@ -1286,9 +1286,9 @@ diff -up firefox-45.0/widget/gtk/gtk3drawing.c.gtk3-20 firefox-45.0/widget/gtk/g
      gTabWidget = NULL;
      gTooltipWidget = NULL;
      gMenuBarWidget = NULL;
-diff -up firefox-45.0/widget/gtk/gtkdrawing.h.gtk3-20 firefox-45.0/widget/gtk/gtkdrawing.h
---- firefox-45.0/widget/gtk/gtkdrawing.h.gtk3-20	2016-03-03 22:48:07.000000000 +0100
-+++ firefox-45.0/widget/gtk/gtkdrawing.h	2016-03-15 13:58:06.910489843 +0100
+diff -up firefox-45.0.1/widget/gtk/gtkdrawing.h.gtk3-20 firefox-45.0.1/widget/gtk/gtkdrawing.h
+--- firefox-45.0.1/widget/gtk/gtkdrawing.h.gtk3-20	2016-03-15 23:37:46.000000000 +0100
++++ firefox-45.0.1/widget/gtk/gtkdrawing.h	2016-03-17 11:24:09.290483042 +0100
 @@ -67,6 +67,13 @@ typedef enum {
    MOZ_GTK_TAB_SELECTED        = 1 << 10
  } GtkTabFlags;
@@ -1327,9 +1327,17 @@ diff -up firefox-45.0/widget/gtk/gtkdrawing.h.gtk3-20 firefox-45.0/widget/gtk/gt
  #ifdef __cplusplus
  }
  #endif /* __cplusplus */
-diff -up firefox-45.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0/widget/gtk/mozgtk/mozgtk.c
---- firefox-45.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20	2016-03-03 22:48:07.000000000 +0100
-+++ firefox-45.0/widget/gtk/mozgtk/mozgtk.c	2016-03-15 13:58:06.914489856 +0100
+diff -up firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c
+--- firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20	2016-03-15 23:37:46.000000000 +0100
++++ firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c	2016-03-17 11:24:09.294483057 +0100
+@@ -388,6 +388,7 @@ STUB(gtk_settings_get_for_screen)
+ STUB(gtk_socket_add_id)
+ STUB(gtk_socket_get_id)
+ STUB(gtk_socket_get_type)
++STUB(gtk_socket_get_plug_window)
+ STUB(gtk_socket_new)
+ STUB(gtk_spin_button_new)
+ STUB(gtk_statusbar_new)
 @@ -502,6 +503,11 @@ STUB(gtk_window_set_type_hint)
  STUB(gtk_window_set_wmclass)
  STUB(gtk_window_unfullscreen)
@@ -1364,9 +1372,9 @@ diff -up firefox-45.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0/widget/gtk
  #endif
  
  #ifdef GTK2_SYMBOLS
-diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/gtk/nsLookAndFeel.cpp
---- firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20	2016-03-03 22:48:07.000000000 +0100
-+++ firefox-45.0/widget/gtk/nsLookAndFeel.cpp	2016-03-15 13:58:06.911489846 +0100
+diff -up firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp
+--- firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp.gtk3-20	2016-03-15 23:37:46.000000000 +0100
++++ firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp	2016-03-17 13:47:31.437687080 +0100
 @@ -232,14 +232,18 @@ nsLookAndFeel::NativeGetColor(ColorID aI
      case eColorID_activeborder:
          // active window border
@@ -1486,7 +1494,7 @@ diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/g
  
      g_object_unref(menu);
  #endif
-@@ -1145,44 +1162,58 @@ nsLookAndFeel::Init()
+@@ -1145,44 +1162,54 @@ nsLookAndFeel::Init()
              GDK_COLOR_TO_NS_RGB(style->dark[GTK_STATE_NORMAL]);
      }
  #else
@@ -1505,11 +1513,8 @@ diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/g
 -    gtk_style_context_add_class(style, GTK_STYLE_CLASS_VIEW);
 -    gtk_style_context_get_background_color(style, GTK_STATE_FLAG_NORMAL, &color);
 +    styleLabel = moz_gtk_style_create(labelPath, NULL);
-+
-+    gtk_style_context_get_border(styleLabel, gtk_style_context_get_state(styleLabel), &padding);
-+    gtk_style_context_get_padding(styleLabel, gtk_style_context_get_state(styleLabel), &padding);
-+
 +    styleSelection = moz_gtk_style_create(labelPath+1, styleLabel);
++
 +    gtk_style_context_get_background_color(styleLabel, gtk_style_context_get_state(styleLabel), &color);
      sMozFieldBackground = GDK_RGBA_TO_NS_RGBA(color);
 -    gtk_style_context_get_color(style, GTK_STATE_FLAG_NORMAL, &color);
@@ -1520,7 +1525,6 @@ diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/g
 -    gtk_style_context_get_background_color(style,
 -        static_cast<GtkStateFlags>(GTK_STATE_FLAG_FOCUSED|GTK_STATE_FLAG_SELECTED),
 -        &color);
-+    gtk_style_context_set_state (styleLabel, GTK_STATE_FLAG_SELECTED);
 +    gtk_style_context_get_background_color(styleSelection, gtk_style_context_get_state(styleSelection), &color);
      sTextSelectedBackground = GDK_RGBA_TO_NS_RGBA(color);
 -    gtk_style_context_get_color(style,
@@ -1562,7 +1566,7 @@ diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/g
  
      // GTK's guide to fancy odd row background colors:
      // 1) Check if a theme explicitly defines an odd row color
-@@ -1195,7 +1226,7 @@ nsLookAndFeel::Init()
+@@ -1195,7 +1222,7 @@ nsLookAndFeel::Init()
      // Get odd row background color
      gtk_style_context_save(style);
      gtk_style_context_add_region(style, GTK_STYLE_REGION_ROW, GTK_REGION_ODD);
@@ -1571,7 +1575,7 @@ diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/g
      sOddCellBackground = GDK_RGBA_TO_NS_RGBA(color);
      gtk_style_context_restore(style);
  
-@@ -1205,7 +1236,7 @@ nsLookAndFeel::Init()
+@@ -1205,7 +1232,7 @@ nsLookAndFeel::Init()
      // TODO GTK3 - update sFrameOuterLightBorder 
      // for GTK_BORDER_STYLE_INSET/OUTSET/GROVE/RIDGE border styles (Bug 978172).
      style = gtk_widget_get_style_context(frame);
@@ -1580,7 +1584,7 @@ diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/g
      sFrameInnerDarkBorder = sFrameOuterLightBorder = GDK_RGBA_TO_NS_RGBA(color);
  
      gtk_widget_path_free(path);
-@@ -1217,9 +1248,11 @@ nsLookAndFeel::Init()
+@@ -1217,9 +1244,11 @@ nsLookAndFeel::Init()
      gtk_container_add(GTK_CONTAINER(parent), infoBar);
      gtk_container_add(GTK_CONTAINER(infoBarContent), infoBarLabel);
      style = gtk_widget_get_style_context(infoBarLabel);
@@ -1593,9 +1597,9 @@ diff -up firefox-45.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0/widget/g
  #endif
      // Some themes have a unified menu bar, and support window dragging on it
      gboolean supports_menubar_drag = FALSE;
-diff -up firefox-45.0/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20 firefox-45.0/widget/gtk/nsNativeThemeGTK.cpp
---- firefox-45.0/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20	2016-03-03 22:48:07.000000000 +0100
-+++ firefox-45.0/widget/gtk/nsNativeThemeGTK.cpp	2016-03-15 13:58:06.911489846 +0100
+diff -up firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20 firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp
+--- firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20	2016-03-15 23:37:46.000000000 +0100
++++ firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp	2016-03-17 11:24:09.291483046 +0100
 @@ -1548,9 +1548,6 @@ nsNativeThemeGTK::GetMinimumWidgetSize(n
    case NS_THEME_RADIO_CONTAINER:
    case NS_THEME_CHECKBOX_LABEL:
