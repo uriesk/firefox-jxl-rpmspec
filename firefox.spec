@@ -273,16 +273,13 @@ cd %{tarballdir}
 %patch215 -p1 -b .addons
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
-%if 0%{?fedora} > 23
-%patch222 -p1 -b .gtk3-20
-%endif
 %patch223 -p1 -b .appchooser-crash
-
 %patch301 -p1 -b .1205199
 %patch302 -p1 -b .1228540
 %patch303 -p1 -b .1228540-1
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
+%patch222 -p1 -b .gtk3-20
 %endif
 
 %patch500 -p1
