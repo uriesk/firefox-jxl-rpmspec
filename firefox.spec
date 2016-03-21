@@ -124,6 +124,7 @@ Patch219:        rhbz-1173156.patch
 Patch221:        firefox-fedora-ua.patch
 Patch222:        firefox-gtk3-20.patch
 Patch223:        rhbz-1291190-appchooser-crash.patch
+Patch224:        mozilla-1170092.patch
 
 # Upstream patches
 Patch301:        mozilla-1205199.patch
@@ -131,8 +132,9 @@ Patch302:        mozilla-1228540.patch
 Patch303:        mozilla-1228540-1.patch
 Patch304:        mozilla-1253216.patch
 
-# Debian extension patch
+# Debian patches
 Patch400:        Allow-unsigned-addons-in-usr-lib-share-mozilla-exten.patch
+Patch401:        Allow-.js-preference-files-to-set-locked-prefs-with-.patch
 
 # Fix Skia Neon stuff on AArch64
 # Update https://bugzilla.mozilla.org/show_bug.cgi?id=1142056
@@ -278,6 +280,8 @@ cd %{tarballdir}
 %patch301 -p1 -b .1205199
 %patch302 -p1 -b .1228540
 %patch303 -p1 -b .1228540-1
+#%patch224 -p1 -b .1170092
+
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
 %patch222 -p1 -b .gtk3-20
@@ -285,6 +289,7 @@ cd %{tarballdir}
 
 # Debian extension patch
 %patch400 -p1 -b .debian-addon
+#%patch401 -p1 -b .js-pref-lock
 
 %patch500 -p1
 
