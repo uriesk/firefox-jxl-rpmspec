@@ -134,7 +134,7 @@ Patch304:        mozilla-1253216.patch
 
 # Debian patches
 Patch400:        Allow-unsigned-addons-in-usr-lib-share-mozilla-exten.patch
-Patch401:        Allow-.js-preference-files-to-set-locked-prefs-with-.patch
+Patch401:        mozilla-440908.patch
 
 # Fix Skia Neon stuff on AArch64
 # Update https://bugzilla.mozilla.org/show_bug.cgi?id=1142056
@@ -289,7 +289,7 @@ cd %{tarballdir}
 
 # Debian extension patch
 %patch400 -p1 -b .debian-addon
-%patch401 -p1 -b .js-pref-lock
+%patch401 -p1 -b .440908
 
 %patch500 -p1
 
