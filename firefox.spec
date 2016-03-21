@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -131,7 +131,8 @@ Patch302:        mozilla-1228540.patch
 Patch303:        mozilla-1228540-1.patch
 Patch304:        mozilla-1253216.patch
 
-# Gtk3 upstream patches
+# Debian extension patch
+Patch400:        Allow-unsigned-addons-in-usr-lib-share-mozilla-exten.patch
 
 # Fix Skia Neon stuff on AArch64
 # Update https://bugzilla.mozilla.org/show_bug.cgi?id=1142056
@@ -281,6 +282,9 @@ cd %{tarballdir}
 %patch304 -p2 -b .1253216
 %patch222 -p1 -b .gtk3-20
 %endif
+
+# Debian extension patch
+%patch400 -p1 -b .debian-addon
 
 %patch500 -p1
 
@@ -785,6 +789,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-2
+- Fixed rhbz#1293874 - use a Debian patch for disabled extension
+  signing
+
 * Wed Mar 16 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-1
 - Update to 45.0.1
 
