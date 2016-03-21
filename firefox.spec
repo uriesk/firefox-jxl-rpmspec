@@ -647,6 +647,9 @@ create_default_langpack "zh-TW" "zh"
 
 %{__mkdir_p} $RPM_BUILD_ROOT/%{mozappdir}/browser/defaults/preferences
 
+# System config dir
+%{__mkdir_p} $RPM_BUILD_ROOT/%{sysconfdir}/%{name}
+
 # System extensions
 %{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/mozilla/extensions/%{firefox_app_id}
 %{__mkdir_p} $RPM_BUILD_ROOT%{_libdir}/mozilla/extensions/%{firefox_app_id}
@@ -730,6 +733,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
+%dir %{sysconfdir}/%{name}
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
 %{_datadir}/appdata/*.appdata.xml
