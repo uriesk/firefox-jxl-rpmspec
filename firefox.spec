@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -280,7 +280,7 @@ cd %{tarballdir}
 %patch301 -p1 -b .1205199
 %patch302 -p1 -b .1228540
 %patch303 -p1 -b .1228540-1
-#%patch224 -p1 -b .1170092
+%patch224 -p1 -b .1170092
 
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
@@ -289,7 +289,7 @@ cd %{tarballdir}
 
 # Debian extension patch
 %patch400 -p1 -b .debian-addon
-#%patch401 -p1 -b .js-pref-lock
+%patch401 -p1 -b .js-pref-lock
 
 %patch500 -p1
 
@@ -794,6 +794,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-3
+- Provide system wide config dir (mozbz#1170092)
+- Allow lock preferences from .js files (mozbz#440908)
+
 * Mon Mar 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-2
 - Fixed rhbz#1293874 - use a Debian patch for disabled extension
   signing
