@@ -798,7 +798,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Mar 22 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-4
+* Tue Mar 22 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-4
 - Added /etc/firefox/pref dir for easy configuration
 
 * Mon Mar 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-3
