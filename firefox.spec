@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0.1
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -648,7 +648,7 @@ create_default_langpack "zh-TW" "zh"
 %{__mkdir_p} $RPM_BUILD_ROOT/%{mozappdir}/browser/defaults/preferences
 
 # System config dir
-%{__mkdir_p} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}
+%{__mkdir_p} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/pref
 
 # System extensions
 %{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/mozilla/extensions/%{firefox_app_id}
@@ -733,7 +733,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
-%dir %{_sysconfdir}/%{name}
+%dir %{_sysconfdir}/%{name}/*
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
 %{_datadir}/appdata/*.appdata.xml
@@ -798,6 +798,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 22 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-4
+- Added /etc/firefox/pref dir for easy configuration
+
 * Mon Mar 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-3
 - Provide system wide config dir (mozbz#1170092)
 - Allow lock preferences from .js files (mozbz#440908)
