@@ -799,6 +799,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Mar 22 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-4
+- Fixed rhbz#1321355 - broken flash plugin
 - Added /etc/firefox/pref dir for easy configuration
 
 * Mon Mar 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-3
