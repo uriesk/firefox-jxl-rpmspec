@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0.1
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -114,7 +114,6 @@ Patch20:        firefox-build-prbool.patch
 Patch21:        firefox-ppc64le.patch
 Patch24:        firefox-debug.patch
 Patch25:        rhbz-1219542-s390-build.patch
-Patch26:        firefox-gcc-6.0.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -131,6 +130,8 @@ Patch301:        mozilla-1205199.patch
 Patch302:        mozilla-1228540.patch
 Patch303:        mozilla-1228540-1.patch
 Patch304:        mozilla-1253216.patch
+Patch305:        mozilla-1245076.patch
+Patch306:        mozilla-1245076-1.patch
 
 # Debian patches
 Patch400:        Allow-unsigned-addons-in-usr-lib-share-mozilla-exten.patch
@@ -265,7 +266,6 @@ cd %{tarballdir}
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-%patch26 -p1 -b .gcc-6.0
 
 %patch3  -p2 -b .arm
 
@@ -286,6 +286,10 @@ cd %{tarballdir}
 %patch304 -p2 -b .1253216
 %patch222 -p1 -b .gtk3-20
 %endif
+
+%patch305 -p1 -b .1245076
+%patch306 -p1 -b .1245076-1
+
 
 # Debian extension patch
 %patch400 -p1 -b .debian-addon
@@ -798,6 +802,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Apr 5 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-5
+- Polished gcc6 patches
+
 * Tue Mar 22 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-4
 - Fixed rhbz#1321355 - broken flash plugin
 - Added /etc/firefox/pref dir for easy configuration
