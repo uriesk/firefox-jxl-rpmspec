@@ -1,6 +1,6 @@
 diff -up firefox-45.0.1/widget/gtk/gtk3drawing.c.gtk3-20 firefox-45.0.1/widget/gtk/gtk3drawing.c
 --- firefox-45.0.1/widget/gtk/gtk3drawing.c.gtk3-20	2016-03-15 23:37:46.000000000 +0100
-+++ firefox-45.0.1/widget/gtk/gtk3drawing.c	2016-03-21 18:40:24.585222036 +0100
++++ firefox-45.0.1/widget/gtk/gtk3drawing.c	2016-04-05 14:40:27.846088625 +0200
 @@ -17,32 +17,78 @@
  
  #include <math.h>
@@ -1288,7 +1288,7 @@ diff -up firefox-45.0.1/widget/gtk/gtk3drawing.c.gtk3-20 firefox-45.0.1/widget/g
      gMenuBarWidget = NULL;
 diff -up firefox-45.0.1/widget/gtk/gtkdrawing.h.gtk3-20 firefox-45.0.1/widget/gtk/gtkdrawing.h
 --- firefox-45.0.1/widget/gtk/gtkdrawing.h.gtk3-20	2016-03-15 23:37:46.000000000 +0100
-+++ firefox-45.0.1/widget/gtk/gtkdrawing.h	2016-03-21 18:40:24.585222036 +0100
++++ firefox-45.0.1/widget/gtk/gtkdrawing.h	2016-04-05 14:40:27.847088629 +0200
 @@ -67,6 +67,13 @@ typedef enum {
    MOZ_GTK_TAB_SELECTED        = 1 << 10
  } GtkTabFlags;
@@ -1328,9 +1328,9 @@ diff -up firefox-45.0.1/widget/gtk/gtkdrawing.h.gtk3-20 firefox-45.0.1/widget/gt
  }
  #endif /* __cplusplus */
 diff -up firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c
---- firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20	2016-03-21 18:40:24.547221968 +0100
-+++ firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c	2016-03-29 11:30:02.660681032 +0200
-@@ -503,6 +503,10 @@ STUB(gtk_window_set_type_hint)
+--- firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20	2016-04-05 14:40:27.799088451 +0200
++++ firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c	2016-04-05 15:16:17.401430826 +0200
+@@ -503,6 +503,11 @@ STUB(gtk_window_set_type_hint)
  STUB(gtk_window_set_wmclass)
  STUB(gtk_window_unfullscreen)
  STUB(gtk_window_unmaximize)
@@ -1338,10 +1338,11 @@ diff -up firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0.1/widget
 +STUB(gtk_entry_get_text_area)
 +STUB(gtk_check_menu_item_get_type)
 +STUB(gtk_spin_button_get_type)
++STUB(gtk_button_get_type)
  #endif
  
  #ifdef GTK3_SYMBOLS
-@@ -550,6 +554,7 @@ STUB(gtk_style_context_get_border_color)
+@@ -550,6 +555,7 @@ STUB(gtk_style_context_get_border_color)
  STUB(gtk_style_context_get_color)
  STUB(gtk_style_context_get_margin)
  STUB(gtk_style_context_get_padding)
@@ -1349,7 +1350,7 @@ diff -up firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0.1/widget
  STUB(gtk_style_context_has_class)
  STUB(gtk_style_context_new)
  STUB(gtk_style_context_remove_class)
-@@ -577,6 +582,14 @@ STUB(gtk_color_chooser_get_type)
+@@ -577,6 +583,13 @@ STUB(gtk_color_chooser_get_type)
  STUB(gtk_color_chooser_set_rgba)
  STUB(gtk_color_chooser_get_rgba)
  STUB(gtk_color_chooser_set_use_alpha)
@@ -1360,13 +1361,12 @@ diff -up firefox-45.0.1/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-45.0.1/widget
 +STUB(gtk_widget_path_iter_get_state)
 +STUB(gtk_style_context_set_parent)
 +STUB(gtk_widget_path_unref)
-+STUB(gtk_button_get_type)
  #endif
  
  #ifdef GTK2_SYMBOLS
 diff -up firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp
 --- firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp.gtk3-20	2016-03-15 23:37:46.000000000 +0100
-+++ firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp	2016-03-21 18:40:24.586222037 +0100
++++ firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp	2016-04-05 14:40:27.848088632 +0200
 @@ -232,14 +232,18 @@ nsLookAndFeel::NativeGetColor(ColorID aI
      case eColorID_activeborder:
          // active window border
@@ -1591,7 +1591,7 @@ diff -up firefox-45.0.1/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-45.0.1/widg
      gboolean supports_menubar_drag = FALSE;
 diff -up firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20 firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp
 --- firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20	2016-03-15 23:37:46.000000000 +0100
-+++ firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp	2016-03-21 18:40:24.586222037 +0100
++++ firefox-45.0.1/widget/gtk/nsNativeThemeGTK.cpp	2016-04-05 14:40:27.848088632 +0200
 @@ -1548,9 +1548,6 @@ nsNativeThemeGTK::GetMinimumWidgetSize(n
    case NS_THEME_RADIO_CONTAINER:
    case NS_THEME_CHECKBOX_LABEL:

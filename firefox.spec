@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -802,6 +802,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Apr 5 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-6
+- Fixed rhbz#1322669 - Flash widgets are not displayed
+
 * Tue Apr 5 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-5
 - Polished gcc6 patches
 
