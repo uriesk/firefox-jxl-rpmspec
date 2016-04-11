@@ -86,14 +86,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        45.0.1
-Release:        6%{?pre_tag}%{?dist}
+Version:        45.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160316.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160411.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -382,11 +382,6 @@ echo "ac_add_options --with-float-abi=soft" >> .mozconfig
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
 echo "ac_add_options --disable-ion" >> .mozconfig
 echo "ac_add_options --disable-yarr-jit" >> .mozconfig
-%endif
-
-#Workarounf for mozbz#1245783
-%if 0%{?fedora} > 23
-echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
 
 %ifnarch %{ix86} x86_64
@@ -802,6 +797,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Apr 11 2016 Martin Stransky <stransky@redhat.com> - 45.0.2-1
+- New upstream (45.0.2)
+
 * Tue Apr 5 2016 Martin Stransky <stransky@redhat.com> - 45.0.1-6
 - Fixed rhbz#1322669 - Flash widgets are not displayed
 
