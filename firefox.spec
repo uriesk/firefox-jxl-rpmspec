@@ -384,6 +384,11 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 echo "ac_add_options --disable-yarr-jit" >> .mozconfig
 %endif
 
+#Workarounf for mozbz#1245783
+%if 0%{?fedora} > 23
+echo "ac_add_options --disable-ion" >> .mozconfig
+%endif
+
 %ifnarch %{ix86} x86_64
 echo "ac_add_options --disable-webrtc" >> .mozconfig
 %endif
