@@ -255,7 +255,7 @@ diff -up firefox-45.0.2/widget/gtk/gtk3drawing.c.gtk3-20 firefox-45.0.2/widget/g
 +    if (!gVertScrollbar.widget && !gHorizScrollbar.widget) {
 +        GtkCssNode path[] = {
 +            { GTK_TYPE_SCROLLBAR, "scrollbar", "horizontal", "bottom"},
-+            { GTK_TYPE_SCROLLBAR, "scrollbar", "vertical", "left" },
++            { GTK_TYPE_SCROLLBAR, "scrollbar", "vertical", "right" },
 +            { G_TYPE_NONE, "contents", NULL, NULL },
 +            { G_TYPE_NONE, "trough", NULL, NULL },
 +            { G_TYPE_NONE, "slider", NULL, NULL }
