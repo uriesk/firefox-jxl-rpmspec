@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        45.0.2
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -132,6 +132,7 @@ Patch303:        mozilla-1228540-1.patch
 Patch304:        mozilla-1253216.patch
 Patch305:        mozilla-1245076.patch
 Patch306:        mozilla-1245076-1.patch
+Patch307:        mozilla-1263145.patch
 
 # Debian patches
 Patch400:        Allow-unsigned-addons-in-usr-lib-share-mozilla-exten.patch
@@ -281,15 +282,13 @@ cd %{tarballdir}
 %patch302 -p1 -b .1228540
 %patch303 -p1 -b .1228540-1
 %patch224 -p1 -b .1170092
-
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
 %patch222 -p1 -b .gtk3-20
 %endif
-
 %patch305 -p1 -b .1245076
 %patch306 -p1 -b .1245076-1
-
+%patch307 -p1 -b .1263145
 
 # Debian extension patch
 %patch400 -p1 -b .debian-addon
@@ -806,6 +805,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.2-5
+- Added patch for mozbz#1263145
+
 * Wed Apr 20 2016 Martin Stransky <stransky@redhat.com> - 45.0.2-4
 - Updated scrollbar code for Gtk 3.20
 

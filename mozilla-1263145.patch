@@ -1,0 +1,112 @@
+diff -up firefox-45.0.2/widget/gtk/gtk3drawing.c.1263145 firefox-45.0.2/widget/gtk/gtk3drawing.c
+--- firefox-45.0.2/widget/gtk/gtk3drawing.c.1263145	2016-04-21 14:30:46.555526845 +0200
++++ firefox-45.0.2/widget/gtk/gtk3drawing.c	2016-04-21 14:32:20.442882060 +0200
+@@ -1693,6 +1693,60 @@ moz_gtk_entry_paint(cairo_t *cr, GdkRect
+     return MOZ_GTK_SUCCESS;
+ }
+ 
++static gint
++moz_gtk_text_view_paint(cairo_t *cr, GdkRectangle* rect,
++                        GtkWidgetState* state,
++                        GtkTextDirection direction)
++{
++    GtkStyleContext* style;
++    GtkStyleContext* style_frame;
++
++    ensure_text_view_widget();
++    ensure_scrolled_window_widget();
++
++    gtk_widget_set_direction(gTextViewWidget, direction);
++    gtk_widget_set_direction(gScrolledWindowWidget, direction);
++
++    style = gtk_widget_get_style_context(gTextViewWidget);
++    gtk_style_context_save(style);
++    gtk_style_context_add_class(style, GTK_STYLE_CLASS_VIEW);
++
++    style_frame = gtk_widget_get_style_context(gScrolledWindowWidget);
++    gtk_style_context_save(style_frame);
++    gtk_style_context_add_class(style_frame, GTK_STYLE_CLASS_FRAME);
++
++    if (state->focused && !state->disabled) {
++        gtk_style_context_set_state(style, GTK_STATE_FLAG_FOCUSED);
++    }
++
++    if (state->disabled) {
++        gtk_style_context_set_state(style, GTK_STATE_FLAG_INSENSITIVE);
++        gtk_style_context_set_state(style_frame, GTK_STATE_FLAG_INSENSITIVE);
++    }
++    gtk_render_frame(style_frame, cr, rect->x, rect->y, rect->width, rect->height);
++
++    /* only handle disabled and normal states, otherwise the whole background
++     * area will be painted differently with other states */
++    GtkStateFlags state_flags = state->disabled ? GTK_STATE_FLAG_INSENSITIVE :
++                                                  GTK_STATE_FLAG_NORMAL;
++    GtkBorder border, padding;
++    gtk_style_context_get_border(style, state_flags, &border);
++    gtk_style_context_get_padding(style, state_flags, &padding);
++
++    gint xthickness = border.left + padding.left;
++    gint ythickness = border.top + padding.top;
++
++    gtk_render_background(style_frame, cr,
++                          rect->x + xthickness, rect->y + ythickness,
++                          rect->width - 2 * xthickness,
++                          rect->height - 2 * ythickness);
++
++    gtk_style_context_restore(style);
++    gtk_style_context_restore(style_frame);
++
++    return MOZ_GTK_SUCCESS;
++}
++
+ static gint 
+ moz_gtk_treeview_paint(cairo_t *cr, GdkRectangle* rect,
+                        GtkWidgetState* state,
+@@ -2915,6 +2969,7 @@ moz_gtk_get_widget_border(GtkThemeWidget
+ 
+             return MOZ_GTK_SUCCESS;
+         }
++    case MOZ_GTK_TEXT_VIEW:
+     case MOZ_GTK_TREEVIEW:
+         {
+             ensure_scrolled_window_widget();
+@@ -3498,6 +3553,9 @@ moz_gtk_widget_paint(GtkThemeWidgetType
+         return moz_gtk_entry_paint(cr, rect, state,
+                                    &gComboBoxEntryTextarea, direction);
+         break;
++    case MOZ_GTK_TEXT_VIEW:
++        return moz_gtk_text_view_paint(cr, rect, state, direction);
++        break;
+     case MOZ_GTK_CHECKBUTTON_CONTAINER:
+     case MOZ_GTK_RADIOBUTTON_CONTAINER:
+         return moz_gtk_container_paint(cr, rect, state,
+diff -up firefox-45.0.2/widget/gtk/gtkdrawing.h.1263145 firefox-45.0.2/widget/gtk/gtkdrawing.h
+--- firefox-45.0.2/widget/gtk/gtkdrawing.h.1263145	2016-04-21 14:30:46.555526845 +0200
++++ firefox-45.0.2/widget/gtk/gtkdrawing.h	2016-04-21 14:30:46.560526864 +0200
+@@ -128,6 +128,8 @@ typedef enum {
+   MOZ_GTK_GRIPPER,
+   /* Paints a GtkEntry. */
+   MOZ_GTK_ENTRY,
++  /* Paints a GtkTextView. */
++  MOZ_GTK_TEXT_VIEW,
+   /* Paints a GtkOptionMenu. */
+   MOZ_GTK_DROPDOWN,
+   /* Paints a dropdown arrow (a GtkButton containing a down GtkArrow). */
+diff -up firefox-45.0.2/widget/gtk/nsNativeThemeGTK.cpp.1263145 firefox-45.0.2/widget/gtk/nsNativeThemeGTK.cpp
+--- firefox-45.0.2/widget/gtk/nsNativeThemeGTK.cpp.1263145	2016-04-21 14:30:46.556526849 +0200
++++ firefox-45.0.2/widget/gtk/nsNativeThemeGTK.cpp	2016-04-21 14:30:46.560526864 +0200
+@@ -503,8 +503,14 @@ nsNativeThemeGTK::GetGtkWidgetAndState(u
+     break;
+   case NS_THEME_NUMBER_INPUT:
+   case NS_THEME_TEXTFIELD:
++    aGtkWidgetType = MOZ_GTK_ENTRY;
++    break;
+   case NS_THEME_TEXTFIELD_MULTILINE:
++#if (MOZ_WIDGET_GTK == 3)
++    aGtkWidgetType = MOZ_GTK_TEXT_VIEW;
++#else
+     aGtkWidgetType = MOZ_GTK_ENTRY;
++#endif
+     break;
+   case NS_THEME_LISTBOX:
+   case NS_THEME_TREEVIEW:
