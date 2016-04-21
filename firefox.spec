@@ -285,10 +285,10 @@ cd %{tarballdir}
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
 %patch222 -p1 -b .gtk3-20
+%patch307 -p1 -b .1263145
 %endif
 %patch305 -p1 -b .1245076
 %patch306 -p1 -b .1245076-1
-%patch307 -p1 -b .1263145
 
 # Debian extension patch
 %patch400 -p1 -b .debian-addon
