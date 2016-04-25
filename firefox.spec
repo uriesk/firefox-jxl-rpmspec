@@ -86,14 +86,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        45.0.2
-Release:        5%{?pre_tag}%{?dist}
+Version:        46.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160411.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160425.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -126,22 +126,14 @@ Patch223:        rhbz-1291190-appchooser-crash.patch
 Patch224:        mozilla-1170092.patch
 
 # Upstream patches
-Patch301:        mozilla-1205199.patch
-Patch302:        mozilla-1228540.patch
-Patch303:        mozilla-1228540-1.patch
 Patch304:        mozilla-1253216.patch
 Patch305:        mozilla-1245076.patch
 Patch306:        mozilla-1245076-1.patch
 Patch307:        mozilla-1263145.patch
+Patch400:        mozilla-1255590.patch
 
 # Debian patches
-Patch400:        Allow-unsigned-addons-in-usr-lib-share-mozilla-exten.patch
 Patch401:        mozilla-440908.patch
-
-# Fix Skia Neon stuff on AArch64
-# Update https://bugzilla.mozilla.org/show_bug.cgi?id=1142056
-# when removed
-Patch500:        aarch64-fix-skia.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -268,7 +260,7 @@ cd %{tarballdir}
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 
-%patch3  -p2 -b .arm
+%patch3  -p1 -b .arm
 
 # For branding specific patches.
 
@@ -278,9 +270,6 @@ cd %{tarballdir}
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
 %patch223 -p1 -b .appchooser-crash
-%patch301 -p1 -b .1205199
-%patch302 -p1 -b .1228540
-%patch303 -p1 -b .1228540-1
 %patch224 -p1 -b .1170092
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
@@ -289,12 +278,10 @@ cd %{tarballdir}
 %endif
 %patch305 -p1 -b .1245076
 %patch306 -p1 -b .1245076-1
+%patch400 -p1 -b .1255590
 
 # Debian extension patch
-%patch400 -p1 -b .debian-addon
 %patch401 -p1 -b .440908
-
-%patch500 -p1
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -805,6 +792,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Apr 25 2016 Martin Stransky <stransky@redhat.com> - 46.0-1
+- Updated to 46.0 (B5)
+
 * Thu Apr 21 2016 Martin Stransky <stransky@redhat.com> - 45.0.2-5
 - Added patch for mozbz#1263145
 

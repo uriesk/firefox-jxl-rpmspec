@@ -1,6 +1,6 @@
-diff -up firefox-45.0/firefox-45.0/media/webrtc/trunk/webrtc/build/common.gypi.arm firefox-45.0/firefox-45.0/media/webrtc/trunk/webrtc/build/common.gypi
---- firefox-45.0/firefox-45.0/media/webrtc/trunk/webrtc/build/common.gypi.arm	2016-03-02 13:32:46.828341623 +0100
-+++ firefox-45.0/firefox-45.0/media/webrtc/trunk/webrtc/build/common.gypi	2016-03-02 13:35:16.658897278 +0100
+diff -up firefox-46.0/media/webrtc/trunk/webrtc/build/common.gypi.arm firefox-46.0/media/webrtc/trunk/webrtc/build/common.gypi
+--- firefox-46.0/media/webrtc/trunk/webrtc/build/common.gypi.arm	2016-04-25 12:03:12.486027089 +0200
++++ firefox-46.0/media/webrtc/trunk/webrtc/build/common.gypi	2016-04-25 12:05:55.714644873 +0200
 @@ -312,20 +312,6 @@
          'defines': [
            'WEBRTC_ARCH_ARM',
@@ -13,7 +13,7 @@ diff -up firefox-45.0/firefox-45.0/media/webrtc/trunk/webrtc/build/common.gypi.a
 -              ['arm_neon==1', {
 -                'defines': ['WEBRTC_ARCH_ARM_NEON',],
 -              }],
--              ['arm_neon==0 and (OS=="android" or moz_widget_toolkit_gonk==1)', {
+-              ['arm_neon==0 and arm_neon_optional==1', {
 -                'defines': ['WEBRTC_DETECT_ARM_NEON',],
 -              }],
 -            ],
