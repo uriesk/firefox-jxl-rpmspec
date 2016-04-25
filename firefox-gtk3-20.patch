@@ -591,7 +591,7 @@ diff -up firefox-46.0/widget/gtk/gtk3drawing.c.gtk3-20 firefox-46.0/widget/gtk/g
 -    style = gtk_widget_get_style_context(GTK_WIDGET(scrollbar));
 -    gtk_style_context_save(style);
 -    gtk_style_context_add_class(style, GTK_STYLE_CLASS_TROUGH);
-+     if (widget == MOZ_GTK_SCROLLBAR_TRACK_HORIZONTAL) {
++     if (widget == MOZ_GTK_SCROLLBAR_HORIZONTAL) {
 +        gtk_widget_set_direction(GTK_WIDGET(gHorizScrollbar.widget), direction);
 +        style = gHorizScrollbar.scroll.style;
 +    }  

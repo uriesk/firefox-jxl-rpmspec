@@ -129,7 +129,6 @@ Patch224:        mozilla-1170092.patch
 Patch304:        mozilla-1253216.patch
 Patch305:        mozilla-1245076.patch
 Patch306:        mozilla-1245076-1.patch
-Patch307:        mozilla-1263145.patch
 Patch400:        mozilla-1255590.patch
 
 # Debian patches
@@ -274,7 +273,6 @@ cd %{tarballdir}
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
 %patch222 -p1 -b .gtk3-20
-%patch307 -p1 -b .1263145
 %endif
 %patch305 -p1 -b .1245076
 %patch306 -p1 -b .1245076-1
