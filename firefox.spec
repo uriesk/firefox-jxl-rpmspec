@@ -130,9 +130,10 @@ Patch304:        mozilla-1253216.patch
 Patch305:        mozilla-1245076.patch
 Patch306:        mozilla-1245076-1.patch
 Patch400:        mozilla-1255590.patch
+Patch401:        mozilla-1266366-branch64.patch
 
 # Debian patches
-Patch401:        mozilla-440908.patch
+Patch500:        mozilla-440908.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -277,9 +278,10 @@ cd %{tarballdir}
 %patch305 -p1 -b .1245076
 %patch306 -p1 -b .1245076-1
 %patch400 -p1 -b .1255590
+%patch401 -p1 -b .1266366-branch64
 
 # Debian extension patch
-%patch401 -p1 -b .440908
+%patch500 -p1 -b .440908
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
