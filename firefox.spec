@@ -741,6 +741,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/components/components.manifest
 %{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
 %{mozappdir}/browser/features/loop@mozilla.org.xpi
+%{mozappdir}/browser/features/e10srollout@mozilla.org.xpi
+%{mozappdir}/browser/features/firefox@getpocket.com.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
 %dir %{mozappdir}/browser/extensions
 %{mozappdir}/browser/extensions/*
