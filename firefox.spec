@@ -18,6 +18,13 @@
 %define system_libvpx      0
 %endif
 
+# Use system libicu?
+%if 0%{?fedora} > 23
+%define system_libicu      1
+%else
+%define system_libicu      0
+%endif
+
 # Hardened build?
 %if 0%{?fedora} > 20
 %define hardened_build    1
@@ -87,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -397,6 +404,12 @@ echo "ac_add_options --with-system-jpeg" >> .mozconfig
 echo "ac_add_options --with-system-libvpx" >> .mozconfig
 %else
 echo "ac_add_options --without-system-libvpx" >> .mozconfig
+%endif
+
+%if %{?system_libicu}
+echo "ac_add_options --with-system-icu" >> .mozconfig
+%else
+echo "ac_add_options --without-system-icu" >> .mozconfig
 %endif
 
 #---------------------------------------------------------------------
@@ -794,6 +807,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Apr 26 2016 Martin Stransky <stransky@redhat.com> - 46.0-2
+- Disabled system libicu on Fedora 22/23
+
 * Mon Apr 25 2016 Martin Stransky <stransky@redhat.com> - 46.0-1
 - Updated to 46.0 (B5)
 
