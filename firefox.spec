@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -807,6 +807,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Apr 27 2016 Martin Stransky <stransky@redhat.com> - 46.0-3
+- Fixed missing langpacks
+
 * Tue Apr 26 2016 Martin Stransky <stransky@redhat.com> - 46.0-2
 - Disabled system libicu on Fedora 22/23
 
