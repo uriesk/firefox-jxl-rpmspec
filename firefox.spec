@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -347,7 +347,11 @@ echo "ac_add_options --disable-optimize" >> .mozconfig
 echo "ac_add_options --enable-dtrace" >> .mozconfig
 %else
 echo "ac_add_options --disable-debug" >> .mozconfig
+%ifarch ppc64le aarch64
+echo 'ac_add_options --enable-optimize="-g -O2"' >> .mozconfig
+%else
 echo "ac_add_options --enable-optimize" >> .mozconfig
+%endif
 %endif
 
 # s390(x) fails to start with jemalloc enabled
@@ -807,6 +811,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Apr 27 2016 Martin Stransky <stransky@redhat.com> - 46.0-4
+- Added fix for rhbz#1315225 - ppc64le/aarch64 build fixes
+
 * Wed Apr 27 2016 Martin Stransky <stransky@redhat.com> - 46.0-3
 - Fixed missing langpacks
 
