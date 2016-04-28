@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -138,6 +138,7 @@ Patch305:        mozilla-1245076.patch
 Patch306:        mozilla-1245076-1.patch
 Patch400:        mozilla-1255590.patch
 Patch401:        mozilla-1266366-branch64.patch
+Patch402:        mozilla-1196777.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -286,6 +287,7 @@ cd %{tarballdir}
 %patch306 -p1 -b .1245076-1
 %patch400 -p1 -b .1255590
 %patch401 -p1 -b .1266366-branch64
+%patch402 -p1 -b .1196777
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -811,6 +813,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 28 2016 Martin Stransky <stransky@redhat.com> - 46.0-5
+- Added fix for rhbz#1322626 - wrong focused window
+
 * Wed Apr 27 2016 Martin Stransky <stransky@redhat.com> - 46.0-4
 - Added fix for rhbz#1315225 - ppc64le/aarch64 build fixes
 
