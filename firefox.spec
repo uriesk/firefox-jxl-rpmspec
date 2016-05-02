@@ -34,8 +34,6 @@
 
 %define system_jpeg       1
 
-%define enable_gstreamer  1
-
 # Separated plugins are supported on x86(64) only
 %ifarch %{ix86} x86_64
 %define separated_plugins 1
@@ -94,7 +92,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/projects/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -191,10 +189,6 @@ Requires:       nss >= %{nss_build_version}
 
 BuildRequires:  desktop-file-utils
 BuildRequires:  system-bookmarks
-%if %{?enable_gstreamer}
-BuildRequires:  pkgconfig(gstreamer-1.0)
-BuildRequires:  pkgconfig(gstreamer-allocators-1.0)
-%endif
 %if %{?system_sqlite}
 BuildRequires:  pkgconfig(sqlite3) >= %{sqlite_version}
 Requires:       sqlite >= %{sqlite_build_version}
@@ -327,12 +321,6 @@ echo "ac_add_options --disable-system-cairo" >> .mozconfig
 
 %if %{?system_ffi}
 echo "ac_add_options --enable-system-ffi" >> .mozconfig
-%endif
-
-%if %{?enable_gstreamer}
-echo "ac_add_options --enable-gstreamer=1.0" >> .mozconfig
-%else
-echo "ac_add_options --disable-gstreamer" >> .mozconfig
 %endif
 
 %if !%{?separated_plugins}
@@ -813,6 +801,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon May 2 2016 Martin Stransky <stransky@redhat.com> - 46.0-6
+- Removed gstreamer config as it's no longer used.
+  See rhbz#1331496 for details.
+
 * Thu Apr 28 2016 Martin Stransky <stransky@redhat.com> - 46.0-5
 - Added fix for rhbz#1322626 - wrong focused window
 
