@@ -93,7 +93,7 @@ Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0
 Release:        6%{?pre_tag}%{?dist}
-URL:            https://www.mozilla.org/projects/firefox/
+URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -804,6 +804,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Mon May 2 2016 Martin Stransky <stransky@redhat.com> - 46.0-6
 - Removed gstreamer config as it's no longer used.
   See rhbz#1331496 for details.
+- Updated Firefox project URL (rhbz#1329014)
 
 * Thu Apr 28 2016 Martin Stransky <stransky@redhat.com> - 46.0-5
 - Added fix for rhbz#1322626 - wrong focused window
