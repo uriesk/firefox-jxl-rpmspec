@@ -91,14 +91,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        46.0
-Release:        6%{?pre_tag}%{?dist}
+Version:        46.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160425.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160503.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -801,6 +801,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue May 3 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-1
+- Updated to 46.0.1
+
 * Mon May 2 2016 Martin Stransky <stransky@redhat.com> - 46.0-6
 - Removed gstreamer config as it's no longer used.
   See rhbz#1331496 for details.
