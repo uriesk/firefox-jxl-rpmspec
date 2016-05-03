@@ -135,7 +135,6 @@ Patch304:        mozilla-1253216.patch
 Patch305:        mozilla-1245076.patch
 Patch306:        mozilla-1245076-1.patch
 Patch400:        mozilla-1255590.patch
-Patch401:        mozilla-1266366-branch64.patch
 Patch402:        mozilla-1196777.patch
 
 # Debian patches
@@ -280,7 +279,6 @@ cd %{tarballdir}
 %patch305 -p1 -b .1245076
 %patch306 -p1 -b .1245076-1
 %patch400 -p1 -b .1255590
-%patch401 -p1 -b .1266366-branch64
 %patch402 -p1 -b .1196777
 
 # Debian extension patch
