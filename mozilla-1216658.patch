@@ -1,0 +1,30 @@
+# HG changeset patch
+# User Nicolas Silva <nsilva@mozilla.com>
+# Parent  0711218a018d912036f7d3be2ae2649e213cfb85
+Bug 1216658 - Ignore Gt3 dark themes and use light theme's color scheme for native widgets. r=karlt
+
+diff --git a/widget/gtk/nsLookAndFeel.cpp b/widget/gtk/nsLookAndFeel.cpp
+--- a/widget/gtk/nsLookAndFeel.cpp
++++ b/widget/gtk/nsLookAndFeel.cpp
+@@ -966,16 +966,21 @@ nsLookAndFeel::Init()
+         sMenuHoverText = GDK_COLOR_TO_NS_RGB(style->fg[GTK_STATE_PRELIGHT]);
+     }
+ 
+     g_object_unref(menu);
+ #else
+     GdkRGBA color;
+     GtkStyleContext *style;
+ 
++    // Disable dark theme because it interracts poorly with wdget styling in
++    // web content.
++    g_object_set(gtk_settings_get_default (),
++                 "gtk-application-prefer-dark-theme", FALSE, NULL);
++
+     // Gtk manages a screen's CSS in the settings object so we
+     // ask Gtk to create it explicitly. Otherwise we may end up
+     // with wrong color theme, see Bug 972382
+     (void)gtk_settings_get_for_screen(gdk_screen_get_default());
+ 
+     GtkWidgetPath *path = gtk_widget_path_new();
+     gtk_widget_path_append_type(path, GTK_TYPE_WINDOW);
+ 
