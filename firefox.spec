@@ -92,7 +92,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -137,6 +137,7 @@ Patch306:        mozilla-1245076-1.patch
 Patch400:        mozilla-1255590.patch
 Patch402:        mozilla-1196777.patch
 Patch403:        mozilla-1216658.patch
+Patch404:        mozilla-1270046.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -282,6 +283,7 @@ cd %{tarballdir}
 %patch400 -p1 -b .1255590
 %patch402 -p1 -b .1196777
 %patch403 -p1 -b .1216658
+%patch404 -p1 -b .1270046
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -801,6 +803,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue May 10 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-3
+- Added patch for rhbz#1332875 - new Samba auth reponse
+
 * Thu May 5 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-2
 - Disable dark theme until we support it correctly (mozbz#1216658)
 
