@@ -92,7 +92,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0.1
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -272,7 +272,9 @@ cd %{tarballdir}
 %patch215 -p1 -b .addons
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
+%if 0%{?fedora} > 22
 %patch223 -p1 -b .appchooser-crash
+%endif
 %patch224 -p1 -b .1170092
 %if 0%{?fedora} > 23
 %patch304 -p2 -b .1253216
@@ -803,6 +805,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 12 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-4
+- Added fix for rhbz#1332821 - Crash on "Select" in "Open with" dialog
+
 * Tue May 10 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-3
 - Added patch for rhbz#1332875 - new Samba auth reponse
 
