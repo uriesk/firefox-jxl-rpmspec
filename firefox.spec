@@ -34,13 +34,6 @@
 
 %define system_jpeg       1
 
-# Separated plugins are supported on x86(64) only
-%ifarch %{ix86} x86_64
-%define separated_plugins 1
-%else
-%define separated_plugins 0
-%endif
-
 %ifarch %{ix86} x86_64
 %define run_tests         0
 %else
@@ -92,7 +85,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0.1
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -138,6 +131,7 @@ Patch400:        mozilla-1255590.patch
 Patch402:        mozilla-1196777.patch
 Patch403:        mozilla-1216658.patch
 Patch404:        mozilla-1270046.patch
+Patch405:        mozilla-1245783.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -286,6 +280,7 @@ cd %{tarballdir}
 %patch402 -p1 -b .1196777
 %patch403 -p1 -b .1216658
 %patch404 -p1 -b .1270046
+%patch405 -p1 -b .1245783
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -325,10 +320,6 @@ echo "ac_add_options --disable-system-cairo" >> .mozconfig
 
 %if %{?system_ffi}
 echo "ac_add_options --enable-system-ffi" >> .mozconfig
-%endif
-
-%if !%{?separated_plugins}
-echo "ac_add_options --disable-ipc" >> .mozconfig
 %endif
 
 %ifarch %{arm}
@@ -373,11 +364,6 @@ echo "ac_add_options --with-float-abi=soft" >> .mozconfig
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
 echo "ac_add_options --disable-ion" >> .mozconfig
 echo "ac_add_options --disable-yarr-jit" >> .mozconfig
-%endif
-
-#Workarounf for mozbz#1245783
-%if 0%{?fedora} > 23
-echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
 
 %ifnarch %{ix86} x86_64
@@ -805,6 +791,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 19 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-5
+- Added a fix for mozbz#1245783 - gcc6.1 crashes in JIT
+
 * Thu May 12 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-4
 - Added fix for rhbz#1332821 - Crash on "Select" in "Open with" dialog
 
