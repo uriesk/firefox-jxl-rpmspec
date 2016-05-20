@@ -85,7 +85,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -793,6 +793,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri May 20 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-6
+- Updated Gtk3.20 patch - fixed tooltips
+
 * Thu May 19 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-5
 - Added a fix for mozbz#1245783 - gcc6.1 crashes in JIT
 
