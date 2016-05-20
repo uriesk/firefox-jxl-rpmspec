@@ -131,6 +131,7 @@ Patch400:        mozilla-1255590.patch
 Patch402:        mozilla-1196777.patch
 Patch403:        mozilla-1216658.patch
 Patch404:        mozilla-1270046.patch
+# Remove when mozbz#1269319 lands
 Patch405:        mozilla-1245783.patch
 
 # Debian patches
@@ -349,6 +350,7 @@ echo "ac_add_options --with-arch=armv7-a" >> .mozconfig
 echo "ac_add_options --with-float-abi=hard" >> .mozconfig
 echo "ac_add_options --with-fpu=vfpv3-d16" >> .mozconfig
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
+echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
 %ifarch armv7hnl
 echo "ac_add_options --with-arch=armv7-a" >> .mozconfig
