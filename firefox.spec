@@ -43,7 +43,7 @@
 # Build as a debug package?
 %define debug_build       0
 
-%define default_bookmarks_file %{_datadir}/bookmarks/default-bookmarks.html
+%define default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
 %define firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
 # Minimal required versions
 %global cairo_version 1.13.1
@@ -193,8 +193,6 @@ Requires:       sqlite >= %{sqlite_build_version}
 %if %{?system_ffi}
 BuildRequires:  pkgconfig(libffi)
 %endif
-
-Requires:       system-bookmarks
 
 %if %{?run_tests}
 BuildRequires:  xorg-x11-server-Xvfb
