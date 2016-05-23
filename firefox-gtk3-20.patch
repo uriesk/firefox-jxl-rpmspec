@@ -472,7 +472,7 @@ diff -up firefox-46.0.1/widget/gtk/gtk3drawing.c.gtk3-20 firefox-46.0.1/widget/g
  
 -    gtk_style_context_get_border(style, 0, &border);
 -    gtk_style_context_get_padding(style, 0, &padding);
-+    GtkStyleContext* style = gEntry.entry.style;
++    style = gEntry.entry.style;
 +    gtk_style_context_get_border(style, gtk_style_context_get_state(style), &border);
 +    gtk_style_context_get_padding(style, gtk_style_context_get_state(style), &padding);
      *focus_h_width = border.left + padding.left;
