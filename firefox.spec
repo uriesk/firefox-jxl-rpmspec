@@ -85,7 +85,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0.1
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -512,7 +512,7 @@ rm -f  objdir/dist/bin/pk12util
 cd %{tarballdir}
 
 # set up our default bookmarks
-%{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/defaults/profile/bookmarks.html
+%{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/en-US/locale/browser/bookmarks.html
 
 # Make sure locale works for langpacks
 %{__cat} > objdir/dist/bin/browser/defaults/preferences/firefox-l10n.js << EOF
@@ -791,7 +791,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon May 23 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-7
+* Mon May 23 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-8
 - Rebuilt for new bookmarks (rhbz#1338010)
 - Fixed build issue in Gtk3.20 patch
 
