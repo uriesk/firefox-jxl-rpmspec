@@ -27,3 +27,5 @@ pref("plugins.notifyMissingFlash", false);
 /* See https://bugzilla.redhat.com/show_bug.cgi?id=1226489 */
 pref("browser.display.use_system_colors", false);
 pref("layers.use-image-offscreen-surfaces", false);
+/* Allow sending credetials to all https:// sites */
+pref("network.negotiate-auth.trusted-uris", "https://")
