@@ -85,7 +85,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        46.0.1
-Release:        8%{?pre_tag}%{?dist}
+Release:        9%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -101,7 +101,7 @@ Source23:       firefox.1
 Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
 
-#Build patches
+# Build patches
 Patch0:         firefox-install-dir.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
@@ -133,6 +133,7 @@ Patch403:        mozilla-1216658.patch
 Patch404:        mozilla-1270046.patch
 # Remove when mozbz#1269319 lands
 Patch405:        mozilla-1245783.patch
+Patch406:        mozilla-890908-async-negotiate.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -280,6 +281,7 @@ cd %{tarballdir}
 %patch403 -p1 -b .1216658
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
+%patch406 -p1 -b .890908-async-negotiate
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -791,6 +793,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 26 2016 Jan Horak <jhorak@redhat.com> - 46.0.1-9
+- Negotiate authentication is made off the main thread (mozbz#890908)
+
 * Mon May 23 2016 Martin Stransky <stransky@redhat.com> - 46.0.1-8
 - Rebuilt for new bookmarks (rhbz#1338010)
 - Fixed build issue in Gtk3.20 patch
