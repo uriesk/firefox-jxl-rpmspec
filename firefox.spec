@@ -101,7 +101,7 @@ Source23:       firefox.1
 Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
 
-#Build patches
+# Build patches
 Patch0:         firefox-install-dir.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
