@@ -1,6 +1,6 @@
-diff -up firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.cpp.890908-async-negotiate firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.cpp
---- firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.cpp.890908-async-negotiate	2016-05-03 07:31:11.000000000 +0200
-+++ firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.cpp	2016-05-26 15:10:23.850901737 +0200
+diff -up firefox-47.0/extensions/auth/nsHttpNegotiateAuth.cpp.890908-async-negotiate firefox-47.0/extensions/auth/nsHttpNegotiateAuth.cpp
+--- firefox-47.0/extensions/auth/nsHttpNegotiateAuth.cpp.890908-async-negotiate	2016-05-12 19:13:34.000000000 +0200
++++ firefox-47.0/extensions/auth/nsHttpNegotiateAuth.cpp	2016-06-01 17:14:07.915470135 +0200
 @@ -38,6 +38,10 @@
  #include "prnetdb.h"
  #include "mozilla/Likely.h"
@@ -259,9 +259,9 @@ diff -up firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.cpp.890908-async-neg
  //
  // GenerateCredentials
  //
-diff -up firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.h.890908-async-negotiate firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.h
---- firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.h.890908-async-negotiate	2016-05-03 07:31:11.000000000 +0200
-+++ firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.h	2016-05-26 15:04:33.971068476 +0200
+diff -up firefox-47.0/extensions/auth/nsHttpNegotiateAuth.h.890908-async-negotiate firefox-47.0/extensions/auth/nsHttpNegotiateAuth.h
+--- firefox-47.0/extensions/auth/nsHttpNegotiateAuth.h.890908-async-negotiate	2016-05-12 19:13:34.000000000 +0200
++++ firefox-47.0/extensions/auth/nsHttpNegotiateAuth.h	2016-06-01 17:14:07.916470137 +0200
 @@ -10,6 +10,7 @@
  #include "nsIURI.h"
  #include "nsSubstring.h"
@@ -287,20 +287,20 @@ diff -up firefox-46.0.1/extensions/auth/nsHttpNegotiateAuth.h.890908-async-negot
 +    RefPtr<mozilla::LazyIdleThread> mNegotiateThread;
  };
  #endif /* nsHttpNegotiateAuth_h__ */
-diff -up firefox-46.0.1/netwerk/base/moz.build.890908-async-negotiate firefox-46.0.1/netwerk/base/moz.build
---- firefox-46.0.1/netwerk/base/moz.build.890908-async-negotiate	2016-05-03 07:31:07.000000000 +0200
-+++ firefox-46.0.1/netwerk/base/moz.build	2016-05-26 15:04:33.971068476 +0200
-@@ -46,6 +46,7 @@ XPIDL_SOURCES += [
-     'nsIFileStreams.idl',
+diff -up firefox-47.0/netwerk/base/moz.build.890908-async-negotiate firefox-47.0/netwerk/base/moz.build
+--- firefox-47.0/netwerk/base/moz.build.890908-async-negotiate	2016-06-01 17:14:07.916470137 +0200
++++ firefox-47.0/netwerk/base/moz.build	2016-06-01 17:15:29.409567895 +0200
+@@ -47,6 +47,7 @@ XPIDL_SOURCES += [
      'nsIFileURL.idl',
      'nsIForcePendingChannel.idl',
+     'nsIFormPOSTActionChannel.idl',
 +    'nsIHttpAuthenticatorCallback.idl',
      'nsIHttpPushListener.idl',
      'nsIIncrementalDownload.idl',
      'nsIIncrementalStreamLoader.idl',
-diff -up firefox-46.0.1/netwerk/base/nsIHttpAuthenticatorCallback.idl.890908-async-negotiate firefox-46.0.1/netwerk/base/nsIHttpAuthenticatorCallback.idl
---- firefox-46.0.1/netwerk/base/nsIHttpAuthenticatorCallback.idl.890908-async-negotiate	2016-05-26 15:04:33.971068476 +0200
-+++ firefox-46.0.1/netwerk/base/nsIHttpAuthenticatorCallback.idl	2016-05-26 15:04:33.971068476 +0200
+diff -up firefox-47.0/netwerk/base/nsIHttpAuthenticatorCallback.idl.890908-async-negotiate firefox-47.0/netwerk/base/nsIHttpAuthenticatorCallback.idl
+--- firefox-47.0/netwerk/base/nsIHttpAuthenticatorCallback.idl.890908-async-negotiate	2016-06-01 17:14:07.917470138 +0200
++++ firefox-47.0/netwerk/base/nsIHttpAuthenticatorCallback.idl	2016-06-01 17:14:07.917470138 +0200
 @@ -0,0 +1,31 @@
 +/* This Source Code Form is subject to the terms of the Mozilla Public
 + * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -333,9 +333,9 @@ diff -up firefox-46.0.1/netwerk/base/nsIHttpAuthenticatorCallback.idl.890908-asy
 +
 +};
 +
-diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpBasicAuth.cpp.890908-async-negotiate firefox-46.0.1/netwerk/protocol/http/nsHttpBasicAuth.cpp
---- firefox-46.0.1/netwerk/protocol/http/nsHttpBasicAuth.cpp.890908-async-negotiate	2016-05-03 07:31:08.000000000 +0200
-+++ firefox-46.0.1/netwerk/protocol/http/nsHttpBasicAuth.cpp	2016-05-26 15:04:33.971068476 +0200
+diff -up firefox-47.0/netwerk/protocol/http/nsHttpBasicAuth.cpp.890908-async-negotiate firefox-47.0/netwerk/protocol/http/nsHttpBasicAuth.cpp
+--- firefox-47.0/netwerk/protocol/http/nsHttpBasicAuth.cpp.890908-async-negotiate	2016-05-12 19:13:28.000000000 +0200
++++ firefox-47.0/netwerk/protocol/http/nsHttpBasicAuth.cpp	2016-06-01 17:14:07.918470139 +0200
 @@ -49,6 +49,20 @@ nsHttpBasicAuth::ChallengeReceived(nsIHt
      *identityInvalid = true;
      return NS_OK;
@@ -357,9 +357,9 @@ diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpBasicAuth.cpp.890908-async-n
  
  NS_IMETHODIMP
  nsHttpBasicAuth::GenerateCredentials(nsIHttpAuthenticableChannel *authChannel,
-diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp.890908-async-negotiate firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp
---- firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp.890908-async-negotiate	2016-05-03 07:31:08.000000000 +0200
-+++ firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp	2016-05-26 15:04:33.972068475 +0200
+diff -up firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp.890908-async-negotiate firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp
+--- firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp.890908-async-negotiate	2016-05-12 19:13:28.000000000 +0200
++++ firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp	2016-06-01 17:14:07.918470139 +0200
 @@ -267,6 +267,11 @@ nsHttpChannelAuthProvider::Cancel(nsresu
          mAsyncPromptAuthCancelable->Cancel(status);
          mAsyncPromptAuthCancelable = nullptr;
@@ -548,9 +548,9 @@ diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.cpp.8909
  
  } // namespace net
  } // namespace mozilla
-diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.h.890908-async-negotiate firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.h
---- firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.h.890908-async-negotiate	2016-05-03 07:31:08.000000000 +0200
-+++ firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.h	2016-05-26 15:04:33.972068475 +0200
+diff -up firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.h.890908-async-negotiate firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.h
+--- firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.h.890908-async-negotiate	2016-05-12 19:13:28.000000000 +0200
++++ firefox-47.0/netwerk/protocol/http/nsHttpChannelAuthProvider.h	2016-06-01 17:14:07.919470140 +0200
 @@ -9,11 +9,13 @@
  
  #include "nsIHttpChannelAuthProvider.h"
@@ -608,9 +608,9 @@ diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpChannelAuthProvider.h.890908
  };
  
  } // namespace net
-diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpDigestAuth.cpp.890908-async-negotiate firefox-46.0.1/netwerk/protocol/http/nsHttpDigestAuth.cpp
---- firefox-46.0.1/netwerk/protocol/http/nsHttpDigestAuth.cpp.890908-async-negotiate	2016-05-03 07:31:08.000000000 +0200
-+++ firefox-46.0.1/netwerk/protocol/http/nsHttpDigestAuth.cpp	2016-05-26 15:04:33.972068475 +0200
+diff -up firefox-47.0/netwerk/protocol/http/nsHttpDigestAuth.cpp.890908-async-negotiate firefox-47.0/netwerk/protocol/http/nsHttpDigestAuth.cpp
+--- firefox-47.0/netwerk/protocol/http/nsHttpDigestAuth.cpp.890908-async-negotiate	2016-05-12 19:13:28.000000000 +0200
++++ firefox-47.0/netwerk/protocol/http/nsHttpDigestAuth.cpp	2016-06-01 17:14:07.920470141 +0200
 @@ -158,6 +158,22 @@ nsHttpDigestAuth::ChallengeReceived(nsIH
    return NS_OK;
  }
@@ -634,9 +634,9 @@ diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpDigestAuth.cpp.890908-async-
  NS_IMETHODIMP
  nsHttpDigestAuth::GenerateCredentials(nsIHttpAuthenticableChannel *authChannel,
                                        const char *challenge,
-diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpNTLMAuth.cpp.890908-async-negotiate firefox-46.0.1/netwerk/protocol/http/nsHttpNTLMAuth.cpp
---- firefox-46.0.1/netwerk/protocol/http/nsHttpNTLMAuth.cpp.890908-async-negotiate	2016-05-03 07:31:08.000000000 +0200
-+++ firefox-46.0.1/netwerk/protocol/http/nsHttpNTLMAuth.cpp	2016-05-26 15:04:33.972068475 +0200
+diff -up firefox-47.0/netwerk/protocol/http/nsHttpNTLMAuth.cpp.890908-async-negotiate firefox-47.0/netwerk/protocol/http/nsHttpNTLMAuth.cpp
+--- firefox-47.0/netwerk/protocol/http/nsHttpNTLMAuth.cpp.890908-async-negotiate	2016-05-12 19:13:28.000000000 +0200
++++ firefox-47.0/netwerk/protocol/http/nsHttpNTLMAuth.cpp	2016-06-01 17:14:07.920470141 +0200
 @@ -323,6 +323,21 @@ nsHttpNTLMAuth::ChallengeReceived(nsIHtt
  }
  
@@ -659,9 +659,9 @@ diff -up firefox-46.0.1/netwerk/protocol/http/nsHttpNTLMAuth.cpp.890908-async-ne
  nsHttpNTLMAuth::GenerateCredentials(nsIHttpAuthenticableChannel *authChannel,
                                      const char      *challenge,
                                      bool             isProxyAuth,
-diff -up firefox-46.0.1/netwerk/protocol/http/nsIHttpAuthenticator.idl.890908-async-negotiate firefox-46.0.1/netwerk/protocol/http/nsIHttpAuthenticator.idl
---- firefox-46.0.1/netwerk/protocol/http/nsIHttpAuthenticator.idl.890908-async-negotiate	2016-05-03 07:31:08.000000000 +0200
-+++ firefox-46.0.1/netwerk/protocol/http/nsIHttpAuthenticator.idl	2016-05-26 15:04:33.973068475 +0200
+diff -up firefox-47.0/netwerk/protocol/http/nsIHttpAuthenticator.idl.890908-async-negotiate firefox-47.0/netwerk/protocol/http/nsIHttpAuthenticator.idl
+--- firefox-47.0/netwerk/protocol/http/nsIHttpAuthenticator.idl.890908-async-negotiate	2016-05-12 19:13:28.000000000 +0200
++++ firefox-47.0/netwerk/protocol/http/nsIHttpAuthenticator.idl	2016-06-01 17:14:07.921470143 +0200
 @@ -6,6 +6,8 @@
  #include "nsISupports.idl"
  
