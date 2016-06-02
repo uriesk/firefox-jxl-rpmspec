@@ -84,14 +84,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        46.0.1
-Release:        9%{?pre_tag}%{?dist}
+Version:        47.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160503.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160601.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -129,7 +129,6 @@ Patch305:        mozilla-1245076.patch
 Patch306:        mozilla-1245076-1.patch
 Patch400:        mozilla-1255590.patch
 Patch402:        mozilla-1196777.patch
-Patch403:        mozilla-1216658.patch
 Patch404:        mozilla-1270046.patch
 # Remove when mozbz#1269319 lands
 Patch405:        mozilla-1245783.patch
@@ -278,7 +277,6 @@ cd %{tarballdir}
 %patch306 -p1 -b .1245076-1
 %patch400 -p1 -b .1255590
 %patch402 -p1 -b .1196777
-%patch403 -p1 -b .1216658
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
 %patch406 -p1 -b .890908-async-negotiate
@@ -793,6 +791,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jun  2 2016 Martin Stransky <stransky@redhat.com> - 47.0-1
+- Updated to 47.0
+
 * Thu May 26 2016 Jan Horak <jhorak@redhat.com> - 46.0.1-9
 - Negotiate authentication is made off the main thread (mozbz#890908)
 
