@@ -85,7 +85,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        47.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -132,7 +132,6 @@ Patch402:        mozilla-1196777.patch
 Patch404:        mozilla-1270046.patch
 # Remove when mozbz#1269319 lands
 Patch405:        mozilla-1245783.patch
-Patch406:        mozilla-890908-async-negotiate.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -279,7 +278,6 @@ cd %{tarballdir}
 %patch402 -p1 -b .1196777
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
-%patch406 -p1 -b .890908-async-negotiate
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -791,8 +789,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Jun  2 2016 Martin Stransky <stransky@redhat.com> - 47.0-1
+* Thu Jun  2 2016 Martin Stransky <stransky@redhat.com> - 47.0-2
 - Updated to 47.0
+- Backout of negotiate authentication patch
 
 * Thu May 26 2016 Jan Horak <jhorak@redhat.com> - 46.0.1-9
 - Negotiate authentication is made off the main thread (mozbz#890908)
