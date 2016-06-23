@@ -1,6 +1,6 @@
 diff -up firefox-47.0/widget/gtk/gtk3drawing.c.gtk3-20 firefox-47.0/widget/gtk/gtk3drawing.c
 --- firefox-47.0/widget/gtk/gtk3drawing.c.gtk3-20	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-47.0/widget/gtk/gtk3drawing.c	2016-06-22 17:32:48.826936183 +0200
++++ firefox-47.0/widget/gtk/gtk3drawing.c	2016-06-23 10:21:37.072462099 +0200
 @@ -17,34 +17,85 @@
  
  #include <math.h>
@@ -1366,7 +1366,7 @@ diff -up firefox-47.0/widget/gtk/gtk3drawing.c.gtk3-20 firefox-47.0/widget/gtk/g
      gMenuPopupWidget = NULL;
 diff -up firefox-47.0/widget/gtk/gtkdrawing.h.gtk3-20 firefox-47.0/widget/gtk/gtkdrawing.h
 --- firefox-47.0/widget/gtk/gtkdrawing.h.gtk3-20	2016-05-12 19:13:34.000000000 +0200
-+++ firefox-47.0/widget/gtk/gtkdrawing.h	2016-06-22 17:07:19.250865371 +0200
++++ firefox-47.0/widget/gtk/gtkdrawing.h	2016-06-23 10:21:37.072462099 +0200
 @@ -67,6 +67,13 @@ typedef enum {
    MOZ_GTK_TAB_SELECTED        = 1 << 10
  } GtkTabFlags;
@@ -1406,8 +1406,8 @@ diff -up firefox-47.0/widget/gtk/gtkdrawing.h.gtk3-20 firefox-47.0/widget/gtk/gt
  #endif /* __cplusplus */
 diff -up firefox-47.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-47.0/widget/gtk/mozgtk/mozgtk.c
 --- firefox-47.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20	2016-05-12 19:13:34.000000000 +0200
-+++ firefox-47.0/widget/gtk/mozgtk/mozgtk.c	2016-06-22 17:07:19.250865371 +0200
-@@ -504,6 +504,11 @@ STUB(gtk_window_set_type_hint)
++++ firefox-47.0/widget/gtk/mozgtk/mozgtk.c	2016-06-23 10:26:36.495774041 +0200
+@@ -504,9 +504,15 @@ STUB(gtk_window_set_type_hint)
  STUB(gtk_window_set_wmclass)
  STUB(gtk_window_unfullscreen)
  STUB(gtk_window_unmaximize)
@@ -1419,11 +1419,16 @@ diff -up firefox-47.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-47.0/widget/gtk
  #endif
  
  #ifdef GTK3_SYMBOLS
-@@ -581,6 +586,14 @@ STUB(gtk_color_chooser_get_type)
++STUB(gtk_box_new)
+ STUB(gdk_device_get_source)
+ STUB(gdk_device_manager_get_client_pointer)
+ STUB(gdk_disable_multidevice)
+@@ -581,6 +587,15 @@ STUB(gtk_color_chooser_get_type)
  STUB(gtk_color_chooser_set_rgba)
  STUB(gtk_color_chooser_get_rgba)
  STUB(gtk_color_chooser_set_use_alpha)
 +STUB(gtk_style_context_get_path)
++STUB(gtk_widget_path_append_for_widget)
 +STUB(gtk_widget_path_copy)
 +STUB(gtk_widget_path_iter_set_object_name)
 +STUB(gtk_widget_path_iter_add_class)
@@ -1436,7 +1441,7 @@ diff -up firefox-47.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-47.0/widget/gtk
  #ifdef GTK2_SYMBOLS
 diff -up firefox-47.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-47.0/widget/gtk/nsLookAndFeel.cpp
 --- firefox-47.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-47.0/widget/gtk/nsLookAndFeel.cpp	2016-06-22 17:31:31.282531213 +0200
++++ firefox-47.0/widget/gtk/nsLookAndFeel.cpp	2016-06-23 10:21:37.073462100 +0200
 @@ -353,14 +353,18 @@ nsLookAndFeel::NativeGetColor(ColorID aI
      case eColorID_activeborder:
          // active window border
@@ -1696,7 +1701,7 @@ diff -up firefox-47.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-47.0/widget/g
      gboolean supports_menubar_drag = FALSE;
 diff -up firefox-47.0/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20 firefox-47.0/widget/gtk/nsNativeThemeGTK.cpp
 --- firefox-47.0/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-47.0/widget/gtk/nsNativeThemeGTK.cpp	2016-06-22 17:07:19.251865377 +0200
++++ firefox-47.0/widget/gtk/nsNativeThemeGTK.cpp	2016-06-23 10:21:37.074462101 +0200
 @@ -1570,9 +1570,6 @@ nsNativeThemeGTK::GetMinimumWidgetSize(n
    case NS_THEME_RADIO_CONTAINER:
    case NS_THEME_CHECKBOX_LABEL:
