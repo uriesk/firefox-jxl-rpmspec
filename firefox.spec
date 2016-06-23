@@ -85,7 +85,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        47.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -789,7 +789,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Jun 22 2016 Martin Stransky <stransky@redhat.com> - 47.0-5
+* Wed Jun 22 2016 Martin Stransky <stransky@redhat.com> - 47.0-6
 - Updated tooltip patch for 3.20
 
 * Mon Jun  6 2016 Martin Stransky <stransky@redhat.com> - 47.0-4
