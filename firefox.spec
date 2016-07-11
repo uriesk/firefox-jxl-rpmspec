@@ -5,9 +5,6 @@
 %define system_sqlite     1
 %define system_ffi        1
 
-# Build for Gtk3?
-%define toolkit_gtk3      1
-
 # Use system cairo?
 %define system_cairo      0
 
@@ -153,9 +150,7 @@ BuildRequires:  zip
 BuildRequires:  bzip2-devel
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libIDL-2.0)
-%if %{toolkit_gtk3}
 BuildRequires:  pkgconfig(gtk+-3.0)
-%endif
 BuildRequires:  pkgconfig(gtk+-2.0)
 BuildRequires:  pkgconfig(krb5)
 BuildRequires:  pkgconfig(pango)
@@ -290,12 +285,6 @@ cd %{tarballdir}
 echo "ac_add_options --enable-official-branding" >> .mozconfig
 %endif
 %{__cp} %{SOURCE24} mozilla-api-key
-
-%if %{toolkit_gtk3}
-echo "ac_add_options --enable-default-toolkit=cairo-gtk3" >> .mozconfig
-%else
-echo "ac_add_options --enable-default-toolkit=cairo-gtk2" >> .mozconfig
-%endif
 
 %if %{?system_nss}
 echo "ac_add_options --with-system-nspr" >> .mozconfig
@@ -769,9 +758,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/crashreporter-override.ini
 %endif
 %{mozappdir}/*.so
-%if %{toolkit_gtk3}
 %{mozappdir}/gtk2/*.so
-%endif
 %{mozappdir}/defaults/pref/channel-prefs.js
 %{mozappdir}/dependentlibs.list
 %{mozappdir}/dictionaries
