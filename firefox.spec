@@ -85,7 +85,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        47.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -130,8 +130,9 @@ Patch306:        mozilla-1245076-1.patch
 Patch400:        mozilla-1255590.patch
 Patch402:        mozilla-1196777.patch
 Patch404:        mozilla-1270046.patch
-# Remove when mozbz#1269319 lands
+# Remove when mozbz#1269319 lands - Firefox 49
 Patch405:        mozilla-1245783.patch
+Patch406:        mozilla-256180.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -278,6 +279,7 @@ cd %{tarballdir}
 %patch402 -p1 -b .1196777
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
+%patch406 -p1 -b .256180
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -789,6 +791,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jul 11 2016 Martin Stransky <stransky@redhat.com> - 47.0.1-2
+- Added fix for mozbz#256180 - gmail paste issues
+
 * Mon Jul 11 2016 Martin Stransky <stransky@redhat.com> - 47.0.1-1
 - Updated to 47.0.1
 
