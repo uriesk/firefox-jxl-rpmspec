@@ -82,7 +82,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        47.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -778,6 +778,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jul 22 2016 Tom Callaway <spot@fedoraproject.org> - 47.0.1-3
+- rebuild for libvpx 1.6.0
+
 * Mon Jul 11 2016 Martin Stransky <stransky@redhat.com> - 47.0.1-2
 - Added fix for mozbz#256180 - gmail paste issues
 
