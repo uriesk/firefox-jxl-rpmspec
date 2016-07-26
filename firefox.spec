@@ -109,6 +109,7 @@ Patch20:        firefox-build-prbool.patch
 Patch21:        firefox-ppc64le.patch
 Patch24:        firefox-debug.patch
 Patch25:        rhbz-1219542-s390-build.patch
+Patch26:        mozilla-1282843.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -247,6 +248,7 @@ cd %{tarballdir}
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
+%patch26 -p1 -b .mzbz#1282843
 
 %patch3  -p1 -b .arm
 
@@ -741,10 +743,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{_datadir}/icons/hicolor/32x32/apps/firefox.png
 %{_datadir}/icons/hicolor/48x48/apps/firefox.png
 %{_datadir}/icons/hicolor/symbolic/apps/firefox-symbolic.svg
-%{mozappdir}/webapprt-stub
-%dir %{mozappdir}/webapprt
-%{mozappdir}/webapprt/omni.ja
-%{mozappdir}/webapprt/webapprt.ini
 %if %{enable_mozilla_crashreporter}
 %{mozappdir}/crashreporter
 %{mozappdir}/crashreporter.ini
