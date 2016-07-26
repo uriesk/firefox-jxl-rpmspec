@@ -81,14 +81,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        47.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        48.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160711.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160726.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -122,9 +122,6 @@ Patch224:        mozilla-1170092.patch
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
-Patch305:        mozilla-1245076.patch
-Patch306:        mozilla-1245076-1.patch
-Patch400:        mozilla-1255590.patch
 Patch402:        mozilla-1196777.patch
 Patch404:        mozilla-1270046.patch
 # Remove when mozbz#1269319 lands - Firefox 49
@@ -242,7 +239,7 @@ cd %{tarballdir}
 # ignored during this compare.
 %patch0  -p1
 
-%patch18 -p2 -b .jemalloc-ppc
+%patch18 -p1 -b .jemalloc-ppc
 %patch19 -p2 -b .s390-inlines
 %patch20 -p1 -b .prbool
 %patch21 -p2 -b .ppc64le
@@ -265,12 +262,9 @@ cd %{tarballdir}
 %endif
 %patch224 -p1 -b .1170092
 %if 0%{?fedora} > 23
-%patch304 -p2 -b .1253216
-%patch222 -p1 -b .gtk3-20
+#%patch304 -p2 -b .1253216
+#%patch222 -p1 -b .gtk3-20
 %endif
-%patch305 -p1 -b .1245076
-%patch306 -p1 -b .1245076-1
-%patch400 -p1 -b .1255590
 %patch402 -p1 -b .1196777
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
@@ -778,6 +772,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul 26 2016 Martin Stransky <stransky@redhat.com> - 48.0-1
+- Updated to 48.0
+
+* Fri Jul 22 2016 Tom Callaway <spot@fedoraproject.org> - 47.0.1-3
+- rebuild for libvpx 1.6.0
+
 * Mon Jul 11 2016 Martin Stransky <stransky@redhat.com> - 47.0.1-2
 - Added fix for mozbz#256180 - gmail paste issues
 
