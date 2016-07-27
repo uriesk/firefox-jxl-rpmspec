@@ -82,13 +82,13 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        48.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160726.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160727.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -772,6 +772,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jul 27 2016 Martin Stransky <stransky@redhat.com> - 48.0-3
+- Updated to 48.0 (B2)
+
 * Wed Jul 27 2016 Jan Horak <jhorak@redhat.com> - 48.0-2
 - Negotiate authentication is made off the main thread again (mozbz#890908)
 - Fixed default prerefences (rhbz#1349489)
