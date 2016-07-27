@@ -82,13 +82,13 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        48.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160726.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160727.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -128,6 +128,7 @@ Patch404:        mozilla-1270046.patch
 # Remove when mozbz#1269319 lands - Firefox 49
 Patch405:        mozilla-1245783.patch
 Patch406:        mozilla-256180.patch
+Patch407:        mozilla-890908-async-nego.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -264,13 +265,14 @@ cd %{tarballdir}
 %endif
 %patch224 -p1 -b .1170092
 %if 0%{?fedora} > 23
-%patch304 -p2 -b .1253216
+%patch304 -p1 -b .1253216
 #%patch222 -p1 -b .gtk3-20
 %endif
 %patch402 -p1 -b .1196777
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
 %patch406 -p1 -b .256180
+%patch407 -p1 -b .890908-async-nego
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -770,6 +772,13 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jul 27 2016 Martin Stransky <stransky@redhat.com> - 48.0-3
+- Updated to 48.0 (B2)
+
+* Wed Jul 27 2016 Jan Horak <jhorak@redhat.com> - 48.0-2
+- Negotiate authentication is made off the main thread again (mozbz#890908)
+- Fixed default prerefences (rhbz#1349489)
+
 * Tue Jul 26 2016 Martin Stransky <stransky@redhat.com> - 48.0-1
 - Updated to 48.0
 
