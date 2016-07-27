@@ -264,7 +264,7 @@ cd %{tarballdir}
 %endif
 %patch224 -p1 -b .1170092
 %if 0%{?fedora} > 23
-#%patch304 -p2 -b .1253216
+%patch304 -p2 -b .1253216
 #%patch222 -p1 -b .gtk3-20
 %endif
 %patch402 -p1 -b .1196777
