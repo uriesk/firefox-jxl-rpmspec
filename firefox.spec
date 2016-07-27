@@ -128,6 +128,7 @@ Patch404:        mozilla-1270046.patch
 # Remove when mozbz#1269319 lands - Firefox 49
 Patch405:        mozilla-1245783.patch
 Patch406:        mozilla-256180.patch
+Patch407:        mozilla-890908-async-nego.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -264,13 +265,14 @@ cd %{tarballdir}
 %endif
 %patch224 -p1 -b .1170092
 %if 0%{?fedora} > 23
-%patch304 -p2 -b .1253216
+%patch304 -p1 -b .1253216
 #%patch222 -p1 -b .gtk3-20
 %endif
 %patch402 -p1 -b .1196777
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
 %patch406 -p1 -b .256180
+%patch407 -p1 -b .890908-async-nego
 
 # Debian extension patch
 %patch500 -p1 -b .440908
