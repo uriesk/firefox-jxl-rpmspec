@@ -82,7 +82,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        48.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -129,6 +129,7 @@ Patch404:        mozilla-1270046.patch
 Patch405:        mozilla-1245783.patch
 Patch406:        mozilla-256180.patch
 Patch407:        mozilla-890908-async-nego.patch
+Patch408:        mozilla-1272332.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -273,6 +274,7 @@ cd %{tarballdir}
 %patch405 -p1 -b .1245783
 %patch406 -p1 -b .256180
 %patch407 -p1 -b .890908-async-nego
+%patch408 -p1 -b .1272332
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -772,6 +774,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jul 28 2016 Martin Stransky <stransky@redhat.com> - 48.0-4
+- Enable dark themes by pref in about:config (Bug 1272332)
+
 * Wed Jul 27 2016 Martin Stransky <stransky@redhat.com> - 48.0-3
 - Updated to 48.0 (B2)
 
