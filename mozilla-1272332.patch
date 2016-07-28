@@ -1,17 +1,7 @@
-# HG changeset patch
-# User Nicolas Silva <nsilva@mozilla.com>
-# Parent  14c5bf11d37b9e92d27f7089d9392de2ac339bb3
-Bug 1272332 - Allow gtk the global dark theme behind a pref. r=karlt
-
-diff --git a/modules/libpref/init/all.js b/modules/libpref/init/all.js
---- a/modules/libpref/init/all.js
-+++ b/modules/libpref/init/all.js
-@@ -4560,16 +4560,17 @@ pref("gfx.content.use-native-pushlayer",
- #ifdef ANDROID
- pref("gfx.apitrace.enabled",false);
- #endif
- 
- #ifdef MOZ_X11
+diff -up firefox-48.0/modules/libpref/init/all.js.orig firefox-48.0/modules/libpref/init/all.js
+--- firefox-48.0/modules/libpref/init/all.js.orig	2016-07-25 22:22:05.000000000 +0200
++++ firefox-48.0/modules/libpref/init/all.js	2016-07-28 13:14:39.065888837 +0200
+@@ -4497,6 +4497,7 @@ pref("gfx.apitrace.enabled",false);
  pref("gfx.content.use-native-pushlayer", true);
  #ifdef MOZ_WIDGET_GTK
  pref("gfx.xrender.enabled",false);
@@ -19,20 +9,18 @@ diff --git a/modules/libpref/init/all.js b/modules/libpref/init/all.js
  #endif
  #endif
  
- #ifdef XP_WIN
- pref("gfx.content.use-native-pushlayer", true);
+diff -up firefox-48.0/widget/gtk/nsLookAndFeel.cpp.orig firefox-48.0/widget/gtk/nsLookAndFeel.cpp
+--- firefox-48.0/widget/gtk/nsLookAndFeel.cpp.orig	2016-06-01 06:11:44.000000000 +0200
++++ firefox-48.0/widget/gtk/nsLookAndFeel.cpp	2016-07-28 13:58:35.645067880 +0200
+@@ -28,6 +28,7 @@
+ #include <dlfcn.h>
  
- // Whether to disable the automatic detection and use of direct2d.
- pref("gfx.direct2d.disabled", false);
-diff --git a/widget/gtk/nsLookAndFeel.cpp b/widget/gtk/nsLookAndFeel.cpp
---- a/widget/gtk/nsLookAndFeel.cpp
-+++ b/widget/gtk/nsLookAndFeel.cpp
-@@ -1093,26 +1093,32 @@ nsLookAndFeel::Init()
-     GdkRGBA color;
-     GtkStyleContext *style;
+ #include "mozilla/gfx/2D.h"
++#include "mozilla/Preferences.h"
  
-     // Gtk manages a screen's CSS in the settings object so we
-     // ask Gtk to create it explicitly. Otherwise we may end up
+ #if MOZ_WIDGET_GTK != 2
+ #include <cairo-gobject.h>
+@@ -1097,16 +1098,22 @@ nsLookAndFeel::Init()
      // with wrong color theme, see Bug 972382
      GtkSettings *settings = gtk_settings_get_for_screen(gdk_screen_get_default());
  
@@ -64,8 +52,3 @@ diff --git a/widget/gtk/nsLookAndFeel.cpp b/widget/gtk/nsLookAndFeel.cpp
      }
  
      GtkWidgetPath *path = gtk_widget_path_new();
-     gtk_widget_path_append_type(path, GTK_TYPE_WINDOW);
- 
-     mBackgroundStyle = create_context(path);
-     gtk_style_context_add_class(mBackgroundStyle, GTK_STYLE_CLASS_BACKGROUND);
- 
