@@ -265,10 +265,8 @@ cd %{tarballdir}
 %patch223 -p1 -b .appchooser-crash
 %endif
 %patch224 -p1 -b .1170092
-%if 0%{?fedora} > 23
 %patch304 -p1 -b .1253216
-#%patch222 -p1 -b .gtk3-20
-%endif
+%patch222 -p1 -b .gtk3-20
 %patch402 -p1 -b .1196777
 %patch404 -p1 -b .1270046
 %patch405 -p1 -b .1245783
@@ -776,6 +774,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Thu Jul 28 2016 Martin Stransky <stransky@redhat.com> - 48.0-4
 - Enable dark themes by pref in about:config (Bug 1272332)
+- Backported gtk3.20 upstream fixes
 
 * Wed Jul 27 2016 Martin Stransky <stransky@redhat.com> - 48.0-3
 - Updated to 48.0 (B2)
