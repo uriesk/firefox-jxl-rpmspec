@@ -764,6 +764,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/platform.ini
 %{mozappdir}/plugin-container
 %{mozappdir}/gmp-clearkey
+%if !%{?system_libicu}
+%{mozappdir}/icudt56l.dat
+%endif
 %exclude %{_includedir}
 %exclude %{_libdir}/firefox-devel-%{version}
 %exclude %{_datadir}/idl
@@ -778,6 +781,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Fri Jul 29 2016 Martin Stransky <stransky@redhat.com> - 48.0-5
 - Added fix for mozbz#1250704 - tooltips text color
+- Disable system sqlite on F23
+- Package in-tree icu file
 
 * Thu Jul 28 2016 Martin Stransky <stransky@redhat.com> - 48.0-4
 - Enable dark themes by pref in about:config (Bug 1272332)
