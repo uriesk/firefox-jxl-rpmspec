@@ -82,7 +82,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        48.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -772,6 +772,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jul 29 2016 Martin Stransky <stransky@redhat.com> - 48.0-5
+- Added fix for mozbz#1250704 - tooltips text color
+
 * Thu Jul 28 2016 Martin Stransky <stransky@redhat.com> - 48.0-4
 - Enable dark themes by pref in about:config (Bug 1272332)
 - Backported gtk3.20 upstream fixes
