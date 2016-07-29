@@ -1,6 +1,6 @@
 diff -up firefox-48.0/widget/gtk/gtk3drawing.cpp.gtk3-20 firefox-48.0/widget/gtk/gtk3drawing.cpp
 --- firefox-48.0/widget/gtk/gtk3drawing.cpp.gtk3-20	2016-07-25 22:22:07.000000000 +0200
-+++ firefox-48.0/widget/gtk/gtk3drawing.cpp	2016-07-29 08:53:37.650354139 +0200
++++ firefox-48.0/widget/gtk/gtk3drawing.cpp	2016-07-29 09:15:11.822285857 +0200
 @@ -18,15 +18,9 @@
  
  #include <math.h>
@@ -1535,7 +1535,7 @@ diff -up firefox-48.0/widget/gtk/gtk3drawing.cpp.gtk3-20 firefox-48.0/widget/gtk
  
 diff -up firefox-48.0/widget/gtk/gtkdrawing.h.gtk3-20 firefox-48.0/widget/gtk/gtkdrawing.h
 --- firefox-48.0/widget/gtk/gtkdrawing.h.gtk3-20	2016-07-25 22:22:07.000000000 +0200
-+++ firefox-48.0/widget/gtk/gtkdrawing.h	2016-07-29 08:53:37.650354139 +0200
++++ firefox-48.0/widget/gtk/gtkdrawing.h	2016-07-29 09:15:11.822285857 +0200
 @@ -69,12 +69,6 @@ typedef enum {
    MOZ_GTK_TAB_SELECTED        = 1 << 10
  } GtkTabFlags;
@@ -1618,7 +1618,7 @@ diff -up firefox-48.0/widget/gtk/gtkdrawing.h.gtk3-20 firefox-48.0/widget/gtk/gt
  } WidgetNodeType;
 diff -up firefox-48.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-48.0/widget/gtk/mozgtk/mozgtk.c
 --- firefox-48.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20	2016-07-25 22:22:07.000000000 +0200
-+++ firefox-48.0/widget/gtk/mozgtk/mozgtk.c	2016-07-29 08:57:28.378810026 +0200
++++ firefox-48.0/widget/gtk/mozgtk/mozgtk.c	2016-07-29 09:15:11.823285862 +0200
 @@ -517,6 +517,7 @@ STUB(gdk_event_get_source_device)
  STUB(gdk_window_get_type)
  STUB(gdk_x11_window_get_xid)
@@ -1648,12 +1648,8 @@ diff -up firefox-48.0/widget/gtk/mozgtk/mozgtk.c.gtk3-20 firefox-48.0/widget/gtk
  #ifdef GTK2_SYMBOLS
 diff -up firefox-48.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-48.0/widget/gtk/nsLookAndFeel.cpp
 --- firefox-48.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-48.0/widget/gtk/nsLookAndFeel.cpp	2016-07-29 08:53:37.664354167 +0200
-@@ -28,9 +28,11 @@
- #include <dlfcn.h>
- 
- #include "mozilla/gfx/2D.h"
-+#include "mozilla/Preferences.h"
++++ firefox-48.0/widget/gtk/nsLookAndFeel.cpp	2016-07-29 09:15:54.943459700 +0200
+@@ -31,6 +31,7 @@
  
  #if MOZ_WIDGET_GTK != 2
  #include <cairo-gobject.h>
@@ -1661,39 +1657,7 @@ diff -up firefox-48.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-48.0/widget/g
  #endif
  
  using mozilla::LookAndFeel;
-@@ -1097,16 +1099,22 @@ nsLookAndFeel::Init()
-     // with wrong color theme, see Bug 972382
-     GtkSettings *settings = gtk_settings_get_for_screen(gdk_screen_get_default());
- 
--    // Disable dark theme because it interacts poorly with widget styling in
--    // web content (see bug 1216658).
--    // To avoid triggering reload of theme settings unnecessarily, only set the
--    // setting when necessary.
--    const gchar* dark_setting = "gtk-application-prefer-dark-theme";
--    gboolean dark;
--    g_object_get(settings, dark_setting, &dark, nullptr);
- 
--    if (dark) {
--        g_object_set(settings, dark_setting, FALSE, nullptr);
-+    bool isContentProcess = XRE_IsContentProcess();
-+    bool allowDarkTheme = mozilla::Preferences::GetBool("widget.allow-gtk-dark-theme", false);
-+
-+    if (isContentProcess || !allowDarkTheme) {
-+        // Disable dark theme because it interacts poorly with widget styling in
-+        // web content (see bug 1216658).
-+        // To avoid triggering reload of theme settings unnecessarily, only set the
-+        // setting when necessary.
-+        const gchar* dark_setting = "gtk-application-prefer-dark-theme";
-+        gboolean dark;
-+        g_object_get(settings, dark_setting, &dark, nullptr);
-+
-+        if (dark) {
-+            g_object_set(settings, dark_setting, FALSE, nullptr);
-+        }
-     }
- 
-     GtkWidgetPath *path = gtk_widget_path_new();
-@@ -1135,15 +1143,24 @@ nsLookAndFeel::Init()
+@@ -1135,15 +1136,24 @@ nsLookAndFeel::Init()
      gtk_style_context_get_color(style, GTK_STATE_FLAG_NORMAL, &color);
      sMozWindowText = GDK_RGBA_TO_NS_RGBA(color);
      gtk_style_context_restore(style);
@@ -1724,7 +1688,7 @@ diff -up firefox-48.0/widget/gtk/nsLookAndFeel.cpp.gtk3-20 firefox-48.0/widget/g
      GtkWidget *accel_label = gtk_accel_label_new("M");
 diff -up firefox-48.0/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20 firefox-48.0/widget/gtk/nsNativeThemeGTK.cpp
 --- firefox-48.0/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20	2016-07-25 22:22:07.000000000 +0200
-+++ firefox-48.0/widget/gtk/nsNativeThemeGTK.cpp	2016-07-29 08:53:37.651354141 +0200
++++ firefox-48.0/widget/gtk/nsNativeThemeGTK.cpp	2016-07-29 09:15:11.824285865 +0200
 @@ -354,10 +354,8 @@ nsNativeThemeGTK::GetGtkWidgetAndState(u
  
            if (isTopLevel) {
@@ -1767,7 +1731,7 @@ diff -up firefox-48.0/widget/gtk/nsNativeThemeGTK.cpp.gtk3-20 firefox-48.0/widge
    case NS_THEME_MENUSEPARATOR:
 diff -up firefox-48.0/widget/gtk/WidgetStyleCache.cpp.gtk3-20 firefox-48.0/widget/gtk/WidgetStyleCache.cpp
 --- firefox-48.0/widget/gtk/WidgetStyleCache.cpp.gtk3-20	2016-07-25 22:22:07.000000000 +0200
-+++ firefox-48.0/widget/gtk/WidgetStyleCache.cpp	2016-07-29 08:53:37.652354143 +0200
++++ firefox-48.0/widget/gtk/WidgetStyleCache.cpp	2016-07-29 09:15:11.825285869 +0200
 @@ -22,7 +22,7 @@ static bool sStyleContextNeedsRestore;
  static GtkStyleContext* sCurrentStyleContext;
  #endif
@@ -2341,7 +2305,7 @@ diff -up firefox-48.0/widget/gtk/WidgetStyleCache.cpp.gtk3-20 firefox-48.0/widge
  
 diff -up firefox-48.0/widget/gtk/WidgetStyleCache.h.gtk3-20 firefox-48.0/widget/gtk/WidgetStyleCache.h
 --- firefox-48.0/widget/gtk/WidgetStyleCache.h.gtk3-20	2016-07-25 22:22:07.000000000 +0200
-+++ firefox-48.0/widget/gtk/WidgetStyleCache.h	2016-07-29 08:53:37.652354143 +0200
++++ firefox-48.0/widget/gtk/WidgetStyleCache.h	2016-07-29 09:15:11.825285869 +0200
 @@ -21,10 +21,24 @@ enum : StyleFlags {
  GtkWidget*
  GetWidget(WidgetNodeType aNodeType);
