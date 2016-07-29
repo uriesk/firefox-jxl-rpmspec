@@ -2,7 +2,11 @@
 %define system_nss        1
 
 # Use system sqlite?
+%if 0%{?fedora} > 23
 %define system_sqlite     1
+%else
+%define system_sqlite     0
+%endif
 %define system_ffi        1
 
 # Use system cairo?
