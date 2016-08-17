@@ -86,7 +86,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        48.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -134,6 +134,7 @@ Patch405:        mozilla-1245783.patch
 Patch406:        mozilla-256180.patch
 Patch407:        mozilla-890908-async-nego.patch
 Patch408:        mozilla-1272332.patch
+Patch409:        mozilla-1225044.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -277,6 +278,7 @@ cd %{tarballdir}
 %patch406 -p1 -b .256180
 %patch407 -p1 -b .890908-async-nego
 %patch408 -p1 -b .1272332
+%patch409 -p1 -b .1225044
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -779,6 +781,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Aug 17 2016 Martin Stransky <stransky@redhat.com> - 48.0-6
+- Added patch for mozbz#1225044 - gtk3 rendering glitches
+
 * Fri Jul 29 2016 Martin Stransky <stransky@redhat.com> - 48.0-5
 - Added fix for mozbz#1250704 - tooltips text color
 - Disable system sqlite on F23
