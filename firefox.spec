@@ -85,8 +85,8 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        48.0
-Release:        6%{?pre_tag}%{?dist}
+Version:        48.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -135,6 +135,7 @@ Patch406:        mozilla-256180.patch
 Patch407:        mozilla-890908-async-nego.patch
 Patch408:        mozilla-1272332.patch
 Patch409:        mozilla-1225044.patch
+Patch410:        mozilla-1291700.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -279,6 +280,7 @@ cd %{tarballdir}
 %patch407 -p1 -b .890908-async-nego
 %patch408 -p1 -b .1272332
 %patch409 -p1 -b .1225044
+%patch410 -p1 -b .1291700
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -773,7 +775,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %exclude %{_libdir}/firefox-devel-%{version}
 %exclude %{_datadir}/idl
 %if !%{?system_nss}
-%{mozappdir}/libfreebl3.chk
+%{mozappdir}/libfreeblpriv3.chk
 %{mozappdir}/libnssdbm3.chk
 %{mozappdir}/libsoftokn3.chk
 %endif
@@ -781,6 +783,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Aug 19 2016 Martin Stransky <stransky@redhat.com> - 48.0.1-1
+- Update to 48.0.1
+- Added fix for mozbz#1291700 - Since latest release NTLM/SPNEGO
+  no longer works
+
 * Wed Aug 17 2016 Martin Stransky <stransky@redhat.com> - 48.0-6
 - Added patch for mozbz#1225044 - gtk3 rendering glitches
 
