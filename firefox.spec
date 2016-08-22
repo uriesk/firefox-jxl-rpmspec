@@ -86,7 +86,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        48.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -783,6 +783,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Aug 22 2016 Jan Horak <jhorak@redhat.com> - 48.0.1-2
+- Added translations for .desktop file actions
+
 * Fri Aug 19 2016 Martin Stransky <stransky@redhat.com> - 48.0.1-1
 - Update to 48.0.1
 - Added fix for mozbz#1291700 - Since latest release NTLM/SPNEGO
