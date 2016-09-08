@@ -85,14 +85,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        48.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        49.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160819.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20160906.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -113,7 +113,6 @@ Patch20:        firefox-build-prbool.patch
 Patch21:        firefox-ppc64le.patch
 Patch24:        firefox-debug.patch
 Patch25:        rhbz-1219542-s390-build.patch
-Patch26:        mozilla-1282843.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -121,21 +120,14 @@ Patch204:        rhbz-966424.patch
 Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
 Patch221:        firefox-fedora-ua.patch
-Patch222:        firefox-gtk3-20.patch
 Patch223:        rhbz-1291190-appchooser-crash.patch
 Patch224:        mozilla-1170092.patch
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
 Patch402:        mozilla-1196777.patch
-Patch404:        mozilla-1270046.patch
-# Remove when mozbz#1269319 lands - Firefox 49
-Patch405:        mozilla-1245783.patch
 Patch406:        mozilla-256180.patch
 Patch407:        mozilla-890908-async-nego.patch
-Patch408:        mozilla-1272332.patch
-Patch409:        mozilla-1225044.patch
-Patch410:        mozilla-1291700.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -256,7 +248,6 @@ cd %{tarballdir}
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-%patch26 -p1 -b .mzbz#1282843
 
 %patch3  -p1 -b .arm
 
@@ -272,15 +263,9 @@ cd %{tarballdir}
 %endif
 %patch224 -p1 -b .1170092
 %patch304 -p1 -b .1253216
-%patch222 -p1 -b .gtk3-20
 %patch402 -p1 -b .1196777
-%patch404 -p1 -b .1270046
-%patch405 -p1 -b .1245783
 %patch406 -p1 -b .256180
 %patch407 -p1 -b .890908-async-nego
-%patch408 -p1 -b .1272332
-%patch409 -p1 -b .1225044
-%patch410 -p1 -b .1291700
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -732,9 +717,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/components/*.so
 %{mozappdir}/browser/components/components.manifest
 %{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
-%{mozappdir}/browser/features/loop@mozilla.org.xpi
 %{mozappdir}/browser/features/e10srollout@mozilla.org.xpi
 %{mozappdir}/browser/features/firefox@getpocket.com.xpi
+%{mozappdir}/browser/features/webcompat@mozilla.org.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
 %dir %{mozappdir}/browser/extensions
 %{mozappdir}/browser/extensions/*
@@ -783,6 +768,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Sep 6 2016 Martin Stransky <stransky@redhat.com> - 49.0-1
+- Update to Firefox 49
+
 * Mon Aug 22 2016 Jan Horak <jhorak@redhat.com> - 48.0.1-2
 - Added translations for .desktop file actions
 

@@ -1,7 +1,7 @@
-diff -up firefox-47.0/modules/libpref/prefapi.cpp.440908 firefox-47.0/modules/libpref/prefapi.cpp
---- firefox-47.0/modules/libpref/prefapi.cpp.440908	2016-06-01 17:17:19.723700226 +0200
-+++ firefox-47.0/modules/libpref/prefapi.cpp	2016-06-01 17:21:05.839971471 +0200
-@@ -947,8 +947,8 @@ void PREF_ReaderCallback(void       *clo
+diff -up firefox-49.0/modules/libpref/prefapi.cpp.440908 firefox-49.0/modules/libpref/prefapi.cpp
+--- firefox-49.0/modules/libpref/prefapi.cpp.440908	2016-07-25 22:22:05.000000000 +0200
++++ firefox-49.0/modules/libpref/prefapi.cpp	2016-09-08 11:45:51.283206722 +0200
+@@ -971,8 +971,8 @@ void PREF_ReaderCallback(void       *clo
                           PrefValue   value,
                           PrefType    type,
                           bool        isDefault,
@@ -12,16 +12,16 @@ diff -up firefox-47.0/modules/libpref/prefapi.cpp.440908 firefox-47.0/modules/li
  {
      uint32_t flags = 0;
      if (isDefault) {
-@@ -960,4 +960,6 @@ void PREF_ReaderCallback(void       *clo
+@@ -984,4 +984,6 @@ void PREF_ReaderCallback(void       *clo
          flags |= kPrefForceSet;
      }
      pref_HashPref(pref, value, type, flags);
 +    if (isLocked)
 +        PREF_LockPref(pref, true);
  }
-diff -up firefox-47.0/modules/libpref/prefapi.h.440908 firefox-47.0/modules/libpref/prefapi.h
---- firefox-47.0/modules/libpref/prefapi.h.440908	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-47.0/modules/libpref/prefapi.h	2016-06-01 17:17:19.723700226 +0200
+diff -up firefox-49.0/modules/libpref/prefapi.h.440908 firefox-49.0/modules/libpref/prefapi.h
+--- firefox-49.0/modules/libpref/prefapi.h.440908	2016-06-01 06:11:44.000000000 +0200
++++ firefox-49.0/modules/libpref/prefapi.h	2016-09-08 11:45:51.283206722 +0200
 @@ -243,7 +243,8 @@ void PREF_ReaderCallback( void *closure,
                            PrefValue   value,
                            PrefType    type,
@@ -32,9 +32,9 @@ diff -up firefox-47.0/modules/libpref/prefapi.h.440908 firefox-47.0/modules/libp
  
  #ifdef __cplusplus
  }
-diff -up firefox-47.0/modules/libpref/prefread.cpp.440908 firefox-47.0/modules/libpref/prefread.cpp
---- firefox-47.0/modules/libpref/prefread.cpp.440908	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-47.0/modules/libpref/prefread.cpp	2016-06-01 17:29:47.017596668 +0200
+diff -up firefox-49.0/modules/libpref/prefread.cpp.440908 firefox-49.0/modules/libpref/prefread.cpp
+--- firefox-49.0/modules/libpref/prefread.cpp.440908	2016-09-05 22:12:58.000000000 +0200
++++ firefox-49.0/modules/libpref/prefread.cpp	2016-09-08 11:45:51.284206727 +0200
 @@ -43,6 +43,7 @@ enum {
  #define BITS_PER_HEX_DIGIT      4
  
@@ -43,7 +43,7 @@ diff -up firefox-47.0/modules/libpref/prefread.cpp.440908 firefox-47.0/modules/l
  static const char kPref[] = "pref";
  static const char kPrefSticky[] = "sticky_pref";
  static const char kTrue[] = "true";
-@@ -131,7 +132,7 @@ pref_DoCallback(PrefParseState *ps)
+@@ -146,7 +147,7 @@ pref_DoCallback(PrefParseState *ps)
          break;
      }
      (*ps->reader)(ps->closure, ps->lb, value, ps->vtype, ps->fdefault,
@@ -52,7 +52,7 @@ diff -up firefox-47.0/modules/libpref/prefread.cpp.440908 firefox-47.0/modules/l
      return true;
  }
  
-@@ -191,6 +192,7 @@ PREF_ParseBuf(PrefParseState *ps, const
+@@ -215,6 +216,7 @@ PREF_ParseBuf(PrefParseState *ps, const
                  ps->vtype = PrefType::Invalid;
                  ps->fdefault = false;
                  ps->fstickydefault = false;
@@ -60,7 +60,7 @@ diff -up firefox-47.0/modules/libpref/prefread.cpp.440908 firefox-47.0/modules/l
              }
              switch (c) {
              case '/':       /* begin comment block or line? */
-@@ -201,11 +203,14 @@ PREF_ParseBuf(PrefParseState *ps, const
+@@ -225,11 +227,14 @@ PREF_ParseBuf(PrefParseState *ps, const
                  break;
              case 'u':       /* indicating user_pref */
              case 's':       /* indicating sticky_pref */
@@ -75,7 +75,7 @@ diff -up firefox-47.0/modules/libpref/prefread.cpp.440908 firefox-47.0/modules/l
                  } else {
                    ps->smatch = kPref;
                  }
-@@ -252,8 +257,10 @@ PREF_ParseBuf(PrefParseState *ps, const
+@@ -277,8 +282,10 @@ PREF_ParseBuf(PrefParseState *ps, const
          /* name parsing */
          case PREF_PARSE_UNTIL_NAME:
              if (c == '\"' || c == '\'') {
@@ -87,9 +87,9 @@ diff -up firefox-47.0/modules/libpref/prefread.cpp.440908 firefox-47.0/modules/l
                  ps->quotechar = c;
                  ps->nextstate = PREF_PARSE_UNTIL_COMMA; /* return here when done */
                  state = PREF_PARSE_QUOTED_STRING;
-diff -up firefox-47.0/modules/libpref/prefread.h.440908 firefox-47.0/modules/libpref/prefread.h
---- firefox-47.0/modules/libpref/prefread.h.440908	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-47.0/modules/libpref/prefread.h	2016-06-01 17:30:32.310651004 +0200
+diff -up firefox-49.0/modules/libpref/prefread.h.440908 firefox-49.0/modules/libpref/prefread.h
+--- firefox-49.0/modules/libpref/prefread.h.440908	2016-09-05 22:12:58.000000000 +0200
++++ firefox-49.0/modules/libpref/prefread.h	2016-09-08 11:57:09.485889976 +0200
 @@ -34,7 +34,8 @@ typedef void (*PrefReader)(void       *c
                             PrefValue   val,
                             PrefType    type,
@@ -98,13 +98,22 @@ diff -up firefox-47.0/modules/libpref/prefread.h.440908 firefox-47.0/modules/lib
 +                           bool        stickyPref,
 +                           bool        lockPref);
  
- /* structure fields are private */
- typedef struct PrefParseState {
-@@ -56,6 +57,7 @@ typedef struct PrefParseState {
+ /**
+  * Report any errors or warnings we encounter during parsing.
+@@ -62,6 +63,7 @@ typedef struct PrefParseState {
      PrefType    vtype;      /* PREF_STRING,INT,BOOL          */
      bool        fdefault;   /* true if (default) pref        */
      bool        fstickydefault; /* true if (sticky) pref     */
 +    bool        flock;      /* true if pref to be locked     */
  } PrefParseState;
+ 
+ /**
+@@ -90,7 +92,7 @@ void PREF_InitParseState(PrefParseState
+  *
+  * @param ps
+  *        PrefParseState instance.
+- */        
++ */
+ void PREF_FinalizeParseState(PrefParseState *ps);
  
  /**
