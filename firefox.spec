@@ -41,6 +41,14 @@
 %define run_tests         0
 %endif
 
+%define build_with_rust   0
+
+%if 0%{?fedora} > 23
+%ifarch %{ix86} x86_64 armv7hl
+%define build_with_rust   1
+%endif
+%endif
+
 # Build as a debug package?
 %define debug_build       0
 
@@ -86,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        49.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -189,6 +197,9 @@ BuildRequires:  pkgconfig(libffi)
 
 %if %{?run_tests}
 BuildRequires:  xorg-x11-server-Xvfb
+%endif
+%if %{?build_with_rust}
+BuildRequires:  rust
 %endif
 
 Obsoletes:      mozilla <= 37:1.7.13
@@ -376,6 +387,9 @@ echo "ac_add_options --with-system-icu" >> .mozconfig
 echo "ac_add_options --without-system-icu" >> .mozconfig
 %endif
 
+%if %{?build_with_rust}
+echo "ac_add_options --enable-rust" >> .mozconfig
+%endif
 #---------------------------------------------------------------------
 
 %build
@@ -768,6 +782,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 26 2016 Jan Horak <jhorak@redhat.com> - 49.0-3
+- Build with rust where possible
+
 * Mon Sep 19 2016 Martin Stransky <stransky@redhat.com> - 49.0-2
 - Update to Firefox 49 (B4)
 
