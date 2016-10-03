@@ -44,7 +44,7 @@
 %define build_with_rust   0
 
 %if 0%{?fedora} > 23
-%ifarch %{ix86} x86_64 armv7hl
+%ifarch x86_64 armv7hl
 %define build_with_rust   1
 %endif
 %endif
@@ -130,6 +130,7 @@ Patch219:        rhbz-1173156.patch
 Patch221:        firefox-fedora-ua.patch
 Patch223:        rhbz-1291190-appchooser-crash.patch
 Patch224:        mozilla-1170092.patch
+Patch225:        mozilla-1005640-accept-lang.patch
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
@@ -273,6 +274,7 @@ cd %{tarballdir}
 %patch223 -p1 -b .appchooser-crash
 %endif
 %patch224 -p1 -b .1170092
+%patch225 -p1 -b .1005640-accept-lang
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
@@ -784,6 +786,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Mon Sep 26 2016 Jan Horak <jhorak@redhat.com> - 49.0-3
 - Build with rust where possible
+- Added fix for wrong accept-language headers when running with non-english locales
 
 * Mon Sep 19 2016 Martin Stransky <stransky@redhat.com> - 49.0-2
 - Update to Firefox 49 (B4)
