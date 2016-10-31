@@ -93,14 +93,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        49.0
-Release:        3%{?pre_tag}%{?dist}
+Version:        49.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20160919.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20161031.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -784,6 +784,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Oct 31 2016 Jan Horak <jhorak@redhat.com> - 49.0.2-1
+- Update to 49.0.2
+
 * Mon Sep 26 2016 Jan Horak <jhorak@redhat.com> - 49.0-3
 - Build with rust where possible
 - Added fix for wrong accept-language headers when running with non-english locales
