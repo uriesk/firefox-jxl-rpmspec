@@ -170,6 +170,7 @@ BuildRequires:  pkgconfig(alsa)
 BuildRequires:  pkgconfig(libnotify) >= %{libnotify_version}
 BuildRequires:  pkgconfig(dri)
 BuildRequires:  pkgconfig(libcurl)
+BuildRequires:  pkgconfig(dbus-glib)
 %if %{?system_libvpx}
 BuildRequires:  libvpx-devel >= %{libvpx_version}
 %endif
