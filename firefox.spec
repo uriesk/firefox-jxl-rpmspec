@@ -93,14 +93,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        49.0.2
+Version:        50.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20161031.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20161110.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -136,7 +136,6 @@ Patch225:        mozilla-1005640-accept-lang.patch
 Patch304:        mozilla-1253216.patch
 Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
-Patch407:        mozilla-890908-async-nego.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -279,7 +278,6 @@ cd %{tarballdir}
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
-%patch407 -p1 -b .890908-async-nego
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -737,6 +735,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/features/e10srollout@mozilla.org.xpi
 %{mozappdir}/browser/features/firefox@getpocket.com.xpi
 %{mozappdir}/browser/features/webcompat@mozilla.org.xpi
+# That's Windows only
+%ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
 %dir %{mozappdir}/browser/extensions
 %{mozappdir}/browser/extensions/*
@@ -770,6 +770,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/platform.ini
 %{mozappdir}/plugin-container
 %{mozappdir}/gmp-clearkey
+%{mozappdir}/fonts/EmojiOneMozilla.ttf
 %if !%{?system_libicu}
 %{mozappdir}/icudt56l.dat
 %endif
@@ -785,6 +786,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Nov 10 2016 Martin Stransky <stransky@redhat.com> - 50.0-1
+- Update to 50.0
+
 * Mon Oct 31 2016 Jan Horak <jhorak@redhat.com> - 49.0.2-1
 - Update to 49.0.2
 

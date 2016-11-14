@@ -1,7 +1,7 @@
-diff -up firefox-49.0/modules/libpref/prefapi.cpp.440908 firefox-49.0/modules/libpref/prefapi.cpp
---- firefox-49.0/modules/libpref/prefapi.cpp.440908	2016-07-25 22:22:05.000000000 +0200
-+++ firefox-49.0/modules/libpref/prefapi.cpp	2016-09-08 11:45:51.283206722 +0200
-@@ -971,8 +971,8 @@ void PREF_ReaderCallback(void       *clo
+diff -up firefox-50.0/modules/libpref/prefapi.cpp.440908 firefox-50.0/modules/libpref/prefapi.cpp
+--- firefox-50.0/modules/libpref/prefapi.cpp.440908	2016-10-31 21:15:26.000000000 +0100
++++ firefox-50.0/modules/libpref/prefapi.cpp	2016-11-10 10:32:48.796115692 +0100
+@@ -997,8 +997,8 @@ void PREF_ReaderCallback(void       *clo
                           PrefValue   value,
                           PrefType    type,
                           bool        isDefault,
@@ -12,29 +12,30 @@ diff -up firefox-49.0/modules/libpref/prefapi.cpp.440908 firefox-49.0/modules/li
  {
      uint32_t flags = 0;
      if (isDefault) {
-@@ -984,4 +984,6 @@ void PREF_ReaderCallback(void       *clo
+@@ -1010,4 +1010,6 @@ void PREF_ReaderCallback(void       *clo
          flags |= kPrefForceSet;
      }
      pref_HashPref(pref, value, type, flags);
 +    if (isLocked)
 +        PREF_LockPref(pref, true);
  }
-diff -up firefox-49.0/modules/libpref/prefapi.h.440908 firefox-49.0/modules/libpref/prefapi.h
---- firefox-49.0/modules/libpref/prefapi.h.440908	2016-06-01 06:11:44.000000000 +0200
-+++ firefox-49.0/modules/libpref/prefapi.h	2016-09-08 11:45:51.283206722 +0200
-@@ -243,7 +243,8 @@ void PREF_ReaderCallback( void *closure,
+diff -up firefox-50.0/modules/libpref/prefapi.h.440908 firefox-50.0/modules/libpref/prefapi.h
+--- firefox-50.0/modules/libpref/prefapi.h.440908	2016-11-10 10:32:48.796115692 +0100
++++ firefox-50.0/modules/libpref/prefapi.h	2016-11-10 10:34:58.013159112 +0100
+@@ -243,8 +243,8 @@ void PREF_ReaderCallback( void *closure,
                            PrefValue   value,
                            PrefType    type,
                            bool        isDefault,
 -                          bool        isStickyDefault);
+-
 +                          bool        isStickyDefault,
 +                          bool        isLocked);
  
- #ifdef __cplusplus
- }
-diff -up firefox-49.0/modules/libpref/prefread.cpp.440908 firefox-49.0/modules/libpref/prefread.cpp
---- firefox-49.0/modules/libpref/prefread.cpp.440908	2016-09-05 22:12:58.000000000 +0200
-+++ firefox-49.0/modules/libpref/prefread.cpp	2016-09-08 11:45:51.284206727 +0200
+ /*
+  * Callback whenever we change a preference
+diff -up firefox-50.0/modules/libpref/prefread.cpp.440908 firefox-50.0/modules/libpref/prefread.cpp
+--- firefox-50.0/modules/libpref/prefread.cpp.440908	2016-09-05 22:12:58.000000000 +0200
++++ firefox-50.0/modules/libpref/prefread.cpp	2016-11-10 10:32:48.796115692 +0100
 @@ -43,6 +43,7 @@ enum {
  #define BITS_PER_HEX_DIGIT      4
  
@@ -87,9 +88,9 @@ diff -up firefox-49.0/modules/libpref/prefread.cpp.440908 firefox-49.0/modules/l
                  ps->quotechar = c;
                  ps->nextstate = PREF_PARSE_UNTIL_COMMA; /* return here when done */
                  state = PREF_PARSE_QUOTED_STRING;
-diff -up firefox-49.0/modules/libpref/prefread.h.440908 firefox-49.0/modules/libpref/prefread.h
---- firefox-49.0/modules/libpref/prefread.h.440908	2016-09-05 22:12:58.000000000 +0200
-+++ firefox-49.0/modules/libpref/prefread.h	2016-09-08 11:57:09.485889976 +0200
+diff -up firefox-50.0/modules/libpref/prefread.h.440908 firefox-50.0/modules/libpref/prefread.h
+--- firefox-50.0/modules/libpref/prefread.h.440908	2016-09-05 22:12:58.000000000 +0200
++++ firefox-50.0/modules/libpref/prefread.h	2016-11-10 10:32:48.796115692 +0100
 @@ -34,7 +34,8 @@ typedef void (*PrefReader)(void       *c
                             PrefValue   val,
                             PrefType    type,
