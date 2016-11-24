@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        50.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -136,6 +136,9 @@ Patch225:        mozilla-1005640-accept-lang.patch
 Patch304:        mozilla-1253216.patch
 Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
+# Rebase Gtk3 widget code to latest trunk to
+# fix various rendering problems
+Patch407:        widget-rebase.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -278,6 +281,9 @@ cd %{tarballdir}
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
+# Rebase Gtk3 widget code to latest trunk to
+# fix various rendering problems
+%patch407 -p1 -b .widget-rebase
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -786,6 +792,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Nov 24 2016 Martin Stransky <stransky@redhat.com> - 50.0-2
+- Rebase Gtk3 widget code to latest trunk to fix
+  various rendering problems (rhbz#1397290)
+
 * Thu Nov 10 2016 Martin Stransky <stransky@redhat.com> - 50.0-1
 - Update to 50.0
 
