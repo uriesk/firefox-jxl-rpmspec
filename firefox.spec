@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        50.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -139,6 +139,7 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
+Patch408:        mozilla-1271100.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -284,6 +285,7 @@ cd %{tarballdir}
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
+%patch408 -p1 -b .1271100
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -792,7 +794,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Nov 30 2016 Martin Stransky <stransky@redhat.com> - 50.0.2-1
+* Wed Nov 30 2016 Martin Stransky <stransky@redhat.com> - 50.0.2-2
+- Added fix for "ABORT: X_ShmAttach: BadAccess" crashes
+  (mozbz#1271100)
+
+* Wed Nov 30 2016 Martin Stransky <stransky@redhat.com> - 50.0.2-1
 - Update to latest upstream (50.0.2)
 
 * Mon Nov 28 2016 Martin Stransky <stransky@redhat.com> - 50.0.1-1
