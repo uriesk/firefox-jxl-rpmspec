@@ -93,14 +93,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        50.0.2
-Release:        2%{?pre_tag}%{?dist}
+Version:        50.1.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20161130.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20161213.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -128,7 +128,6 @@ Patch204:        rhbz-966424.patch
 Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
 Patch221:        firefox-fedora-ua.patch
-Patch223:        rhbz-1291190-appchooser-crash.patch
 Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 
@@ -139,7 +138,6 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
-Patch408:        mozilla-1271100.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -274,9 +272,6 @@ cd %{tarballdir}
 %patch215 -p1 -b .addons
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
-%if 0%{?fedora} > 22
-%patch223 -p1 -b .appchooser-crash
-%endif
 %patch224 -p1 -b .1170092
 %patch225 -p1 -b .1005640-accept-lang
 %patch304 -p1 -b .1253216
@@ -285,7 +280,6 @@ cd %{tarballdir}
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
-%patch408 -p1 -b .1271100
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -794,6 +788,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 13 2016 Martin Stransky <stransky@redhat.com> - 50.1.0-1
+- Updated to 50.1.0
+
 * Wed Nov 30 2016 Martin Stransky <stransky@redhat.com> - 50.0.2-2
 - Added fix for "ABORT: X_ShmAttach: BadAccess" crashes
   (mozbz#1271100)
