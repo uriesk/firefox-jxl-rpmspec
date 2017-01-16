@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        50.1.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -138,6 +138,7 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
+Patch408:        mozilla-1290037.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -280,6 +281,7 @@ cd %{tarballdir}
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
+%patch408 -p1 -b .1290037
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -788,6 +790,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 16 2017 Martin Stransky <stransky@redhat.com> - 50.1.0-3
+- Added patch for nss 3.28.1 (mozbz#1290037)
+
 * Wed Dec 21 2016 Martin Stransky <stransky@redhat.com> - 50.1.0-2
 - Enabled Mozilla crash reporter
 
