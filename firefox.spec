@@ -139,6 +139,7 @@ Patch406:        mozilla-256180.patch
 # fix various rendering problems
 Patch407:        widget-rebase.patch
 Patch408:        mozilla-1290037.patch
+Patch409:        mozilla-1329272.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -282,6 +283,7 @@ cd %{tarballdir}
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
 %patch408 -p1 -b .1290037
+%patch409 -p1 -b .1329272
 
 # Debian extension patch
 %patch500 -p1 -b .440908
