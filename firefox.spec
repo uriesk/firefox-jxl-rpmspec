@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        50.1.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -792,6 +792,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 17 2017 Jan Horak <jhorak@redhat.com> - 50.1.0-4
+- Enable telemetry (rhbz#1412971)
+
 * Mon Jan 16 2017 Martin Stransky <stransky@redhat.com> - 50.1.0-3
 - Added patch for nss 3.28.1 (mozbz#1290037)
 
