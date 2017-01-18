@@ -137,7 +137,7 @@ Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
-#Patch407:        widget-rebase.patch
+Patch407:        widget-rebase.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -279,7 +279,7 @@ cd %{tarballdir}
 %patch406 -p1 -b .256180
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
-#%patch407 -p1 -b .widget-rebase
+%patch407 -p1 -b .widget-rebase
 
 # Debian extension patch
 %patch500 -p1 -b .440908
