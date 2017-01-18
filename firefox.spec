@@ -93,14 +93,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        50.1.0
-Release:        4%{?pre_tag}%{?dist}
+Version:        51.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20161213.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20170118.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -137,9 +137,7 @@ Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
-Patch407:        widget-rebase.patch
-Patch408:        mozilla-1290037.patch
-Patch409:        mozilla-1329272.patch
+#Patch407:        widget-rebase.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -281,9 +279,7 @@ cd %{tarballdir}
 %patch406 -p1 -b .256180
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
-%patch407 -p1 -b .widget-rebase
-%patch408 -p1 -b .1290037
-%patch409 -p1 -b .1329272
+#%patch407 -p1 -b .widget-rebase
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -792,6 +788,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 18 2017 Martin Stransky <stransky@redhat.com> - 51.0-1
+- Update to 51.0 (B1)
+
 * Tue Jan 17 2017 Jan Horak <jhorak@redhat.com> - 50.1.0-4
 - Enable telemetry (rhbz#1412971)
 
