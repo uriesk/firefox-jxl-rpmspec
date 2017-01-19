@@ -1,5 +1,5 @@
 # Temporary disable
-ExcludeArch: armv7hl aarch64
+ExcludeArch: armv7hl aarch64 ppc ppc64 ppc64le
 
 # Use system nspr/nss?
 %define system_nss        1
