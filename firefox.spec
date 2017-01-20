@@ -44,7 +44,7 @@
 %define build_with_rust   0
 
 %if 0%{?fedora} > 23
-%ifarch x86_64 armv7hl
+%ifarch x86_64
 %define build_with_rust   1
 %endif
 %endif
