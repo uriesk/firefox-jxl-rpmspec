@@ -1,6 +1,6 @@
 diff -up firefox-51.0/gfx/2d/BorrowedContext.h.1319374 firefox-51.0/gfx/2d/BorrowedContext.h
 --- firefox-51.0/gfx/2d/BorrowedContext.h.1319374	2017-01-16 17:16:49.000000000 +0100
-+++ firefox-51.0/gfx/2d/BorrowedContext.h	2017-01-20 09:30:07.619753937 +0100
++++ firefox-51.0/gfx/2d/BorrowedContext.h	2017-01-20 12:17:56.589954310 +0100
 @@ -195,8 +195,18 @@ public:
  
    CGContextRef cg;
@@ -22,7 +22,7 @@ diff -up firefox-51.0/gfx/2d/BorrowedContext.h.1319374 firefox-51.0/gfx/2d/Borro
  #endif
 diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp
 --- firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374	2017-01-16 17:16:50.000000000 +0100
-+++ firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp	2017-01-20 09:30:07.619753937 +0100
++++ firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp	2017-01-20 12:27:01.818193768 +0100
 @@ -12,7 +12,6 @@
  #include "CompositableHost.h"           // for CompositableHost
  #include "ContainerLayerComposite.h"    // for ContainerLayerComposite, etc
@@ -31,7 +31,17 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
  #include "FrameMetrics.h"               // for FrameMetrics
  #include "GeckoProfiler.h"              // for profiler_set_frame_number, etc
  #include "ImageLayerComposite.h"        // for ImageLayerComposite
-@@ -133,6 +132,10 @@ LayerManagerComposite::LayerManagerCompo
+@@ -72,6 +71,9 @@
+ #include "TextRenderer.h"               // for TextRenderer
+ #include "mozilla/layers/CompositorBridgeParent.h"
+ #include "TreeTraversal.h"              // for ForEachNode
++#ifdef USE_SKIA
++#include "PaintCounter.h"               // For PaintCounter
++#endif
+ 
+ class gfxContext;
+ 
+@@ -133,6 +135,10 @@ LayerManagerComposite::LayerManagerCompo
  {
    mTextRenderer = new TextRenderer(aCompositor);
    MOZ_ASSERT(aCompositor);
@@ -42,7 +52,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
  }
  
  LayerManagerComposite::~LayerManagerComposite()
-@@ -151,8 +154,11 @@ LayerManagerComposite::Destroy()
+@@ -151,8 +157,11 @@ LayerManagerComposite::Destroy()
      }
      mRoot = nullptr;
      mClonedLayerTreeProperties = nullptr;
@@ -55,7 +65,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
    }
  }
  
-@@ -564,7 +570,6 @@ LayerManagerComposite::InvalidateDebugOv
+@@ -564,7 +573,6 @@ LayerManagerComposite::InvalidateDebugOv
    bool drawFps = gfxPrefs::LayersDrawFPS();
    bool drawFrameCounter = gfxPrefs::DrawFrameCounter();
    bool drawFrameColorBars = gfxPrefs::CompositorDrawColorBars();
@@ -63,7 +73,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
  
    if (drawFps || drawFrameCounter) {
      aInvalidRegion.Or(aInvalidRegion, nsIntRect(0, 0, 256, 256));
-@@ -572,11 +577,16 @@ LayerManagerComposite::InvalidateDebugOv
+@@ -572,11 +580,16 @@ LayerManagerComposite::InvalidateDebugOv
    if (drawFrameColorBars) {
      aInvalidRegion.Or(aInvalidRegion, nsIntRect(0, 0, 10, aBounds.height));
    }
@@ -80,7 +90,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
  void
  LayerManagerComposite::DrawPaintTimes(Compositor* aCompositor)
  {
-@@ -587,6 +597,7 @@ LayerManagerComposite::DrawPaintTimes(Co
+@@ -587,6 +600,7 @@ LayerManagerComposite::DrawPaintTimes(Co
    TimeDuration compositeTime = TimeStamp::Now() - mRenderStartTime;
    mPaintCounter->Draw(aCompositor, mLastPaintTime, compositeTime);
  }
@@ -88,7 +98,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
  
  static uint16_t sFrameCount = 0;
  void
-@@ -595,7 +606,6 @@ LayerManagerComposite::RenderDebugOverla
+@@ -595,7 +609,6 @@ LayerManagerComposite::RenderDebugOverla
    bool drawFps = gfxPrefs::LayersDrawFPS();
    bool drawFrameCounter = gfxPrefs::DrawFrameCounter();
    bool drawFrameColorBars = gfxPrefs::CompositorDrawColorBars();
@@ -96,7 +106,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
  
    TimeStamp now = TimeStamp::Now();
  
-@@ -736,9 +746,12 @@ LayerManagerComposite::RenderDebugOverla
+@@ -736,9 +749,12 @@ LayerManagerComposite::RenderDebugOverla
      sFrameCount++;
    }
  
@@ -111,7 +121,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.cpp.1319374 fir
  RefPtr<CompositingRenderTarget>
 diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.h.1319374 firefox-51.0/gfx/layers/composite/LayerManagerComposite.h
 --- firefox-51.0/gfx/layers/composite/LayerManagerComposite.h.1319374	2017-01-16 17:16:50.000000000 +0100
-+++ firefox-51.0/gfx/layers/composite/LayerManagerComposite.h	2017-01-20 09:32:15.040916556 +0100
++++ firefox-51.0/gfx/layers/composite/LayerManagerComposite.h	2017-01-20 12:17:56.589954310 +0100
 @@ -331,11 +331,6 @@ private:
  #endif
  
@@ -144,7 +154,7 @@ diff -up firefox-51.0/gfx/layers/composite/LayerManagerComposite.h.1319374 firef
  /**
 diff -up firefox-51.0/gfx/layers/moz.build.1319374 firefox-51.0/gfx/layers/moz.build
 --- firefox-51.0/gfx/layers/moz.build.1319374	2017-01-16 17:16:50.000000000 +0100
-+++ firefox-51.0/gfx/layers/moz.build	2017-01-20 09:31:13.328322116 +0100
++++ firefox-51.0/gfx/layers/moz.build	2017-01-20 12:17:56.589954310 +0100
 @@ -340,7 +340,6 @@ UNIFIED_SOURCES += [
      'composite/ImageHost.cpp',
      'composite/ImageLayerComposite.cpp',
