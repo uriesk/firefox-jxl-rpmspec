@@ -397,6 +397,10 @@ echo "ac_add_options --without-system-icu" >> .mozconfig
 %if %{?build_with_rust}
 echo "ac_add_options --enable-rust" >> .mozconfig
 %endif
+
+%ifarch aarch64 ppc64 s390x
+echo "ac_add_options --disable-skia" >> .mozconfig
+%endif
 #---------------------------------------------------------------------
 
 %build
