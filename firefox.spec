@@ -5,7 +5,7 @@ ExcludeArch: armv7hl
 %define system_nss        1
 
 # Use system sqlite?
-%if 0%{?fedora} > 23
+%if 0%{?fedora} > 24
 %define system_sqlite     1
 %else
 %define system_sqlite     0
