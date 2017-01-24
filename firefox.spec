@@ -1,3 +1,6 @@
+# Temporary disabled due to js crash
+ExcludeArch: armv7hl
+
 # Use system nspr/nss?
 %define system_nss        1
 
@@ -339,28 +342,6 @@ echo "ac_add_options --enable-optimize" >> .mozconfig
 # s390(x) fails to start with jemalloc enabled
 %ifarch s390 s390x
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
-%endif
-
-%if 0
-%ifarch armv7hl
-echo "ac_add_options --with-arch=armv7-a" >> .mozconfig
-echo "ac_add_options --with-float-abi=hard" >> .mozconfig
-echo "ac_add_options --with-fpu=vfpv3-d16" >> .mozconfig
-echo "ac_add_options --disable-ion" >> .mozconfig
-%endif
-%ifarch armv7hnl
-echo "ac_add_options --with-arch=armv7-a" >> .mozconfig
-echo "ac_add_options --with-float-abi=hard" >> .mozconfig
-echo "ac_add_options --with-fpu=neon" >> .mozconfig
-echo "ac_add_options --disable-ion" >> .mozconfig
-echo "ac_add_options --disable-yarr-jit" >> .mozconfig
-%endif
-%ifarch armv5tel
-echo "ac_add_options --with-arch=armv5te" >> .mozconfig
-echo "ac_add_options --with-float-abi=soft" >> .mozconfig
-echo "ac_add_options --disable-ion" >> .mozconfig
-echo "ac_add_options --disable-yarr-jit" >> .mozconfig
-%endif
 %endif
 
 %ifnarch %{ix86} x86_64
