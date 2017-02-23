@@ -98,7 +98,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        51.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -145,6 +145,7 @@ Patch406:        mozilla-256180.patch
 # fix various rendering problems
 Patch407:        widget-rebase.patch
 Patch408:        mozilla-1319374.patch
+Patch409:        mozilla-1321579.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -295,6 +296,7 @@ cd %{tarballdir}
 %patch407 -p1 -b .widget-rebase
 # ppc64 build fix
 %patch408 -p1 -b .1319374
+%patch409 -p1 -b .1321579
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -788,6 +790,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Feb 23 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-6
+- Added fix for mozbz#1321579
+
 * Thu Feb 23 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-5
 - Disabled -O3 optimization on rawhide to make FF usable (rhbz#1422532)
 
