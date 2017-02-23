@@ -98,7 +98,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        51.0.1
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -343,7 +343,11 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 %ifarch ppc64le aarch64
 echo 'ac_add_options --enable-optimize="-g -O2"' >> .mozconfig
 %else
+%if 0%{?fedora} > 25
+echo 'ac_add_options --enable-optimize="-g -O2"' >> .mozconfig
+%else
 echo "ac_add_options --enable-optimize" >> .mozconfig
+%endif
 %endif
 %endif
 
@@ -784,6 +788,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Feb 23 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-5
+- Disabled -O3 optimization on rawhide to make FF usable (rhbz#1422532)
+
 * Wed Feb 15 2017 Jan Horak <jhorak@redhat.com> - 51.0.1-4
 - Fixed bug 1421334 - translations for "New window"
 
