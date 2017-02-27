@@ -98,7 +98,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        51.0.1
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -136,6 +136,7 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
+Patch227:        rhbz-1414535.patch
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
@@ -287,6 +288,7 @@ cd %{tarballdir}
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
+%patch227 -p1 -b .rh1414535
 
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
@@ -790,6 +792,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 27 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-7
+- Added fix for rhbz#1414535
+
 * Thu Feb 23 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-6
 - Added fix for mozbz#1321579
 
