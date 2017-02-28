@@ -1,5 +1,5 @@
 # Temporary disabled due to js crash
-#ExcludeArch: armv7hl
+ExcludeArch: armv7hl
 
 # Use system nspr/nss?
 %define system_nss        1
@@ -97,7 +97,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        51.0.1
-Release:        8%{?pre_tag}%{?dist}
+Release:        9%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -791,6 +791,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 27 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-9
+- Disabled ARMv7 due to build failures (rhbz#1426850)
+
 * Mon Feb 27 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-8
 - Enabled ARMv7 (rhbz#1426850)
 
