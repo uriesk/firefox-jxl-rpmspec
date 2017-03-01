@@ -347,7 +347,12 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 echo 'ac_add_options --enable-optimize="-g -O2"' >> .mozconfig
 %else
 %if 0%{?fedora} > 25
+%ifarch s390 s390x
+# crashes in xpcshell with "-g -O2", potential gcc issue
+echo "ac_add_options --enable-optimize" >> .mozconfig
+%else
 echo 'ac_add_options --enable-optimize="-g -O2"' >> .mozconfig
+%endif
 %else
 echo "ac_add_options --enable-optimize" >> .mozconfig
 %endif
