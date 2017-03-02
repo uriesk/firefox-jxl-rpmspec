@@ -342,6 +342,7 @@ echo "ac_add_options --enable-debug" >> .mozconfig
 echo "ac_add_options --disable-optimize" >> .mozconfig
 echo "ac_add_options --enable-dtrace" >> .mozconfig
 %else
+%define optimize_flags "none"
 # Fedora 26 (gcc7) needs to disable default build flags (mozbz#1342344)
 %if 0%{?fedora} > 25
 %ifnarch s390 s390x
@@ -355,7 +356,7 @@ echo "ac_add_options --enable-dtrace" >> .mozconfig
 %ifarch ppc64le aarch64
 %define optimize_flags "-g -O2"
 %endif
-%if %{?optimize_flags}
+%if %{optimize_flags} != "none"
 echo 'ac_add_options --enable-optimize=%{?optimize_flags}' >> .mozconfig
 %else
 echo 'ac_add_options --enable-optimize' >> .mozconfig
