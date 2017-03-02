@@ -97,7 +97,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        51.0.1
-Release:        10%{?pre_tag}%{?dist}
+Release:        11%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -135,7 +135,13 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-Patch227:        rhbz-1414535.patch
+
+%if 0%{?fedora} > 25
+# Fix depends on p11-kit-trust 0.23.4 and enhanced ca-certificates.rpm
+Patch227:        rhbz-1400293-fix-mozilla-1324096.patch
+%else
+Patch227:        rhbz-1400293-workaround.patch
+%endif
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
@@ -193,6 +199,14 @@ Requires:       mozilla-filesystem
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
+%endif
+
+%if 0%{?fedora} > 25
+# For early testing of rhbz#1400293 mozbz#1324096 on F26 and Rawhide,
+# temporarily require the specific NSS build with the backports.
+# Can be removed after firefox is changed to require NSS 3.30.
+BuildRequires:  nss-devel >= 3.29.1-2.1
+Requires:       nss >= 3.29.1-2.1
 %endif
 
 BuildRequires:  desktop-file-utils
@@ -287,7 +301,7 @@ cd %{tarballdir}
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%patch227 -p1 -b .rh1414535
+%patch227 -p1 -b .rh1400293
 
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
@@ -801,6 +815,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 02 2017 Kai Engert <kaie@redhat.com> - 51.0.1-11
+- Enable upstream fix for rhbz#1400293 mozbz#1324096 on F26 and Rawhide.
+  Keep the old workaround on F24/F25, required base packages aren't
+  available yet.
+
 * Thu Mar 2 2017 Martin Stransky <stransky@redhat.com> - 51.0.1-10
 - Test another ARMv7 build setup (rhbz#1426850)
 
