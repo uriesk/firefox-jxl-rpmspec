@@ -20,7 +20,7 @@
 %endif
 
 # Use system libicu?
-%if 0%{?fedora} > 23
+%if 0%{?fedora} > 27
 %define system_libicu      1
 %else
 %define system_libicu      0
