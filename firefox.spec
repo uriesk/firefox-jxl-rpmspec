@@ -1,6 +1,3 @@
-# Temporary disabled due to js crash
-#ExcludeArch: armv7hl
-
 # Use system nspr/nss?
 %define system_nss        1
 
@@ -96,14 +93,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        51.0.1
-Release:        11%{?pre_tag}%{?dist}
+Version:        52.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20170126.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20170303.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -121,7 +118,6 @@ Patch18:        xulrunner-24.0-jemalloc-ppc.patch
 # workaround linking issue on s390 (JSContext::updateMallocCounter(size_t) not found)
 Patch19:        xulrunner-24.0-s390-inlines.patch
 Patch20:        firefox-build-prbool.patch
-Patch21:        firefox-ppc64le.patch
 Patch24:        firefox-debug.patch
 Patch25:        rhbz-1219542-s390-build.patch
 
@@ -150,8 +146,6 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
-Patch408:        mozilla-1319374.patch
-Patch409:        mozilla-1321579.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -280,7 +274,6 @@ cd %{tarballdir}
 %patch18 -p1 -b .jemalloc-ppc
 %patch19 -p2 -b .s390-inlines
 %patch20 -p1 -b .prbool
-%patch21 -p2 -b .ppc64le
 %patch24 -p1 -b .debug
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
@@ -309,9 +302,6 @@ cd %{tarballdir}
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
-# ppc64 build fix
-%patch408 -p1 -b .1319374
-%patch409 -p1 -b .1321579
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -815,6 +805,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 3 2017 Martin Stransky <stransky@redhat.com> - 52.0-1
+- Update to 52.0 (B2)
+
 * Thu Mar 02 2017 Kai Engert <kaie@redhat.com> - 51.0.1-11
 - Enable upstream fix for rhbz#1400293 mozbz#1324096 on F26 and Rawhide.
   Keep the old workaround on F24/F25, required base packages aren't
