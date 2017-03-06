@@ -747,9 +747,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %doc %{mozappdir}/LICENSE
 %{mozappdir}/browser/chrome
 %{mozappdir}/browser/chrome.manifest
-%dir %{mozappdir}/browser/components
-%{mozappdir}/browser/components/*.so
-%{mozappdir}/browser/components/components.manifest
 %{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
 %{mozappdir}/browser/features/e10srollout@mozilla.org.xpi
 %{mozappdir}/browser/features/firefox@getpocket.com.xpi
@@ -764,6 +761,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %endif
 %{mozappdir}/browser/omni.ja
 %{mozappdir}/browser/icons
+%{mozappdir}/chrome.manifest
 %{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
 %exclude %{mozappdir}/removed-files
@@ -777,6 +775,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %if %{enable_mozilla_crashreporter}
 %{mozappdir}/crashreporter
 %{mozappdir}/crashreporter.ini
+%{mozappdir}/minidump-analyzer
 %{mozappdir}/Throbber-small.gif
 %{mozappdir}/browser/crashreporter-override.ini
 %endif
@@ -791,7 +790,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/gmp-clearkey
 %{mozappdir}/fonts/EmojiOneMozilla.ttf
 %if !%{?system_libicu}
-%{mozappdir}/icudt56l.dat
+%{mozappdir}/icudt*.dat
 %endif
 %exclude %{_includedir}
 %exclude %{_libdir}/firefox-devel-%{version}
