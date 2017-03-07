@@ -26,6 +26,13 @@
 %define system_libicu      0
 %endif
 
+# Big endian platforms
+%ifarch ppc64
+# Javascript Intl API is not supported on big endian platforms right now:
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1322212
+%define big_endian              1
+%endif
+
 # Hardened build?
 %if 0%{?fedora} > 20
 %define hardened_build    1
@@ -120,6 +127,7 @@ Patch19:        xulrunner-24.0-s390-inlines.patch
 Patch20:        firefox-build-prbool.patch
 Patch24:        firefox-debug.patch
 Patch25:        rhbz-1219542-s390-build.patch
+Patch26:        build-icu-big-endian.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -306,6 +314,11 @@ cd %{tarballdir}
 # Debian extension patch
 %patch500 -p1 -b .440908
 
+# Patch for big endian platforms only
+%if 0%{?big_endian}
+%patch26 -p1 -b .icu
+%endif
+
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
 %if %{official_branding}
@@ -425,6 +438,13 @@ esac
 %endif
 
 cd %{tarballdir}
+
+echo "Generate big endian version of config/external/icu/data/icud58l.dat"
+%if 0%{?big_endian}
+  ./mach python intl/icu_sources_data.py .
+  ls -l config/external/icu/data
+  rm -f config/external/icu/data/icudt*l.dat
+%endif
 
 # Update the various config.guess to upstream release for aarch64 support
 find ./ -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
@@ -804,6 +824,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar  7 2017 Jan Horak <jhorak@redhat.com> - 52.0-2
+- Added fix for libicu on big endian platforms
+
 * Fri Mar 3 2017 Martin Stransky <stransky@redhat.com> - 52.0-1
 - Update to 52.0 (B2)
 
