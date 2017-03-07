@@ -27,7 +27,7 @@
 %endif
 
 # Big endian platforms
-%ifarch ppc64
+%ifarch ppc64 s390x
 # Javascript Intl API is not supported on big endian platforms right now:
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1322212
 %define big_endian              1
@@ -824,6 +824,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar  7 2017 Jan Horak <jhorak@redhat.com> - 52.0-3
+- Added s390x to big endian platforms
+
 * Tue Mar  7 2017 Jan Horak <jhorak@redhat.com> - 52.0-2
 - Added fix for libicu on big endian platforms
 
