@@ -101,7 +101,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        52.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
