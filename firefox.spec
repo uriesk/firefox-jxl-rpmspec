@@ -96,6 +96,7 @@
 %else
 %define enable_mozilla_crashreporter       0
 %endif
+%define enable_mozilla_crashreporter       0
 %endif
 
 Summary:        Mozilla Firefox Web browser
