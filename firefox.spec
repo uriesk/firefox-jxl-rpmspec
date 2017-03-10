@@ -90,13 +90,10 @@
 %define official_branding       1
 %define build_langpacks         1
 
+%define enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
 %define enable_mozilla_crashreporter       1
-%else
-%define enable_mozilla_crashreporter       0
-%endif
-%define enable_mozilla_crashreporter       0
 %endif
 
 Summary:        Mozilla Firefox Web browser
