@@ -101,7 +101,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        52.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -824,6 +824,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 10 2017 Martin Stransky <stransky@redhat.com> - 52.0-4
+- Fixed e10s enablement (rhbz#1398717)
+
 * Tue Mar  7 2017 Jan Horak <jhorak@redhat.com> - 52.0-3
 - Added s390x to big endian platforms
 
