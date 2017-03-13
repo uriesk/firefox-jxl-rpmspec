@@ -142,12 +142,9 @@ Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 
-%if 0%{?fedora} > 25
 # Fix depends on p11-kit-trust 0.23.4 and enhanced ca-certificates.rpm
 Patch227:        rhbz-1400293-fix-mozilla-1324096.patch
-%else
-Patch227:        rhbz-1400293-workaround.patch
-%endif
+Patch228:        rhbz-1400293-workaround.patch
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
@@ -306,7 +303,13 @@ cd %{tarballdir}
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
+
+%if 0%{?fedora} > 25
+ # Fix depends on p11-kit-trust 0.23.4 and enhanced ca-certificates.rpm
 %patch227 -p1 -b .rh1400293
+%else
+%patch228 -p1 -b .rh1400293
+%endif
 
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
