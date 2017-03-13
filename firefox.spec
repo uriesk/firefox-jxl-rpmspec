@@ -95,6 +95,7 @@
 %ifarch %{ix86} x86_64
 %define enable_mozilla_crashreporter       1
 %endif
+%endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
