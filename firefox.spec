@@ -1,3 +1,6 @@
+# Use ALSA backend?
+%define alsa_backend      0
+
 # Use system nspr/nss?
 %define system_nss        1
 
@@ -100,7 +103,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        52.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -182,7 +185,9 @@ BuildRequires:  pkgconfig(xt)
 BuildRequires:  pkgconfig(xrender)
 BuildRequires:  pkgconfig(hunspell)
 BuildRequires:  pkgconfig(libstartup-notification-1.0)
+%if %{?alsa_backend}
 BuildRequires:  pkgconfig(alsa)
+%endif
 BuildRequires:  pkgconfig(libnotify) >= %{libnotify_version}
 BuildRequires:  pkgconfig(dri)
 BuildRequires:  pkgconfig(libcurl)
@@ -351,6 +356,10 @@ echo "ac_add_options --enable-system-ffi" >> .mozconfig
 
 %ifarch %{arm}
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
+%endif
+
+%if %{?alsa_backend}
+echo "ac_add_options --enable-alsa" >> .mozconfig
 %endif
 
 %if %{?debug_build}
@@ -823,6 +832,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 13 2017 Martin Stransky <stransky@redhat.com> - 52.0-5
+- Enable ALSA backend behind pref (rhbz#1431371)
+
 * Fri Mar 10 2017 Martin Stransky <stransky@redhat.com> - 52.0-4
 - Fixed e10s enablement (rhbz#1398717)
 
