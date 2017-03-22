@@ -103,7 +103,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        52.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -153,6 +153,8 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
+Patch408:        mozilla-1348168.patch
+Patch409:        mozilla-1158076.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -317,6 +319,8 @@ cd %{tarballdir}
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
+%patch408 -p1 -b .1348168
+%patch409 -p1 -b .1158076
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -835,6 +839,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 22 2017 Martin Stransky <stransky@redhat.com> - 52.0-6
+- Added fix for CVE-2017-5428
+- Added fix for mozbz#1158076
+
 * Mon Mar 13 2017 Martin Stransky <stransky@redhat.com> - 52.0-5
 - Enable ALSA backend behind pref (rhbz#1431371)
 
