@@ -103,7 +103,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        52.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -320,7 +320,8 @@ cd %{tarballdir}
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
 %patch408 -p1 -b .1348168
-%patch409 -p1 -b .1158076
+# Disabled due to rhbz#1435964
+#%patch409 -p1 -b .1158076
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -839,6 +840,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 27 2017 Martin Stransky <stransky@redhat.com> - 52.0-7
+- Reverted mozbz#1158076 due to rhbz#1435964
+
 * Wed Mar 22 2017 Martin Stransky <stransky@redhat.com> - 52.0-6
 - Added fix for CVE-2017-5428
 - Added fix for mozbz#1158076
