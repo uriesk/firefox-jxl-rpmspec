@@ -102,14 +102,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        52.0
-Release:        7%{?pre_tag}%{?dist}
+Version:        52.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20170303.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20170329.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -153,7 +153,6 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
-Patch408:        mozilla-1348168.patch
 Patch409:        mozilla-1158076.patch
 
 # Debian patches
@@ -319,7 +318,6 @@ cd %{tarballdir}
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
-%patch408 -p1 -b .1348168
 # Disabled due to rhbz#1435964
 #%patch409 -p1 -b .1158076
 
@@ -840,6 +838,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 29 2017 Jan Horak <jhorak@redhat.com> - 52.0.2-1
+- Update to 52.0.2
+
 * Mon Mar 27 2017 Martin Stransky <stransky@redhat.com> - 52.0-7
 - Reverted mozbz#1158076 due to rhbz#1435964
 
