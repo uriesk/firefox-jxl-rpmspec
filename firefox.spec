@@ -103,7 +103,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        52.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -153,7 +153,9 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
-Patch409:        mozilla-1158076.patch
+Patch410:        mozilla-1348576.patch
+Patch411:        mozilla-1158076-1.patch
+Patch412:        mozilla-1158076-2.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -319,7 +321,9 @@ cd %{tarballdir}
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
 # Disabled due to rhbz#1435964
-#%patch409 -p1 -b .1158076
+%patch410 -p1 -b .1348576
+%patch411 -p1 -b .1158076-1
+%patch412 -p1 -b .1158076-2
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -839,6 +843,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 31 2017 Martin Stransky <stransky@redhat.com> - 52.0.2-2
+- Added patch for mozbz#1348576 - enable e10s by default
+- Added patch for mozbz#1158076 - enable dark theme by pref
+
 * Wed Mar 29 2017 Jan Horak <jhorak@redhat.com> - 52.0.2-1
 - Update to 52.0.2
 
