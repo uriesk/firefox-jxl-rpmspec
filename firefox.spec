@@ -789,7 +789,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/features/e10srollout@mozilla.org.xpi
 %{mozappdir}/browser/features/firefox@getpocket.com.xpi
 %{mozappdir}/browser/features/webcompat@mozilla.org.xpi
-%{mozappdir}/browser/features/deployment-checker@mozilla.org.xp
+%{mozappdir}/browser/features/deployment-checker@mozilla.org.xpi
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
