@@ -102,14 +102,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        52.0.2
-Release:        2%{?pre_tag}%{?dist}
+Version:        53.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20170329.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20170418.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -127,7 +127,6 @@ Patch18:        xulrunner-24.0-jemalloc-ppc.patch
 # workaround linking issue on s390 (JSContext::updateMallocCounter(size_t) not found)
 Patch19:        xulrunner-24.0-s390-inlines.patch
 Patch20:        firefox-build-prbool.patch
-Patch24:        firefox-debug.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 
@@ -153,9 +152,6 @@ Patch406:        mozilla-256180.patch
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 Patch407:        widget-rebase.patch
-Patch410:        mozilla-1348576.patch
-Patch411:        mozilla-1158076-1.patch
-Patch412:        mozilla-1158076-2.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -286,7 +282,6 @@ cd %{tarballdir}
 %patch18 -p1 -b .jemalloc-ppc
 %patch19 -p2 -b .s390-inlines
 %patch20 -p1 -b .prbool
-%patch24 -p1 -b .debug
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
@@ -320,10 +315,6 @@ cd %{tarballdir}
 # Rebase Gtk3 widget code to latest trunk to
 # fix various rendering problems
 %patch407 -p1 -b .widget-rebase
-# Disabled due to rhbz#1435964
-%patch410 -p1 -b .1348576
-%patch411 -p1 -b .1158076-1
-%patch412 -p1 -b .1158076-2
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -843,6 +834,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 18 2017 Martin Stransky <stransky@redhat.com> - 53.0-1
+- Updated to 53.0 (B6)
+
 * Fri Mar 31 2017 Martin Stransky <stransky@redhat.com> - 52.0.2-2
 - Added patch for mozbz#1348576 - enable e10s by default
 - Added patch for mozbz#1158076 - enable dark theme by pref
