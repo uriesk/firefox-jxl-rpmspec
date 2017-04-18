@@ -4,6 +4,13 @@
 # Use system nspr/nss?
 %define system_nss        1
 
+# Use system hunspell?
+%if 0%{?fedora} > 25
+%define system_hunspell   1
+%else
+%define system_hunspell   0
+%endif
+
 # Use system sqlite?
 %if 0%{?fedora} > 25
 %define system_sqlite     1
@@ -103,7 +110,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        53.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -180,7 +187,9 @@ BuildRequires:  pkgconfig(pango)
 BuildRequires:  pkgconfig(freetype2) >= %{freetype_version}
 BuildRequires:  pkgconfig(xt)
 BuildRequires:  pkgconfig(xrender)
+%if %{?system_hunspell}
 BuildRequires:  pkgconfig(hunspell)
+%endif
 BuildRequires:  pkgconfig(libstartup-notification-1.0)
 %if %{?alsa_backend}
 BuildRequires:  pkgconfig(alsa)
@@ -362,6 +371,12 @@ echo "ac_add_options --disable-elf-hack" >> .mozconfig
 
 %if %{?alsa_backend}
 echo "ac_add_options --enable-alsa" >> .mozconfig
+%endif
+
+%if %{?system_hunspell}
+echo "ac_add_options --enable-system-hunspell" >> .mozconfig
+%else
+echo "ac_add_options --disable-system-hunspell" >> .mozconfig
 %endif
 
 %if %{?debug_build}
@@ -840,6 +855,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Apr 18 2017 Martin Stransky <stransky@redhat.com> - 53.0-2
+- Disable system hunspell library when necessary
+
 * Tue Apr 18 2017 Martin Stransky <stransky@redhat.com> - 53.0-1
 - Updated to 53.0 (B6)
 
