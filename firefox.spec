@@ -75,7 +75,7 @@
 %if %{?system_nss}
 %global nspr_version 4.10.10
 %global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
-%global nss_version 3.29.5
+%global nss_version 3.29.3
 %global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %endif
 
