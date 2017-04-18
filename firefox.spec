@@ -800,7 +800,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/features/e10srollout@mozilla.org.xpi
 %{mozappdir}/browser/features/firefox@getpocket.com.xpi
 %{mozappdir}/browser/features/webcompat@mozilla.org.xpi
-%{mozappdir}/browser/features/deployment-checker@mozilla.org.xpi
 %{mozappdir}/distribution/distribution.ini
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
@@ -843,9 +842,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %if !%{?system_libicu}
 %{mozappdir}/icudt*.dat
 %endif
-%exclude %{_includedir}
-%exclude %{_libdir}/firefox-devel-%{version}
-%exclude %{_datadir}/idl
 %if !%{?system_nss}
 %{mozappdir}/libfreeblpriv3.chk
 %{mozappdir}/libnssdbm3.chk
