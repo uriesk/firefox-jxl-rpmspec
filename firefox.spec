@@ -150,9 +150,9 @@ Patch229:        firefox-nss-version.patch
 Patch304:        mozilla-1253216.patch
 Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
-# Rebase Gtk3 widget code to latest trunk to
-# fix various rendering problems
-Patch407:        widget-rebase.patch
+Patch407:        mozilla-1348576.patch
+Patch408:        mozilla-1158076-1.patch
+Patch409:        mozilla-1158076-2.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -313,9 +313,9 @@ cd %{tarballdir}
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
-# Rebase Gtk3 widget code to latest trunk to
-# fix various rendering problems
-%patch407 -p1 -b .widget-rebase
+%patch407 -p1 -b .1348576
+%patch408 -p1 -b .1158076-1
+%patch409 -p1 -b .1158076-2
 
 # Debian extension patch
 %patch500 -p1 -b .440908
