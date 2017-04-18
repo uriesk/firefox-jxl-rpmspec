@@ -75,7 +75,7 @@
 %if %{?system_nss}
 %global nspr_version 4.10.10
 %global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
-%global nss_version 3.29.5
+%global nss_version 3.29.3
 %global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %endif
 
@@ -118,6 +118,7 @@ Source21:       firefox.sh.in
 Source23:       firefox.1
 Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
+Source26:       distribution.ini
 
 # Build patches
 Patch0:         firefox-install-dir.patch
@@ -712,6 +713,10 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" $RPM_BUILD_ROOT/%{
 # Default
 %{__cp} %{SOURCE12} ${RPM_BUILD_ROOT}%{mozappdir}/browser/defaults/preferences
 
+# Add distribution.ini
+%{__mkdir_p} ${RPM_BUILD_ROOT}%{mozappdir}/distribution
+%{__cp} %{SOURCE26} ${RPM_BUILD_ROOT}%{mozappdir}/distribution
+
 # Remove copied libraries to speed up build
 rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libmozjs.so
 rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libmozalloc.so
@@ -781,6 +786,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/features/firefox@getpocket.com.xpi
 %{mozappdir}/browser/features/webcompat@mozilla.org.xpi
 %{mozappdir}/browser/features/deployment-checker@mozilla.org.xpi
+%{mozappdir}/distribution/distribution.ini
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
@@ -836,6 +842,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Apr 18 2017 Martin Stransky <stransky@redhat.com> - 53.0-1
 - Updated to 53.0 (B6)
+
+* Tue Apr 18 2017 Jan Horak <jhorak@redhat.com> - 52.0.2-3
+- Do not use color management until it is fixed for some broken profiles,
+  ie. don't set gfx.color_management.enablev4 to true (rhbz#1403970).
+- Added distribution.ini file to fix mozbz#1354489
 
 * Fri Mar 31 2017 Martin Stransky <stransky@redhat.com> - 52.0.2-2
 - Added patch for mozbz#1348576 - enable e10s by default
