@@ -837,6 +837,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Tue Apr 18 2017 Martin Stransky <stransky@redhat.com> - 53.0-1
 - Updated to 53.0 (B6)
 
+* Tue Apr 18 2017 Jan Horak <jhorak@redhat.com> - 52.0.2-3
+- Do not use color management until it is fixed for some broken profiles,
+  ie. don't set gfx.color_management.enablev4 to true (rhbz#1403970).
+
 * Fri Mar 31 2017 Martin Stransky <stransky@redhat.com> - 52.0.2-2
 - Added patch for mozbz#1348576 - enable e10s by default
 - Added patch for mozbz#1158076 - enable dark theme by pref
