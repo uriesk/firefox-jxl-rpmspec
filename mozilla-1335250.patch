@@ -1,16 +1,7 @@
-# HG changeset patch
-# User Andrea Marchesini <amarchesini@mozilla.com>
-# Parent  b8b7103963d9f243b0a30c8bc0d9a0b37ed8a955
-
-diff --git a/dom/media/webrtc/MediaEngine.h b/dom/media/webrtc/MediaEngine.h
---- a/dom/media/webrtc/MediaEngine.h
-+++ b/dom/media/webrtc/MediaEngine.h
-@@ -221,27 +221,27 @@ public:
-   class AllocationHandle
-   {
-   public:
-     NS_INLINE_DECL_THREADSAFE_REFCOUNTING(AllocationHandle);
-   protected:
+diff -up firefox-53.0/dom/media/webrtc/MediaEngine.h.1335250 firefox-53.0/dom/media/webrtc/MediaEngine.h
+--- firefox-53.0/dom/media/webrtc/MediaEngine.h.1335250	2017-04-11 06:15:22.000000000 +0200
++++ firefox-53.0/dom/media/webrtc/MediaEngine.h	2017-04-19 20:35:55.264741939 +0200
+@@ -226,7 +226,7 @@ public:
      ~AllocationHandle() {}
    public:
      AllocationHandle(const dom::MediaTrackConstraints& aConstraints,
@@ -19,9 +10,7 @@ diff --git a/dom/media/webrtc/MediaEngine.h b/dom/media/webrtc/MediaEngine.h
                       const MediaEnginePrefs& aPrefs,
                       const nsString& aDeviceId)
  
-     : mConstraints(aConstraints),
-       mPrincipalInfo(aPrincipalInfo),
-       mPrefs(aPrefs),
+@@ -236,7 +236,7 @@ public:
        mDeviceId(aDeviceId) {}
    public:
      NormalizedConstraints mConstraints;
@@ -30,8 +19,12 @@ diff --git a/dom/media/webrtc/MediaEngine.h b/dom/media/webrtc/MediaEngine.h
      MediaEnginePrefs mPrefs;
      nsString mDeviceId;
    };
- 
-   /* Release the device back to the system. */
-   virtual nsresult Deallocate(AllocationHandle* aHandle)
+@@ -327,7 +327,7 @@ public:
+   virtual nsresult Allocate(const dom::MediaTrackConstraints &aConstraints,
+                             const MediaEnginePrefs &aPrefs,
+                             const nsString& aDeviceId,
+-                            const ipc::PrincipalInfo& aPrincipalInfo,
++                            const mozilla::ipc::PrincipalInfo& aPrincipalInfo,
+                             AllocationHandle** aOutHandle,
+                             const char** aOutBadConstraint)
    {
-     MOZ_ASSERT(aHandle);
