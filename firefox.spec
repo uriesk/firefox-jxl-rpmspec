@@ -137,6 +137,7 @@ Patch19:        xulrunner-24.0-s390-inlines.patch
 Patch20:        firefox-build-prbool.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
+Patch27:        mozilla-1335250.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -295,6 +296,7 @@ cd %{tarballdir}
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
+%patch27 -p1 -b .1335250
 
 %patch3  -p1 -b .arm
 

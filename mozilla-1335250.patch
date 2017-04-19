@@ -1,0 +1,37 @@
+# HG changeset patch
+# User Andrea Marchesini <amarchesini@mozilla.com>
+# Parent  b8b7103963d9f243b0a30c8bc0d9a0b37ed8a955
+
+diff --git a/dom/media/webrtc/MediaEngine.h b/dom/media/webrtc/MediaEngine.h
+--- a/dom/media/webrtc/MediaEngine.h
++++ b/dom/media/webrtc/MediaEngine.h
+@@ -221,27 +221,27 @@ public:
+   class AllocationHandle
+   {
+   public:
+     NS_INLINE_DECL_THREADSAFE_REFCOUNTING(AllocationHandle);
+   protected:
+     ~AllocationHandle() {}
+   public:
+     AllocationHandle(const dom::MediaTrackConstraints& aConstraints,
+-                     const ipc::PrincipalInfo& aPrincipalInfo,
++                     const mozilla::ipc::PrincipalInfo& aPrincipalInfo,
+                      const MediaEnginePrefs& aPrefs,
+                      const nsString& aDeviceId)
+ 
+     : mConstraints(aConstraints),
+       mPrincipalInfo(aPrincipalInfo),
+       mPrefs(aPrefs),
+       mDeviceId(aDeviceId) {}
+   public:
+     NormalizedConstraints mConstraints;
+-    ipc::PrincipalInfo mPrincipalInfo;
++    mozilla::ipc::PrincipalInfo mPrincipalInfo;
+     MediaEnginePrefs mPrefs;
+     nsString mDeviceId;
+   };
+ 
+   /* Release the device back to the system. */
+   virtual nsresult Deallocate(AllocationHandle* aHandle)
+   {
+     MOZ_ASSERT(aHandle);
