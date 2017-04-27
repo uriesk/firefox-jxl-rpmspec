@@ -321,9 +321,9 @@ cd %{tarballdir}
 %patch224 -p1 -b .1170092
 %patch225 -p1 -b .1005640-accept-lang
 #ARM run-time patch
-%ifarch aarch64
+#TEMP %ifarch aarch64
 %patch226 -p1 -b .1354671
-%endif
+#%endif
 %patch227 -p1 -b .rh1400293
 %patch229 -p1 -b .nss-version
 
