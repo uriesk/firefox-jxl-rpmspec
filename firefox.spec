@@ -110,7 +110,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        53.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -149,9 +149,7 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-# Fix depends on p11-kit-trust 0.23.4 and enhanced ca-certificates.rpm
 Patch227:        rhbz-1400293-fix-mozilla-1324096.patch
-Patch228:        rhbz-1400293-workaround.patch
 Patch229:        firefox-nss-version.patch
 
 # Upstream patches
@@ -220,6 +218,19 @@ Requires:       nss >= %{nss_build_version}
 # Can be removed after firefox is changed to require NSS 3.30.
 BuildRequires:  nss-devel >= 3.29.1-2.1
 Requires:       nss >= 3.29.1-2.1
+%endif
+
+%if 0%{?fedora} < 26
+# Using Conflicts for p11-kit, not Requires, because on multi-arch
+# systems p11-kit isn't yet available for secondary arches like
+# p11-kit.i686 (fallback to libnssckbi.so from NSS).
+# This build contains backports from p11-kit 0.23.4
+Conflicts: p11-kit < 0.23.2-3
+# Requires build with CKA_NSS_MOZILLA_CA_POLICY attribute
+Requires: ca-certificates >= 2017.2.11-1.1
+# Requires NSS build with backports from NSS 3.30
+BuildRequires:  nss-devel >= 3.29.3-1.1
+Requires:       nss >= 3.29.3-1.1
 %endif
 
 BuildRequires:  desktop-file-utils
@@ -313,12 +324,7 @@ cd %{tarballdir}
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%if 0%{?fedora} > 25
- # Fix depends on p11-kit-trust 0.23.4 and enhanced ca-certificates.rpm
 %patch227 -p1 -b .rh1400293
-%else
-%patch228 -p1 -b .rh1400293
-%endif
 %patch229 -p1 -b .nss-version
 
 %patch304 -p1 -b .1253216
@@ -855,6 +861,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 27 2017 Jan Horak <jhorak@redhat.com> - 53.0-4
+- Added patch from rhbz#1400293
+
 * Thu Apr 20 2017 Martin Stransky <stransky@redhat.com> - 53.0-3
 - Enabled second arches
 
