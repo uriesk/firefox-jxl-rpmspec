@@ -140,6 +140,7 @@ Patch20:        firefox-build-prbool.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
+Patch28:        build-1360521-missing-cheddar.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -310,6 +311,7 @@ cd %{tarballdir}
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 %patch27 -p1 -b .1335250
+%patch28 -p2 -b .1360521-missing-cheddar
 
 %patch3  -p1 -b .arm
 
