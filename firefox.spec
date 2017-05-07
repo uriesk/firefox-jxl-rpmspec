@@ -459,9 +459,6 @@ echo "ac_add_options --enable-rust" >> .mozconfig
 echo "ac_add_options --disable-rust" >> .mozconfig
 %endif
 
-%ifarch aarch64 ppc64 s390x
-echo "ac_add_options --disable-skia" >> .mozconfig
-%endif
 #---------------------------------------------------------------------
 
 %build
@@ -867,6 +864,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Fri May  5 2017 Jan Horak <jhorak@redhat.com> - 53.0.2-1
 - Update to 53.0.2
+- Cannot use disable-skia for any architecture now
 
 * Thu Apr 27 2017 Jan Horak <jhorak@redhat.com> - 53.0-4
 - Added patch from rhbz#1400293
