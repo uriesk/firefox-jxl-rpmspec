@@ -1,3 +1,5 @@
+ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
+
 # Use ALSA backend?
 %define alsa_backend      0
 
@@ -115,7 +117,6 @@ Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
-ExcludeArch:    armv7hl ppc64le aarch64 ppc64
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
 Source1:        firefox-langpacks-%{version}%{?pre_version}-20170505.tar.xz
