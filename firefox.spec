@@ -163,6 +163,8 @@ Patch406:        mozilla-256180.patch
 Patch407:        mozilla-1348576.patch
 Patch408:        mozilla-1158076-1.patch
 Patch409:        mozilla-1158076-2.patch
+Patch410:        mozilla-1321521.patch
+Patch411:        mozilla-1321521-2.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -338,6 +340,8 @@ cd %{tarballdir}
 %patch407 -p1 -b .1348576
 %patch408 -p1 -b .1158076-1
 %patch409 -p1 -b .1158076-2
+%patch410 -p1 -b .1321521
+%patch411 -p1 -b .1321521-2
 
 # Debian extension patch
 %patch500 -p1 -b .440908
