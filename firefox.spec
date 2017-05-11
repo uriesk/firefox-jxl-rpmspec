@@ -1,4 +1,4 @@
-ExcludeArch: s390 s390x
+ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 
 # Use ALSA backend?
 %define alsa_backend      0
