@@ -1,4 +1,4 @@
-ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
+ExcludeArch: s390 s390x
 
 # Use ALSA backend?
 %define alsa_backend      0
@@ -25,20 +25,20 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 %define system_cairo      0
 
 # Use system libvpx?
-%define system_libvpx      1
+%define system_libvpx     1
 
 # Use system libicu?
 %if 0%{?fedora} > 27
-%define system_libicu      1
+%define system_libicu     1
 %else
-%define system_libicu      0
+%define system_libicu     0
 %endif
 
 # Big endian platforms
 %ifarch ppc64 s390x
 # Javascript Intl API is not supported on big endian platforms right now:
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1322212
-%define big_endian              1
+%define big_endian        1
 %endif
 
 # Hardened build?
@@ -103,7 +103,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        53.0.2
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
