@@ -54,7 +54,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 
 %define build_with_rust   0
 
-%ifarch x86_64 armv7hl
+%ifarch %{ix86} x86_64 armv7hl
 %define build_with_rust   1
 %endif
 
