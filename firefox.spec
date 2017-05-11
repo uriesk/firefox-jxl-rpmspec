@@ -25,11 +25,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 %define system_cairo      0
 
 # Use system libvpx?
-%if 0%{?fedora} > 23
 %define system_libvpx      1
-%else
-%define system_libvpx      0
-%endif
 
 # Use system libicu?
 %if 0%{?fedora} > 27
@@ -46,11 +42,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 %endif
 
 # Hardened build?
-%if 0%{?fedora} > 20
 %define hardened_build    1
-%else
-%define hardened_build    0
-%endif
 
 %define system_jpeg       1
 
@@ -62,10 +54,8 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 
 %define build_with_rust   0
 
-%if 0%{?fedora} > 23
-%ifarch x86_64
+%ifarch x86_64 armv7hl
 %define build_with_rust   1
-%endif
 %endif
 
 
@@ -113,7 +103,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        53.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -867,6 +857,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 11 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-3
+- Enabled Rust on Arm builds
+
 * Thu May 11 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-2
 - Enabled Arm builds
 
