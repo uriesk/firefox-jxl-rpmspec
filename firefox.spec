@@ -857,6 +857,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri May 12 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-4
+- Enabled rust on ix86
+
 * Thu May 11 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-3
 - Enabled Rust on Arm builds
 
