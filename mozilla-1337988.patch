@@ -1,6 +1,6 @@
 diff -up firefox-53.0.2/dom/plugins/base/nsJSNPRuntime.cpp.1337988 firefox-53.0.2/dom/plugins/base/nsJSNPRuntime.cpp
 --- firefox-53.0.2/dom/plugins/base/nsJSNPRuntime.cpp.1337988	2017-04-11 06:15:22.000000000 +0200
-+++ firefox-53.0.2/dom/plugins/base/nsJSNPRuntime.cpp	2017-05-16 12:24:52.615168435 +0200
++++ firefox-53.0.2/dom/plugins/base/nsJSNPRuntime.cpp	2017-05-17 13:11:24.628137703 +0200
 @@ -1746,7 +1746,7 @@ NPObjWrapper_ObjectMoved(JSObject *obj,
    auto entry =
      static_cast<NPObjWrapperHashEntry*>(sNPObjWrappers->Search(npobj));
@@ -12,7 +12,7 @@ diff -up firefox-53.0.2/dom/plugins/base/nsJSNPRuntime.cpp.1337988 firefox-53.0.
  
 diff -up firefox-53.0.2/js/ipc/JavaScriptShared.cpp.1337988 firefox-53.0.2/js/ipc/JavaScriptShared.cpp
 --- firefox-53.0.2/js/ipc/JavaScriptShared.cpp.1337988	2017-04-11 06:15:17.000000000 +0200
-+++ firefox-53.0.2/js/ipc/JavaScriptShared.cpp	2017-05-16 12:24:52.615168435 +0200
++++ firefox-53.0.2/js/ipc/JavaScriptShared.cpp	2017-05-17 13:11:24.628137703 +0200
 @@ -101,7 +101,7 @@ IdToObjectMap::has(const ObjectId& id, c
      auto p = table_.lookup(id);
      if (!p)
@@ -24,7 +24,7 @@ diff -up firefox-53.0.2/js/ipc/JavaScriptShared.cpp.1337988 firefox-53.0.2/js/ip
  
 diff -up firefox-53.0.2/js/public/RootingAPI.h.1337988 firefox-53.0.2/js/public/RootingAPI.h
 --- firefox-53.0.2/js/public/RootingAPI.h.1337988	2017-04-11 06:15:17.000000000 +0200
-+++ firefox-53.0.2/js/public/RootingAPI.h	2017-05-16 12:33:02.437320374 +0200
++++ firefox-53.0.2/js/public/RootingAPI.h	2017-05-17 14:16:44.378827481 +0200
 @@ -150,6 +150,10 @@ template<typename T>
  struct PersistentRootedMarker;
  } /* namespace gc */
@@ -149,7 +149,15 @@ diff -up firefox-53.0.2/js/public/RootingAPI.h.1337988 firefox-53.0.2/js/public/
      PersistentRooted() : ptr(GCPolicy<T>::initial()) {}
  
      template <typename RootingContext>
-@@ -1193,8 +1188,6 @@ class JS_PUBLIC_API(ObjectPtr)
+@@ -1157,6 +1152,7 @@ class PersistentRooted : public js::Root
+         }
+     }
+ 
++    DECLARE_POINTER_COMPARISON_OPS(T);
+     DECLARE_POINTER_CONSTREF_OPS(T);
+     DECLARE_POINTER_ASSIGN_OPS(PersistentRooted, T);
+     DECLARE_NONPOINTER_ACCESSOR_METHODS(ptr);
+@@ -1193,8 +1189,6 @@ class JS_PUBLIC_API(ObjectPtr)
      Heap<JSObject*> value;
  
    public:
@@ -158,7 +166,7 @@ diff -up firefox-53.0.2/js/public/RootingAPI.h.1337988 firefox-53.0.2/js/public/
      ObjectPtr() : value(nullptr) {}
  
      explicit ObjectPtr(JSObject* obj) : value(obj) {}
-@@ -1297,177 +1290,6 @@ Swap(JS::TenuredHeap<T>& aX, JS::Tenured
+@@ -1297,177 +1291,6 @@ Swap(JS::TenuredHeap<T>& aX, JS::Tenured
  
  } /* namespace mozilla */
  
@@ -338,7 +346,7 @@ diff -up firefox-53.0.2/js/public/RootingAPI.h.1337988 firefox-53.0.2/js/public/
  #endif  /* js_RootingAPI_h */
 diff -up firefox-53.0.2/js/src/gc/Barrier.h.1337988 firefox-53.0.2/js/src/gc/Barrier.h
 --- firefox-53.0.2/js/src/gc/Barrier.h.1337988	2017-04-11 06:15:17.000000000 +0200
-+++ firefox-53.0.2/js/src/gc/Barrier.h	2017-05-16 12:28:15.140404323 +0200
++++ firefox-53.0.2/js/src/gc/Barrier.h	2017-05-17 13:11:24.629137700 +0200
 @@ -349,8 +349,8 @@ class WriteBarrieredBase : public Barrie
      explicit WriteBarrieredBase(const T& v) : BarrieredBase<T>(v) {}
  
@@ -418,7 +426,7 @@ diff -up firefox-53.0.2/js/src/gc/Barrier.h.1337988 firefox-53.0.2/js/src/gc/Bar
  #endif /* gc_Barrier_h */
 diff -up firefox-53.0.2/js/src/jsapi-tests/testGCHeapPostBarriers.cpp.1337988 firefox-53.0.2/js/src/jsapi-tests/testGCHeapPostBarriers.cpp
 --- firefox-53.0.2/js/src/jsapi-tests/testGCHeapPostBarriers.cpp.1337988	2017-04-11 06:15:18.000000000 +0200
-+++ firefox-53.0.2/js/src/jsapi-tests/testGCHeapPostBarriers.cpp	2017-05-16 12:24:52.616168431 +0200
++++ firefox-53.0.2/js/src/jsapi-tests/testGCHeapPostBarriers.cpp	2017-05-17 13:11:24.629137700 +0200
 @@ -5,7 +5,6 @@
   * License, v. 2.0. If a copy of the MPL was not distributed with this
   * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -541,7 +549,7 @@ diff -up firefox-53.0.2/js/src/jsapi-tests/testGCHeapPostBarriers.cpp.1337988 fi
 -END_TEST(testUnbarrieredEquality)
 diff -up firefox-53.0.2/js/src/vm/SharedMem.h.1337988 firefox-53.0.2/js/src/vm/SharedMem.h
 --- firefox-53.0.2/js/src/vm/SharedMem.h.1337988	2017-04-11 06:15:18.000000000 +0200
-+++ firefox-53.0.2/js/src/vm/SharedMem.h	2017-05-16 12:24:52.616168431 +0200
++++ firefox-53.0.2/js/src/vm/SharedMem.h	2017-05-17 13:11:24.629137700 +0200
 @@ -12,8 +12,8 @@
  template<typename T>
  class SharedMem
@@ -555,7 +563,7 @@ diff -up firefox-53.0.2/js/src/vm/SharedMem.h.1337988 firefox-53.0.2/js/src/vm/S
          IsUnshared,
 diff -up firefox-53.0.2/js/xpconnect/src/XPCInlines.h.1337988 firefox-53.0.2/js/xpconnect/src/XPCInlines.h
 --- firefox-53.0.2/js/xpconnect/src/XPCInlines.h.1337988	2017-04-11 06:15:18.000000000 +0200
-+++ firefox-53.0.2/js/xpconnect/src/XPCInlines.h	2017-05-16 12:24:52.616168431 +0200
++++ firefox-53.0.2/js/xpconnect/src/XPCInlines.h	2017-05-17 13:11:24.629137700 +0200
 @@ -471,7 +471,7 @@ inline
  void XPCWrappedNativeTearOff::JSObjectMoved(JSObject* obj, const JSObject* old)
  {
@@ -567,7 +575,7 @@ diff -up firefox-53.0.2/js/xpconnect/src/XPCInlines.h.1337988 firefox-53.0.2/js/
  
 diff -up firefox-53.0.2/js/xpconnect/src/XPCWrappedNative.cpp.1337988 firefox-53.0.2/js/xpconnect/src/XPCWrappedNative.cpp
 --- firefox-53.0.2/js/xpconnect/src/XPCWrappedNative.cpp.1337988	2017-04-11 06:15:18.000000000 +0200
-+++ firefox-53.0.2/js/xpconnect/src/XPCWrappedNative.cpp	2017-05-16 12:24:52.616168431 +0200
++++ firefox-53.0.2/js/xpconnect/src/XPCWrappedNative.cpp	2017-05-17 13:11:24.629137700 +0200
 @@ -888,7 +888,7 @@ void
  XPCWrappedNative::FlatJSObjectMoved(JSObject* obj, const JSObject* old)
  {
@@ -579,7 +587,7 @@ diff -up firefox-53.0.2/js/xpconnect/src/XPCWrappedNative.cpp.1337988 firefox-53
      CallQueryInterface(mIdentity, &cache);
 diff -up firefox-53.0.2/js/xpconnect/src/XPCWrappedNativeProto.cpp.1337988 firefox-53.0.2/js/xpconnect/src/XPCWrappedNativeProto.cpp
 --- firefox-53.0.2/js/xpconnect/src/XPCWrappedNativeProto.cpp.1337988	2017-04-11 06:15:18.000000000 +0200
-+++ firefox-53.0.2/js/xpconnect/src/XPCWrappedNativeProto.cpp	2017-05-16 12:24:52.616168431 +0200
++++ firefox-53.0.2/js/xpconnect/src/XPCWrappedNativeProto.cpp	2017-05-17 13:11:24.629137700 +0200
 @@ -101,7 +101,7 @@ XPCWrappedNativeProto::CallPostCreatePro
  void
  XPCWrappedNativeProto::JSProtoObjectFinalized(js::FreeOp* fop, JSObject* obj)
