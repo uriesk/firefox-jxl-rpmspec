@@ -400,7 +400,6 @@ echo "ac_add_options --disable-system-hunspell" >> .mozconfig
 %if %{?debug_build}
 echo "ac_add_options --enable-debug" >> .mozconfig
 echo "ac_add_options --disable-optimize" >> .mozconfig
-echo "ac_add_options --enable-dtrace" >> .mozconfig
 %else
 %define optimize_flags "none"
 # Fedora 26 (gcc7) needs to disable default build flags (mozbz#1342344)
