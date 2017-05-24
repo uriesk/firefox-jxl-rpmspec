@@ -1,5 +1,5 @@
 %if 0%{?fedora} < 27
-ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
+ExcludeArch: ppc64le ppc64 s390 s390x
 %endif
 
 # Use ALSA backend?
@@ -54,12 +54,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 %define run_tests         0
 %endif
 
-%define build_with_rust   0
-
-%ifarch %{ix86} x86_64 armv7hl aarch64
 %define build_with_rust   1
-%endif
-
 
 # Build as a debug package?
 %define debug_build       0
@@ -105,7 +100,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        53.0.2
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -868,6 +863,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 24 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-7
+- Enabled aarch64 on all Fedoras
+- Enabled Rust on all arches
+
 * Wed May 24 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-6
 - Added aarch64 patch (mozbz#1353817)
 
