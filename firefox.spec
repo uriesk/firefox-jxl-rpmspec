@@ -56,7 +56,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 
 %define build_with_rust   0
 
-%ifarch %{ix86} x86_64 armv7hl
+%ifarch %{ix86} x86_64 armv7hl aarch64
 %define build_with_rust   1
 %endif
 
@@ -105,7 +105,7 @@ ExcludeArch: ppc64le aarch64 ppc64 s390 s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        53.0.2
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -158,6 +158,7 @@ Patch409:        mozilla-1158076-2.patch
 Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
+Patch413:        mozilla-1353817.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -336,13 +337,13 @@ cd %{tarballdir}
 %patch409 -p1 -b .1158076-2
 %patch410 -p1 -b .1321521
 %patch411 -p1 -b .1321521-2
-
 %ifarch %{arm}
 %if 0%{?fedora} < 26
 # Workaround for mozbz#1337988
 %patch412 -p1 -b .1337988
 %endif
 %endif
+%patch413 -p1 -b .1353817
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -867,6 +868,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 24 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-6
+- Added aarch64 patch (mozbz#1353817)
+
 * Tue May 16 2017 Martin Stransky <stransky@redhat.com> - 53.0.2-5
 - Arm gcc6 build fix (mozbz#1337988)
 
