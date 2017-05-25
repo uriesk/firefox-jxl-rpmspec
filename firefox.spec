@@ -56,9 +56,9 @@ ExcludeArch: ppc64le ppc64 s390x
 
 %define build_with_rust   1
 
-%ifarch ppc64 ppc64le s390x
-%define build_with_rust   0
-%endif
+#%ifarch ppc64 ppc64le s390x
+#%define build_with_rust   0
+#%endif
 
 # Build as a debug package?
 %define debug_build       0
@@ -89,7 +89,6 @@ ExcludeArch: ppc64le ppc64 s390x
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
-%global tarballdir    %{name}-%{version}
 
 %define official_branding       1
 %define build_langpacks         1
@@ -146,6 +145,7 @@ Patch225:        mozilla-1005640-accept-lang.patch
 Patch226:        rhbz-1354671.patch
 Patch227:        rhbz-1400293-fix-mozilla-1324096.patch
 Patch229:        firefox-nss-version.patch
+Patch230:        mozilla-rust-config.patch
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
@@ -292,8 +292,7 @@ This package contains results of tests executed during build.
 #---------------------------------------------------------------------
 
 %prep
-%setup -q -c
-cd %{tarballdir}
+%setup -q
 
 # Build patches, can't change backup suffix from default because during build
 # there is a compare of config and js/config directories and .orig suffix is
@@ -327,6 +326,7 @@ cd %{tarballdir}
 %endif
 %patch227 -p1 -b .rh1400293
 %patch229 -p1 -b .nss-version
+%patch230 -p1 -b .rust
 
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
@@ -584,7 +584,6 @@ rm -f  objdir/dist/bin/pk12util
 #---------------------------------------------------------------------
 
 %install
-cd %{tarballdir}
 
 # set up our default bookmarks
 %{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/en-US/locale/browser/bookmarks.html
