@@ -478,8 +478,6 @@ case "%{sqlite_build_version}" in
 esac
 %endif
 
-cd %{tarballdir}
-
 echo "Generate big endian version of config/external/icu/data/icud58l.dat"
 %if 0%{?big_endian}
   ./mach python intl/icu_sources_data.py .
