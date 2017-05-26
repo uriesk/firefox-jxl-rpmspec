@@ -659,7 +659,7 @@ SentUpstream: 2014-09-22
 </application>
 EOF
 
-echo > ../%{name}.lang
+echo > %{name}.lang
 %if %{build_langpacks}
 # Extract langpacks, make any mods needed, repack the langpack, and install it.
 %{__mkdir_p} $RPM_BUILD_ROOT%{langpackdir}
@@ -677,7 +677,7 @@ for langpack in `ls firefox-langpacks/*.xpi`; do
 
   %{__install} -m 644 ${extensionID}.xpi $RPM_BUILD_ROOT%{langpackdir}
   language=`echo $language | sed -e 's/-/_/g'`
-  echo "%%lang($language) %{langpackdir}/${extensionID}.xpi" >> ../%{name}.lang
+  echo "%%lang($language) %{langpackdir}/${extensionID}.xpi" >> %{name}.lang
 done
 %{__rm} -rf firefox-langpacks
 
@@ -688,7 +688,7 @@ language_short=$2
 cd $RPM_BUILD_ROOT%{langpackdir}
 ln -s langpack-$language_long@firefox.mozilla.org.xpi langpack-$language_short@firefox.mozilla.org.xpi
 cd -
-echo "%%lang($language_short) %{langpackdir}/langpack-$language_short@firefox.mozilla.org.xpi" >> ../%{name}.lang
+echo "%%lang($language_short) %{langpackdir}/langpack-$language_short@firefox.mozilla.org.xpi" >> %{name}.lang
 }
 
 # Table of fallbacks for each language
