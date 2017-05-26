@@ -1,3 +1,4 @@
+
 %if 0%{?fedora} < 27
 ExcludeArch: ppc64le ppc64 s390x
 %endif
