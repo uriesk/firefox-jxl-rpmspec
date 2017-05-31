@@ -867,6 +867,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 31 2017 Jan Horak <jhorak@redhat.com> - 53.0.3-2
+- Added patch for big endian platforms
+
 * Fri May 26 2017 Jan Horak <jhorak@redhat.com> - 53.0.3-1
 - Update to 53.0.3
 
