@@ -1,8 +1,4 @@
 
-%if 0%{?fedora} < 27
-ExcludeArch: ppc64le ppc64 s390x
-%endif
-
 # Use ALSA backend?
 %define alsa_backend      0
 
@@ -104,7 +100,7 @@ ExcludeArch: ppc64le ppc64 s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        53.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -869,6 +865,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Wed May 31 2017 Jan Horak <jhorak@redhat.com> - 53.0.3-2
 - Added patch for big endian platforms
+- Do not restrict architectures in older Fedoras
 
 * Fri May 26 2017 Jan Horak <jhorak@redhat.com> - 53.0.3-1
 - Update to 53.0.3
