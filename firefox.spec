@@ -124,6 +124,7 @@ Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
 Patch28:        build-1360521-missing-cheddar.patch
 Patch29:        build-big-endian.patch
+Patch30:        fedora-build.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -297,6 +298,7 @@ This package contains results of tests executed during build.
 %endif
 #%patch28 -p2 -b .1360521-missing-cheddar
 %patch29 -p1 -b .big-endian
+%patch30 -p1 -b .fedora-build
 
 %patch3  -p1 -b .arm
 
