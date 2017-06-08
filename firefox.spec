@@ -237,10 +237,8 @@ BuildRequires:  pkgconfig(libffi)
 %if %{?run_tests}
 BuildRequires:  xorg-x11-server-Xvfb
 %endif
-%if %{?build_with_rust}
 BuildRequires:  rust
 BuildRequires:  cargo
-%endif
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
