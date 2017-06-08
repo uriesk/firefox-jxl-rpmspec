@@ -51,12 +51,6 @@
 %define run_tests         0
 %endif
 
-%define build_with_rust   1
-
-#%ifarch ppc64 ppc64le s390x
-#%define build_with_rust   0
-#%endif
-
 # Build as a debug package?
 %define debug_build       0
 
@@ -448,12 +442,6 @@ echo "ac_add_options --without-system-libvpx" >> .mozconfig
 echo "ac_add_options --with-system-icu" >> .mozconfig
 %else
 echo "ac_add_options --without-system-icu" >> .mozconfig
-%endif
-
-%if %{?build_with_rust}
-echo "ac_add_options --enable-rust" >> .mozconfig
-%else
-echo "ac_add_options --disable-rust" >> .mozconfig
 %endif
 
 #---------------------------------------------------------------------
