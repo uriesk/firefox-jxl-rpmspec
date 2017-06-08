@@ -13,7 +13,7 @@
 %endif
 
 # Use system sqlite?
-%if 0%{?fedora} > 25
+%if 0%{?fedora} > 27
 %define system_sqlite     1
 %else
 %define system_sqlite     0
@@ -141,7 +141,6 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-Patch227:        rhbz-1400293-fix-mozilla-1324096.patch
 Patch229:        firefox-nss-version.patch
 Patch230:        mozilla-rust-config.patch
 
@@ -299,13 +298,12 @@ This package contains results of tests executed during build.
 
 
 %patch18 -p1 -b .jemalloc-ppc
-%patch19 -p2 -b .s390-inlines
+#%patch19 -p2 -b .s390-inlines
 %patch20 -p1 -b .prbool
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-%patch27 -p1 -b .1335250
-%patch28 -p2 -b .1360521-missing-cheddar
+#%patch28 -p2 -b .1360521-missing-cheddar
 %patch29 -p1 -b .big-endian
 
 %patch3  -p1 -b .arm
@@ -323,18 +321,13 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%patch227 -p1 -b .rh1400293
-%patch229 -p1 -b .nss-version
 %patch230 -p1 -b .rust
 
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
-%patch407 -p1 -b .1348576
 %patch408 -p1 -b .1158076-1
 %patch409 -p1 -b .1158076-2
-%patch410 -p1 -b .1321521
-%patch411 -p1 -b .1321521-2
 %ifarch %{arm}
 %if 0%{?fedora} < 26
 # Workaround for mozbz#1337988
