@@ -793,6 +793,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/features/e10srollout@mozilla.org.xpi
 %{mozappdir}/browser/features/firefox@getpocket.com.xpi
 %{mozappdir}/browser/features/webcompat@mozilla.org.xpi
+%{mozappdir}/browser/features/screenshots@mozilla.org.xpi
 %{mozappdir}/distribution/distribution.ini
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
@@ -807,6 +808,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/chrome.manifest
 %{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
+%{mozappdir}/pingsender
 %exclude %{mozappdir}/removed-files
 %{_datadir}/icons/hicolor/16x16/apps/firefox.png
 %{_datadir}/icons/hicolor/22x22/apps/firefox.png
