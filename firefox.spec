@@ -125,6 +125,8 @@ Patch27:        mozilla-1335250.patch
 Patch28:        build-1360521-missing-cheddar.patch
 Patch29:        build-big-endian.patch
 Patch30:        fedora-build.patch
+Patch31:        build-ppc64-s390x-curl.patch
+Patch32:        build-rust-ppc64le.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -137,7 +139,6 @@ Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
-Patch230:        mozilla-rust-config.patch
 
 # Upstream patches
 Patch304:        mozilla-1253216.patch
@@ -299,6 +300,8 @@ This package contains results of tests executed during build.
 #%patch28 -p2 -b .1360521-missing-cheddar
 %patch29 -p1 -b .big-endian
 %patch30 -p1 -b .fedora-build
+%patch31 -p1 -b .ppc64-s390x-curl
+%patch32 -p1 -b .rust-ppc64le
 
 %patch3  -p1 -b .arm
 
@@ -315,7 +318,6 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%patch230 -p1 -b .rust
 
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
