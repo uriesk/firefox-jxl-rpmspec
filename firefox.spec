@@ -628,7 +628,7 @@ SentUpstream: 2014-09-22
     </p>
     <!-- FIXME: Needs another couple of paragraphs -->
   </description>
-  <url type="homepage">http://www.mozilla.org/en-US/</url>
+  <url type="homepage">http://www.mozilla.org/</url>
   <screenshots>
     <screenshot type="default">https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/a.png</screenshot>
     <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/b.png</screenshot>
