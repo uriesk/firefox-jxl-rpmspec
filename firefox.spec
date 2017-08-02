@@ -93,14 +93,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        54.0.1
+Version:        55.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20170725.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20170802.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -145,8 +145,6 @@ Patch304:        mozilla-1253216.patch
 Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
 Patch407:        mozilla-1348576.patch
-Patch408:        mozilla-1158076-1.patch
-Patch409:        mozilla-1158076-2.patch
 Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
@@ -308,7 +306,7 @@ This package contains results of tests executed during build.
 # For branding specific patches.
 
 # Fedora patches
-%patch204 -p2 -b .966424
+#%patch204 -p2 -b .966424
 %patch215 -p1 -b .addons
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
@@ -322,8 +320,6 @@ This package contains results of tests executed during build.
 %patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
-%patch408 -p1 -b .1158076-1
-%patch409 -p1 -b .1158076-2
 %ifarch %{arm}
 %if 0%{?fedora} < 26
 # Workaround for mozbz#1337988
@@ -848,6 +844,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Aug 2 2017 Martin Stransky <stransky@redhat.com> - 55.0-1
+- Updated to 55.0 (B1)
+
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 54.0.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Tue Jul 25 2017 Jan Horak <jhorak@redhat.com> - 54.0.1-1
 - Update to 54.0.1
 
