@@ -1,3 +1,4 @@
+#Disabled due to https://bugzilla.mozilla.org/show_bug.cgi?id=1387010
 ExcludeArch: aarch64 armv7hl
 
 # Use ALSA backend?
