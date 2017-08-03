@@ -1,3 +1,4 @@
+ExcludeArch: aarch64 armv7hl
 
 # Use ALSA backend?
 %define alsa_backend      0
@@ -127,6 +128,7 @@ Patch29:        build-big-endian.patch
 Patch30:        fedora-build.patch
 Patch31:        build-ppc64-s390x-curl.patch
 Patch32:        build-rust-ppc64le.patch
+Patch33:        build-ppc-s390-dom.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -300,6 +302,7 @@ This package contains results of tests executed during build.
 %patch30 -p1 -b .fedora-build
 %patch31 -p1 -b .ppc64-s390x-curl
 %patch32 -p1 -b .rust-ppc64le
+%patch33 -p1 -b .ppc-s390-dom
 
 %patch3  -p1 -b .arm
 
