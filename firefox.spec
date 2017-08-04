@@ -1,5 +1,5 @@
-#Disabled due to https://bugzilla.mozilla.org/show_bug.cgi?id=1387010
-ExcludeArch: aarch64 armv7hl
+#Disabled due to build failures
+ExcludeArch: ppc ppc64 ppc64le
 
 # Use ALSA backend?
 %define alsa_backend      0
@@ -130,6 +130,7 @@ Patch30:        fedora-build.patch
 Patch31:        build-ppc64-s390x-curl.patch
 Patch32:        build-rust-ppc64le.patch
 Patch33:        build-ppc-s390-dom.patch
+Patch34:        build-cubeb-pulse-arm.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -304,6 +305,7 @@ This package contains results of tests executed during build.
 %patch31 -p1 -b .ppc64-s390x-curl
 %patch32 -p1 -b .rust-ppc64le
 %patch33 -p1 -b .ppc-s390-dom
+%patch34 -p1 -b .cubeb-pulse-arm
 
 %patch3  -p1 -b .arm
 
