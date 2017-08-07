@@ -1,6 +1,3 @@
-#Disabled due to build failures
-ExcludeArch: ppc ppc64 ppc64le
-
 # Use ALSA backend?
 %define alsa_backend      0
 
@@ -96,7 +93,7 @@ ExcludeArch: ppc ppc64 ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        55.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -847,6 +844,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Aug 7 2017 Martin Stransky <stransky@redhat.com> - 55.0-2
+- Updated to 55.0 (B3)
+
 * Wed Aug 2 2017 Martin Stransky <stransky@redhat.com> - 55.0-1
 - Updated to 55.0 (B1)
 
