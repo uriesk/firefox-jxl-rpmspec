@@ -93,7 +93,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        55.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -844,7 +844,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Aug 7 2017 Martin Stransky <stransky@redhat.com> - 55.0-2
+* Tue Aug 8 2017 Martin Stransky <stransky@redhat.com> - 55.0-3
+- Rebuild
+
+* Mon Aug 7 2017 Martin Stransky <stransky@redhat.com> - 55.0-2
 - Updated to 55.0 (B3)
 
 * Wed Aug 2 2017 Martin Stransky <stransky@redhat.com> - 55.0-1
