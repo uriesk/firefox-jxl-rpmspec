@@ -128,6 +128,7 @@ Patch31:        build-ppc64-s390x-curl.patch
 Patch32:        build-rust-ppc64le.patch
 Patch33:        build-ppc-s390-dom.patch
 Patch34:        build-cubeb-pulse-arm.patch
+Patch35:        build-ppc-jit.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -303,6 +304,9 @@ This package contains results of tests executed during build.
 %patch32 -p1 -b .rust-ppc64le
 %patch33 -p1 -b .ppc-s390-dom
 %patch34 -p1 -b .cubeb-pulse-arm
+%ifarch ppc ppc64 ppc64le
+%patch35 -p1 -b .ppc-jit
+%endif
 
 %patch3  -p1 -b .arm
 
