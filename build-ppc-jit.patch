@@ -1,0 +1,12 @@
+diff -up firefox-55.0/js/src/jit/MIR.h.old firefox-55.0/js/src/jit/MIR.h
+--- firefox-55.0/js/src/jit/MIR.h.old	2017-08-08 14:04:44.528460099 +0200
++++ firefox-55.0/js/src/jit/MIR.h	2017-08-08 14:05:11.045364831 +0200
+@@ -12434,7 +12434,7 @@ class MNearbyInt
+     TRIVIAL_NEW_WRAPPERS
+ 
+     static bool HasAssemblerSupport(RoundingMode mode) {
+-        return Assembler::HasRoundInstruction(mode);
++        return false;
+     }
+ 
+     RoundingMode roundingMode() const { return roundingMode_; }
