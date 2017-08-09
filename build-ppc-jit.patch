@@ -17,7 +17,7 @@ diff -up firefox-55.0/js/src/jit/ExecutableAllocator.h.old firefox-55.0/js/src/j
      {
          sync_instruction_memory((caddr_t)code, size);
      }
-+#elif defined(__ppc__) || defined(__ppc64__) || defined(__ppc64le__)
++#else
 +    static void cacheFlush(void*, size_t)
 +    {
 +    }
