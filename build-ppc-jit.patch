@@ -10,3 +10,17 @@ diff -up firefox-55.0/js/src/jit/MIR.h.old firefox-55.0/js/src/jit/MIR.h
      }
  
      RoundingMode roundingMode() const { return roundingMode_; }
+diff -up firefox-55.0/js/src/jit/ExecutableAllocator.h.old firefox-55.0/js/src/jit/ExecutableAllocator.h
+--- firefox-55.0/js/src/jit/ExecutableAllocator.h.old	2017-08-09 09:24:18.784983505 +0200
++++ firefox-55.0/js/src/jit/ExecutableAllocator.h	2017-08-09 09:28:01.471100075 +0200
+@@ -307,6 +307,10 @@ class ExecutableAllocator
+     {
+         sync_instruction_memory((caddr_t)code, size);
+     }
++#elif defined(__ppc__) || defined(__ppc64__) || defined(__ppc64le__)
++    static void cacheFlush(void*, size_t)
++    {
++    }
+ #endif
+ 
+   private:
