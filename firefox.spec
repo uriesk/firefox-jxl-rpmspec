@@ -65,9 +65,13 @@
 
 %if %{?system_nss}
 %global nspr_version 4.10.10
-%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
+# NSS/NSPR quite often ends in build override, so as requirement the version
+# we're building against could bring us some broken dependencies from time to time.
+%global nspr_build_version %{nspr_version}
+#%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
 %global nss_version 3.29.3
-%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
+%global nss_build_version %{nss_version}
+#%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %endif
 
 %if %{?system_sqlite}
@@ -93,7 +97,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        55.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -848,6 +852,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Aug 11 2017 Jan Horak <jhorak@redhat.com> - 55.0-6
+- Do not require nss and nspr which we build package against
+
 * Tue Aug 8 2017 Martin Stransky <stransky@redhat.com> - 55.0-5
 - Rebuild
 
