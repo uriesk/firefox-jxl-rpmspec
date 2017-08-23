@@ -97,7 +97,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        55.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -249,6 +249,9 @@ BuildRequires:  cargo
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
+
+#remove when nspr 4.16 is at stable
+Conflicts:      pkgconfig(nspr) >= 4.16
 
 %description
 Mozilla Firefox is an open-source web browser, designed for standards
@@ -853,6 +856,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Aug 23 2017 Martin Stransky <stransky@redhat.com> - 55.0.2-2
+- Rebuilt to remove wrong dependency to nspr-4.16.
+
 * Fri Aug 18 2017 Martin Stransky <stransky@redhat.com> - 55.0.2-1
 - Updated to 55.0.2
 
