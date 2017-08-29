@@ -462,6 +462,10 @@ echo "ac_add_options --with-system-icu" >> .mozconfig
 %else
 echo "ac_add_options --without-system-icu" >> .mozconfig
 %endif
+%ifarch s390 s390x
+echo "ac_add_options --disable-ion" >> .mozconfig
+%endif
+
 
 #---------------------------------------------------------------------
 
