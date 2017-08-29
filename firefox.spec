@@ -67,11 +67,11 @@
 %global nspr_version 4.10.10
 # NSS/NSPR quite often ends in build override, so as requirement the version
 # we're building against could bring us some broken dependencies from time to time.
-%global nspr_build_version %{nspr_version}
 #%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
+%global nspr_build_version %{nspr_version}
 %global nss_version 3.29.3
-%global nss_build_version %{nss_version}
 #%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
+%global nss_build_version %{nss_version}
 %endif
 
 %if %{?system_sqlite}
@@ -137,6 +137,9 @@ Patch33:        build-ppc-s390-dom.patch
 Patch34:        build-cubeb-pulse-arm.patch
 Patch35:        build-ppc-jit.patch
 Patch36:        build-missing-xlocale-h.patch
+# Always feel lucky for unsupported platforms:
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1347128
+Patch37:        build-jit-atomic-always-lucky.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -151,7 +154,6 @@ Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
 
 # Upstream patches
-Patch304:        mozilla-1253216.patch
 Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
 Patch407:        mozilla-1348576.patch
@@ -207,6 +209,7 @@ BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
 
 Requires:       mozilla-filesystem
+Requires:       p11-kit-trust
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
@@ -316,6 +319,7 @@ This package contains results of tests executed during build.
 %ifarch ppc ppc64 ppc64le
 %patch35 -p1 -b .ppc-jit
 %endif
+%patch37 -p1 -b .jit-atomic-lucky
 
 %patch3  -p1 -b .arm
 
@@ -333,7 +337,6 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 
-%patch304 -p1 -b .1253216
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %ifarch %{arm}
@@ -854,6 +857,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/libfreeblpriv3.chk
 %{mozappdir}/libnssdbm3.chk
 %{mozappdir}/libsoftokn3.chk
+%exclude %{mozappdir}/libnssckbi.so
 %endif
 
 #---------------------------------------------------------------------
