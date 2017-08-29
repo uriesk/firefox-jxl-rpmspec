@@ -27,7 +27,7 @@
 
 # Use system libicu?
 %if 0%{?fedora} > 27
-%define system_libicu     1
+%define system_libicu     0
 %else
 %define system_libicu     0
 %endif
@@ -90,7 +90,9 @@
 %define enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
+%if 0%{?fedora} < 27
 %define enable_mozilla_crashreporter       1
+%endif
 %endif
 %endif
 
@@ -113,6 +115,7 @@ Source23:       firefox.1
 Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
+Source27:       google-api-key
 
 # Build patches
 Patch0:         firefox-install-dir.patch
@@ -133,6 +136,7 @@ Patch32:        build-rust-ppc64le.patch
 Patch33:        build-ppc-s390-dom.patch
 Patch34:        build-cubeb-pulse-arm.patch
 Patch35:        build-ppc-jit.patch
+Patch36:        build-missing-xlocale-h.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -346,6 +350,7 @@ This package contains results of tests executed during build.
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
+%patch37 -p2 -b .xlocale
 %endif
 
 %{__rm} -f .mozconfig
@@ -354,6 +359,7 @@ This package contains results of tests executed during build.
 echo "ac_add_options --enable-official-branding" >> .mozconfig
 %endif
 %{__cp} %{SOURCE24} mozilla-api-key
+%{__cp} %{SOURCE27} google-api-key
 
 %if %{?system_nss}
 echo "ac_add_options --with-system-nspr" >> .mozconfig
