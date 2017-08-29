@@ -350,7 +350,7 @@ This package contains results of tests executed during build.
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
-%patch37 -p2 -b .xlocale
+%patch36 -p2 -b .xlocale
 %endif
 
 %{__rm} -f .mozconfig
