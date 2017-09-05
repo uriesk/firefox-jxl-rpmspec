@@ -129,6 +129,7 @@ Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
 Patch28:        build-1360521-missing-cheddar.patch
+# Also fixes s390x: https://bugzilla.mozilla.org/show_bug.cgi?id=1376268
 Patch29:        build-big-endian.patch
 Patch30:        fedora-build.patch
 Patch31:        build-ppc64-s390x-curl.patch
@@ -140,6 +141,8 @@ Patch36:        build-missing-xlocale-h.patch
 # Always feel lucky for unsupported platforms:
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1347128
 Patch37:        build-jit-atomic-always-lucky.patch
+# Fixing missing cacheFlush when JS_CODEGEN_NONE is used (s390x)
+Patch38:        build-cacheFlush-missing.patch
 
 # Fedora specific patches
 # Unable to install addons from https pages
@@ -320,6 +323,7 @@ This package contains results of tests executed during build.
 %patch35 -p1 -b .ppc-jit
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
+%patch38 -p1 -b .cacheFlush-missing
 
 %patch3  -p1 -b .arm
 
