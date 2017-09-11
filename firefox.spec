@@ -99,7 +99,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        55.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -807,6 +807,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
+%dir %{_sysconfdir}/%{name}
 %dir %{_sysconfdir}/%{name}/*
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
@@ -871,6 +872,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Aug 28 2017 Ville Skyttä <ville.skytta@iki.fi> - 55.0.3-2
+- Own the %%{_sysconfdir}/%%{name} dir
+
 * Fri Sep  1 2017 Jan Horak <jhorak@redhat.com> - 55.0.3-1
 - Update to 55.0.3
 
