@@ -872,7 +872,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Aug 28 2017 Ville Skyttä <ville.skytta@iki.fi> - 55.0.3-2
+* Thu Sep 14 2017 Ville Skyttä <ville.skytta@iki.fi> - 55.0.3-2
 - Own the %%{_sysconfdir}/%%{name} dir
 
 * Fri Sep  1 2017 Jan Horak <jhorak@redhat.com> - 55.0.3-1
