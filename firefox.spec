@@ -99,7 +99,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        55.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -164,6 +164,7 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
+Patch414:        mozilla-1399611.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -350,6 +351,7 @@ This package contains results of tests executed during build.
 %endif
 %endif
 %patch413 -p1 -b .1353817
+%patch414 -p1 -b .1399611
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -807,6 +809,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
+%dir %{_sysconfdir}/%{name}
 %dir %{_sysconfdir}/%{name}/*
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
@@ -871,6 +874,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Sep 14 2017 Martin Stransky <stransky@redhat.com> - 55.0.3-3
+- Added experimental patch for mozbz#1399611
+
+* Thu Sep 14 2017 Ville Skyttä <ville.skytta@iki.fi> - 55.0.3-2
+- Own the %%{_sysconfdir}/%%{name} dir
+
 * Fri Sep  1 2017 Jan Horak <jhorak@redhat.com> - 55.0.3-1
 - Update to 55.0.3
 
