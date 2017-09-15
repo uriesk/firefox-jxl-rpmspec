@@ -1,3 +1,6 @@
+# Draw shadows/hide titlebar?
+%define csd_emulation     0
+
 # Use ALSA backend?
 %define alsa_backend      0
 
@@ -99,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        55.0.3
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -351,7 +354,9 @@ This package contains results of tests executed during build.
 %endif
 %endif
 %patch413 -p1 -b .1353817
+%if %{?csd_emulation}
 %patch414 -p1 -b .1399611
+%endif
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -874,6 +879,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Sep 15 2017 Martin Stransky <stransky@redhat.com> - 55.0.3-4
+- Added switch to build mozbz#1399611 and disable it now
+  for various regressions.
+
 * Thu Sep 14 2017 Martin Stransky <stransky@redhat.com> - 55.0.3-3
 - Added experimental patch for mozbz#1399611
 
