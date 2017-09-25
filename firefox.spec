@@ -205,6 +205,7 @@ BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
+BuildRequires:  llvm-devel
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
