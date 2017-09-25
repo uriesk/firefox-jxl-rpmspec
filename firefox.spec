@@ -1,6 +1,3 @@
-# Draw shadows/hide titlebar?
-%define csd_emulation     0
-
 # Use ALSA backend?
 %define alsa_backend      0
 
@@ -101,14 +98,14 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        55.0.3
-Release:        4%{?pre_tag}%{?dist}
+Version:        56.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20170901.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20170925.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -125,13 +122,10 @@ Patch0:         firefox-install-dir.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
 Patch18:        xulrunner-24.0-jemalloc-ppc.patch
-# workaround linking issue on s390 (JSContext::updateMallocCounter(size_t) not found)
-Patch19:        xulrunner-24.0-s390-inlines.patch
 Patch20:        firefox-build-prbool.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
-Patch28:        build-1360521-missing-cheddar.patch
 # Also fixes s390x: https://bugzilla.mozilla.org/show_bug.cgi?id=1376268
 Patch29:        build-big-endian.patch
 Patch30:        fedora-build.patch
@@ -148,8 +142,6 @@ Patch37:        build-jit-atomic-always-lucky.patch
 Patch38:        build-cacheFlush-missing.patch
 
 # Fedora specific patches
-# Unable to install addons from https pages
-Patch204:        rhbz-966424.patch
 Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
 Patch221:        firefox-fedora-ua.patch
@@ -167,7 +159,6 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
-Patch414:        mozilla-1399611.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -311,30 +302,26 @@ This package contains results of tests executed during build.
 
 
 %patch18 -p1 -b .jemalloc-ppc
-#%patch19 -p2 -b .s390-inlines
 %patch20 -p1 -b .prbool
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-#%patch28 -p2 -b .1360521-missing-cheddar
-%patch29 -p1 -b .big-endian
+# don't need that? %patch29 -p1 -b .big-endian
 %patch30 -p1 -b .fedora-build
 %patch31 -p1 -b .ppc64-s390x-curl
 %patch32 -p1 -b .rust-ppc64le
-%patch33 -p1 -b .ppc-s390-dom
-%patch34 -p1 -b .cubeb-pulse-arm
+# don't need that %patch33 -p1 -b .ppc-s390-dom
+# don't need that %patch34 -p1 -b .cubeb-pulse-arm
 %ifarch ppc ppc64 ppc64le
 %patch35 -p1 -b .ppc-jit
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
-%patch38 -p1 -b .cacheFlush-missing
 
 %patch3  -p1 -b .arm
 
 # For branding specific patches.
 
 # Fedora patches
-#%patch204 -p2 -b .966424
 %patch215 -p1 -b .addons
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
@@ -354,9 +341,6 @@ This package contains results of tests executed during build.
 %endif
 %endif
 %patch413 -p1 -b .1353817
-%if %{?csd_emulation}
-%patch414 -p1 -b .1399611
-%endif
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -879,6 +863,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 24 2017 Martin Stransky <stransky@redhat.com> - 56.0-1
+- Update to 56.0 (B4)
+
 * Fri Sep 15 2017 Martin Stransky <stransky@redhat.com> - 55.0.3-4
 - Added switch to build mozbz#1399611 and disable it now
   for various regressions.
