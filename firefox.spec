@@ -69,7 +69,7 @@
 # we're building against could bring us some broken dependencies from time to time.
 #%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.29.3
+%global nss_version 3.32.1
 #%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %global nss_build_version %{nss_version}
 %endif
