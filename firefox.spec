@@ -864,7 +864,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Sep 24 2017 Martin Stransky <stransky@redhat.com> - 56.0-1
+* Mon Sep 25 2017 Martin Stransky <stransky@redhat.com> - 56.0-1
 - Update to 56.0 (B4)
 
 * Fri Sep 15 2017 Martin Stransky <stransky@redhat.com> - 55.0.3-4
