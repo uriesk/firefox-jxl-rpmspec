@@ -159,6 +159,7 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
+Patch414:        mozilla-1341234.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -207,6 +208,7 @@ BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
 BuildRequires:  llvm
 BuildRequires:  llvm-devel
+BuildRequires:  clang
 BuildRequires:  clang-libs
 
 Requires:       mozilla-filesystem
@@ -344,6 +346,7 @@ This package contains results of tests executed during build.
 %endif
 %endif
 %patch413 -p1 -b .1353817
+%patch414 -p1 -b .1341234
 
 # Debian extension patch
 %patch500 -p1 -b .440908
