@@ -99,13 +99,13 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        56.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20170925.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20170927.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -206,6 +206,7 @@ BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
 BuildRequires:  llvm-devel
+BuildRequires:  clang-libs
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
@@ -864,8 +865,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Sep 25 2017 Martin Stransky <stransky@redhat.com> - 56.0-1
-- Update to 56.0 (B4)
+* Mon Sep 25 2017 Martin Stransky <stransky@redhat.com> - 56.0-2
+- Update to 56.0 (B6)
 
 * Fri Sep 15 2017 Martin Stransky <stransky@redhat.com> - 55.0.3-4
 - Added switch to build mozbz#1399611 and disable it now
