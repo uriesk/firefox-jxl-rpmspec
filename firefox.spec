@@ -205,6 +205,7 @@ BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
+BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang-libs
 
