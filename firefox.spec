@@ -1,3 +1,5 @@
+ExclusiveArch: %{ix86} x86_64
+
 # Use ALSA backend?
 %define alsa_backend      0
 
