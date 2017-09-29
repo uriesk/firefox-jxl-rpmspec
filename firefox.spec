@@ -131,7 +131,6 @@ Patch29:        build-big-endian.patch
 Patch30:        fedora-build.patch
 Patch31:        build-ppc64-s390x-curl.patch
 Patch32:        build-rust-ppc64le.patch
-Patch33:        build-ppc-s390-dom.patch
 Patch34:        build-cubeb-pulse-arm.patch
 Patch35:        build-ppc-jit.patch
 Patch36:        build-missing-xlocale-h.patch
@@ -311,11 +310,10 @@ This package contains results of tests executed during build.
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-# don't need that? %patch29 -p1 -b .big-endian
+%patch29 -p1 -b .big-endian
 %patch30 -p1 -b .fedora-build
 %patch31 -p1 -b .ppc64-s390x-curl
 %patch32 -p1 -b .rust-ppc64le
-# don't need that %patch33 -p1 -b .ppc-s390-dom
 # don't need that %patch34 -p1 -b .cubeb-pulse-arm
 %ifarch ppc ppc64 ppc64le
 %patch35 -p1 -b .ppc-jit
