@@ -1,5 +1,3 @@
-ExclusiveArch: %{ix86} x86_64
-
 # Use ALSA backend?
 %define alsa_backend      0
 
@@ -101,7 +99,7 @@ ExclusiveArch: %{ix86} x86_64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        56.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -871,6 +869,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Sep 29 2017 Martin Stransky <stransky@redhat.com> - 56.0-3
+- Enabled second arches.
+
 * Mon Sep 25 2017 Martin Stransky <stransky@redhat.com> - 56.0-2
 - Update to 56.0 (B6)
 
