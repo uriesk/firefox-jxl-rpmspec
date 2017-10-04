@@ -99,7 +99,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        56.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -149,6 +149,7 @@ Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
+Patch230:        rhbz-1497932.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -159,6 +160,7 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch414:        mozilla-1341234.patch
+Patch415:        mozilla-1405267.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -334,6 +336,7 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
+%patch230 -p1 -b .1497932
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
@@ -345,6 +348,7 @@ This package contains results of tests executed during build.
 %endif
 %patch413 -p1 -b .1353817
 %patch414 -p1 -b .1341234
+%patch415 -p1 -b .1405267
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -867,6 +871,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Oct 4 2017 Martin Stransky <stransky@redhat.com> - 56.0-4
+- Fixed rhbz#1497932 - Plug-Ins for example flash fails
+  because of unresolved symbols
+
 * Fri Sep 29 2017 Martin Stransky <stransky@redhat.com> - 56.0-3
 - Enabled second arches.
 
