@@ -156,6 +156,7 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch415:        mozilla-1405267.patch
+Patch416:        mozilla-1399611.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -313,8 +314,6 @@ This package contains results of tests executed during build.
 
 %patch3  -p1 -b .arm
 
-# For branding specific patches.
-
 # Fedora patches
 %patch215 -p1 -b .addons
 %patch219 -p2 -b .rhbz-1173156
@@ -337,6 +336,7 @@ This package contains results of tests executed during build.
 
 %patch413 -p1 -b .1353817
 %patch415 -p1 -b .1405267
+%patch416 -p1 -b .1399611
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -857,6 +857,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Thu Oct 5 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.1
 - Updated to 57.0 Beta 5
+- Added patch for mozbz#1399611 - CSD emulation
 
 * Wed Oct 4 2017 Martin Stransky <stransky@redhat.com> - 56.0-4
 - Fixed rhbz#1497932 - Plug-Ins for example flash fails
