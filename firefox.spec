@@ -453,6 +453,9 @@ echo "ac_add_options --without-system-icu" >> .mozconfig
 echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
 
+%ifarch %{ix86}
+echo "ac_add_options --disable-stylo" >> .mozconfig
+%endif
 
 #---------------------------------------------------------------------
 
