@@ -77,7 +77,7 @@
 %global sqlite_build_version %(pkg-config --silence-errors --modversion sqlite3 2>/dev/null || echo 65536)
 %endif
 
-%define pre_version             b6
+%define pre_version             b7
 
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
@@ -99,13 +99,13 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        57.0
-Release:        0.2%{?pre_tag}%{?dist}
+Release:        0.3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20171009.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20171011.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -155,7 +155,6 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
-Patch415:        mozilla-1405267.patch
 Patch416:        mozilla-1399611.patch
 
 # Debian patches
@@ -335,7 +334,6 @@ This package contains results of tests executed during build.
 %endif
 
 %patch413 -p1 -b .1353817
-%patch415 -p1 -b .1405267
 %patch416 -p1 -b .1399611
 
 # Debian extension patch
@@ -858,6 +856,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Oct 11 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.3
+- Updated to 57.0 Beta 7
+
 * Mon Oct 9 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.2
 - Updated to 57.0 Beta 6
 
