@@ -77,7 +77,7 @@
 %global sqlite_build_version %(pkg-config --silence-errors --modversion sqlite3 2>/dev/null || echo 65536)
 %endif
 
-%define pre_version             b7
+%define pre_version             b8
 
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
@@ -99,13 +99,13 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        57.0
-Release:        0.3%{?pre_tag}%{?dist}
+Release:        0.4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20171011.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20171016.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -856,6 +856,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Oct 16 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.4
+- Updated to 57.0 Beta 8
+
 * Wed Oct 11 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.3
 - Updated to 57.0 Beta 7
 
