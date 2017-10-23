@@ -2,9 +2,6 @@
 ExcludeArch: armv7hl
 %endif
 
-# Use ALSA backend?
-%define alsa_backend      0
-
 # Use system nspr/nss?
 %define system_nss        1
 
@@ -68,12 +65,12 @@ ExcludeArch: armv7hl
 %endif
 
 %if %{?system_nss}
-%global nspr_version 4.10.10
+%global nspr_version 4.17.0
 # NSS/NSPR quite often ends in build override, so as requirement the version
 # we're building against could bring us some broken dependencies from time to time.
 #%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.32.1
+%global nss_version 3.33
 #%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %global nss_build_version %{nss_version}
 %endif
@@ -84,9 +81,12 @@ ExcludeArch: armv7hl
 %global sqlite_build_version %(pkg-config --silence-errors --modversion sqlite3 2>/dev/null || echo 65536)
 %endif
 
+%define pre_version             b9
+
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
+%global tarballdir    %{name}-%{version}%{?pre_version}
 
 %define official_branding       1
 %define build_langpacks         1
@@ -102,14 +102,14 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        56.0
-Release:        5%{?pre_tag}%{?dist}
+Version:        57.0
+Release:        0.5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20170927.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20171019.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -126,16 +126,13 @@ Patch0:         firefox-install-dir.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
 Patch18:        xulrunner-24.0-jemalloc-ppc.patch
-Patch20:        firefox-build-prbool.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
 # Also fixes s390x: https://bugzilla.mozilla.org/show_bug.cgi?id=1376268
 Patch29:        build-big-endian.patch
-Patch30:        fedora-build.patch
 Patch31:        build-ppc64-s390x-curl.patch
 Patch32:        build-rust-ppc64le.patch
-Patch34:        build-cubeb-pulse-arm.patch
 Patch35:        build-ppc-jit.patch
 Patch36:        build-missing-xlocale-h.patch
 # Always feel lucky for unsupported platforms:
@@ -153,7 +150,6 @@ Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
-Patch230:        rhbz-1497932.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -163,7 +159,7 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
-Patch415:        mozilla-1405267.patch
+Patch416:        mozilla-1399611.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -195,9 +191,6 @@ BuildRequires:  pkgconfig(xrender)
 BuildRequires:  pkgconfig(hunspell)
 %endif
 BuildRequires:  pkgconfig(libstartup-notification-1.0)
-%if %{?alsa_backend}
-BuildRequires:  pkgconfig(alsa)
-%endif
 BuildRequires:  pkgconfig(libnotify) >= %{libnotify_version}
 BuildRequires:  pkgconfig(dri)
 BuildRequires:  pkgconfig(libcurl)
@@ -302,7 +295,7 @@ This package contains results of tests executed during build.
 #---------------------------------------------------------------------
 
 %prep
-%setup -q
+%setup -q -n %{tarballdir}
 
 # Build patches, can't change backup suffix from default because during build
 # there is a compare of config and js/config directories and .orig suffix is
@@ -311,23 +304,18 @@ This package contains results of tests executed during build.
 
 
 %patch18 -p1 -b .jemalloc-ppc
-%patch20 -p1 -b .prbool
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 %patch29 -p1 -b .big-endian
-%patch30 -p1 -b .fedora-build
 %patch31 -p1 -b .ppc64-s390x-curl
 %patch32 -p1 -b .rust-ppc64le
-# don't need that %patch34 -p1 -b .cubeb-pulse-arm
 %ifarch ppc ppc64 ppc64le
 %patch35 -p1 -b .ppc-jit
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
 
 %patch3  -p1 -b .arm
-
-# For branding specific patches.
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -339,7 +327,6 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%patch230 -p1 -b .1497932
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
@@ -349,8 +336,9 @@ This package contains results of tests executed during build.
 %patch412 -p1 -b .1337988
 %endif
 %endif
+
 %patch413 -p1 -b .1353817
-%patch415 -p1 -b .1405267
+%patch416 -p1 -b .1399611
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -395,10 +383,6 @@ echo "ac_add_options --enable-system-ffi" >> .mozconfig
 
 %ifarch %{arm}
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
-%endif
-
-%if %{?alsa_backend}
-echo "ac_add_options --enable-alsa" >> .mozconfig
 %endif
 
 %if %{?system_hunspell}
@@ -471,6 +455,9 @@ echo "ac_add_options --without-system-icu" >> .mozconfig
 echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
 
+%ifarch %{ix86}
+echo "ac_add_options --disable-stylo" >> .mozconfig
+%endif
 
 #---------------------------------------------------------------------
 
@@ -873,8 +860,21 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Fri Oct 6 2017 Martin Stransky <stransky@redhat.com> - 56.0-5
-- Enable Stylo again.
+* Thu Oct 19 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.5
+- Updated to 57.0 Beta 9
+
+* Mon Oct 16 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.4
+- Updated to 57.0 Beta 8
+
+* Wed Oct 11 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.3
+- Updated to 57.0 Beta 7
+
+* Mon Oct 9 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.2
+- Updated to 57.0 Beta 6
+
+* Thu Oct 5 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.1
+- Updated to 57.0 Beta 5
+- Added patch for mozbz#1399611 - CSD emulation
 
 * Wed Oct 4 2017 Martin Stransky <stransky@redhat.com> - 56.0-4
 - Fixed rhbz#1497932 - Plug-Ins for example flash fails
