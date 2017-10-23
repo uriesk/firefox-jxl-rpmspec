@@ -1,19 +1,19 @@
-diff -up firefox-55.0.2/js/src/jit/AtomicOperations.h.jit-atomic-lucky firefox-55.0.2/js/src/jit/AtomicOperations.h
---- firefox-55.0.2/js/src/jit/AtomicOperations.h.jit-atomic-lucky	2017-07-31 18:20:47.000000000 +0200
-+++ firefox-55.0.2/js/src/jit/AtomicOperations.h	2017-08-29 12:59:52.870926044 +0200
-@@ -348,7 +348,7 @@ AtomicOperations::isLockfree(int32_t siz
- # elif defined(__sh__)
- #  include "jit/none/AtomicOperations-feeling-lucky.h"
- # else
--#  include "jit/none/AtomicOperations-none.h" // These MOZ_CRASH() always
-+#  include "jit/none/AtomicOperations-feeling-lucky.h"
- # endif
- #elif defined(JS_CODEGEN_X86) || defined(JS_CODEGEN_X64)
- # include "jit/x86-shared/AtomicOperations-x86-shared.h"
-diff -up firefox-55.0.2/js/src/jit/none/AtomicOperations-feeling-lucky.h.jit-atomic-lucky firefox-55.0.2/js/src/jit/none/AtomicOperations-feeling-lucky.h
---- firefox-55.0.2/js/src/jit/none/AtomicOperations-feeling-lucky.h.jit-atomic-lucky	2017-08-29 14:10:52.665031524 +0200
-+++ firefox-55.0.2/js/src/jit/none/AtomicOperations-feeling-lucky.h	2017-08-29 14:09:40.756060235 +0200
-@@ -60,6 +60,14 @@
+diff -up firefox-57.0b5/js/src/jit/AtomicOperations.h.jit-atomic-lucky firefox-57.0b5/js/src/jit/AtomicOperations.h
+--- firefox-57.0b5/js/src/jit/AtomicOperations.h.jit-atomic-lucky	2017-10-06 12:34:02.338973607 +0200
++++ firefox-57.0b5/js/src/jit/AtomicOperations.h	2017-10-06 12:38:24.632622215 +0200
+@@ -415,7 +415,7 @@ AtomicOperations::isLockfreeJS(int32_t s
+ #elif defined(__s390__) || defined(__s390x__)
+ # include "jit/none/AtomicOperations-feeling-lucky.h"
+ #else
+-# error "No AtomicOperations support provided for this platform"
++# include "jit/none/AtomicOperations-feeling-lucky.h"
+ #endif
+ 
+ #endif // jit_AtomicOperations_h
+diff -up firefox-57.0b5/js/src/jit/none/AtomicOperations-feeling-lucky.h.jit-atomic-lucky firefox-57.0b5/js/src/jit/none/AtomicOperations-feeling-lucky.h
+--- firefox-57.0b5/js/src/jit/none/AtomicOperations-feeling-lucky.h.jit-atomic-lucky	2017-09-19 06:18:28.000000000 +0200
++++ firefox-57.0b5/js/src/jit/none/AtomicOperations-feeling-lucky.h	2017-10-06 12:34:02.338973607 +0200
+@@ -79,6 +79,14 @@
  #  define GNUC_COMPATIBLE
  #endif
  
