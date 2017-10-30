@@ -103,7 +103,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        57.0
-Release:        0.7%{?pre_tag}%{?dist}
+Release:        0.8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Group:          Applications/Internet
@@ -160,6 +160,9 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch416:        mozilla-1399611.patch
+
+# Better compatibility with NSS sql database format, rhbz#1496563
+Patch481:        sqlcompat-ff57-1-backport-730495
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -339,6 +342,10 @@ This package contains results of tests executed during build.
 
 %patch413 -p1 -b .1353817
 %patch416 -p1 -b .1399611
+
+%if 0%{?fedora} > 27
+%patch481 -p1 -b .sqlcompat-1
+%endif
 
 # Debian extension patch
 %patch500 -p1 -b .440908
@@ -860,8 +867,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Oct 30 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.7
+* Mon Oct 30 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.8
 - Updated to 57.0 Beta 12
+
+* Tue Oct 24 2017 Kai Engert <kaie@redhat.com> - 57.0-0.7
+- Backport mozbz#730495 for rhbz#1496563
 
 * Tue Oct 24 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.6
 - Updated to 57.0 Beta 11
