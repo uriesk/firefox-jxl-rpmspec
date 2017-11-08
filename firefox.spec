@@ -588,32 +588,32 @@ rm -f  objdir/dist/bin/pk12util
 pref("general.useragent.locale", "chrome://global/locale/intl.properties");
 EOF
 
-DESTDIR=$RPM_BUILD_ROOT make -C objdir install
+DESTDIR=%{buildroot} make -C objdir install
 
-%{__mkdir_p} $RPM_BUILD_ROOT{%{_libdir},%{_bindir},%{_datadir}/applications}
+%{__mkdir_p} %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
-desktop-file-install --dir $RPM_BUILD_ROOT%{_datadir}/applications %{SOURCE20}
+desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 
 # set up the firefox start script
-%{__rm} -rf $RPM_BUILD_ROOT%{_bindir}/firefox
-%{__cat} %{SOURCE21} > $RPM_BUILD_ROOT%{_bindir}/firefox
-%{__chmod} 755 $RPM_BUILD_ROOT%{_bindir}/firefox
+%{__rm} -rf %{buildroot}%{_bindir}/firefox
+%{__cat} %{SOURCE21} > %{buildroot}%{_bindir}/firefox
+%{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
-%{__install} -p -D -m 644 %{SOURCE23} $RPM_BUILD_ROOT%{_mandir}/man1/firefox.1
+%{__install} -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
-%{__rm} -f $RPM_BUILD_ROOT/%{mozappdir}/firefox-config
-%{__rm} -f $RPM_BUILD_ROOT/%{mozappdir}/update-settings.ini
+%{__rm} -f %{buildroot}/%{mozappdir}/firefox-config
+%{__rm} -f %{buildroot}/%{mozappdir}/update-settings.ini
 
 for s in 16 22 24 32 48 256; do
-    %{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${s}x${s}/apps
+    %{__mkdir_p} %{buildroot}%{_datadir}/icons/hicolor/${s}x${s}/apps
     %{__cp} -p browser/branding/official/default${s}.png \
-               $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${s}x${s}/apps/firefox.png
+               %{buildroot}%{_datadir}/icons/hicolor/${s}x${s}/apps/firefox.png
 done
 
 # Install hight contrast icon
-%{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/symbolic/apps
+%{__mkdir_p} %{buildroot}%{_datadir}/icons/hicolor/symbolic/apps
 %{__cp} -p %{SOURCE25} \
-           $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/symbolic/apps
+           %{buildroot}%{_datadir}/icons/hicolor/symbolic/apps
 
 # Register as an application to be visible in the software center
 #
@@ -622,8 +622,8 @@ done
 #
 # See http://www.freedesktop.org/software/appstream/docs/ for more details.
 #
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/appdata
-cat > $RPM_BUILD_ROOT%{_datadir}/appdata/%{name}.appdata.xml <<EOF
+mkdir -p %{buildroot}%{_datadir}/appdata
+cat > %{buildroot}%{_datadir}/appdata/%{name}.appdata.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2014 Richard Hughes <richard@hughsie.com> -->
 <!--
@@ -658,7 +658,7 @@ EOF
 echo > %{name}.lang
 %if %{build_langpacks}
 # Extract langpacks, make any mods needed, repack the langpack, and install it.
-%{__mkdir_p} $RPM_BUILD_ROOT%{langpackdir}
+%{__mkdir_p} %{buildroot}%{langpackdir}
 %{__tar} xf %{SOURCE1}
 for langpack in `ls firefox-langpacks/*.xpi`; do
   language=`basename $langpack .xpi`
@@ -671,7 +671,7 @@ for langpack in `ls firefox-langpacks/*.xpi`; do
   zip -qq -r9mX ../${extensionID}.xpi *
   cd -
 
-  %{__install} -m 644 ${extensionID}.xpi $RPM_BUILD_ROOT%{langpackdir}
+  %{__install} -m 644 ${extensionID}.xpi %{buildroot}%{langpackdir}
   language=`echo $language | sed -e 's/-/_/g'`
   echo "%%lang($language) %{langpackdir}/${extensionID}.xpi" >> %{name}.lang
 done
@@ -681,7 +681,7 @@ done
 function create_default_langpack() {
 language_long=$1
 language_short=$2
-cd $RPM_BUILD_ROOT%{langpackdir}
+cd %{buildroot}%{langpackdir}
 ln -s langpack-$language_long@firefox.mozilla.org.xpi langpack-$language_short@firefox.mozilla.org.xpi
 cd -
 echo "%%lang($language_short) %{langpackdir}/langpack-$language_short@firefox.mozilla.org.xpi" >> %{name}.lang
@@ -705,47 +705,47 @@ create_default_langpack "zh-TW" "zh"
 %endif # build_langpacks
 
 
-%{__mkdir_p} $RPM_BUILD_ROOT/%{mozappdir}/browser/defaults/preferences
+%{__mkdir_p} %{buildroot}/%{mozappdir}/browser/defaults/preferences
 
 # System config dir
-%{__mkdir_p} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/pref
+%{__mkdir_p} %{buildroot}/%{_sysconfdir}/%{name}/pref
 
 # System extensions
-%{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/mozilla/extensions/%{firefox_app_id}
-%{__mkdir_p} $RPM_BUILD_ROOT%{_libdir}/mozilla/extensions/%{firefox_app_id}
+%{__mkdir_p} %{buildroot}%{_datadir}/mozilla/extensions/%{firefox_app_id}
+%{__mkdir_p} %{buildroot}%{_libdir}/mozilla/extensions/%{firefox_app_id}
 
 # Copy over the LICENSE
-%{__install} -p -c -m 644 LICENSE $RPM_BUILD_ROOT/%{mozappdir}
+%{__install} -p -c -m 644 LICENSE %{buildroot}/%{mozappdir}
 
 # Use the system hunspell dictionaries
-%{__rm} -rf ${RPM_BUILD_ROOT}%{mozappdir}/dictionaries
-ln -s %{_datadir}/myspell ${RPM_BUILD_ROOT}%{mozappdir}/dictionaries
+%{__rm} -rf %{buildroot}%{mozappdir}/dictionaries
+ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
 
 # Enable crash reporter for Firefox application
 %if %{enable_mozilla_crashreporter}
-sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" $RPM_BUILD_ROOT/%{mozappdir}/application.ini
+sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{mozappdir}/application.ini
 # Add debuginfo for crash-stats.mozilla.com
-%{__mkdir_p} $RPM_BUILD_ROOT/%{moz_debug_dir}
-%{__cp} objdir/dist/%{symbols_file_name} $RPM_BUILD_ROOT/%{moz_debug_dir}
+%{__mkdir_p} %{buildroot}/%{moz_debug_dir}
+%{__cp} objdir/dist/%{symbols_file_name} %{buildroot}/%{moz_debug_dir}
 %endif
 
 %if %{run_tests}
 # Add debuginfo for crash-stats.mozilla.com
-%{__mkdir_p} $RPM_BUILD_ROOT/test_results
-%{__cp} test_results/* $RPM_BUILD_ROOT/test_results
+%{__mkdir_p} %{buildroot}/test_results
+%{__cp} test_results/* %{buildroot}/test_results
 %endif
 
 # Default
-%{__cp} %{SOURCE12} ${RPM_BUILD_ROOT}%{mozappdir}/browser/defaults/preferences
+%{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 
 # Add distribution.ini
-%{__mkdir_p} ${RPM_BUILD_ROOT}%{mozappdir}/distribution
-%{__cp} %{SOURCE26} ${RPM_BUILD_ROOT}%{mozappdir}/distribution
+%{__mkdir_p} %{buildroot}%{mozappdir}/distribution
+%{__cp} %{SOURCE26} %{buildroot}%{mozappdir}/distribution
 
 # Remove copied libraries to speed up build
-rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libmozjs.so
-rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libmozalloc.so
-rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libxul.so
+rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozjs.so
+rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozalloc.so
+rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libxul.so
 #---------------------------------------------------------------------
 
 # Moves defaults/preferences to browser/defaults/preferences
