@@ -106,7 +106,6 @@ Version:        57.0
 Release:        0.9%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
-Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
 Source1:        firefox-langpacks-%{version}%{?pre_version}-20171106.tar.xz
@@ -274,7 +273,6 @@ compliance, performance and portability.
 %global crashreporter_pkg_name mozilla-crashreporter-%{name}-debuginfo
 %package -n %{crashreporter_pkg_name}
 Summary: Debugging symbols used by Mozilla's crash reporter servers
-Group: Development/Debug
 %description -n %{crashreporter_pkg_name}
 This package provides debug information for Firefox, for use by
 Mozilla's crash reporter servers.  If you are trying to locally
@@ -287,7 +285,6 @@ debug %{name}, you want to install %{name}-debuginfo instead.
 %global testsuite_pkg_name mozilla-%{name}-testresults
 %package -n %{testsuite_pkg_name}
 Summary: Results of testsuite
-Group: Development/Debug
 %description -n %{testsuite_pkg_name}
 This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
