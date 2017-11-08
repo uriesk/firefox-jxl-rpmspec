@@ -278,7 +278,6 @@ This package provides debug information for Firefox, for use by
 Mozilla's crash reporter servers.  If you are trying to locally
 debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
-%defattr(-,root,root)
 %endif
 
 %if %{run_tests}
@@ -289,7 +288,6 @@ Summary: Results of testsuite
 This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
 /test_results
-%defattr(-,root,root)
 %endif
 
 #---------------------------------------------------------------------
@@ -794,7 +792,6 @@ fi
 gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files -f %{name}.lang
-%defattr(-,root,root,-)
 %{_bindir}/firefox
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
