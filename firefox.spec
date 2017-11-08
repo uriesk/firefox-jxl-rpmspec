@@ -803,7 +803,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{_datadir}/appdata/*.appdata.xml
 %{_datadir}/applications/*.desktop
 %dir %{mozappdir}
-%doc %{mozappdir}/LICENSE
+%license %{mozappdir}/LICENSE
 %{mozappdir}/browser/chrome
 %{mozappdir}/browser/chrome.manifest
 %{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
