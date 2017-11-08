@@ -3,59 +3,59 @@ ExcludeArch: armv7hl
 %endif
 
 # Use system nspr/nss?
-%define system_nss        1
+%global system_nss        1
 
 # Use system hunspell?
 %if 0%{?fedora} > 25
-%define system_hunspell   1
+%global system_hunspell   1
 %else
-%define system_hunspell   0
+%global system_hunspell   0
 %endif
 
 # Use system sqlite?
 %if 0%{?fedora} > 27
-%define system_sqlite     1
+%global system_sqlite     1
 %else
-%define system_sqlite     0
+%global system_sqlite     0
 %endif
-%define system_ffi        1
+%global system_ffi        1
 
 # Use system cairo?
-%define system_cairo      0
+%global system_cairo      0
 
 # Use system libvpx?
-%define system_libvpx     1
+%global system_libvpx     1
 
 # Use system libicu?
 %if 0%{?fedora} > 27
-%define system_libicu     0
+%global system_libicu     0
 %else
-%define system_libicu     0
+%global system_libicu     0
 %endif
 
 # Big endian platforms
 %ifarch ppc64 s390x
 # Javascript Intl API is not supported on big endian platforms right now:
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1322212
-%define big_endian        1
+%global big_endian        1
 %endif
 
 # Hardened build?
-%define hardened_build    1
+%global hardened_build    1
 
-%define system_jpeg       1
+%global system_jpeg       1
 
 %ifarch %{ix86} x86_64
-%define run_tests         0
+%global run_tests         0
 %else
-%define run_tests         0
+%global run_tests         0
 %endif
 
 # Build as a debug package?
-%define debug_build       0
+%global debug_build       0
 
-%define default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
-%define firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
+%global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
+%global firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
 # Minimal required versions
 %global cairo_version 1.13.1
 %global freetype_version 2.1.9
@@ -81,21 +81,21 @@ ExcludeArch: armv7hl
 %global sqlite_build_version %(pkg-config --silence-errors --modversion sqlite3 2>/dev/null || echo 65536)
 %endif
 
-%define pre_version             b14
+%global pre_version             b14
 
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
 %global tarballdir    %{name}-%{version}%{?pre_version}
 
-%define official_branding       1
-%define build_langpacks         1
+%global official_branding       1
+%global build_langpacks         1
 
-%define enable_mozilla_crashreporter       0
+%global enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
 %if 0%{?fedora} < 27
-%define enable_mozilla_crashreporter       1
+%global enable_mozilla_crashreporter       1
 %endif
 %endif
 %endif
@@ -402,19 +402,19 @@ echo "ac_add_options --disable-system-hunspell" >> .mozconfig
 echo "ac_add_options --enable-debug" >> .mozconfig
 echo "ac_add_options --disable-optimize" >> .mozconfig
 %else
-%define optimize_flags "none"
+%global optimize_flags "none"
 # Fedora 26 (gcc7) needs to disable default build flags (mozbz#1342344)
 %if 0%{?fedora} > 25
 %ifnarch s390 s390x
-%define optimize_flags "-g -O2"
+%global optimize_flags "-g -O2"
 %endif
 %endif
 %ifarch armv7hl
 # ARMv7 need that (rhbz#1426850)
-%define optimize_flags "-g -O2 -fno-schedule-insns"
+%global optimize_flags "-g -O2 -fno-schedule-insns"
 %endif
 %ifarch ppc64le aarch64
-%define optimize_flags "-g -O2"
+%global optimize_flags "-g -O2"
 %endif
 %if %{optimize_flags} != "none"
 echo 'ac_add_options --enable-optimize=%{?optimize_flags}' >> .mozconfig
