@@ -3,59 +3,59 @@ ExcludeArch: armv7hl
 %endif
 
 # Use system nspr/nss?
-%define system_nss        1
+%global system_nss        1
 
 # Use system hunspell?
 %if 0%{?fedora} > 25
-%define system_hunspell   1
+%global system_hunspell   1
 %else
-%define system_hunspell   0
+%global system_hunspell   0
 %endif
 
 # Use system sqlite?
 %if 0%{?fedora} > 27
-%define system_sqlite     1
+%global system_sqlite     1
 %else
-%define system_sqlite     0
+%global system_sqlite     0
 %endif
-%define system_ffi        1
+%global system_ffi        1
 
 # Use system cairo?
-%define system_cairo      0
+%global system_cairo      0
 
 # Use system libvpx?
-%define system_libvpx     1
+%global system_libvpx     1
 
 # Use system libicu?
 %if 0%{?fedora} > 27
-%define system_libicu     0
+%global system_libicu     0
 %else
-%define system_libicu     0
+%global system_libicu     0
 %endif
 
 # Big endian platforms
 %ifarch ppc64 s390x
 # Javascript Intl API is not supported on big endian platforms right now:
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1322212
-%define big_endian        1
+%global big_endian        1
 %endif
 
 # Hardened build?
-%define hardened_build    1
+%global hardened_build    1
 
-%define system_jpeg       1
+%global system_jpeg       1
 
 %ifarch %{ix86} x86_64
-%define run_tests         0
+%global run_tests         0
 %else
-%define run_tests         0
+%global run_tests         0
 %endif
 
 # Build as a debug package?
-%define debug_build       0
+%global debug_build       0
 
-%define default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
-%define firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
+%global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
+%global firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
 # Minimal required versions
 %global cairo_version 1.13.1
 %global freetype_version 2.1.9
@@ -81,21 +81,19 @@ ExcludeArch: armv7hl
 %global sqlite_build_version %(pkg-config --silence-errors --modversion sqlite3 2>/dev/null || echo 65536)
 %endif
 
-%define pre_version             b14
-
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
 %global tarballdir    %{name}-%{version}%{?pre_version}
 
-%define official_branding       1
-%define build_langpacks         1
+%global official_branding       1
+%global build_langpacks         1
 
-%define enable_mozilla_crashreporter       0
+%global enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
 %if 0%{?fedora} < 27
-%define enable_mozilla_crashreporter       1
+%global enable_mozilla_crashreporter       1
 %endif
 %endif
 %endif
@@ -103,13 +101,12 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        57.0
-Release:        0.9%{?pre_tag}%{?dist}
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
-Group:          Applications/Internet
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20171106.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20171109.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -274,25 +271,21 @@ compliance, performance and portability.
 %global crashreporter_pkg_name mozilla-crashreporter-%{name}-debuginfo
 %package -n %{crashreporter_pkg_name}
 Summary: Debugging symbols used by Mozilla's crash reporter servers
-Group: Development/Debug
 %description -n %{crashreporter_pkg_name}
 This package provides debug information for Firefox, for use by
 Mozilla's crash reporter servers.  If you are trying to locally
 debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
-%defattr(-,root,root)
 %endif
 
 %if %{run_tests}
 %global testsuite_pkg_name mozilla-%{name}-testresults
 %package -n %{testsuite_pkg_name}
 Summary: Results of testsuite
-Group: Development/Debug
 %description -n %{testsuite_pkg_name}
 This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
 /test_results
-%defattr(-,root,root)
 %endif
 
 #---------------------------------------------------------------------
@@ -402,19 +395,19 @@ echo "ac_add_options --disable-system-hunspell" >> .mozconfig
 echo "ac_add_options --enable-debug" >> .mozconfig
 echo "ac_add_options --disable-optimize" >> .mozconfig
 %else
-%define optimize_flags "none"
+%global optimize_flags "none"
 # Fedora 26 (gcc7) needs to disable default build flags (mozbz#1342344)
 %if 0%{?fedora} > 25
 %ifnarch s390 s390x
-%define optimize_flags "-g -O2"
+%global optimize_flags "-g -O2"
 %endif
 %endif
 %ifarch armv7hl
 # ARMv7 need that (rhbz#1426850)
-%define optimize_flags "-g -O2 -fno-schedule-insns"
+%global optimize_flags "-g -O2 -fno-schedule-insns"
 %endif
 %ifarch ppc64le aarch64
-%define optimize_flags "-g -O2"
+%global optimize_flags "-g -O2"
 %endif
 %if %{optimize_flags} != "none"
 echo 'ac_add_options --enable-optimize=%{?optimize_flags}' >> .mozconfig
@@ -497,7 +490,7 @@ find ./ -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
 #
 # Disable C++ exceptions since Mozilla code is not exception-safe
 #
-MOZ_OPT_FLAGS=$(echo "$RPM_OPT_FLAGS" | %{__sed} -e 's/-Wall//')
+MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 #rhbz#1037063
 # -Werror=format-security causes build failures when -Wno-format is explicitly given
 # for some sources
@@ -593,32 +586,32 @@ rm -f  objdir/dist/bin/pk12util
 pref("general.useragent.locale", "chrome://global/locale/intl.properties");
 EOF
 
-DESTDIR=$RPM_BUILD_ROOT make -C objdir install
+DESTDIR=%{buildroot} make -C objdir install
 
-%{__mkdir_p} $RPM_BUILD_ROOT{%{_libdir},%{_bindir},%{_datadir}/applications}
+%{__mkdir_p} %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
-desktop-file-install --dir $RPM_BUILD_ROOT%{_datadir}/applications %{SOURCE20}
+desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 
 # set up the firefox start script
-%{__rm} -rf $RPM_BUILD_ROOT%{_bindir}/firefox
-%{__cat} %{SOURCE21} > $RPM_BUILD_ROOT%{_bindir}/firefox
-%{__chmod} 755 $RPM_BUILD_ROOT%{_bindir}/firefox
+%{__rm} -rf %{buildroot}%{_bindir}/firefox
+%{__cat} %{SOURCE21} > %{buildroot}%{_bindir}/firefox
+%{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
-%{__install} -p -D -m 644 %{SOURCE23} $RPM_BUILD_ROOT%{_mandir}/man1/firefox.1
+%{__install} -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
-%{__rm} -f $RPM_BUILD_ROOT/%{mozappdir}/firefox-config
-%{__rm} -f $RPM_BUILD_ROOT/%{mozappdir}/update-settings.ini
+%{__rm} -f %{buildroot}/%{mozappdir}/firefox-config
+%{__rm} -f %{buildroot}/%{mozappdir}/update-settings.ini
 
 for s in 16 22 24 32 48 256; do
-    %{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${s}x${s}/apps
+    %{__mkdir_p} %{buildroot}%{_datadir}/icons/hicolor/${s}x${s}/apps
     %{__cp} -p browser/branding/official/default${s}.png \
-               $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${s}x${s}/apps/firefox.png
+               %{buildroot}%{_datadir}/icons/hicolor/${s}x${s}/apps/firefox.png
 done
 
 # Install hight contrast icon
-%{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/symbolic/apps
+%{__mkdir_p} %{buildroot}%{_datadir}/icons/hicolor/symbolic/apps
 %{__cp} -p %{SOURCE25} \
-           $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/symbolic/apps
+           %{buildroot}%{_datadir}/icons/hicolor/symbolic/apps
 
 # Register as an application to be visible in the software center
 #
@@ -627,8 +620,8 @@ done
 #
 # See http://www.freedesktop.org/software/appstream/docs/ for more details.
 #
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/appdata
-cat > $RPM_BUILD_ROOT%{_datadir}/appdata/%{name}.appdata.xml <<EOF
+mkdir -p %{buildroot}%{_datadir}/appdata
+cat > %{buildroot}%{_datadir}/appdata/%{name}.appdata.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2014 Richard Hughes <richard@hughsie.com> -->
 <!--
@@ -663,7 +656,7 @@ EOF
 echo > %{name}.lang
 %if %{build_langpacks}
 # Extract langpacks, make any mods needed, repack the langpack, and install it.
-%{__mkdir_p} $RPM_BUILD_ROOT%{langpackdir}
+%{__mkdir_p} %{buildroot}%{langpackdir}
 %{__tar} xf %{SOURCE1}
 for langpack in `ls firefox-langpacks/*.xpi`; do
   language=`basename $langpack .xpi`
@@ -676,7 +669,7 @@ for langpack in `ls firefox-langpacks/*.xpi`; do
   zip -qq -r9mX ../${extensionID}.xpi *
   cd -
 
-  %{__install} -m 644 ${extensionID}.xpi $RPM_BUILD_ROOT%{langpackdir}
+  %{__install} -m 644 ${extensionID}.xpi %{buildroot}%{langpackdir}
   language=`echo $language | sed -e 's/-/_/g'`
   echo "%%lang($language) %{langpackdir}/${extensionID}.xpi" >> %{name}.lang
 done
@@ -686,7 +679,7 @@ done
 function create_default_langpack() {
 language_long=$1
 language_short=$2
-cd $RPM_BUILD_ROOT%{langpackdir}
+cd %{buildroot}%{langpackdir}
 ln -s langpack-$language_long@firefox.mozilla.org.xpi langpack-$language_short@firefox.mozilla.org.xpi
 cd -
 echo "%%lang($language_short) %{langpackdir}/langpack-$language_short@firefox.mozilla.org.xpi" >> %{name}.lang
@@ -710,47 +703,47 @@ create_default_langpack "zh-TW" "zh"
 %endif # build_langpacks
 
 
-%{__mkdir_p} $RPM_BUILD_ROOT/%{mozappdir}/browser/defaults/preferences
+%{__mkdir_p} %{buildroot}/%{mozappdir}/browser/defaults/preferences
 
 # System config dir
-%{__mkdir_p} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/pref
+%{__mkdir_p} %{buildroot}/%{_sysconfdir}/%{name}/pref
 
 # System extensions
-%{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}/mozilla/extensions/%{firefox_app_id}
-%{__mkdir_p} $RPM_BUILD_ROOT%{_libdir}/mozilla/extensions/%{firefox_app_id}
+%{__mkdir_p} %{buildroot}%{_datadir}/mozilla/extensions/%{firefox_app_id}
+%{__mkdir_p} %{buildroot}%{_libdir}/mozilla/extensions/%{firefox_app_id}
 
 # Copy over the LICENSE
-%{__install} -p -c -m 644 LICENSE $RPM_BUILD_ROOT/%{mozappdir}
+%{__install} -p -c -m 644 LICENSE %{buildroot}/%{mozappdir}
 
 # Use the system hunspell dictionaries
-%{__rm} -rf ${RPM_BUILD_ROOT}%{mozappdir}/dictionaries
-ln -s %{_datadir}/myspell ${RPM_BUILD_ROOT}%{mozappdir}/dictionaries
+%{__rm} -rf %{buildroot}%{mozappdir}/dictionaries
+ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
 
 # Enable crash reporter for Firefox application
 %if %{enable_mozilla_crashreporter}
-sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" $RPM_BUILD_ROOT/%{mozappdir}/application.ini
+sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{mozappdir}/application.ini
 # Add debuginfo for crash-stats.mozilla.com
-%{__mkdir_p} $RPM_BUILD_ROOT/%{moz_debug_dir}
-%{__cp} objdir/dist/%{symbols_file_name} $RPM_BUILD_ROOT/%{moz_debug_dir}
+%{__mkdir_p} %{buildroot}/%{moz_debug_dir}
+%{__cp} objdir/dist/%{symbols_file_name} %{buildroot}/%{moz_debug_dir}
 %endif
 
 %if %{run_tests}
 # Add debuginfo for crash-stats.mozilla.com
-%{__mkdir_p} $RPM_BUILD_ROOT/test_results
-%{__cp} test_results/* $RPM_BUILD_ROOT/test_results
+%{__mkdir_p} %{buildroot}/test_results
+%{__cp} test_results/* %{buildroot}/test_results
 %endif
 
 # Default
-%{__cp} %{SOURCE12} ${RPM_BUILD_ROOT}%{mozappdir}/browser/defaults/preferences
+%{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 
 # Add distribution.ini
-%{__mkdir_p} ${RPM_BUILD_ROOT}%{mozappdir}/distribution
-%{__cp} %{SOURCE26} ${RPM_BUILD_ROOT}%{mozappdir}/distribution
+%{__mkdir_p} %{buildroot}%{mozappdir}/distribution
+%{__cp} %{SOURCE26} %{buildroot}%{mozappdir}/distribution
 
 # Remove copied libraries to speed up build
-rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libmozjs.so
-rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libmozalloc.so
-rm -f ${RPM_BUILD_ROOT}%{mozappdirdev}/sdk/lib/libxul.so
+rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozjs.so
+rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozalloc.so
+rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libxul.so
 #---------------------------------------------------------------------
 
 # Moves defaults/preferences to browser/defaults/preferences
@@ -797,7 +790,6 @@ fi
 gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files -f %{name}.lang
-%defattr(-,root,root,-)
 %{_bindir}/firefox
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
@@ -809,7 +801,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{_datadir}/appdata/*.appdata.xml
 %{_datadir}/applications/*.desktop
 %dir %{mozappdir}
-%doc %{mozappdir}/LICENSE
+%license %{mozappdir}/LICENSE
 %{mozappdir}/browser/chrome
 %{mozappdir}/browser/chrome.manifest
 %{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
@@ -867,6 +859,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Nov 9 2017 Martin Stransky <stransky@redhat.com> - 57.0-1
+- Updated to 57.0
+
 * Mon Nov 6 2017 Martin Stransky <stransky@redhat.com> - 57.0-0.9
 - Updated to 57.0 Beta 14
 
