@@ -215,6 +215,7 @@ Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
 BuildRequires:  python2-devel
+Requires:       u2f-hidraw-policy
 
 %if 0%{?fedora} > 25
 # For early testing of rhbz#1400293 mozbz#1324096 on F26 and Rawhide,
