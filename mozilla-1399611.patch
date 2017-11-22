@@ -1,6 +1,6 @@
-diff -up firefox-57.0b8/browser/app/profile/firefox.js.1399611 firefox-57.0b8/browser/app/profile/firefox.js
---- firefox-57.0b8/browser/app/profile/firefox.js.1399611	2017-10-16 12:11:45.364240654 +0200
-+++ firefox-57.0b8/browser/app/profile/firefox.js	2017-10-16 12:28:03.860720910 +0200
+diff -up firefox-57.0/browser/app/profile/firefox.js.1399611 firefox-57.0/browser/app/profile/firefox.js
+--- firefox-57.0/browser/app/profile/firefox.js.1399611	2017-11-22 12:17:33.717682523 +0100
++++ firefox-57.0/browser/app/profile/firefox.js	2017-11-22 12:17:33.728682488 +0100
 @@ -457,11 +457,7 @@ pref("browser.tabs.loadBookmarksInBackgr
  pref("browser.tabs.loadBookmarksInTabs", false);
  pref("browser.tabs.tabClipWidth", 140);
@@ -13,9 +13,9 @@ diff -up firefox-57.0b8/browser/app/profile/firefox.js.1399611 firefox-57.0b8/br
  
  // Offer additional drag space to the user. The drag space
  // will only be shown if browser.tabs.drawInTitlebar is true.
-diff -up firefox-57.0b8/browser/base/content/browser-tabsintitlebar.js.1399611 firefox-57.0b8/browser/base/content/browser-tabsintitlebar.js
---- firefox-57.0b8/browser/base/content/browser-tabsintitlebar.js.1399611	2017-10-09 22:17:13.000000000 +0200
-+++ firefox-57.0b8/browser/base/content/browser-tabsintitlebar.js	2017-10-16 12:11:45.364240654 +0200
+diff -up firefox-57.0/browser/base/content/browser-tabsintitlebar.js.1399611 firefox-57.0/browser/base/content/browser-tabsintitlebar.js
+--- firefox-57.0/browser/base/content/browser-tabsintitlebar.js.1399611	2017-11-02 17:16:30.000000000 +0100
++++ firefox-57.0/browser/base/content/browser-tabsintitlebar.js	2017-11-22 12:17:33.728682488 +0100
 @@ -14,6 +14,11 @@ var TabsInTitlebar = {
      this._readPref();
      Services.prefs.addObserver(this._prefName, this);
@@ -28,9 +28,9 @@ diff -up firefox-57.0b8/browser/base/content/browser-tabsintitlebar.js.1399611 f
      // We need to update the appearance of the titlebar when the menu changes
      // from the active to the inactive state. We can't, however, rely on
      // DOMMenuBarInactive, because the menu fires this event and then removes
-diff -up firefox-57.0b8/browser/base/moz.build.1399611 firefox-57.0b8/browser/base/moz.build
---- firefox-57.0b8/browser/base/moz.build.1399611	2017-09-29 18:16:45.000000000 +0200
-+++ firefox-57.0b8/browser/base/moz.build	2017-10-16 12:11:45.364240654 +0200
+diff -up firefox-57.0/browser/base/moz.build.1399611 firefox-57.0/browser/base/moz.build
+--- firefox-57.0/browser/base/moz.build.1399611	2017-11-02 17:16:30.000000000 +0100
++++ firefox-57.0/browser/base/moz.build	2017-11-22 12:17:33.728682488 +0100
 @@ -57,7 +57,7 @@ DEFINES['APP_LICENSE_BLOCK'] = '%s/conte
  if CONFIG['MOZ_WIDGET_TOOLKIT'] in ('windows', 'gtk2', 'gtk3', 'cocoa'):
      DEFINES['CONTEXT_COPY_IMAGE_CONTENTS'] = 1
@@ -40,9 +40,9 @@ diff -up firefox-57.0b8/browser/base/moz.build.1399611 firefox-57.0b8/browser/ba
      DEFINES['CAN_DRAW_IN_TITLEBAR'] = 1
  
  if CONFIG['MOZ_WIDGET_TOOLKIT'] in ('windows', 'gtk2', 'gtk3'):
-diff -up firefox-57.0b8/browser/themes/linux/browser.css.1399611 firefox-57.0b8/browser/themes/linux/browser.css
---- firefox-57.0b8/browser/themes/linux/browser.css.1399611	2017-10-05 06:17:37.000000000 +0200
-+++ firefox-57.0b8/browser/themes/linux/browser.css	2017-10-16 12:11:45.365240651 +0200
+diff -up firefox-57.0/browser/themes/linux/browser.css.1399611 firefox-57.0/browser/themes/linux/browser.css
+--- firefox-57.0/browser/themes/linux/browser.css.1399611	2017-11-02 17:16:32.000000000 +0100
++++ firefox-57.0/browser/themes/linux/browser.css	2017-11-22 12:17:33.728682488 +0100
 @@ -556,7 +556,9 @@ html|span.ac-emphasize-text-url {
  
  #nav-bar,
@@ -140,9 +140,9 @@ diff -up firefox-57.0b8/browser/themes/linux/browser.css.1399611 firefox-57.0b8/
 +    }
 +  }
 +}
-diff -up firefox-57.0b8/dom/base/nsGkAtomList.h.1399611 firefox-57.0b8/dom/base/nsGkAtomList.h
---- firefox-57.0b8/dom/base/nsGkAtomList.h.1399611	2017-09-15 06:15:41.000000000 +0200
-+++ firefox-57.0b8/dom/base/nsGkAtomList.h	2017-10-16 12:11:45.365240651 +0200
+diff -up firefox-57.0/dom/base/nsGkAtomList.h.1399611 firefox-57.0/dom/base/nsGkAtomList.h
+--- firefox-57.0/dom/base/nsGkAtomList.h.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/dom/base/nsGkAtomList.h	2017-11-22 12:17:33.729682485 +0100
 @@ -2270,6 +2270,10 @@ GK_ATOM(touch_enabled, "touch-enabled")
  GK_ATOM(menubar_drag, "menubar-drag")
  GK_ATOM(swipe_animation_enabled, "swipe-animation-enabled")
@@ -165,9 +165,9 @@ diff -up firefox-57.0b8/dom/base/nsGkAtomList.h.1399611 firefox-57.0b8/dom/base/
  
  // application commands
  GK_ATOM(Back, "Back")
-diff -up firefox-57.0b8/gfx/src/nsThemeConstants.h.1399611 firefox-57.0b8/gfx/src/nsThemeConstants.h
---- firefox-57.0b8/gfx/src/nsThemeConstants.h.1399611	2017-06-12 18:37:10.000000000 +0200
-+++ firefox-57.0b8/gfx/src/nsThemeConstants.h	2017-10-16 12:11:45.365240651 +0200
+diff -up firefox-57.0/gfx/src/nsThemeConstants.h.1399611 firefox-57.0/gfx/src/nsThemeConstants.h
+--- firefox-57.0/gfx/src/nsThemeConstants.h.1399611	2017-07-31 18:20:46.000000000 +0200
++++ firefox-57.0/gfx/src/nsThemeConstants.h	2017-11-22 12:17:33.729682485 +0100
 @@ -299,6 +299,7 @@ enum ThemeWidgetType : uint8_t {
    NS_THEME_MAC_SOURCE_LIST,
    NS_THEME_MAC_SOURCE_LIST_SELECTION,
@@ -176,9 +176,9 @@ diff -up firefox-57.0b8/gfx/src/nsThemeConstants.h.1399611 firefox-57.0b8/gfx/sr
  
    ThemeWidgetType_COUNT
  };
-diff -up firefox-57.0b8/layout/style/nsCSSRuleProcessor.cpp.1399611 firefox-57.0b8/layout/style/nsCSSRuleProcessor.cpp
---- firefox-57.0b8/layout/style/nsCSSRuleProcessor.cpp.1399611	2017-08-02 14:27:54.000000000 +0200
-+++ firefox-57.0b8/layout/style/nsCSSRuleProcessor.cpp	2017-10-16 12:11:45.365240651 +0200
+diff -up firefox-57.0/layout/style/nsCSSRuleProcessor.cpp.1399611 firefox-57.0/layout/style/nsCSSRuleProcessor.cpp
+--- firefox-57.0/layout/style/nsCSSRuleProcessor.cpp.1399611	2017-09-14 22:16:05.000000000 +0200
++++ firefox-57.0/layout/style/nsCSSRuleProcessor.cpp	2017-11-22 12:17:33.729682485 +0100
 @@ -1180,6 +1180,30 @@ nsCSSRuleProcessor::InitSystemMetrics()
      sSystemMetrics->AppendElement(nsGkAtoms::physical_home_button);
    }
@@ -210,9 +210,9 @@ diff -up firefox-57.0b8/layout/style/nsCSSRuleProcessor.cpp.1399611 firefox-57.0
  #ifdef XP_WIN
    if (NS_SUCCEEDED(
          LookAndFeel::GetInt(LookAndFeel::eIntID_WindowsThemeIdentifier,
-diff -up firefox-57.0b8/layout/style/nsMediaFeatures.cpp.1399611 firefox-57.0b8/layout/style/nsMediaFeatures.cpp
---- firefox-57.0b8/layout/style/nsMediaFeatures.cpp.1399611	2017-09-15 06:15:42.000000000 +0200
-+++ firefox-57.0b8/layout/style/nsMediaFeatures.cpp	2017-10-16 12:11:45.366240647 +0200
+diff -up firefox-57.0/layout/style/nsMediaFeatures.cpp.1399611 firefox-57.0/layout/style/nsMediaFeatures.cpp
+--- firefox-57.0/layout/style/nsMediaFeatures.cpp.1399611	2017-11-02 17:16:35.000000000 +0100
++++ firefox-57.0/layout/style/nsMediaFeatures.cpp	2017-11-22 12:17:33.730682482 +0100
 @@ -788,6 +788,42 @@ nsMediaFeatures::features[] = {
      GetSystemMetric
    },
@@ -256,10 +256,10 @@ diff -up firefox-57.0b8/layout/style/nsMediaFeatures.cpp.1399611 firefox-57.0b8/
    // Internal -moz-is-glyph media feature: applies only inside SVG glyphs.
    // Internal because it is really only useful in the user agent anyway
    //  and therefore not worth standardizing.
-diff -up firefox-57.0b8/modules/libpref/init/all.js.1399611 firefox-57.0b8/modules/libpref/init/all.js
---- firefox-57.0b8/modules/libpref/init/all.js.1399611	2017-10-12 18:12:09.000000000 +0200
-+++ firefox-57.0b8/modules/libpref/init/all.js	2017-10-16 12:11:45.366240647 +0200
-@@ -4911,6 +4911,7 @@ pref("gfx.apitrace.enabled",false);
+diff -up firefox-57.0/modules/libpref/init/all.js.1399611 firefox-57.0/modules/libpref/init/all.js
+--- firefox-57.0/modules/libpref/init/all.js.1399611	2017-11-02 17:16:31.000000000 +0100
++++ firefox-57.0/modules/libpref/init/all.js	2017-11-22 12:17:33.730682482 +0100
+@@ -4913,6 +4913,7 @@ pref("gfx.apitrace.enabled",false);
  pref("gfx.xrender.enabled",false);
  pref("widget.chrome.allow-gtk-dark-theme", false);
  pref("widget.content.allow-gtk-dark-theme", false);
@@ -267,9 +267,9 @@ diff -up firefox-57.0b8/modules/libpref/init/all.js.1399611 firefox-57.0b8/modul
  #endif
  #endif
  
-diff -up firefox-57.0b8/toolkit/modules/moz.build.1399611 firefox-57.0b8/toolkit/modules/moz.build
---- firefox-57.0b8/toolkit/modules/moz.build.1399611	2017-09-15 06:15:40.000000000 +0200
-+++ firefox-57.0b8/toolkit/modules/moz.build	2017-10-16 12:11:45.366240647 +0200
+diff -up firefox-57.0/toolkit/modules/moz.build.1399611 firefox-57.0/toolkit/modules/moz.build
+--- firefox-57.0/toolkit/modules/moz.build.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/toolkit/modules/moz.build	2017-11-22 12:17:33.730682482 +0100
 @@ -259,7 +259,7 @@ EXTRA_JS_MODULES.sessionstore += [
  ]
  
@@ -279,9 +279,9 @@ diff -up firefox-57.0b8/toolkit/modules/moz.build.1399611 firefox-57.0b8/toolkit
      DEFINES['CAN_DRAW_IN_TITLEBAR'] = 1
  
  if CONFIG['MOZ_WIDGET_TOOLKIT'] in ('windows', 'gtk2', 'gtk3'):
-diff -up firefox-57.0b8/widget/gtk/gtk3drawing.cpp.1399611 firefox-57.0b8/widget/gtk/gtk3drawing.cpp
---- firefox-57.0b8/widget/gtk/gtk3drawing.cpp.1399611	2017-09-15 06:15:40.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/gtk3drawing.cpp	2017-10-16 12:11:45.367240644 +0200
+diff -up firefox-57.0/widget/gtk/gtk3drawing.cpp.1399611 firefox-57.0/widget/gtk/gtk3drawing.cpp
+--- firefox-57.0/widget/gtk/gtk3drawing.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/gtk/gtk3drawing.cpp	2017-11-22 12:17:33.731682479 +0100
 @@ -17,6 +17,7 @@
  #include "WidgetStyleCache.h"
  
@@ -569,9 +569,9 @@ diff -up firefox-57.0b8/widget/gtk/gtk3drawing.cpp.1399611 firefox-57.0b8/widget
      default:
          g_warning("Unknown widget type: %d", widget);
      }
-diff -up firefox-57.0b8/widget/gtk/gtkdrawing.h.1399611 firefox-57.0b8/widget/gtk/gtkdrawing.h
---- firefox-57.0b8/widget/gtk/gtkdrawing.h.1399611	2017-06-12 18:37:20.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/gtkdrawing.h	2017-10-16 12:11:45.367240644 +0200
+diff -up firefox-57.0/widget/gtk/gtkdrawing.h.1399611 firefox-57.0/widget/gtk/gtkdrawing.h
+--- firefox-57.0/widget/gtk/gtkdrawing.h.1399611	2017-07-31 18:20:53.000000000 +0200
++++ firefox-57.0/widget/gtk/gtkdrawing.h	2017-11-22 12:17:33.731682479 +0100
 @@ -268,8 +268,14 @@ typedef enum {
    MOZ_GTK_SPLITTER_SEPARATOR_VERTICAL,
    /* Paints the background of a window, dialog or page. */
@@ -635,9 +635,9 @@ diff -up firefox-57.0b8/widget/gtk/gtkdrawing.h.1399611 firefox-57.0b8/widget/gt
  /**
   * Get the YTHICKNESS of a tab (notebook extension).
   */
-diff -up firefox-57.0b8/widget/gtk/mozgtk/mozgtk.c.1399611 firefox-57.0b8/widget/gtk/mozgtk/mozgtk.c
---- firefox-57.0b8/widget/gtk/mozgtk/mozgtk.c.1399611	2017-10-09 22:17:13.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/mozgtk/mozgtk.c	2017-10-16 12:11:45.367240644 +0200
+diff -up firefox-57.0/widget/gtk/mozgtk/mozgtk.c.1399611 firefox-57.0/widget/gtk/mozgtk/mozgtk.c
+--- firefox-57.0/widget/gtk/mozgtk/mozgtk.c.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/gtk/mozgtk/mozgtk.c	2017-11-22 12:17:33.731682479 +0100
 @@ -580,6 +580,8 @@ STUB(gtk_style_context_set_state)
  STUB(gtk_style_properties_lookup_property)
  STUB(gtk_tree_view_column_get_button)
@@ -666,9 +666,9 @@ diff -up firefox-57.0b8/widget/gtk/mozgtk/mozgtk.c.1399611 firefox-57.0b8/widget
  #endif
  
  #ifdef GTK2_SYMBOLS
-diff -up firefox-57.0b8/widget/gtk/nsLookAndFeel.cpp.1399611 firefox-57.0b8/widget/gtk/nsLookAndFeel.cpp
---- firefox-57.0b8/widget/gtk/nsLookAndFeel.cpp.1399611	2017-09-21 06:10:10.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/nsLookAndFeel.cpp	2017-10-16 12:11:45.367240644 +0200
+diff -up firefox-57.0/widget/gtk/nsLookAndFeel.cpp.1399611 firefox-57.0/widget/gtk/nsLookAndFeel.cpp
+--- firefox-57.0/widget/gtk/nsLookAndFeel.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/gtk/nsLookAndFeel.cpp	2017-11-22 12:17:33.731682479 +0100
 @@ -642,6 +642,22 @@ nsLookAndFeel::GetIntImpl(IntID aID, int
      case eIntID_ContextMenuOffsetHorizontal:
          aResult = 2;
@@ -733,9 +733,9 @@ diff -up firefox-57.0b8/widget/gtk/nsLookAndFeel.cpp.1399611 firefox-57.0b8/widg
  }
  
  // virtual
-diff -up firefox-57.0b8/widget/gtk/nsLookAndFeel.h.1399611 firefox-57.0b8/widget/gtk/nsLookAndFeel.h
---- firefox-57.0b8/widget/gtk/nsLookAndFeel.h.1399611	2017-09-21 06:10:10.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/nsLookAndFeel.h	2017-10-16 12:11:45.367240644 +0200
+diff -up firefox-57.0/widget/gtk/nsLookAndFeel.h.1399611 firefox-57.0/widget/gtk/nsLookAndFeel.h
+--- firefox-57.0/widget/gtk/nsLookAndFeel.h.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/gtk/nsLookAndFeel.h	2017-11-22 12:17:33.732682476 +0100
 @@ -32,6 +32,8 @@ public:
      virtual char16_t GetPasswordCharacterImpl();
      virtual bool GetEchoPasswordImpl();
@@ -756,9 +756,9 @@ diff -up firefox-57.0b8/widget/gtk/nsLookAndFeel.h.1399611 firefox-57.0b8/widget
      bool    mInitialized;
  
      void EnsureInit();
-diff -up firefox-57.0b8/widget/gtk/nsNativeThemeGTK.cpp.1399611 firefox-57.0b8/widget/gtk/nsNativeThemeGTK.cpp
---- firefox-57.0b8/widget/gtk/nsNativeThemeGTK.cpp.1399611	2017-09-19 06:18:28.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/nsNativeThemeGTK.cpp	2017-10-16 12:11:45.368240640 +0200
+diff -up firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp.1399611 firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp
+--- firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp	2017-11-22 12:17:33.732682476 +0100
 @@ -23,6 +23,7 @@
  #include "nsIDOMHTMLInputElement.h"
  #include "nsGkAtoms.h"
@@ -839,9 +839,9 @@ diff -up firefox-57.0b8/widget/gtk/nsNativeThemeGTK.cpp.1399611 firefox-57.0b8/w
    }
  
    return eUnknownTransparency;
-diff -up firefox-57.0b8/widget/gtk/nsWindow.cpp.1399611 firefox-57.0b8/widget/gtk/nsWindow.cpp
---- firefox-57.0b8/widget/gtk/nsWindow.cpp.1399611	2017-10-16 12:11:45.361240666 +0200
-+++ firefox-57.0b8/widget/gtk/nsWindow.cpp	2017-10-16 12:11:45.369240636 +0200
+diff -up firefox-57.0/widget/gtk/nsWindow.cpp.1399611 firefox-57.0/widget/gtk/nsWindow.cpp
+--- firefox-57.0/widget/gtk/nsWindow.cpp.1399611	2017-11-22 12:17:33.724682501 +0100
++++ firefox-57.0/widget/gtk/nsWindow.cpp	2017-11-22 13:28:29.352498513 +0100
 @@ -85,6 +85,7 @@
  #include "nsIPropertyBag2.h"
  #include "GLContext.h"
@@ -1312,7 +1312,7 @@ diff -up firefox-57.0b8/widget/gtk/nsWindow.cpp.1399611 firefox-57.0b8/widget/gt
  gint
  nsWindow::GdkScaleFactor()
  {
-@@ -6846,6 +7051,157 @@ nsWindow::SynthesizeNativeTouchPoint(uin
+@@ -6846,6 +7051,158 @@ nsWindow::SynthesizeNativeTouchPoint(uin
  }
  #endif
  
@@ -1340,13 +1340,12 @@ diff -up firefox-57.0b8/widget/gtk/nsWindow.cpp.1399611 firefox-57.0b8/widget/gt
 +    if (mCSDSupportLevel != CSD_SUPPORT_UNKNOWN) {
 +        return mCSDSupportLevel;
 +    }
-+    // TODO: MATE
 +    const char* currentDesktop = getenv("XDG_CURRENT_DESKTOP");
 +    if (currentDesktop) {
 +        if (strcmp(currentDesktop, "GNOME") == 0) {
 +            mCSDSupportLevel = CSD_SUPPORT_FULL;
 +        } else if (strcmp(currentDesktop, "XFCE") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FULL;
++            mCSDSupportLevel = CSD_SUPPORT_FLAT;
 +        } else if (strcmp(currentDesktop, "X-Cinnamon") == 0) {
 +            mCSDSupportLevel = CSD_SUPPORT_FULL;
 +        } else if (strcmp(currentDesktop, "KDE") == 0) {
@@ -1357,6 +1356,8 @@ diff -up firefox-57.0b8/widget/gtk/nsWindow.cpp.1399611 firefox-57.0b8/widget/gt
 +            mCSDSupportLevel = CSD_SUPPORT_FLAT;
 +        } else if (strcmp(currentDesktop, "i3") == 0) {
 +            mCSDSupportLevel = CSD_SUPPORT_NONE;
++        } else if (strcmp(currentDesktop, "MATE") == 0) {
++            mCSDSupportLevel = CSD_SUPPORT_FLAT;
 +        } else {
 +            mCSDSupportLevel = CSD_SUPPORT_NONE;
 +        }
@@ -1470,9 +1471,9 @@ diff -up firefox-57.0b8/widget/gtk/nsWindow.cpp.1399611 firefox-57.0b8/widget/gt
  int32_t
  nsWindow::RoundsWidgetCoordinatesTo()
  {
-diff -up firefox-57.0b8/widget/gtk/nsWindow.h.1399611 firefox-57.0b8/widget/gtk/nsWindow.h
---- firefox-57.0b8/widget/gtk/nsWindow.h.1399611	2017-09-15 06:15:40.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/nsWindow.h	2017-10-16 12:11:45.369240636 +0200
+diff -up firefox-57.0/widget/gtk/nsWindow.h.1399611 firefox-57.0/widget/gtk/nsWindow.h
+--- firefox-57.0/widget/gtk/nsWindow.h.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/gtk/nsWindow.h	2017-11-22 12:17:33.733682473 +0100
 @@ -123,6 +123,7 @@ public:
                                           double aHeight,
                                           bool   aRepaint) override;
@@ -1562,9 +1563,9 @@ diff -up firefox-57.0b8/widget/gtk/nsWindow.h.1399611 firefox-57.0b8/widget/gtk/
  };
  
  #endif /* __nsWindow_h__ */
-diff -up firefox-57.0b8/widget/gtk/WidgetStyleCache.cpp.1399611 firefox-57.0b8/widget/gtk/WidgetStyleCache.cpp
---- firefox-57.0b8/widget/gtk/WidgetStyleCache.cpp.1399611	2017-09-15 06:15:40.000000000 +0200
-+++ firefox-57.0b8/widget/gtk/WidgetStyleCache.cpp	2017-10-16 12:11:45.369240636 +0200
+diff -up firefox-57.0/widget/gtk/WidgetStyleCache.cpp.1399611 firefox-57.0/widget/gtk/WidgetStyleCache.cpp
+--- firefox-57.0/widget/gtk/WidgetStyleCache.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/gtk/WidgetStyleCache.cpp	2017-11-22 12:17:33.733682473 +0100
 @@ -26,10 +26,14 @@ static GtkStyleContext*
  GetCssNodeStyleInternal(WidgetNodeType aNodeType);
  
@@ -1708,9 +1709,9 @@ diff -up firefox-57.0b8/widget/gtk/WidgetStyleCache.cpp.1399611 firefox-57.0b8/w
  
    /* Clear already freed arrays */
    mozilla::PodArrayZero(sWidgetStorage);
-diff -up firefox-57.0b8/widget/LookAndFeel.h.1399611 firefox-57.0b8/widget/LookAndFeel.h
---- firefox-57.0b8/widget/LookAndFeel.h.1399611	2017-09-16 18:22:54.000000000 +0200
-+++ firefox-57.0b8/widget/LookAndFeel.h	2017-10-16 12:11:45.369240636 +0200
+diff -up firefox-57.0/widget/LookAndFeel.h.1399611 firefox-57.0/widget/LookAndFeel.h
+--- firefox-57.0/widget/LookAndFeel.h.1399611	2017-11-02 17:16:34.000000000 +0100
++++ firefox-57.0/widget/LookAndFeel.h	2017-11-22 12:17:33.733682473 +0100
 @@ -405,6 +405,30 @@ public:
       eIntID_PhysicalHomeButton,
  
