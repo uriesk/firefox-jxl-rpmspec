@@ -101,7 +101,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        57.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -860,6 +860,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Dec 4 2017 Martin Stransky <stransky@redhat.com> - 57.0.1-2
+- Added new man page by Tobias Girstmair (rhbz#1334025)
+
 * Thu Nov 30 2017 Jan Horak <jhorak@redhat.com> - 57.0.1-1
 - Update to 57.0.1
 
