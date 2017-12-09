@@ -1,4 +1,4 @@
-%if 0%{?fedora} < 26
+%if 0%{?fedora} < 26 || 0%{?fedora} > 27
 ExcludeArch: armv7hl
 %endif
 
@@ -101,7 +101,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        57.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -860,6 +860,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Dec 08 2017 Kevin Fenzi <kevin@scrye.com> - 57.0.1-3
+- Temp disable armv7 for rawhide to get composes working again. rhbz#1523912
+
 * Mon Dec 4 2017 Martin Stransky <stransky@redhat.com> - 57.0.1-2
 - Added new man page by Tobias Girstmair (rhbz#1334025)
 
