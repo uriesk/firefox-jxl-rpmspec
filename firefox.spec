@@ -1,4 +1,4 @@
-%if 0%{?fedora} < 26
+%if 0%{?fedora} < 26 || 0%{?fedora} > 27
 ExcludeArch: armv7hl
 %endif
 
@@ -92,21 +92,19 @@ ExcludeArch: armv7hl
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
-%if 0%{?fedora} < 27
 %global enable_mozilla_crashreporter       1
-%endif
 %endif
 %endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        57.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        57.0.3
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20171130.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180102.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -860,6 +858,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan  2 2018 Jan Horak <jhorak@redhat.com> - 57.0.3-1
+- Update to 57.0.3
+
+* Fri Dec 08 2017 Kevin Fenzi <kevin@scrye.com> - 57.0.1-3
+- Temp disable armv7 for rawhide to get composes working again. rhbz#1523912
+
 * Mon Dec 4 2017 Martin Stransky <stransky@redhat.com> - 57.0.1-2
 - Added new man page by Tobias Girstmair (rhbz#1334025)
 
