@@ -1,4 +1,4 @@
-%if 0%{?fedora} < 26 || 0%{?fedora} > 27
+%if 0%{?fedora} < 26 || 0%{?fedora} >= 27
 ExcludeArch: armv7hl
 %endif
 
@@ -859,6 +859,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Jan  2 2018 Jan Horak <jhorak@redhat.com> - 57.0.3-1
+- Exclude armv7hl due to OOM during build on koji
 - Update to 57.0.3
 
 * Fri Dec 08 2017 Kevin Fenzi <kevin@scrye.com> - 57.0.1-3
