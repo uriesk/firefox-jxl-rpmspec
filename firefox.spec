@@ -70,7 +70,7 @@ ExcludeArch: armv7hl
 # we're building against could bring us some broken dependencies from time to time.
 #%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.33
+%global nss_version 3.34
 #%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %global nss_build_version %{nss_version}
 %endif
@@ -98,13 +98,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        57.0.3
+Version:        57.0.4
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180102.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180104.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -858,6 +858,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jan 4 2018 Martin Stransky <stransky@redhat.com> - 57.0.4-1
+- Update to 57.0.4
+- Require nss 3.34 (rhbz#1531031)
+
 * Tue Jan  2 2018 Jan Horak <jhorak@redhat.com> - 57.0.3-1
 - Exclude armv7hl due to OOM during build on koji
 - Update to 57.0.3
