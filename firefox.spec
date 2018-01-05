@@ -1,6 +1,5 @@
-%if 0%{?fedora} < 26 || 0%{?fedora} >= 27
+# Disabled due to rhbz#1523912
 ExcludeArch: armv7hl
-%endif
 
 # Use system nspr/nss?
 %global system_nss        1
@@ -861,6 +860,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Thu Jan 4 2018 Martin Stransky <stransky@redhat.com> - 57.0.4-1
 - Update to 57.0.4
 - Require nss 3.34 (rhbz#1531031)
+- Disabled ARM on all Fedoras due to rhbz#1523912
 
 * Tue Jan  2 2018 Jan Horak <jhorak@redhat.com> - 57.0.3-1
 - Exclude armv7hl due to OOM during build on koji
