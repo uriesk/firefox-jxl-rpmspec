@@ -1,6 +1,3 @@
-# Disabled due to rhbz#1523912
-ExcludeArch: armv7hl
-
 # Use system nspr/nss?
 %global system_nss        1
 
@@ -98,7 +95,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        57.0.4
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -516,6 +513,9 @@ export MOZ_DEBUG_FLAGS=" "
 %ifarch s390 %{arm} ppc aarch64
 MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
+%ifarch %{arm}
+RUSTFLAGS="-Cdebuginfo=0"
+%endif
 export CFLAGS=$MOZ_OPT_FLAGS
 export CXXFLAGS=$MOZ_OPT_FLAGS
 export LDFLAGS=$MOZ_LINK_FLAGS
@@ -857,6 +857,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 9 2018 Martin Stransky <stransky@redhat.com> - 57.0.4-2
+- Try to disable rust debuginfo on arm to have arm builds again (rhbz#1523912)
+
 * Thu Jan 4 2018 Martin Stransky <stransky@redhat.com> - 57.0.4-1
 - Update to 57.0.4
 - Require nss 3.34 (rhbz#1531031)
