@@ -94,13 +94,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        57.0.4
-Release:        2%{?pre_tag}%{?dist}
+Version:        58.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180104.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180123.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -141,6 +141,8 @@ Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
+Patch230:        firefox-fedora-rhbz-1537287-v2.patch
+Patch231:        build-with-nss-3.34.0.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -151,9 +153,6 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch416:        mozilla-1399611.patch
-
-# Better compatibility with NSS sql database format, rhbz#1496563
-Patch481:        sqlcompat-ff57-1-backport-730495
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -300,10 +299,11 @@ This package contains results of tests executed during build.
 %endif
 %patch29 -p1 -b .big-endian
 %patch31 -p1 -b .ppc64-s390x-curl
-%patch32 -p1 -b .rust-ppc64le
-%ifarch ppc ppc64 ppc64le
-%patch35 -p1 -b .ppc-jit
-%endif
+# Second arch patches - do we still need them?
+#%patch32 -p1 -b .rust-ppc64le
+#%ifarch ppc ppc64 ppc64le
+#%patch35 -p1 -b .ppc-jit
+#%endif
 %patch37 -p1 -b .jit-atomic-lucky
 
 %patch3  -p1 -b .arm
@@ -318,25 +318,29 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
+%if 0%{?fedora} < 28
+%patch230 -p1 -b .rhbz-1537287
+%endif
+%patch231 -p1
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
-%ifarch %{arm}
-%if 0%{?fedora} < 26
+# Does not apply
+#%ifarch %{arm}
+#%if 0%{?fedora} < 26
 # Workaround for mozbz#1337988
-%patch412 -p1 -b .1337988
-%endif
-%endif
+#%patch412 -p1 -b .1337988
+#%endif
+#%endif
 
 %patch413 -p1 -b .1353817
-%patch416 -p1 -b .1399611
-
-%if 0%{?fedora} > 27
-%patch481 -p1 -b .sqlcompat-1
-%endif
+# CSD - Disabled now
+#%patch416 -p1 -b .1399611
 
 # Debian extension patch
-%patch500 -p1 -b .440908
+# Disabled due to new pref module, see
+# https://bugzilla.mozilla.org/show_bug.cgi?id=440908
+#%patch500 -p1 -b .440908
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -534,7 +538,11 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 %endif
 
-make -f client.mk build STRIP="/bin/true" MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS" MOZ_SERVICES_SYNC="1"
+#make -f client.mk build STRIP="/bin/true" MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS" MOZ_SERVICES_SYNC="1"
+export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
+export MOZ_SERVICES_SYNC="1"
+export STRIP=/bin/true
+./mach build
 
 # create debuginfo for crash-stats.mozilla.com
 %if %{enable_mozilla_crashreporter}
@@ -816,7 +824,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/omni.ja
 %{mozappdir}/browser/icons
 %{mozappdir}/chrome.manifest
-%{mozappdir}/run-mozilla.sh
+#%{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
 %{mozappdir}/pingsender
 %exclude %{mozappdir}/removed-files
@@ -857,6 +865,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 23 2018 Martin Stransky <stransky@redhat.com> - 58.0-1
+- Update to 58.0
+
 * Tue Jan 9 2018 Martin Stransky <stransky@redhat.com> - 57.0.4-2
 - Try to disable rust debuginfo on arm to have arm builds again (rhbz#1523912)
 

@@ -1,7 +1,7 @@
-diff -up firefox-56.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092 firefox-56.0/extensions/pref/autoconfig/src/nsReadConfig.cpp
---- firefox-56.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092	2017-09-25 10:28:35.413675532 +0200
-+++ firefox-56.0/extensions/pref/autoconfig/src/nsReadConfig.cpp	2017-09-25 10:31:06.394196960 +0200
-@@ -243,9 +243,20 @@ nsresult nsReadConfig::openAndEvaluateJS
+diff -up firefox-58.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092 firefox-58.0/extensions/pref/autoconfig/src/nsReadConfig.cpp
+--- firefox-58.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092	2018-01-11 21:17:03.000000000 +0100
++++ firefox-58.0/extensions/pref/autoconfig/src/nsReadConfig.cpp	2018-01-23 13:59:45.446495820 +0100
+@@ -239,9 +239,20 @@ nsresult nsReadConfig::openAndEvaluateJS
              return rv;
  
          rv = NS_NewLocalFileInputStream(getter_AddRefs(inStr), jsFile);
@@ -24,22 +24,22 @@ diff -up firefox-56.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092 fi
      } else {
          nsAutoCString location("resource://gre/defaults/autoconfig/");
          location += aFileName;
-diff -up firefox-56.0/modules/libpref/Preferences.cpp.1170092 firefox-56.0/modules/libpref/Preferences.cpp
---- firefox-56.0/modules/libpref/Preferences.cpp.1170092	2017-09-14 22:15:52.000000000 +0200
-+++ firefox-56.0/modules/libpref/Preferences.cpp	2017-09-25 10:28:35.413675532 +0200
-@@ -1514,6 +1514,8 @@ pref_InitInitialObjects()
-   // - jar:$gre/omni.jar!/defaults/preferences/*.js
-   // Thus, in omni.jar case, we always load app-specific default preferences
-   // from omni.jar, whether or not $app == $gre.
+diff -up firefox-58.0/modules/libpref/Preferences.cpp.1170092 firefox-58.0/modules/libpref/Preferences.cpp
+--- firefox-58.0/modules/libpref/Preferences.cpp.1170092	2018-01-23 13:59:45.447495817 +0100
++++ firefox-58.0/modules/libpref/Preferences.cpp	2018-01-23 14:02:51.456987774 +0100
+@@ -4402,6 +4402,8 @@ pref_InitInitialObjects()
+   //
+   // Thus, in the omni.jar case, we always load app-specific default
+   // preferences from omni.jar, whether or not `$app == $gre`.
 +  // At very end load configuration from system config location:
 +  // - /etc/firefox/pref/*.js
  
-   nsZipFind *findPtr;
-   nsAutoPtr<nsZipFind> find;
-diff -up firefox-56.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-56.0/toolkit/xre/nsXREDirProvider.cpp
---- firefox-56.0/toolkit/xre/nsXREDirProvider.cpp.1170092	2017-09-14 22:16:02.000000000 +0200
-+++ firefox-56.0/toolkit/xre/nsXREDirProvider.cpp	2017-09-25 10:28:35.414675529 +0200
-@@ -58,6 +58,7 @@
+   nsresult rv;
+   nsZipFind* findPtr;
+diff -up firefox-58.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-58.0/toolkit/xre/nsXREDirProvider.cpp
+--- firefox-58.0/toolkit/xre/nsXREDirProvider.cpp.1170092	2018-01-11 21:17:06.000000000 +0100
++++ firefox-58.0/toolkit/xre/nsXREDirProvider.cpp	2018-01-23 13:59:45.447495817 +0100
+@@ -59,6 +59,7 @@
  #endif
  #ifdef XP_UNIX
  #include <ctype.h>
@@ -47,7 +47,7 @@ diff -up firefox-56.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-56.0/tool
  #endif
  #ifdef XP_IOS
  #include "UIKitDirProvider.h"
-@@ -570,6 +571,20 @@ nsXREDirProvider::GetFile(const char* aP
+@@ -554,6 +555,20 @@ nsXREDirProvider::GetFile(const char* aP
        }
      }
    }
@@ -68,7 +68,7 @@ diff -up firefox-56.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-56.0/tool
    if (NS_FAILED(rv) || !file)
      return NS_ERROR_FAILURE;
  
-@@ -935,6 +950,14 @@ nsXREDirProvider::GetFilesInternal(const
+@@ -887,6 +902,14 @@ nsXREDirProvider::GetFilesInternal(const
      LoadDirIntoArray(mXULAppDir, kAppendPrefDir, directories);
      LoadDirsIntoArray(mAppBundleDirectories,
                        kAppendPrefDir, directories);
@@ -83,12 +83,12 @@ diff -up firefox-56.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-56.0/tool
  
      rv = NS_NewArrayEnumerator(aResult, directories);
    }
-diff -up firefox-56.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092 firefox-56.0/xpcom/io/nsAppDirectoryServiceDefs.h
---- firefox-56.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092	2017-09-14 22:16:02.000000000 +0200
-+++ firefox-56.0/xpcom/io/nsAppDirectoryServiceDefs.h	2017-09-25 10:28:35.414675529 +0200
-@@ -62,6 +62,7 @@
+diff -up firefox-58.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092 firefox-58.0/xpcom/io/nsAppDirectoryServiceDefs.h
+--- firefox-58.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092	2018-01-23 13:59:45.447495817 +0100
++++ firefox-58.0/xpcom/io/nsAppDirectoryServiceDefs.h	2018-01-23 14:02:02.871120476 +0100
+@@ -59,6 +59,7 @@
+ #define NS_APP_PREFS_50_FILE                    "PrefF"
  #define NS_APP_PREFS_DEFAULTS_DIR_LIST          "PrefDL"
- #define NS_EXT_PREFS_DEFAULTS_DIR_LIST          "ExtPrefDL"
  #define NS_APP_PREFS_OVERRIDE_DIR               "PrefDOverride" // Directory for per-profile defaults
 +#define NS_APP_PREFS_SYSTEM_CONFIG_DIR          "PrefSysConf"   // Directory with system-wide configuration
  
