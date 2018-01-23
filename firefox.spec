@@ -1,3 +1,6 @@
+# Temporary disable
+ExcludeArch: ppc64 ppc64le aarch64 armv7hl s390x
+
 # Use system nspr/nss?
 %global system_nss        1
 
