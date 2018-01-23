@@ -1,0 +1,14 @@
+diff -up firefox-58.0/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium.old firefox-58.0/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium
+diff -up firefox-58.0/media/webrtc/trunk/Makefile.old firefox-58.0/media/webrtc/trunk/Makefile
+diff -up firefox-58.0/old-configure.in.old firefox-58.0/old-configure.in
+--- firefox-58.0/old-configure.in.old	2018-01-23 14:49:51.771309172 +0100
++++ firefox-58.0/old-configure.in	2018-01-23 14:50:04.091265876 +0100
+@@ -1915,7 +1915,7 @@ MOZ_ARG_WITH_BOOL(system-nss,
+     _USE_SYSTEM_NSS=1 )
+ 
+ if test -n "$_USE_SYSTEM_NSS"; then
+-    AM_PATH_NSS(3.34.1, [MOZ_SYSTEM_NSS=1], [AC_MSG_ERROR([you don't have NSS installed or your version is too old])])
++    AM_PATH_NSS(3.34.0, [MOZ_SYSTEM_NSS=1], [AC_MSG_ERROR([you don't have NSS installed or your version is too old])])
+ fi
+ 
+ if test -n "$MOZ_SYSTEM_NSS"; then

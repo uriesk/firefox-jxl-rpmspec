@@ -1,12 +1,12 @@
-diff -up firefox-57.0b5/memory/build/mozjemalloc.cpp.old firefox-57.0b5/memory/build/mozjemalloc.cpp
---- firefox-57.0b5/memory/build/mozjemalloc.cpp.old	2017-10-06 12:00:27.938687498 +0200
-+++ firefox-57.0b5/memory/build/mozjemalloc.cpp	2017-10-06 12:02:45.232151309 +0200
-@@ -780,7 +780,7 @@ struct arena_t {
-  * controlling the malloc behavior are defined as compile-time constants
-  * for best performance and cannot be altered at runtime.
-  */
--#if !defined(__ia64__) && !defined(__sparc__) && !defined(__mips__) && !defined(__aarch64__)
-+#if !defined(__ia64__) && !defined(__sparc__) && !defined(__mips__) && !defined(__aarch64__) && !(defined(__powerpc__))
- #define MALLOC_STATIC_SIZES 1
+diff -up firefox-58.0/memory/build/mozjemalloc.cpp.jemalloc-ppc firefox-58.0/memory/build/mozjemalloc.cpp
+--- firefox-58.0/memory/build/mozjemalloc.cpp.jemalloc-ppc	2018-01-23 13:12:28.618164403 +0100
++++ firefox-58.0/memory/build/mozjemalloc.cpp	2018-01-23 13:18:26.638212523 +0100
+@@ -180,7 +180,7 @@ using namespace mozilla;
+ // Debug builds are opted out too, for test coverage.
+ #ifndef MOZ_DEBUG
+ #if !defined(__ia64__) && !defined(__sparc__) && !defined(__mips__) &&         \
+-  !defined(__aarch64__)
++  !defined(__aarch64__) && !defined(__powerpc__)
+ #define MALLOC_STATIC_PAGESIZE 1
  #endif
- 
+ #endif
