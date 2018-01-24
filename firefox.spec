@@ -153,6 +153,7 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch416:        mozilla-1399611.patch
+# ppc64/le build patch
 Patch417:        mozilla-1416170.patch
 
 # Debian patches
