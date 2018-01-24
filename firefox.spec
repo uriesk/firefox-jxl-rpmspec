@@ -143,6 +143,7 @@ Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
 Patch230:        firefox-fedora-rhbz-1537287-v2.patch
 Patch231:        build-with-nss-3.34.0.patch
+Patch232:        build-jit-CodeAlignment.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -324,6 +325,7 @@ This package contains results of tests executed during build.
 %patch230 -p1 -b .rhbz-1537287
 %endif
 %patch231 -p1
+%patch232 -p1 -b .CodeAlignment
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
