@@ -1,36 +1,6 @@
-diff -up firefox-57.0/browser/app/profile/firefox.js.1399611 firefox-57.0/browser/app/profile/firefox.js
---- firefox-57.0/browser/app/profile/firefox.js.1399611	2017-11-22 12:17:33.717682523 +0100
-+++ firefox-57.0/browser/app/profile/firefox.js	2017-11-22 12:17:33.728682488 +0100
-@@ -457,11 +457,7 @@ pref("browser.tabs.loadBookmarksInBackgr
- pref("browser.tabs.loadBookmarksInTabs", false);
- pref("browser.tabs.tabClipWidth", 140);
- pref("browser.tabs.tabMinWidth", 76);
--#ifdef UNIX_BUT_NOT_MAC
--pref("browser.tabs.drawInTitlebar", false);
--#else
- pref("browser.tabs.drawInTitlebar", true);
--#endif
- 
- // Offer additional drag space to the user. The drag space
- // will only be shown if browser.tabs.drawInTitlebar is true.
-diff -up firefox-57.0/browser/base/content/browser-tabsintitlebar.js.1399611 firefox-57.0/browser/base/content/browser-tabsintitlebar.js
---- firefox-57.0/browser/base/content/browser-tabsintitlebar.js.1399611	2017-11-02 17:16:30.000000000 +0100
-+++ firefox-57.0/browser/base/content/browser-tabsintitlebar.js	2017-11-22 12:17:33.728682488 +0100
-@@ -14,6 +14,11 @@ var TabsInTitlebar = {
-     this._readPref();
-     Services.prefs.addObserver(this._prefName, this);
- 
-+    // Always disable on unsupported GTK versions.
-+    if (AppConstants.MOZ_WIDGET_TOOLKIT == "gtk3") {
-+      this.allowedBy("gtk", window.matchMedia("(-moz-gtk-csd-available)"));
-+    }
-+
-     // We need to update the appearance of the titlebar when the menu changes
-     // from the active to the inactive state. We can't, however, rely on
-     // DOMMenuBarInactive, because the menu fires this event and then removes
-diff -up firefox-57.0/browser/base/moz.build.1399611 firefox-57.0/browser/base/moz.build
---- firefox-57.0/browser/base/moz.build.1399611	2017-11-02 17:16:30.000000000 +0100
-+++ firefox-57.0/browser/base/moz.build	2017-11-22 12:17:33.728682488 +0100
+diff -up firefox-58.0/browser/base/moz.build.1399611 firefox-58.0/browser/base/moz.build
+--- firefox-58.0/browser/base/moz.build.1399611	2017-11-02 17:16:30.000000000 +0100
++++ firefox-58.0/browser/base/moz.build	2018-01-24 10:57:03.717031953 +0100
 @@ -57,7 +57,7 @@ DEFINES['APP_LICENSE_BLOCK'] = '%s/conte
  if CONFIG['MOZ_WIDGET_TOOLKIT'] in ('windows', 'gtk2', 'gtk3', 'cocoa'):
      DEFINES['CONTEXT_COPY_IMAGE_CONTENTS'] = 1
@@ -40,180 +10,22 @@ diff -up firefox-57.0/browser/base/moz.build.1399611 firefox-57.0/browser/base/m
      DEFINES['CAN_DRAW_IN_TITLEBAR'] = 1
  
  if CONFIG['MOZ_WIDGET_TOOLKIT'] in ('windows', 'gtk2', 'gtk3'):
-diff -up firefox-57.0/browser/themes/linux/browser.css.1399611 firefox-57.0/browser/themes/linux/browser.css
---- firefox-57.0/browser/themes/linux/browser.css.1399611	2017-11-02 17:16:32.000000000 +0100
-+++ firefox-57.0/browser/themes/linux/browser.css	2017-11-22 12:17:33.728682488 +0100
-@@ -556,7 +556,9 @@ html|span.ac-emphasize-text-url {
- 
- #nav-bar,
- #toolbar-menubar:not([autohide="true"]):not(:-moz-lwtheme):-moz-system-metric(menubar-drag),
--#TabsToolbar:not(:-moz-lwtheme):-moz-system-metric(menubar-drag) {
-+#TabsToolbar:not(:-moz-lwtheme):-moz-system-metric(menubar-drag),
-+#main-window[tabsintitlebar] #toolbar-menubar:not([autohide="true"]),
-+#main-window[tabsintitlebar] #TabsToolbar {
-   -moz-binding: url("chrome://browser/content/customizableui/toolbar.xml#toolbar-drag");
- }
- 
-@@ -713,3 +715,85 @@ html|span.ac-emphasize-text-url {
- .restore-tabs-button:hover:active:not([disabled="true"]) {
-   padding: 3px;
- }
-+
-+@media not all and (-moz-gtk-csd-available) {
-+  #main-window > #titlebar {
-+    /* We need to hide the titlebar explicitly on versions of GTK without CSD. */
-+    display: none;
-+  }
-+}
-+
-+/* Titlebar/CSD */
-+@media (-moz-gtk-csd-available) {
-+  #main-window[tabsintitlebar][sizemode="normal"] > #titlebar {
-+    min-height: calc(var(--tab-min-height) + 12px);
-+  }
-+
-+  #main-window[tabsintitlebar] #titlebar:-moz-lwtheme {
-+    visibility: hidden;
-+  }
-+  #main-window[tabsintitlebar] #titlebar-content:-moz-lwtheme {
-+    visibility: visible;
-+  }
-+
-+  #main-window[tabsintitlebar][sizemode="normal"] > #titlebar {
-+    -moz-appearance: -moz-window-titlebar;
-+  }
-+  #main-window[tabsintitlebar][sizemode="maximized"] > #titlebar {
-+    -moz-appearance: -moz-window-titlebar-maximized;
-+  }
-+
-+  /* The button box must appear on top of the navigator-toolbox in order for
-+   * click and hover mouse events to work properly for the button in the restored
-+   * window state. Otherwise, elements in the navigator-toolbox, like the menubar,
-+   * can swallow those events.
-+   */
-+  #titlebar-buttonbox {
-+    z-index: 1;
-+  }
-+
-+  /* titlebar command buttons */
-+  /* Use full scale icons here as the Gtk+ does. */
-+  @media (-moz-gtk-csd-minimize-button) {
-+    #titlebar-min {
-+      list-style-image: url("moz-icon://stock/window-minimize-symbolic");
-+      -moz-appearance: -moz-window-button-minimize;
-+    }
-+  }
-+  @media not all and (-moz-gtk-csd-minimize-button) {
-+    #titlebar-min {
-+      display: none;
-+    }
-+  }
-+
-+  @media (-moz-gtk-csd-maximize-button) {
-+    #titlebar-max {
-+      list-style-image: url("moz-icon://stock/window-maximize-symbolic");
-+      -moz-appearance: -moz-window-button-maximize;
-+    }
-+    #main-window[sizemode="maximized"] #titlebar-max {
-+      list-style-image: url("moz-icon://stock/window-restore-symbolic");
-+      -moz-appearance: -moz-window-button-restore;
-+    }
-+  }
-+  @media not all and (-moz-gtk-csd-maximize-button) {
-+    #titlebar-max {
-+      display: none;
-+    }
-+    #main-window[sizemode="maximized"] #titlebar-max {
-+      display: none;
-+    }
-+  }
-+
-+  @media (-moz-gtk-csd-close-button) {
-+    #titlebar-close {
-+      list-style-image: url("moz-icon://stock/window-close-symbolic");
-+      -moz-appearance: -moz-window-button-close;
-+    }
-+  }
-+  @media not all and (-moz-gtk-csd-close-button) {
-+    #titlebar-close {
-+      display: none;
-+    }
-+  }
-+}
-diff -up firefox-57.0/dom/base/nsGkAtomList.h.1399611 firefox-57.0/dom/base/nsGkAtomList.h
---- firefox-57.0/dom/base/nsGkAtomList.h.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/dom/base/nsGkAtomList.h	2017-11-22 12:17:33.729682485 +0100
-@@ -2270,6 +2270,10 @@ GK_ATOM(touch_enabled, "touch-enabled")
- GK_ATOM(menubar_drag, "menubar-drag")
- GK_ATOM(swipe_animation_enabled, "swipe-animation-enabled")
- GK_ATOM(physical_home_button, "physical-home-button")
-+GK_ATOM(gtk_csd_available, "gtk-csd-available")
-+GK_ATOM(gtk_csd_minimize_button, "gtk-csd-minimize-button")
-+GK_ATOM(gtk_csd_maximize_button, "gtk-csd-maximize-button")
-+GK_ATOM(gtk_csd_close_button, "gtk-csd-close-button")
- 
- // windows theme selector metrics
- GK_ATOM(windows_classic, "windows-classic")
-@@ -2306,6 +2310,10 @@ GK_ATOM(_moz_device_orientation, "-moz-d
- GK_ATOM(_moz_is_resource_document, "-moz-is-resource-document")
- GK_ATOM(_moz_swipe_animation_enabled, "-moz-swipe-animation-enabled")
- GK_ATOM(_moz_physical_home_button, "-moz-physical-home-button")
-+GK_ATOM(_moz_gtk_csd_available, "-moz-gtk-csd-available")
-+GK_ATOM(_moz_gtk_csd_minimize_button, "-moz-gtk-csd-minimize-button")
-+GK_ATOM(_moz_gtk_csd_maximize_button, "-moz-gtk-csd-maximize-button")
-+GK_ATOM(_moz_gtk_csd_close_button, "-moz-gtk-csd-close-button")
- 
- // application commands
- GK_ATOM(Back, "Back")
-diff -up firefox-57.0/gfx/src/nsThemeConstants.h.1399611 firefox-57.0/gfx/src/nsThemeConstants.h
---- firefox-57.0/gfx/src/nsThemeConstants.h.1399611	2017-07-31 18:20:46.000000000 +0200
-+++ firefox-57.0/gfx/src/nsThemeConstants.h	2017-11-22 12:17:33.729682485 +0100
-@@ -299,6 +299,7 @@ enum ThemeWidgetType : uint8_t {
-   NS_THEME_MAC_SOURCE_LIST,
-   NS_THEME_MAC_SOURCE_LIST_SELECTION,
-   NS_THEME_MAC_ACTIVE_SOURCE_LIST_SELECTION,
-+  NS_THEME_GTK_WINDOW_DECORATION,
- 
-   ThemeWidgetType_COUNT
- };
-diff -up firefox-57.0/layout/style/nsCSSRuleProcessor.cpp.1399611 firefox-57.0/layout/style/nsCSSRuleProcessor.cpp
---- firefox-57.0/layout/style/nsCSSRuleProcessor.cpp.1399611	2017-09-14 22:16:05.000000000 +0200
-+++ firefox-57.0/layout/style/nsCSSRuleProcessor.cpp	2017-11-22 12:17:33.729682485 +0100
-@@ -1180,6 +1180,30 @@ nsCSSRuleProcessor::InitSystemMetrics()
-     sSystemMetrics->AppendElement(nsGkAtoms::physical_home_button);
+diff -up firefox-58.0/browser/themes/linux/browser.css.1399611 firefox-58.0/browser/themes/linux/browser.css
+--- firefox-58.0/browser/themes/linux/browser.css.1399611	2018-01-11 21:16:54.000000000 +0100
++++ firefox-58.0/browser/themes/linux/browser.css	2018-01-24 10:57:03.718031950 +0100
+@@ -717,7 +717,7 @@ html|span.ac-emphasize-text-url {
+   :root[tabsintitlebar] > #titlebar:-moz-lwtheme {
+     visibility: hidden;
+   }
+-  :root[tabsintitlebar] > #titlebar-content:-moz-lwtheme {
++  :root[tabsintitlebar] #titlebar-content:-moz-lwtheme {
+     visibility: visible;
    }
  
-+  rv = LookAndFeel::GetInt(LookAndFeel::eIntID_GTKCSDAvailable,
-+                           &metricResult);
-+  if (NS_SUCCEEDED(rv) && metricResult) {
-+    sSystemMetrics->AppendElement(nsGkAtoms::gtk_csd_available);
-+  }
-+
-+  rv = LookAndFeel::GetInt(LookAndFeel::eIntID_GTKCSDMinimizeButton,
-+                           &metricResult);
-+  if (NS_SUCCEEDED(rv) && metricResult) {
-+    sSystemMetrics->AppendElement(nsGkAtoms::gtk_csd_minimize_button);
-+  }
-+
-+  rv = LookAndFeel::GetInt(LookAndFeel::eIntID_GTKCSDMaximizeButton,
-+                           &metricResult);
-+  if (NS_SUCCEEDED(rv) && metricResult) {
-+    sSystemMetrics->AppendElement(nsGkAtoms::gtk_csd_maximize_button);
-+  }
-+
-+  rv = LookAndFeel::GetInt(LookAndFeel::eIntID_GTKCSDCloseButton,
-+                           &metricResult);
-+  if (NS_SUCCEEDED(rv) && metricResult) {
-+    sSystemMetrics->AppendElement(nsGkAtoms::gtk_csd_close_button);
-+  }
-+
- #ifdef XP_WIN
-   if (NS_SUCCEEDED(
-         LookAndFeel::GetInt(LookAndFeel::eIntID_WindowsThemeIdentifier,
-diff -up firefox-57.0/layout/style/nsMediaFeatures.cpp.1399611 firefox-57.0/layout/style/nsMediaFeatures.cpp
---- firefox-57.0/layout/style/nsMediaFeatures.cpp.1399611	2017-11-02 17:16:35.000000000 +0100
-+++ firefox-57.0/layout/style/nsMediaFeatures.cpp	2017-11-22 12:17:33.730682482 +0100
-@@ -788,6 +788,42 @@ nsMediaFeatures::features[] = {
+diff -up firefox-58.0/layout/style/nsMediaFeatures.cpp.1399611 firefox-58.0/layout/style/nsMediaFeatures.cpp
+--- firefox-58.0/layout/style/nsMediaFeatures.cpp.1399611	2018-01-11 21:17:01.000000000 +0100
++++ firefox-58.0/layout/style/nsMediaFeatures.cpp	2018-01-24 10:57:03.718031950 +0100
+@@ -831,6 +831,42 @@ nsMediaFeatures::features[] = {
      GetSystemMetric
    },
  
@@ -256,20 +68,9 @@ diff -up firefox-57.0/layout/style/nsMediaFeatures.cpp.1399611 firefox-57.0/layo
    // Internal -moz-is-glyph media feature: applies only inside SVG glyphs.
    // Internal because it is really only useful in the user agent anyway
    //  and therefore not worth standardizing.
-diff -up firefox-57.0/modules/libpref/init/all.js.1399611 firefox-57.0/modules/libpref/init/all.js
---- firefox-57.0/modules/libpref/init/all.js.1399611	2017-11-02 17:16:31.000000000 +0100
-+++ firefox-57.0/modules/libpref/init/all.js	2017-11-22 12:17:33.730682482 +0100
-@@ -4913,6 +4913,7 @@ pref("gfx.apitrace.enabled",false);
- pref("gfx.xrender.enabled",false);
- pref("widget.chrome.allow-gtk-dark-theme", false);
- pref("widget.content.allow-gtk-dark-theme", false);
-+pref("widget.allow-client-side-decoration", false);
- #endif
- #endif
- 
-diff -up firefox-57.0/toolkit/modules/moz.build.1399611 firefox-57.0/toolkit/modules/moz.build
---- firefox-57.0/toolkit/modules/moz.build.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/toolkit/modules/moz.build	2017-11-22 12:17:33.730682482 +0100
+diff -up firefox-58.0/toolkit/modules/moz.build.1399611 firefox-58.0/toolkit/modules/moz.build
+--- firefox-58.0/toolkit/modules/moz.build.1399611	2018-01-11 21:17:05.000000000 +0100
++++ firefox-58.0/toolkit/modules/moz.build	2018-01-24 10:57:03.718031950 +0100
 @@ -259,7 +259,7 @@ EXTRA_JS_MODULES.sessionstore += [
  ]
  
@@ -279,366 +80,34 @@ diff -up firefox-57.0/toolkit/modules/moz.build.1399611 firefox-57.0/toolkit/mod
      DEFINES['CAN_DRAW_IN_TITLEBAR'] = 1
  
  if CONFIG['MOZ_WIDGET_TOOLKIT'] in ('windows', 'gtk2', 'gtk3'):
-diff -up firefox-57.0/widget/gtk/gtk3drawing.cpp.1399611 firefox-57.0/widget/gtk/gtk3drawing.cpp
---- firefox-57.0/widget/gtk/gtk3drawing.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/gtk/gtk3drawing.cpp	2017-11-22 12:17:33.731682479 +0100
-@@ -17,6 +17,7 @@
- #include "WidgetStyleCache.h"
- 
- #include <math.h>
-+#include <dlfcn.h>
- 
- static gboolean checkbox_check_state;
- static gboolean notebook_has_tab_gap;
-@@ -39,9 +40,25 @@ static gint
- moz_gtk_menu_item_paint(WidgetNodeType widget, cairo_t *cr, GdkRectangle* rect,
-                         GtkWidgetState* state, GtkTextDirection direction);
- 
-+static void
-+moz_gtk_add_style_margin(GtkStyleContext* style,
-+                         gint* left, gint* top, gint* right, gint* bottom);
-+static void
-+moz_gtk_add_style_border(GtkStyleContext* style,
-+                         gint* left, gint* top, gint* right, gint* bottom);
-+static void
-+moz_gtk_add_style_padding(GtkStyleContext* style,
-+                          gint* left, gint* top, gint* right, gint* bottom);
-+static void moz_gtk_add_margin_border_padding(GtkStyleContext *style,
-+                                              gint* left, gint* top,
-+                                              gint* right, gint* bottom);
-+static void moz_gtk_add_border_padding(GtkStyleContext *style,
-+                                       gint* left, gint* top,
-+                                       gint* right, gint* bottom);
- static GtkBorder
- GetMarginBorderPadding(GtkStyleContext* aStyle);
- 
-+
- // GetStateFlagsFromGtkWidgetState() can be safely used for the specific
- // GtkWidgets that set both prelight and active flags.  For other widgets,
- // either the GtkStateFlags or Gecko's GtkWidgetState need to be carefully
-@@ -233,6 +250,43 @@ moz_gtk_splitter_get_metrics(gint orient
-     return MOZ_GTK_SUCCESS;
- }
- 
-+void
-+moz_gtk_get_window_border(gint* top, gint* right, gint* bottom, gint* left)
-+{
-+  MOZ_ASSERT(gtk_check_version(3, 20, 0) == nullptr,
-+             "Window decorations are only supported on GTK 3.20+.");
-+
-+  GtkStyleContext* style = GetStyleContext(MOZ_GTK_WINDOW);
-+
-+  *top = *right = *bottom = *left = 0;
-+  moz_gtk_add_border_padding(style, left, top, right, bottom);
-+  GtkBorder windowMargin;
-+  gtk_style_context_get_margin(style, GTK_STATE_FLAG_NORMAL, &windowMargin);
-+
-+  style = GetStyleContext(MOZ_GTK_WINDOW_DECORATION);
-+
-+  // Available on GTK 3.20+.
-+  static auto sGtkRenderBackgroundGetClip =
-+    (void (*)(GtkStyleContext*, gdouble, gdouble, gdouble, gdouble, GdkRectangle*))
-+    dlsym(RTLD_DEFAULT, "gtk_render_background_get_clip");
-+
-+  GdkRectangle shadowClip;
-+  sGtkRenderBackgroundGetClip(style, 0, 0, 0, 0, &shadowClip);
-+
-+  // Transfer returned inset rectangle to GtkBorder
-+  GtkBorder shadowBorder = {
-+      static_cast<gint16>(-shadowClip.x),                    // left
-+      static_cast<gint16>(shadowClip.width + shadowClip.x),  // right
-+      static_cast<gint16>(-shadowClip.y),                    // top
-+      static_cast<gint16>(shadowClip.height + shadowClip.y), // bottom
-+  };
-+
-+  *left += MAX(windowMargin.left, shadowBorder.left);
-+  *right += MAX(windowMargin.right, shadowBorder.right);
-+  *top += MAX(windowMargin.top, shadowBorder.top);
-+  *bottom += MAX(windowMargin.bottom, shadowBorder.bottom);
-+}
-+
- static gint
- moz_gtk_window_paint(cairo_t *cr, GdkRectangle* rect,
-                      GtkTextDirection direction)
-@@ -302,6 +356,24 @@ moz_gtk_button_paint(cairo_t *cr, GdkRec
- }
- 
- static gint
-+moz_gtk_header_bar_button_paint(cairo_t *cr, GdkRectangle* rect,
-+                                GtkWidgetState* state,
-+                                GtkReliefStyle relief, GtkWidget* widget,
-+                                GtkTextDirection direction)
-+{
-+    GtkBorder margin;
-+    GtkStyleContext* style = gtk_widget_get_style_context(widget);
-+    gtk_style_context_get_margin(style, GTK_STATE_FLAG_NORMAL, &margin);
-+
-+    rect->x += margin.left;
-+    rect->y += margin.top;
-+    rect->width -= margin.left + margin.right;
-+    rect->height -= margin.top + margin.bottom;
-+
-+    return moz_gtk_button_paint(cr, rect, state, relief, widget, direction);
-+}
-+
-+static gint
- moz_gtk_toggle_paint(cairo_t *cr, GdkRectangle* rect,
-                      GtkWidgetState* state,
-                      gboolean selected, gboolean inconsistent,
-@@ -1948,6 +2020,38 @@ moz_gtk_info_bar_paint(cairo_t *cr, GdkR
-     return MOZ_GTK_SUCCESS;
- }
- 
-+static gint
-+moz_gtk_header_bar_paint(WidgetNodeType widgetType,
-+                         cairo_t *cr, GdkRectangle* rect, GtkWidgetState* state)
-+{
-+    GtkStateFlags state_flags = GetStateFlagsFromGtkWidgetState(state);
-+    GtkStyleContext *style;
-+
-+    style = GetStyleContext(widgetType, GTK_TEXT_DIR_LTR,
-+                            state_flags);
-+    InsetByMargin(rect, style);
-+    gtk_render_background(style, cr, rect->x, rect->y, rect->width,
-+                          rect->height);
-+    gtk_render_frame(style, cr, rect->x, rect->y, rect->width, rect->height);
-+
-+    return MOZ_GTK_SUCCESS;
-+}
-+
-+void
-+moz_gtk_header_bar_paint(cairo_t *cr, GdkRectangle* rect)
-+{
-+    static GtkWidgetState state;
-+    moz_gtk_header_bar_paint(MOZ_GTK_HEADER_BAR, cr, rect, &state);
-+}
-+
-+void
-+moz_gtk_get_header_bar_border(gint* top, gint* right, gint* bottom, gint* left)
-+{
-+    *left = *top = *right = *bottom = 0;
-+    moz_gtk_add_border_padding(GetStyleContext(MOZ_GTK_HEADER_BAR),
-+                               left, top, right, bottom);
-+}
-+
- static void
- moz_gtk_add_style_margin(GtkStyleContext* style,
-                          gint* left, gint* top, gint* right, gint* bottom)
-@@ -1999,6 +2103,14 @@ static void moz_gtk_add_margin_border_pa
-     moz_gtk_add_style_padding(style, left, top, right, bottom);
- }
- 
-+static void moz_gtk_add_border_padding(GtkStyleContext *style,
-+                                       gint* left, gint* top,
-+                                       gint* right, gint* bottom)
-+{
-+    moz_gtk_add_style_border(style, left, top, right, bottom);
-+    moz_gtk_add_style_padding(style, left, top, right, bottom);
-+}
-+
- static GtkBorder
- GetMarginBorderPadding(GtkStyleContext* aStyle)
- {
-@@ -2054,8 +2166,7 @@ moz_gtk_get_widget_border(WidgetNodeType
-             // XXX: Subtract 1 pixel from the padding to account for the default
-             // padding in forms.css. See bug 1187385.
-             *left = *top = *right = *bottom = -1;
--            moz_gtk_add_style_padding(style, left, top, right, bottom);
--            moz_gtk_add_style_border(style, left, top, right, bottom);
-+            moz_gtk_add_border_padding(style, left, top, right, bottom);
- 
-             return MOZ_GTK_SUCCESS;
-         }
-@@ -2076,10 +2187,8 @@ moz_gtk_get_widget_border(WidgetNodeType
-             *left = *top = *right = *bottom =
-                 gtk_container_get_border_width(GTK_CONTAINER(
-                                                GetWidget(MOZ_GTK_TREE_HEADER_CELL)));
--
-             style = GetStyleContext(MOZ_GTK_TREE_HEADER_CELL);
--            moz_gtk_add_style_border(style, left, top, right, bottom);
--            moz_gtk_add_style_padding(style, left, top, right, bottom);
-+            moz_gtk_add_border_padding(style, left, top, right, bottom);
-             return MOZ_GTK_SUCCESS;
-         }
-     case MOZ_GTK_TREE_HEADER_SORTARROW:
-@@ -2105,8 +2214,7 @@ moz_gtk_get_widget_border(WidgetNodeType
-                 gtk_container_get_border_width(GTK_CONTAINER(
-                                                GetWidget(MOZ_GTK_COMBOBOX_BUTTON)));
-             style = GetStyleContext(MOZ_GTK_COMBOBOX_BUTTON);
--            moz_gtk_add_style_padding(style, left, top, right, bottom);
--            moz_gtk_add_style_border(style, left, top, right, bottom);
-+            moz_gtk_add_border_padding(style, left, top, right, bottom);
- 
-             /* If there is no separator, don't try to count its width. */
-             separator_width = 0;
-@@ -2160,10 +2268,8 @@ moz_gtk_get_widget_border(WidgetNodeType
-             style = gtk_widget_get_style_context(w);
- 
-             *left = *top = *right = *bottom = gtk_container_get_border_width(GTK_CONTAINER(w));
--            moz_gtk_add_style_border(style,
--                                     left, top, right, bottom);
--            moz_gtk_add_style_padding(style,
--                                      left, top, right, bottom);
-+            moz_gtk_add_border_padding(style,
-+                                       left, top, right, bottom);
-             return MOZ_GTK_SUCCESS;
-         }
-     case MOZ_GTK_MENUPOPUP:
-@@ -2210,6 +2316,21 @@ moz_gtk_get_widget_border(WidgetNodeType
- 
-             return MOZ_GTK_SUCCESS;
-         }
-+    case MOZ_GTK_HEADER_BAR:
-+    case MOZ_GTK_HEADER_BAR_MAXIMIZED:
-+        {
-+            style = GetStyleContext(widget);
-+            moz_gtk_add_border_padding(style, left, top, right, bottom);
-+            return MOZ_GTK_SUCCESS;
-+        }
-+    case MOZ_GTK_HEADER_BAR_BUTTON_CLOSE:
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MINIMIZE:
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE:
-+        {
-+            style = GetStyleContext(widget);
-+            moz_gtk_add_margin_border_padding(style, left, top, right, bottom);
-+            return MOZ_GTK_SUCCESS;
-+        }
- 
-     /* These widgets have no borders, since they are not containers. */
-     case MOZ_GTK_CHECKBUTTON_LABEL:
-@@ -2646,6 +2767,36 @@ GetScrollbarMetrics(GtkOrientation aOrie
-     return metrics;
- }
- 
-+void
-+moz_gtk_window_decoration_paint(cairo_t *cr, GdkRectangle* rect)
-+{
-+    gint top, right, bottom, left;
-+    moz_gtk_get_window_border(&top, &right, &bottom, &left);
-+
-+    cairo_save(cr);
-+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-+    cairo_rectangle(cr, rect->x, rect->y, left, rect->height);
-+    cairo_fill(cr);
-+    cairo_rectangle(cr, rect->x+rect->width-right, rect->y, right, rect->height);
-+    cairo_fill(cr);
-+    cairo_rectangle(cr, rect->x, rect->y, rect->width, top);
-+    cairo_fill(cr);
-+    cairo_rectangle(cr, rect->x, rect->height-bottom, rect->width, bottom);
-+    cairo_fill(cr);
-+    cairo_restore(cr);
-+
-+    GtkStyleContext* style = GetStyleContext(MOZ_GTK_WINDOW_DECORATION,
-+                                               GTK_TEXT_DIR_NONE);
-+    rect->x += left;
-+    rect->y += top;
-+    rect->width -= left + right;
-+    rect->height -= top + bottom;
-+
-+    gtk_render_background(style, cr, rect->x, rect->y, rect->width, rect->height);
-+    gtk_render_frame(style, cr, rect->x, rect->y, rect->width, rect->height);
-+}
-+
-+
- /* cairo_t *cr argument has to be a system-cairo. */
- gint
- moz_gtk_widget_paint(WidgetNodeType widget, cairo_t *cr,
-@@ -2671,6 +2822,14 @@ moz_gtk_widget_paint(WidgetNodeType widg
-                                     GetWidget(MOZ_GTK_BUTTON),
-                                     direction);
-         break;
-+    case MOZ_GTK_HEADER_BAR_BUTTON_CLOSE:
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MINIMIZE:
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE:
-+        return moz_gtk_header_bar_button_paint(cr, rect, state,
-+                                               (GtkReliefStyle) flags,
-+                                               GetWidget(widget),
-+                                               direction);
-+        break;
-     case MOZ_GTK_CHECKBUTTON:
-     case MOZ_GTK_RADIOBUTTON:
-         return moz_gtk_toggle_paint(cr, rect, state,
-@@ -2877,6 +3036,10 @@ moz_gtk_widget_paint(WidgetNodeType widg
-     case MOZ_GTK_INFO_BAR:
-         return moz_gtk_info_bar_paint(cr, rect, state);
-         break;
-+    case MOZ_GTK_HEADER_BAR:
-+    case MOZ_GTK_HEADER_BAR_MAXIMIZED:
-+        return moz_gtk_header_bar_paint(widget, cr, rect, state);
-+        break;
-     default:
-         g_warning("Unknown widget type: %d", widget);
-     }
-diff -up firefox-57.0/widget/gtk/gtkdrawing.h.1399611 firefox-57.0/widget/gtk/gtkdrawing.h
---- firefox-57.0/widget/gtk/gtkdrawing.h.1399611	2017-07-31 18:20:53.000000000 +0200
-+++ firefox-57.0/widget/gtk/gtkdrawing.h	2017-11-22 12:17:33.731682479 +0100
-@@ -268,8 +268,14 @@ typedef enum {
-   MOZ_GTK_SPLITTER_SEPARATOR_VERTICAL,
-   /* Paints the background of a window, dialog or page. */
-   MOZ_GTK_WINDOW,
-+  /* Used only as a container for MOZ_GTK_HEADER_BAR_MAXIMIZED. */
-+  MOZ_GTK_WINDOW_MAXIMIZED,
-   /* Window container for all widgets */
-   MOZ_GTK_WINDOW_CONTAINER,
-+  /* Window with the 'csd' style class. */
-+  MOZ_GTK_WINDOW_CSD,
-+  /* Client-side window decoration node. Available on GTK 3.20+. */
-+  MOZ_GTK_WINDOW_DECORATION,
-   /* Paints a GtkInfoBar, for notifications. */
-   MOZ_GTK_INFO_BAR,
-   /* Used for widget tree construction. */
-@@ -290,6 +296,14 @@ typedef enum {
-   MOZ_GTK_COMBOBOX_ENTRY_ARROW,
-   /* Used for scrolled window shell. */
-   MOZ_GTK_SCROLLED_WINDOW,
-+  /* Paints a GtkHeaderBar */
-+  MOZ_GTK_HEADER_BAR,
-+  /* Paints a GtkHeaderBar in maximized state */
-+  MOZ_GTK_HEADER_BAR_MAXIMIZED,
-+  /* Paints a GtkHeaderBar title buttons */
-+  MOZ_GTK_HEADER_BAR_BUTTON_CLOSE,
-+  MOZ_GTK_HEADER_BAR_BUTTON_MINIMIZE,
-+  MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE,
- 
-   MOZ_GTK_WIDGET_NODE_COUNT
- } WidgetNodeType;
-@@ -542,6 +556,32 @@ gint moz_gtk_get_menu_separator_height(g
-  */
- gint moz_gtk_splitter_get_metrics(gint orientation, gint* size);
- 
-+#if (MOZ_WIDGET_GTK == 3)
-+/**
-+ * Gets the margins to be used for window decorations, typically the extra space
-+ * required to draw a drop shadow (obtained from gtk_render_background_get_clip).
-+ * Only available on GTK 3.20+.
-+ */
-+void moz_gtk_get_window_border(gint* top, gint* right, gint* bottom, gint* left);
-+
-+/**
-+ * Draw window decorations, typically a shadow.
-+ * Only available on GTK 3.20+.
-+ */
-+void moz_gtk_window_decoration_paint(cairo_t *cr, GdkRectangle* rect);
-+
-+/**
-+ * Gets the border of window header bar, only available on GTK 3.20+.
-+ */
-+void moz_gtk_get_header_bar_border(gint* top, gint* right, gint* bottom, gint* left);
-+
-+/**
-+ * Draw window header bar, only available on GTK 3.20+.
-+ */
-+void moz_gtk_header_bar_paint(cairo_t *cr, GdkRectangle* rect);
-+
-+#endif
-+
- /**
-  * Get the YTHICKNESS of a tab (notebook extension).
-  */
-diff -up firefox-57.0/widget/gtk/mozgtk/mozgtk.c.1399611 firefox-57.0/widget/gtk/mozgtk/mozgtk.c
---- firefox-57.0/widget/gtk/mozgtk/mozgtk.c.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/gtk/mozgtk/mozgtk.c	2017-11-22 12:17:33.731682479 +0100
-@@ -580,6 +580,8 @@ STUB(gtk_style_context_set_state)
+diff -up firefox-58.0/widget/gtk/mozgtk/mozgtk.c.1399611 firefox-58.0/widget/gtk/mozgtk/mozgtk.c
+--- firefox-58.0/widget/gtk/mozgtk/mozgtk.c.1399611	2018-01-11 21:17:06.000000000 +0100
++++ firefox-58.0/widget/gtk/mozgtk/mozgtk.c	2018-01-24 10:11:58.638648276 +0100
+@@ -391,6 +391,7 @@ STUB(gtk_separator_menu_item_new)
+ STUB(gtk_separator_tool_item_new)
+ STUB(gtk_settings_get_default)
+ STUB(gtk_settings_get_for_screen)
++STUB(gtk_show_uri)
+ STUB(gtk_socket_add_id)
+ STUB(gtk_socket_get_id)
+ STUB(gtk_socket_get_type)
+@@ -407,6 +408,7 @@ STUB(gtk_target_list_add_image_targets)
+ STUB(gtk_target_list_new)
+ STUB(gtk_target_list_unref)
+ STUB(gtk_targets_include_image)
++STUB(gtk_targets_include_text)
+ STUB(gtk_target_table_free)
+ STUB(gtk_target_table_new_from_list)
+ STUB(gtk_text_view_new)
+@@ -479,6 +481,7 @@ STUB(gtk_widget_show_all)
+ STUB(gtk_widget_size_allocate)
+ STUB(gtk_widget_style_get)
+ STUB(gtk_widget_unparent)
++STUB(gtk_widget_unrealize)
+ STUB(gtk_window_deiconify)
+ STUB(gtk_window_fullscreen)
+ STUB(gtk_window_get_group)
+@@ -582,6 +585,8 @@ STUB(gtk_style_context_set_state)
  STUB(gtk_style_properties_lookup_property)
  STUB(gtk_tree_view_column_get_button)
  STUB(gtk_widget_get_preferred_size)
@@ -647,908 +116,1153 @@ diff -up firefox-57.0/widget/gtk/mozgtk/mozgtk.c.1399611 firefox-57.0/widget/gtk
  STUB(gtk_widget_get_state_flags)
  STUB(gtk_widget_get_style_context)
  STUB(gtk_widget_path_append_type)
-@@ -589,6 +591,10 @@ STUB(gtk_widget_path_iter_add_class)
- STUB(gtk_widget_path_get_object_type)
- STUB(gtk_widget_path_new)
- STUB(gtk_widget_path_unref)
-+STUB(gtk_widget_set_margin_left)
-+STUB(gtk_widget_set_margin_right)
-+STUB(gtk_widget_set_margin_top)
-+STUB(gtk_widget_set_margin_bottom)
- STUB(gtk_widget_set_visual)
- STUB(gtk_app_chooser_dialog_new_for_content_type)
- STUB(gtk_app_chooser_get_type)
-@@ -601,6 +607,7 @@ STUB(gtk_color_chooser_get_type)
- STUB(gtk_color_chooser_set_rgba)
- STUB(gtk_color_chooser_get_rgba)
- STUB(gtk_color_chooser_set_use_alpha)
-+STUB(gtk_window_get_size)
- #endif
- 
- #ifdef GTK2_SYMBOLS
-diff -up firefox-57.0/widget/gtk/nsLookAndFeel.cpp.1399611 firefox-57.0/widget/gtk/nsLookAndFeel.cpp
---- firefox-57.0/widget/gtk/nsLookAndFeel.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/gtk/nsLookAndFeel.cpp	2017-11-22 12:17:33.731682479 +0100
-@@ -642,6 +642,22 @@ nsLookAndFeel::GetIntImpl(IntID aID, int
-     case eIntID_ContextMenuOffsetHorizontal:
-         aResult = 2;
-         break;
-+    case eIntID_GTKCSDAvailable:
-+        EnsureInit();
-+        aResult = sCSDAvailable;
-+        break;
-+    case eIntID_GTKCSDMaximizeButton:
-+        EnsureInit();
-+        aResult = sCSDMaximizeButton;
-+        break;
-+    case eIntID_GTKCSDMinimizeButton:
-+        EnsureInit();
-+        aResult = sCSDMinimizeButton;
-+        break;
-+    case eIntID_GTKCSDCloseButton:
-+        EnsureInit();
-+        aResult = sCSDCloseButton;
-+        break;
-     default:
-         aResult = 0;
-         res     = NS_ERROR_FAILURE;
-@@ -1048,6 +1064,40 @@ nsLookAndFeel::EnsureInit()
- 
-     gtk_widget_destroy(window);
-     g_object_unref(labelWidget);
-+
-+    // Require GTK 3.20 for client-side decoration support.
-+    // 3.20 exposes gtk_render_background_get_clip, which is required for
-+    // calculating shadow metrics for decorated windows.
-+    sCSDAvailable = gtk_check_version(3, 20, 0) == nullptr;
-+    if (sCSDAvailable) {
-+        sCSDAvailable =
-+            mozilla::Preferences::GetBool("widget.allow-client-side-decoration",
-+                                          false);
-+    }
-+
-+    const gchar* decorationLayout = nullptr;
-+    if (gtk_check_version(3, 12, 0) == nullptr) {
-+        static auto sGtkHeaderBarGetDecorationLayoutPtr =
-+          (const gchar* (*)(GtkWidget*))
-+          dlsym(RTLD_DEFAULT, "gtk_header_bar_get_decoration_layout");
-+
-+        GtkWidget* headerBar = GetWidget(MOZ_GTK_HEADER_BAR);
-+        decorationLayout = sGtkHeaderBarGetDecorationLayoutPtr(headerBar);
-+        if (!decorationLayout) {
-+            g_object_get(settings, "gtk-decoration-layout", &decorationLayout,
-+                         nullptr);
-+        }
-+    }
-+
-+    if (decorationLayout) {
-+        sCSDCloseButton = (strstr(decorationLayout, "close") != nullptr);
-+        sCSDMaximizeButton = (strstr(decorationLayout, "maximize") != nullptr);
-+        sCSDMinimizeButton = (strstr(decorationLayout, "minimize") != nullptr);
-+    } else {
-+        sCSDCloseButton = true;
-+        sCSDMaximizeButton = true;
-+        sCSDMinimizeButton = true;
-+    }
- }
- 
- // virtual
-diff -up firefox-57.0/widget/gtk/nsLookAndFeel.h.1399611 firefox-57.0/widget/gtk/nsLookAndFeel.h
---- firefox-57.0/widget/gtk/nsLookAndFeel.h.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/gtk/nsLookAndFeel.h	2017-11-22 12:17:33.732682476 +0100
-@@ -32,6 +32,8 @@ public:
-     virtual char16_t GetPasswordCharacterImpl();
-     virtual bool GetEchoPasswordImpl();
- 
-+    bool IsCSDAvailable() const { return sCSDAvailable; }
-+
- protected:
- 
-     // Cached fonts
-@@ -82,6 +84,10 @@ protected:
-     char16_t sInvisibleCharacter;
-     float   sCaretRatio;
-     bool    sMenuSupportsDrag;
-+    bool    sCSDAvailable;
-+    bool    sCSDMaximizeButton;
-+    bool    sCSDMinimizeButton;
-+    bool    sCSDCloseButton;
-     bool    mInitialized;
- 
-     void EnsureInit();
-diff -up firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp.1399611 firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp
---- firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/gtk/nsNativeThemeGTK.cpp	2017-11-22 12:17:33.732682476 +0100
-@@ -23,6 +23,7 @@
- #include "nsIDOMHTMLInputElement.h"
- #include "nsGkAtoms.h"
- #include "nsAttrValueInlines.h"
+diff -up firefox-58.0/widget/gtk/nsLookAndFeel.cpp.1399611 firefox-58.0/widget/gtk/nsLookAndFeel.cpp
+--- firefox-58.0/widget/gtk/nsLookAndFeel.cpp.1399611	2018-01-11 21:17:06.000000000 +0100
++++ firefox-58.0/widget/gtk/nsLookAndFeel.cpp	2018-01-24 10:57:03.718031950 +0100
+@@ -24,6 +24,7 @@
+ #include "nsStyleConsts.h"
+ #include "gfxFontConstants.h"
+ #include "WidgetUtils.h"
 +#include "nsWindow.h"
  
- #include "mozilla/EventStates.h"
- #include "mozilla/Services.h"
-@@ -703,6 +704,24 @@ nsNativeThemeGTK::GetGtkWidgetAndState(u
-   case NS_THEME_GTK_INFO_BAR:
-     aGtkWidgetType = MOZ_GTK_INFO_BAR;
-     break;
-+  case NS_THEME_WINDOW_TITLEBAR:
-+    aGtkWidgetType = MOZ_GTK_HEADER_BAR;
-+    break;
-+  case NS_THEME_WINDOW_TITLEBAR_MAXIMIZED:
-+    aGtkWidgetType = MOZ_GTK_HEADER_BAR_MAXIMIZED;
-+    break;
-+  case NS_THEME_WINDOW_BUTTON_CLOSE:
-+    aGtkWidgetType = MOZ_GTK_HEADER_BAR_BUTTON_CLOSE;
-+    break;
-+  case NS_THEME_WINDOW_BUTTON_MINIMIZE:
-+    aGtkWidgetType = MOZ_GTK_HEADER_BAR_BUTTON_MINIMIZE;
-+    break;
-+  case NS_THEME_WINDOW_BUTTON_MAXIMIZE:
-+    aGtkWidgetType = MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE;
-+    break;
-+  case NS_THEME_WINDOW_BUTTON_RESTORE:
-+    aGtkWidgetType = MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE;
-+    break;
-   default:
-     return false;
-   }
-@@ -1627,6 +1646,10 @@ nsNativeThemeGTK::GetMinimumWidgetSize(n
-   case NS_THEME_MENULIST:
-   case NS_THEME_TOOLBARBUTTON:
-   case NS_THEME_TREEHEADERCELL:
-+  case NS_THEME_WINDOW_BUTTON_CLOSE:
-+  case NS_THEME_WINDOW_BUTTON_MINIMIZE:
-+  case NS_THEME_WINDOW_BUTTON_MAXIMIZE:
-+  case NS_THEME_WINDOW_BUTTON_RESTORE:
-     {
-       if (aWidgetType == NS_THEME_MENULIST) {
-         // Include the arrow size.
-@@ -1892,9 +1915,21 @@ nsNativeThemeGTK::ThemeSupportsWidget(ns
-   case NS_THEME_DIALOG:
- #if (MOZ_WIDGET_GTK == 3)
-   case NS_THEME_GTK_INFO_BAR:
-+  case NS_THEME_GTK_WINDOW_DECORATION:
- #endif
-     return !IsWidgetStyled(aPresContext, aFrame, aWidgetType);
+ #include <dlfcn.h>
  
-+  case NS_THEME_WINDOW_BUTTON_CLOSE:
-+  case NS_THEME_WINDOW_BUTTON_MINIMIZE:
-+  case NS_THEME_WINDOW_BUTTON_MAXIMIZE:
-+  case NS_THEME_WINDOW_BUTTON_RESTORE:
-+  case NS_THEME_WINDOW_TITLEBAR:
-+  case NS_THEME_WINDOW_TITLEBAR_MAXIMIZED:
-+    // GtkHeaderBar is available on GTK 3.10+, which is used for styling
-+    // title bars and title buttons.
-+    return gtk_check_version(3, 10, 0) == nullptr &&
-+           !IsWidgetStyled(aPresContext, aFrame, aWidgetType);
-+
-   case NS_THEME_MENULIST_BUTTON:
-     if (aFrame && aFrame->GetWritingMode().IsVertical()) {
-       return false;
-@@ -1978,6 +2013,13 @@ nsNativeThemeGTK::GetWidgetTransparency(
- #else
-     return eTransparent;
- #endif
-+  case NS_THEME_GTK_WINDOW_DECORATION:
-+  {
-+    nsWindow* window = static_cast<nsWindow*>(aFrame->GetNearestWidget());
-+    if (window)
-+      return window->IsComposited() ? eTransparent : eOpaque;
-+    return eOpaque;
-+  }
-   }
+@@ -740,7 +741,7 @@ GetSystemFontInfo(GtkStyleContext *aStyl
+     // Scale fonts up on HiDPI displays.
+     // This would be done automatically with cairo, but we manually manage
+     // the display scale for platform consistency.
+-    size *= ScreenHelperGTK::GetGTKMonitorScaleFactor();
++    size *= mozilla::widget::ScreenHelperGTK::GetGTKMonitorScaleFactor();
  
-   return eUnknownTransparency;
-diff -up firefox-57.0/widget/gtk/nsWindow.cpp.1399611 firefox-57.0/widget/gtk/nsWindow.cpp
---- firefox-57.0/widget/gtk/nsWindow.cpp.1399611	2017-11-22 12:17:33.724682501 +0100
-+++ firefox-57.0/widget/gtk/nsWindow.cpp	2017-11-22 13:28:29.352498513 +0100
-@@ -85,6 +85,7 @@
- #include "nsIPropertyBag2.h"
- #include "GLContext.h"
- #include "gfx2DGlue.h"
-+#include "nsLookAndFeel.h"
+     // |size| is now pixels
  
- #ifdef ACCESSIBILITY
- #include "mozilla/a11y/Accessible.h"
-@@ -139,6 +140,8 @@ using namespace mozilla::widget;
+@@ -1076,17 +1077,13 @@ nsLookAndFeel::EnsureInit()
+     gtk_widget_destroy(window);
+     g_object_unref(labelWidget);
  
- #include "mozilla/layers/APZCTreeManager.h"
+-    // Require GTK 3.20 for client-side decoration support.
+-    mCSDAvailable = gtk_check_version(3, 20, 0) == nullptr;
+-    if (mCSDAvailable) {
+-        mCSDAvailable =
+-            mozilla::Preferences::GetBool("widget.allow-client-side-decoration",
+-                                          false);
+-    }
++    // Require GTK 3.10 for GtkHeaderBar support and compatible window manager.
++    mCSDAvailable = (gtk_check_version(3, 10, 0) == nullptr &&
++        nsWindow::GetCSDSupportLevel() != nsWindow::CSD_SUPPORT_NONE);
  
-+#include "gtkdrawing.h"
-+
+     // We need to initialize whole CSD config explicitly because it's queried
+     // as -moz-gtk* media features.
+-    mCSDCloseButton = false;
++    mCSDCloseButton = true;
+     mCSDMaximizeButton = false;
+     mCSDMinimizeButton = false;
+ 
+@@ -1095,18 +1092,24 @@ nsLookAndFeel::EnsureInit()
+           (const gchar* (*)(GtkWidget*))
+           dlsym(RTLD_DEFAULT, "gtk_header_bar_get_decoration_layout");
+ 
+-        GtkWidget* headerBar = GetWidget(MOZ_GTK_HEADER_BAR);
+-        const gchar* decorationLayout =
+-            sGtkHeaderBarGetDecorationLayoutPtr(headerBar);
+-        if (!decorationLayout) {
+-            g_object_get(settings, "gtk-decoration-layout", &decorationLayout,
+-                         nullptr);
+-        }
++        if (sGtkHeaderBarGetDecorationLayoutPtr) {
++            GtkWidget* headerBar = GetWidget(MOZ_GTK_HEADER_BAR);
++            const gchar* decorationLayout =
++                sGtkHeaderBarGetDecorationLayoutPtr(headerBar);
++            if (!decorationLayout) {
++                g_object_get(settings, "gtk-decoration-layout",
++                             &decorationLayout,
++                             nullptr);
++            }
+ 
+-        if (decorationLayout) {
+-            mCSDCloseButton = (strstr(decorationLayout, "close") != nullptr);
+-            mCSDMaximizeButton = (strstr(decorationLayout, "maximize") != nullptr);
+-            mCSDMinimizeButton = (strstr(decorationLayout, "minimize") != nullptr);
++            if (decorationLayout) {
++                mCSDCloseButton =
++                    (strstr(decorationLayout, "close") != nullptr);
++                mCSDMaximizeButton =
++                    (strstr(decorationLayout, "maximize") != nullptr);
++                mCSDMinimizeButton =
++                    (strstr(decorationLayout, "minimize") != nullptr);
++            }
+         }
+     }
+ }
+diff -up firefox-58.0/widget/gtk/nsNativeThemeGTK.cpp.1399611 firefox-58.0/widget/gtk/nsNativeThemeGTK.cpp
+--- firefox-58.0/widget/gtk/nsNativeThemeGTK.cpp.1399611	2018-01-11 21:17:06.000000000 +0100
++++ firefox-58.0/widget/gtk/nsNativeThemeGTK.cpp	2018-01-24 10:57:03.719031946 +0100
+@@ -29,6 +29,7 @@
+ 
+ #include <gdk/gdkprivate.h>
+ #include <gtk/gtk.h>
++#include <gtk/gtkx.h>
+ 
+ #include "gfxContext.h"
+ #include "gfxPlatformGtk.h"
+@@ -51,6 +52,7 @@
+ 
  using namespace mozilla;
  using namespace mozilla::gfx;
- using namespace mozilla::widget;
-@@ -186,6 +189,8 @@ static gboolean expose_event_cb
- #else
++using namespace mozilla::widget;
+ 
+ NS_IMPL_ISUPPORTS_INHERITED(nsNativeThemeGTK, nsNativeTheme, nsITheme,
+                                                              nsIObserver)
+@@ -1375,6 +1377,10 @@ nsNativeThemeGTK::GetWidgetPadding(nsDev
+   switch (aWidgetType) {
+     case NS_THEME_BUTTON_FOCUS:
+     case NS_THEME_TOOLBARBUTTON:
++    case NS_THEME_WINDOW_BUTTON_CLOSE:
++    case NS_THEME_WINDOW_BUTTON_MINIMIZE:
++    case NS_THEME_WINDOW_BUTTON_MAXIMIZE:
++    case NS_THEME_WINDOW_BUTTON_RESTORE:
+     case NS_THEME_DUALBUTTON:
+     case NS_THEME_TAB_SCROLL_ARROW_BACK:
+     case NS_THEME_TAB_SCROLL_ARROW_FORWARD:
+diff -up firefox-58.0/widget/gtk/nsWindow.cpp.1399611 firefox-58.0/widget/gtk/nsWindow.cpp
+--- firefox-58.0/widget/gtk/nsWindow.cpp.1399611	2018-01-24 10:57:03.714031963 +0100
++++ firefox-58.0/widget/gtk/nsWindow.cpp	2018-01-24 10:57:03.720031943 +0100
+@@ -178,13 +178,8 @@ static int    is_parent_ungrab_enter(Gdk
+ static int    is_parent_grab_leave(GdkEventCrossing *aEvent);
+ 
+ /* callbacks from widgets */
+-#if (MOZ_WIDGET_GTK == 2)
+-static gboolean expose_event_cb           (GtkWidget *widget,
+-                                           GdkEventExpose *event);
+-#else
  static gboolean expose_event_cb           (GtkWidget *widget,
                                             cairo_t *rect);
-+static gboolean expose_event_decoration_draw_cb (GtkWidget *widget,
-+                                                cairo_t *cr);
- #endif
+-#endif
  static gboolean configure_event_cb        (GtkWidget *widget,
                                             GdkEventConfigure *event);
-@@ -231,7 +236,6 @@ static void     screen_composited_change
-                                                   gpointer user_data);
+ static void     container_unrealize_cb    (GtkWidget *widget);
+@@ -230,11 +225,9 @@ static void     screen_composited_change
  static void     widget_composited_changed_cb     (GtkWidget* widget,
                                                    gpointer user_data);
--
- #if (MOZ_WIDGET_GTK == 3)
+ 
+-#if (MOZ_WIDGET_GTK == 3)
  static void     scale_changed_cb          (GtkWidget* widget,
                                             GParamSpec* aPSpec,
-@@ -440,6 +444,7 @@ nsWindow::nsWindow()
- 
-     mContainer           = nullptr;
-     mGdkWindow           = nullptr;
-+    mIsCSDEnabled        = false;
-     mShell               = nullptr;
-     mCompositorWidgetDelegate = nullptr;
-     mHasMappedToplevel   = false;
-@@ -481,6 +486,9 @@ nsWindow::nsWindow()
-     mLastScrollEventTime = GDK_CURRENT_TIME;
- #endif
-     mPendingConfigures = 0;
-+    mDrawWindowDecoration = false;
-+    mDecorationSize = {0,0,0,0};
-+    mCSDSupportLevel = CSD_SUPPORT_UNKNOWN;
- }
- 
- nsWindow::~nsWindow()
-@@ -1479,8 +1487,8 @@ LayoutDeviceIntRect
- nsWindow::GetScreenBounds()
+                                            gpointer aPointer);
+-#endif
+ #if GTK_CHECK_VERSION(3,4,0)
+ static gboolean touch_event_cb            (GtkWidget* aWidget,
+                                            GdkEventTouch* aEvent);
+@@ -390,7 +383,7 @@ static guint gButtonState;
+ static inline int32_t
+ GetBitmapStride(int32_t width)
  {
-     LayoutDeviceIntRect rect;
--    if (mIsTopLevel && mContainer) {
--        // use the point including window decorations
-+    if (mIsTopLevel && mContainer && !IsClientDecorated()) {
-+        // use the point including default Gtk+ window decorations
-         gint x, y;
-         gdk_window_get_root_origin(gtk_widget_get_window(GTK_WIDGET(mContainer)), &x, &y);
-         rect.MoveTo(GdkPointToDevicePixels({ x, y }));
-@@ -1606,6 +1614,10 @@ nsWindow::SetCursor(nsCursor aCursor)
-                 return;
- 
-             gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(mContainer)), newCursor);
-+            if (IsClientDecorated()) {
-+                gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(mShell)),
-+                                      newCursor);
-+            }
-         }
-     }
- }
-@@ -1662,6 +1674,10 @@ nsWindow::SetCursor(imgIContainer* aCurs
-     if (cursor) {
-         if (mContainer) {
-             gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(mContainer)), cursor);
-+            if (IsClientDecorated()) {
-+                gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(mShell)),
-+                                      cursor);
-+            }
-             rv = NS_OK;
-         }
- #if (MOZ_WIDGET_GTK == 3)
-@@ -2176,6 +2192,12 @@ nsWindow::OnExposeEvent(cairo_t *cr)
-         return TRUE;
-     }
- 
-+    // Clip upper part of the mContainer to get visible rounded corners
-+    // of GtkHeaderBar which is renderd to mShell.
-+    if (mIsCSDEnabled) {
-+        ApplyCSDClipping();
-+    }
-+
-     // If this widget uses OMTC...
-     if (GetLayerManager()->GetBackendType() == LayersBackend::LAYERS_CLIENT ||
-         GetLayerManager()->GetBackendType() == LayersBackend::LAYERS_WR) {
-@@ -2586,6 +2608,53 @@ nsWindow::OnMotionNotifyEvent(GdkEventMo
-         }
-     }
+-#if defined(MOZ_X11) || (MOZ_WIDGET_GTK == 2)
++#if defined(MOZ_X11)
+   return (width+7)/8;
+ #else
+   return cairo_format_stride_for_width(CAIRO_FORMAT_A1, width);
+@@ -458,11 +451,23 @@ nsWindow::nsWindow()
+     mXVisual  = nullptr;
+     mXDepth   = 0;
  #endif /* MOZ_X11 */
-+    // Client is decorated and we're getting the motion event for mShell
-+    // window which draws the CSD decorations around mContainer.
-+    if (IsClientDecorated()) {
-+        if (aEvent->window == gtk_widget_get_window(mShell)) {
-+            GdkWindowEdge edge;
-+            LayoutDeviceIntPoint refPoint =
-+                GdkEventCoordsToDevicePixels(aEvent->x, aEvent->y);
-+            if (CheckResizerEdge(refPoint, edge)) {
-+                nsCursor cursor = eCursor_none;
-+                switch (edge) {
-+                case GDK_WINDOW_EDGE_NORTH:
-+                    cursor = eCursor_n_resize;
-+                    break;
-+                case GDK_WINDOW_EDGE_NORTH_WEST:
-+                    cursor = eCursor_nw_resize;
-+                    break;
-+                case GDK_WINDOW_EDGE_NORTH_EAST:
-+                    cursor = eCursor_ne_resize;
-+                    break;
-+                case GDK_WINDOW_EDGE_WEST:
-+                    cursor = eCursor_w_resize;
-+                    break;
-+                case GDK_WINDOW_EDGE_EAST:
-+                    cursor = eCursor_e_resize;
-+                    break;
-+                case GDK_WINDOW_EDGE_SOUTH:
-+                    cursor = eCursor_s_resize;
-+                    break;
-+                case GDK_WINDOW_EDGE_SOUTH_WEST:
-+                    cursor = eCursor_sw_resize;
-+                    break;
-+                case GDK_WINDOW_EDGE_SOUTH_EAST:
-+                    cursor = eCursor_se_resize;
-+                    break;
-+                }
-+                SetCursor(cursor);
-+                return;
-+            }
-+        }
-+        // We're not on resize handle - check if we need to reset cursor back.
-+        if (mCursor == eCursor_n_resize || mCursor == eCursor_nw_resize ||
-+            mCursor == eCursor_ne_resize ||  mCursor == eCursor_w_resize ||
-+            mCursor == eCursor_e_resize || mCursor == eCursor_s_resize ||
-+            mCursor == eCursor_sw_resize || mCursor == eCursor_se_resize) {
-+            SetCursor(eCursor_standard);
-+        }
-+    }
++
+     if (!gGlobalsInitialized) {
+         gGlobalsInitialized = true;
  
-     WidgetMouseEvent event(true, eMouseMove, this, WidgetMouseEvent::eReal);
+         // It's OK if either of these fail, but it may not be one day.
+         initialize_prefs();
++
++#ifdef MOZ_WAYLAND
++        // Wayland provides clipboard data to application on focus-in event
++        // so we need to init our clipboard hooks before we create window
++        // and get focus.
++        if (!mIsX11Display) {
++            nsCOMPtr<nsIClipboard> clipboard =
++                do_GetService("@mozilla.org/widget/clipboard;1");
++            NS_ASSERTION(clipboard, "Failed to init clipboard!");
++        }
++#endif
+     }
  
-@@ -2756,6 +2825,20 @@ nsWindow::OnButtonPressEvent(GdkEventBut
-     if (CheckForRollup(aEvent->x_root, aEvent->y_root, false, false))
+     mLastMotionPressure = 0;
+@@ -1521,7 +1526,7 @@ nsWindow::UpdateClientOffset()
+ {
+     AUTO_PROFILER_LABEL("nsWindow::UpdateClientOffset", GRAPHICS);
+ 
+-    if (!mIsTopLevel || !mShell || !mGdkWindow || !mIsX11Display ||
++    if (!mIsTopLevel || !mShell || !mIsX11Display ||
+         gtk_window_get_window_type(GTK_WINDOW(mShell)) == GTK_WINDOW_POPUP) {
+         mClientOffset = nsIntPoint(0, 0);
          return;
+@@ -1534,7 +1539,7 @@ nsWindow::UpdateClientOffset()
+     int length_returned;
+     long *frame_extents;
  
-+    if (IsClientDecorated() && aEvent->window == gtk_widget_get_window(mShell)) {
-+        // Check to see if the event is within our window's resize region
-+        GdkWindowEdge edge;
-+        LayoutDeviceIntPoint refPoint =
-+            GdkEventCoordsToDevicePixels(aEvent->x, aEvent->y);
-+        if (CheckResizerEdge(refPoint, edge)) {
-+            gdk_window_begin_resize_drag(gtk_widget_get_window(mShell),
-+                                         edge, aEvent->button,
-+                                         aEvent->x_root, aEvent->y_root,
-+                                         aEvent->time);
-+            return;
+-    if (!gdk_property_get(mGdkWindow,
++    if (!gdk_property_get(gtk_widget_get_window(mShell),
+                           gdk_atom_intern ("_NET_FRAME_EXTENTS", FALSE),
+                           cardinal_atom,
+                           0, // offset
+@@ -1710,16 +1715,22 @@ nsWindow::GetNativeData(uint32_t aDataTy
+ #ifdef MOZ_X11
+         GdkDisplay* gdkDisplay = gdk_display_get_default();
+         if (GDK_IS_X11_DISPLAY(gdkDisplay)) {
+-          return GDK_DISPLAY_XDISPLAY(gdkDisplay);
++            return GDK_DISPLAY_XDISPLAY(gdkDisplay);
+         }
+ #endif /* MOZ_X11 */
++        // Don't bother to return native display on Wayland as it's for
++        // X11 only NPAPI plugins.
+         return nullptr;
+     }
+     case NS_NATIVE_SHELLWIDGET:
+         return GetToplevelWidget();
+ 
+     case NS_NATIVE_SHAREABLE_WINDOW:
+-        return (void *) GDK_WINDOW_XID(gdk_window_get_toplevel(mGdkWindow));
++        if (mIsX11Display) {
++            return (void *) GDK_WINDOW_XID(gdk_window_get_toplevel(mGdkWindow));
 +        }
-+    }
-+
-     gdouble pressure = 0;
-     gdk_event_get_axis ((GdkEvent*)aEvent, GDK_AXIS_PRESSURE, &pressure);
-     mLastMotionPressure = pressure;
-@@ -3341,6 +3424,8 @@ nsWindow::OnWindowStateEvent(GtkWidget *
- #endif //ACCESSIBILITY
++        NS_WARNING("nsWindow::GetNativeData(): NS_NATIVE_SHAREABLE_WINDOW is not handled on Wayland!");
++        return nullptr;
+     case NS_RAW_NATIVE_IME_CONTEXT: {
+         void* pseudoIMEContext = GetPseudoIMEContext();
+         if (pseudoIMEContext) {
+@@ -1800,18 +1811,18 @@ nsWindow::SetIcon(const nsAString& aIcon
+         // The last two entries (for the old XPM format) will be ignored unless
+         // no icons are found using other suffixes. XPM icons are deprecated.
+ 
+-        const char extensions[6][7] = { ".png", "16.png", "32.png", "48.png",
+-                                    ".xpm", "16.xpm" };
++        const char16_t extensions[9][8] = { u".png", u"16.png", u"32.png",
++                                            u"48.png", u"64.png", u"128.png",
++                                            u"256.png",
++                                            u".xpm", u"16.xpm" };
+ 
+         for (uint32_t i = 0; i < ArrayLength(extensions); i++) {
+             // Don't bother looking for XPM versions if we found a PNG.
+             if (i == ArrayLength(extensions) - 2 && foundIcon)
+                 break;
+ 
+-            nsAutoString extension;
+-            extension.AppendASCII(extensions[i]);
+-
+-            ResolveIconName(aIconSpec, extension, getter_AddRefs(iconFile));
++            ResolveIconName(aIconSpec, nsDependentString(extensions[i]),
++                            getter_AddRefs(iconFile));
+             if (iconFile) {
+                 iconFile->GetNativePath(path);
+                 GdkPixbuf *icon = gdk_pixbuf_new_from_file(path.get(), nullptr);
+@@ -2024,30 +2035,6 @@ gdk_window_flash(GdkWindow *    aGdkWind
+ #endif // DEBUG
+ #endif
+ 
+-#if (MOZ_WIDGET_GTK == 2)
+-static bool
+-ExtractExposeRegion(LayoutDeviceIntRegion& aRegion, GdkEventExpose* aEvent)
+-{
+-  GdkRectangle* rects;
+-  gint nrects;
+-  gdk_region_get_rectangles(aEvent->region, &rects, &nrects);
+-
+-  if (nrects > MAX_RECTS_IN_REGION) {
+-      // Just use the bounding box
+-      rects[0] = aEvent->area;
+-      nrects = 1;
+-  }
+-
+-  for (GdkRectangle* r = rects; r < rects + nrects; r++) {
+-      aRegion.Or(aRegion, LayoutDeviceIntRect(r->x, r->y, r->width, r->height));
+-      LOGDRAW(("\t%d %d %d %d\n", r->x, r->y, r->width, r->height));
+-  }
+-
+-  g_free(rects);
+-  return true;
+-}
+-
+-#else
+ # ifdef cairo_copy_clip_rectangle_list
+ #  error "Looks like we're including Mozilla's cairo instead of system cairo"
+ # endif
+@@ -2069,15 +2056,9 @@ ExtractExposeRegion(LayoutDeviceIntRegio
+   cairo_rectangle_list_destroy(rects);
+   return true;
+ }
+-#endif
+ 
+-#if (MOZ_WIDGET_GTK == 2)
+-gboolean
+-nsWindow::OnExposeEvent(GdkEventExpose *aEvent)
+-#else
+ gboolean
+ nsWindow::OnExposeEvent(cairo_t *cr)
+-#endif
+ {
+     // Send any pending resize events so that layout can update.
+     // May run event loop.
+@@ -2096,11 +2077,7 @@ nsWindow::OnExposeEvent(cairo_t *cr)
+         return FALSE;
+ 
+     LayoutDeviceIntRegion exposeRegion;
+-#if (MOZ_WIDGET_GTK == 2)
+-    if (!ExtractExposeRegion(exposeRegion, aEvent)) {
+-#else
+     if (!ExtractExposeRegion(exposeRegion, cr)) {
+-#endif
+         return FALSE;
      }
  
-+    UpdateClientDecorations();
-+
-     if (mWidgetListener) {
-       mWidgetListener->SizeModeChanged(mSizeState);
-       if (aEvent->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) {
-@@ -3405,6 +3490,7 @@ nsWindow::OnCompositedChanged()
-       presShell->ThemeChanged();
+@@ -2141,7 +2118,7 @@ nsWindow::OnExposeEvent(cairo_t *cr)
+ 
+     LOGDRAW(("sending expose event [%p] %p 0x%lx (rects follow):\n",
+              (void *)this, (void *)mGdkWindow,
+-             gdk_x11_window_get_xid(mGdkWindow)));
++             mIsX11Display ? gdk_x11_window_get_xid(mGdkWindow) : 0));
+ 
+     // Our bounds may have changed after calling WillPaintWindow.  Clip
+     // to the new bounds here.  The region is relative to this
+@@ -2304,19 +2281,11 @@ nsWindow::OnExposeEvent(cairo_t *cr)
+     listener->DidPaintWindow();
+ 
+     // Synchronously flush any new dirty areas
+-#if (MOZ_WIDGET_GTK == 2)
+-    GdkRegion* dirtyArea = gdk_window_get_update_area(mGdkWindow);
+-#else
+     cairo_region_t* dirtyArea = gdk_window_get_update_area(mGdkWindow);
+-#endif
+ 
+     if (dirtyArea) {
+         gdk_window_invalidate_region(mGdkWindow, dirtyArea, false);
+-#if (MOZ_WIDGET_GTK == 2)
+-        gdk_region_destroy(dirtyArea);
+-#else
+         cairo_region_destroy(dirtyArea);
+-#endif
+         gdk_window_process_updates(mGdkWindow, false);
      }
-   }
-+  UpdateClientDecorations();
+ 
+@@ -2466,7 +2435,7 @@ nsWindow::OnSizeAllocate(GtkAllocation *
+     mBounds.SizeTo(size);
+ 
+ #ifdef MOZ_X11
+-    // Notify the X11CompositorWidget of a ClientSizeChange
++    // Notify the GtkCompositorWidget of a ClientSizeChange
+     if (mCompositorWidgetDelegate) {
+       mCompositorWidgetDelegate->NotifyClientSizeChanged(GetClientSize());
+     }
+@@ -3550,21 +3519,9 @@ CreateGdkWindow(GdkWindow *parent, GtkWi
+     attributes.visual = gtk_widget_get_visual(widget);
+     attributes.window_type = GDK_WINDOW_CHILD;
+ 
+-#if (MOZ_WIDGET_GTK == 2)
+-    attributes_mask |= GDK_WA_COLORMAP;
+-    attributes.colormap = gtk_widget_get_colormap(widget);
+-#endif
+-
+     GdkWindow *window = gdk_window_new(parent, &attributes, attributes_mask);
+     gdk_window_set_user_data(window, widget);
+ 
+-// GTK3 TODO?
+-#if (MOZ_WIDGET_GTK == 2)
+-    /* set the default pixmap to None so that you don't end up with the
+-       gtk default which is BlackPixel. */
+-    gdk_window_set_back_pixmap(window, nullptr, FALSE);
+-#endif
+-
+     return window;
  }
  
- void
-@@ -3593,7 +3679,8 @@ nsWindow::Create(nsIWidget* aParent,
-     GtkWindow      *topLevelParent = nullptr;
-     nsWindow       *parentnsWindow = nullptr;
-     GtkWidget      *eventWidget = nullptr;
--    bool            shellHasCSD = false;
-+    GtkWidget      *drawWidget = nullptr;
-+    bool            drawToContainer = false;
- 
-     if (aParent) {
-         parentnsWindow = static_cast<nsWindow*>(aParent);
-@@ -3640,29 +3727,47 @@ nsWindow::Create(nsIWidget* aParent,
-               GTK_WINDOW_TOPLEVEL : GTK_WINDOW_POPUP;
+@@ -3653,10 +3610,14 @@ nsWindow::Create(nsIWidget* aParent,
+         // which will use a Window with the override-redirect attribute
+         // (for temporary windows).
+         // For long-lived windows, their stacking order is managed by the
+-        // window manager, as indicated by GTK_WINDOW_TOPLEVEL ...
+-        GtkWindowType type =
+-            mWindowType != eWindowType_popup || aInitData->mNoAutoHide ?
+-              GTK_WINDOW_TOPLEVEL : GTK_WINDOW_POPUP;
++        // window manager, as indicated by GTK_WINDOW_TOPLEVEL.
++        // For Wayland we have to always use GTK_WINDOW_POPUP to control
++        // popup window position.
++        GtkWindowType type = GTK_WINDOW_TOPLEVEL;
++        if (mWindowType == eWindowType_popup) {
++            type = (mIsX11Display && aInitData->mNoAutoHide) ?
++                GTK_WINDOW_TOPLEVEL : GTK_WINDOW_POPUP;
++        }
          mShell = gtk_window_new(type);
  
--        bool useAlphaVisual = (mWindowType == eWindowType_popup &&
--                               aInitData->mSupportTranslucency);
-+        bool useAlphaVisual = false;
-+#if (MOZ_WIDGET_GTK == 3)
-+        // When CSD is available we can emulate it for toplevel windows.
-+        // Content is rendered to mContainer and transparent decorations to mShell.
-+        if (GetCSDSupportLevel() != CSD_SUPPORT_NONE &&
-+            mWindowType == eWindowType_toplevel) {
-+            int32_t isCSDAvailable = false;
-+            nsresult rv = LookAndFeel::GetInt(LookAndFeel::eIntID_GTKCSDAvailable,
-+                                             &isCSDAvailable);
-+            if (NS_SUCCEEDED(rv)) {
-+                mIsCSDEnabled = useAlphaVisual = isCSDAvailable;
-+            }
-+        } else
-+#endif
-+        if (mWindowType == eWindowType_popup) {
-+            useAlphaVisual = aInitData->mSupportTranslucency;
-+        }
- 
-         // mozilla.widget.use-argb-visuals is a hidden pref defaulting to false
-         // to allow experimentation
-         if (Preferences::GetBool("mozilla.widget.use-argb-visuals", false))
-             useAlphaVisual = true;
- 
-+        // An ARGB visual is only useful if we are on a compositing
-+        // window manager.
-+        GdkScreen *screen = gtk_widget_get_screen(mShell);
-+        if (useAlphaVisual && !gdk_screen_is_composited(screen)) {
-+            useAlphaVisual = false;
-+        }
-+
-         // We need to select an ARGB visual here instead of in
-         // SetTransparencyMode() because it has to be done before the
--        // widget is realized.  An ARGB visual is only useful if we
--        // are on a compositing window manager.
-+        // widget is realized.
+         bool useAlphaVisual = (mWindowType == eWindowType_popup &&
+@@ -3674,13 +3635,8 @@ nsWindow::Create(nsIWidget* aParent,
          if (useAlphaVisual) {
--            GdkScreen *screen = gtk_widget_get_screen(mShell);
--            if (gdk_screen_is_composited(screen)) {
- #if (MOZ_WIDGET_GTK == 2)
+             GdkScreen *screen = gtk_widget_get_screen(mShell);
+             if (gdk_screen_is_composited(screen)) {
+-#if (MOZ_WIDGET_GTK == 2)
 -                GdkColormap *colormap = gdk_screen_get_rgba_colormap(screen);
 -                gtk_widget_set_colormap(mShell, colormap);
-+            GdkColormap *colormap = gdk_screen_get_rgba_colormap(screen);
-+            gtk_widget_set_colormap(mShell, colormap);
- #else
--                GdkVisual *visual = gdk_screen_get_rgba_visual(screen);
--                gtk_widget_set_visual(mShell, visual);
-+            GdkVisual *visual = gdk_screen_get_rgba_visual(screen);
-+            gtk_widget_set_visual(mShell, visual);
- #endif
--            }
+-#else
+                 GdkVisual *visual = gdk_screen_get_rgba_visual(screen);
+                 gtk_widget_set_visual(mShell, visual);
+-#endif
+             }
          }
  
-         // We only move a general managed toplevel window if someone has
-@@ -3756,24 +3861,56 @@ nsWindow::Create(nsIWidget* aParent,
+@@ -3728,9 +3684,11 @@ nsWindow::Create(nsIWidget* aParent,
+ #ifdef MOZ_X11
+                 // ... but when the window manager offers focus through
+                 // WM_TAKE_FOCUS, focus is requested on the parent window.
+-                gtk_widget_realize(mShell);
+-                gdk_window_add_filter(gtk_widget_get_window(mShell),
+-                                      popup_take_focus_filter, nullptr);
++                if (mIsX11Display) {
++                    gtk_widget_realize(mShell);
++                    gdk_window_add_filter(gtk_widget_get_window(mShell),
++                                          popup_take_focus_filter, nullptr);
++                }
+ #endif
+             }
+ 
+@@ -3742,7 +3700,11 @@ nsWindow::Create(nsIWidget* aParent,
+             else {
+                 switch (aInitData->mPopupHint) {
+                     case ePopupTypeMenu:
+-                        gtkTypeHint = GDK_WINDOW_TYPE_HINT_POPUP_MENU;
++                        // Use GDK_WINDOW_TYPE_HINT_UTILITY on Wayland which
++                        // guides Gtk to create the popup as subsurface
++                        // instead of xdg_shell popup (see Bug 1423598).
++                        gtkTypeHint = mIsX11Display ? GDK_WINDOW_TYPE_HINT_POPUP_MENU :
++                                                      GDK_WINDOW_TYPE_HINT_UTILITY;
+                         break;
+                     case ePopupTypeTooltip:
+                         gtkTypeHint = GDK_WINDOW_TYPE_HINT_TOOLTIP;
+@@ -3769,13 +3731,11 @@ nsWindow::Create(nsIWidget* aParent,
+             gtk_window_group_add_window(group, GTK_WINDOW(mShell));
+             g_object_unref(group);
+ 
+-            if (GetCSDSupportLevel() != CSD_SUPPORT_NONE) {
+-                int32_t isCSDAvailable = false;
+-                nsresult rv = LookAndFeel::GetInt(LookAndFeel::eIntID_GTKCSDAvailable,
+-                                                &isCSDAvailable);
+-                if (NS_SUCCEEDED(rv)) {
+-                   mIsCSDAvailable = isCSDAvailable;
+-                }
++            int32_t isCSDAvailable = false;
++            nsresult rv = LookAndFeel::GetInt(LookAndFeel::eIntID_GTKCSDAvailable,
++                                              &isCSDAvailable);
++            if (NS_SUCCEEDED(rv)) {
++               mIsCSDAvailable = isCSDAvailable;
+             }
+         }
+ 
+@@ -3783,7 +3743,6 @@ nsWindow::Create(nsIWidget* aParent,
+         GtkWidget *container = moz_container_new();
          mContainer = MOZ_CONTAINER(container);
  
- #if (MOZ_WIDGET_GTK == 3)
--        // "csd" style is set when widget is realized so we need to call
--        // it explicitly now.
--        gtk_widget_realize(mShell);
--
--        // We can't draw directly to top-level window when client side
--        // decorations are enabled. We use container with GdkWindow instead.
--        GtkStyleContext* style = gtk_widget_get_style_context(mShell);
--        shellHasCSD = gtk_style_context_has_class(style, "csd");
+-#if (MOZ_WIDGET_GTK == 3)
+         // "csd" style is set when widget is realized so we need to call
+         // it explicitly now.
+         gtk_widget_realize(mShell);
+@@ -3793,16 +3752,22 @@ nsWindow::Create(nsIWidget* aParent,
+          * 1) We're running on Gtk+ without client side decorations.
+          *    Content is rendered to mShell window and we listen
+          *    to the Gtk+ events on mShell
+-         * 2) We're running on Gtk+ > 3.20 and client side decorations
++         * 2) We're running on Gtk+ and client side decorations
+          *    are drawn by Gtk+ to mShell. Content is rendered to mContainer
+          *    and we listen to the Gtk+ events on mContainer.
++         * 3) We're running on Wayland. All gecko content is rendered
++         *    to mContainer and we listen to the Gtk+ events on mContainer.
+          */
+         GtkStyleContext* style = gtk_widget_get_style_context(mShell);
+-        drawToContainer = gtk_style_context_has_class(style, "csd");
 -#endif
--        if (!shellHasCSD) {
--            // Use mShell's window for drawing and events.
--            gtk_widget_set_has_window(container, FALSE);
--            // Prevent GtkWindow from painting a background to flicker.
--            gtk_widget_set_app_paintable(mShell, TRUE);
--        }
--        // Set up event widget
--        eventWidget = shellHasCSD ? container : mShell;
-+        /* There are tree possible situations here:
-+         *
-+         * 1) We're running on Gtk+ < 3.20 without any decorations. Content
-+         *    is rendered to mShell window and we listen Gtk+ events on mShell.
-+         * 2) We're running on Gtk+ > 3.20 and window decorations are drawn
-+         *    by default by Gtk+. Content is rendered to mContainer,
-+         *    we listen events on mContainer. mShell contains default Gtk+
-+         *    window decorations rendered by Gtk+.
-+         * 3) We're running on Gtk+ > 3.20 and both window decorations and
-+         *    content is rendered by gecko. We emulate Gtk+ decoration rendering
-+         *    to mShell and we need to listen Gtk events on both mShell
-+         *    and mContainer.
-+         */
-+
-+        // When client side decorations are enabled (rendered by us or by Gtk+)
-+        // the decoration is rendered to mShell (toplevel) window and
-+        // we draw our content to mContainer.
-+        if (mIsCSDEnabled) {
-+            drawToContainer = true;
-+        } else {
-+            // mIsCSDEnabled can be disabled by preference so look at actual
-+            // toplevel window style to to detect active "csd" style.
-+            // The "csd" style is set when widget is realized so we need to call
-+            // it explicitly now.
-+            gtk_widget_realize(mShell);
-+
-+            GtkStyleContext* style = gtk_widget_get_style_context(mShell);
-+            drawToContainer = gtk_style_context_has_class(style, "csd");
-+        }
-+#endif
-+        drawWidget = (drawToContainer) ? container : mShell;
-+        // When we draw decorations on our own we need to handle resize events
-+        // because Gtk+ does not provide resizers for undecorated windows.
-+        // The CSD on mShell borders act as resize handlers
-+        // so we need to listen there.
-+        eventWidget = (drawToContainer && !mIsCSDEnabled) ? container : mShell;
-+
++        drawToContainer =
++            !mIsX11Display ||
++            (mIsCSDAvailable && GetCSDSupportLevel() == CSD_SUPPORT_FLAT ) ||
++            gtk_style_context_has_class(style, "csd");
+         eventWidget = (drawToContainer) ? container : mShell;
+ 
          gtk_widget_add_events(eventWidget, kEvents);
-+        if (eventWidget != drawWidget) {
-+            // CSD is rendered by us (not by Gtk+) so we also need to listen
-+            // at mShell window for events.
-+            gtk_widget_add_events(drawWidget, kEvents);
-+        }
-+
-+        // Prevent GtkWindow from painting a background to flicker.
-+        gtk_widget_set_app_paintable(drawWidget, TRUE);
-+
-+        // gtk_container_add() realizes the child widget so we need to
-+        // set it now.
-+        gtk_widget_set_has_window(container, drawToContainer);
++        if (drawToContainer)
++            gtk_widget_add_events(mShell, GDK_PROPERTY_CHANGE_MASK);
  
-         gtk_container_add(GTK_CONTAINER(mShell), container);
-         gtk_widget_realize(container);
-@@ -3783,7 +3920,7 @@ nsWindow::Create(nsIWidget* aParent,
-         gtk_widget_grab_focus(container);
+         // Prevent GtkWindow from painting a background to avoid flickering.
+         gtk_widget_set_app_paintable(eventWidget, TRUE);
+@@ -3839,19 +3804,11 @@ nsWindow::Create(nsIWidget* aParent,
  
-         // the drawing window
--        mGdkWindow = gtk_widget_get_window(eventWidget);
-+        mGdkWindow = gtk_widget_get_window(drawWidget);
+             // If the popup ignores mouse events, set an empty input shape.
+             if (aInitData->mMouseTransparent) {
+-#if (MOZ_WIDGET_GTK == 2)
+-              GdkRectangle rect = { 0, 0, 0, 0 };
+-              GdkRegion *region = gdk_region_rectangle(&rect);
+-
+-              gdk_window_input_shape_combine_region(mGdkWindow, region, 0, 0);
+-              gdk_region_destroy(region);
+-#else
+               cairo_rectangle_int_t rect = { 0, 0, 0, 0 };
+               cairo_region_t *region = cairo_region_create_rectangle(&rect);
  
-         if (mWindowType == eWindowType_popup) {
-             // gdk does not automatically set the cursor for "temporary"
-@@ -3856,6 +3993,11 @@ nsWindow::Create(nsIWidget* aParent,
+               gdk_window_input_shape_combine_region(mGdkWindow, region, 0, 0);
+               cairo_region_destroy(region);
+-#endif
+             }
+         }
+     }
+@@ -3893,6 +3850,12 @@ nsWindow::Create(nsIWidget* aParent,
  
      // label the drawing window with this object so we can find our way home
      g_object_set_data(G_OBJECT(mGdkWindow), "nsWindow", this);
-+    if (mIsCSDEnabled) {
-+        // label the CSD window with this object so we can find our way home
++    if (drawToContainer) {
++        // Also label mShell toplevel window,
++        // property_notify_event_cb callback also needs to find its way home
 +        g_object_set_data(G_OBJECT(gtk_widget_get_window(mShell)),
 +                          "nsWindow", this);
 +    }
  
      if (mContainer)
          g_object_set_data(G_OBJECT(mContainer), "nsWindow", this);
-@@ -3893,6 +4035,10 @@ nsWindow::Create(nsIWidget* aParent,
-         g_signal_connect_after(default_settings,
-                                "notify::gtk-font-name",
-                                G_CALLBACK(theme_changed_cb), this);
-+        if (mIsCSDEnabled) {
-+            g_signal_connect(G_OBJECT(mShell), "draw",
-+                             G_CALLBACK(expose_event_decoration_draw_cb), nullptr);
-+        }
+@@ -3910,12 +3873,12 @@ nsWindow::Create(nsIWidget* aParent,
+                          G_CALLBACK(window_state_event_cb), nullptr);
+         g_signal_connect(mShell, "check-resize",
+                          G_CALLBACK(check_resize_cb), nullptr);
+-
+-        GdkScreen *screen = gtk_widget_get_screen(mShell);
+-
+         g_signal_connect(mShell, "composited-changed",
+                          G_CALLBACK(widget_composited_changed_cb), nullptr);
++        g_signal_connect(mShell, "property-notify-event",
++                         G_CALLBACK(property_notify_event_cb), nullptr);
+ 
++        GdkScreen *screen = gtk_widget_get_screen(mShell);
+         if (!g_signal_handler_find(screen, G_SIGNAL_MATCH_FUNC,
+                                    0, 0, nullptr,
+                                    FuncToGpointer(screen_composited_changed_cb), 0)) {
+@@ -3940,21 +3903,14 @@ nsWindow::Create(nsIWidget* aParent,
+                                G_CALLBACK(size_allocate_cb), nullptr);
+         g_signal_connect(mContainer, "hierarchy-changed",
+                          G_CALLBACK(hierarchy_changed_cb), nullptr);
+-#if (MOZ_WIDGET_GTK == 3)
+         g_signal_connect(mContainer, "notify::scale-factor",
+                          G_CALLBACK(scale_changed_cb), nullptr);
+-#endif
+         // Initialize mHasMappedToplevel.
+         hierarchy_changed_cb(GTK_WIDGET(mContainer), nullptr);
+         // Expose, focus, key, and drag events are sent even to GTK_NO_WINDOW
+         // widgets.
+-#if (MOZ_WIDGET_GTK == 2)
+-        g_signal_connect(mContainer, "expose_event",
+-                         G_CALLBACK(expose_event_cb), nullptr);
+-#else
+         g_signal_connect(G_OBJECT(mContainer), "draw",
+                          G_CALLBACK(expose_event_cb), nullptr);
+-#endif
+         g_signal_connect(mContainer, "focus_in_event",
+                          G_CALLBACK(focus_in_event_cb), nullptr);
+         g_signal_connect(mContainer, "focus_out_event",
+@@ -4006,10 +3962,6 @@ nsWindow::Create(nsIWidget* aParent,
      }
  
-     if (mContainer) {
-@@ -3943,7 +4089,7 @@ nsWindow::Create(nsIWidget* aParent,
-                          G_CALLBACK(drag_data_received_event_cb), nullptr);
+     if (eventWidget) {
+-#if (MOZ_WIDGET_GTK == 2)
+-        // Don't let GTK mess with the shapes of our GdkWindows
+-        GTK_PRIVATE_SET_FLAG(eventWidget, GTK_HAS_SHAPE_MASK);
+-#endif
  
-         GtkWidget *widgets[] = { GTK_WIDGET(mContainer),
--                                 !shellHasCSD ? mShell : nullptr };
-+                                 !drawToContainer ? mShell : nullptr };
-         for (size_t i = 0; i < ArrayLength(widgets) && widgets[i]; ++i) {
-             // Visibility events are sent to the owning widget of the relevant
-             // window but do not propagate to parent widgets so connect on
-@@ -3973,7 +4119,6 @@ nsWindow::Create(nsIWidget* aParent,
-         // Don't let GTK mess with the shapes of our GdkWindows
-         GTK_PRIVATE_SET_FLAG(eventWidget, GTK_HAS_SHAPE_MASK);
- #endif
--
          // These events are sent to the owning widget of the relevant window
          // and propagate up to the first widget that handles the events, so we
-         // need only connect on mShell, if it exists, to catch events on its
-@@ -4110,6 +4255,12 @@ nsWindow::NativeResize()
-          size.width, size.height));
+@@ -4025,8 +3977,6 @@ nsWindow::Create(nsIWidget* aParent,
+                          G_CALLBACK(button_press_event_cb), nullptr);
+         g_signal_connect(eventWidget, "button-release-event",
+                          G_CALLBACK(button_release_event_cb), nullptr);
+-        g_signal_connect(eventWidget, "property-notify-event",
+-                         G_CALLBACK(property_notify_event_cb), nullptr);
+         g_signal_connect(eventWidget, "scroll-event",
+                          G_CALLBACK(scroll_event_cb), nullptr);
+ #if GTK_CHECK_VERSION(3,4,0)
+@@ -4039,7 +3989,7 @@ nsWindow::Create(nsIWidget* aParent,
+     if (mShell) {
+         LOG(("\tmShell %p mContainer %p mGdkWindow %p 0x%lx\n",
+              mShell, mContainer, mGdkWindow,
+-             gdk_x11_window_get_xid(mGdkWindow)));
++             mIsX11Display ? gdk_x11_window_get_xid(mGdkWindow) : 0));
+     } else if (mContainer) {
+         LOG(("\tmContainer %p mGdkWindow %p\n", mContainer, mGdkWindow));
+     }
+@@ -4063,8 +4013,12 @@ nsWindow::Create(nsIWidget* aParent,
  
-     if (mIsTopLevel) {
-+        // When we draw decorations add extra space to draw shadows
-+        // around the main window.
-+        if (mDrawWindowDecoration) {
-+            size.width += mDecorationSize.left + mDecorationSize.right;
-+            size.height += mDecorationSize.top + mDecorationSize.bottom;
-+        }
-         gtk_window_resize(GTK_WINDOW(mShell), size.width, size.height);
+       mSurfaceProvider.Initialize(mXDisplay, mXWindow, mXVisual, mXDepth);
      }
-     else if (mContainer) {
-@@ -4166,6 +4317,11 @@ nsWindow::NativeMoveResize()
-     if (mIsTopLevel) {
-         // x and y give the position of the window manager frame top-left.
-         gtk_window_move(GTK_WINDOW(mShell), topLeft.x, topLeft.y);
++#ifdef MOZ_WAYLAND
++    else if (!mIsX11Display) {
++      mSurfaceProvider.Initialize(this);
++    }
++#endif
+ #endif
+-
+     return NS_OK;
+ }
+ 
+@@ -4099,7 +4053,8 @@ nsWindow::SetWindowClass(const nsAString
+   res_name[0] = toupper(res_name[0]);
+   if (!role) role = res_name;
+ 
+-  gdk_window_set_role(mGdkWindow, role);
++  GdkWindow* gdkWindow = gtk_widget_get_window(mShell);
++  gdk_window_set_role(gdkWindow, role);
+ 
+ #ifdef MOZ_X11
+   if (mIsX11Display) {
+@@ -4115,7 +4070,7 @@ nsWindow::SetWindowClass(const nsAString
+       // a warning & refuses to make the change.
+       GdkDisplay *display = gdk_display_get_default();
+       XSetClassHint(GDK_DISPLAY_XDISPLAY(display),
+-                    gdk_x11_window_get_xid(mGdkWindow),
++                    gdk_x11_window_get_xid(gdkWindow),
+                     class_hint);
+       XFree(class_hint);
+   }
+@@ -4164,7 +4119,7 @@ nsWindow::NativeResize()
+     }
+ 
+ #ifdef MOZ_X11
+-    // Notify the X11CompositorWidget of a ClientSizeChange
++    // Notify the GtkCompositorWidget of a ClientSizeChange
+     // This is different than OnSizeAllocate to catch initial sizing
+     if (mCompositorWidgetDelegate) {
+       mCompositorWidgetDelegate->NotifyClientSizeChanged(GetClientSize());
+@@ -4220,7 +4175,7 @@ nsWindow::NativeMoveResize()
+     }
+ 
+ #ifdef MOZ_X11
+-    // Notify the X11CompositorWidget of a ClientSizeChange
++    // Notify the GtkCompositorWidget of a ClientSizeChange
+     // This is different than OnSizeAllocate to catch initial sizing
+     if (mCompositorWidgetDelegate) {
+       mCompositorWidgetDelegate->NotifyClientSizeChanged(GetClientSize());
+@@ -4529,17 +4484,6 @@ nsWindow::SetWindowClipRegion(const nsTA
+     if (!mGdkWindow)
+         return NS_OK;
+ 
+-#if (MOZ_WIDGET_GTK == 2)
+-    GdkRegion *region = gdk_region_new(); // aborts on OOM
+-    for (uint32_t i = 0; i < newRects->Length(); ++i) {
+-        const LayoutDeviceIntRect& r = newRects->ElementAt(i);
+-        GdkRectangle rect = { r.x, r.y, r.width, r.height };
+-        gdk_region_union_with_rect(region, &rect);
+-    }
+-
+-    gdk_window_shape_combine_region(mGdkWindow, region, 0, 0);
+-    gdk_region_destroy(region);
+-#else
+     cairo_region_t *region = cairo_region_create();
+     for (uint32_t i = 0; i < newRects->Length(); ++i) {
+         const LayoutDeviceIntRect& r = newRects->ElementAt(i);
+@@ -4549,7 +4493,6 @@ nsWindow::SetWindowClipRegion(const nsTA
+ 
+     gdk_window_shape_combine_region(mGdkWindow, region, 0, 0);
+     cairo_region_destroy(region);
+-#endif
+ 
+     return NS_OK;
+ }
+@@ -4658,17 +4601,6 @@ nsWindow::ApplyTransparencyBitmap()
+                       maskPixmap, ShapeSet);
+     XFreePixmap(xDisplay, maskPixmap);
+ #else
+-#if (MOZ_WIDGET_GTK == 2)
+-    gtk_widget_reset_shapes(mShell);
+-    GdkBitmap* maskBitmap = gdk_bitmap_create_from_data(mGdkWindow,
+-            mTransparencyBitmap,
+-            mTransparencyBitmapWidth, mTransparencyBitmapHeight);
+-    if (!maskBitmap)
+-        return;
+-
+-    gtk_widget_shape_combine_mask(mShell, maskBitmap, 0, 0);
+-    g_object_unref(maskBitmap);
+-#else
+     cairo_surface_t *maskBitmap;
+     maskBitmap = cairo_image_surface_create_for_data((unsigned char*)mTransparencyBitmap,
+                                                      CAIRO_FORMAT_A1,
+@@ -4682,7 +4614,6 @@ nsWindow::ApplyTransparencyBitmap()
+     gtk_widget_shape_combine_region(mShell, maskRegion);
+     cairo_region_destroy(maskRegion);
+     cairo_surface_destroy(maskBitmap);
+-#endif // MOZ_WIDGET_GTK == 2
+ #endif // MOZ_X11
+ }
+ 
+@@ -4779,6 +4710,12 @@ nsWindow::GrabPointer(guint32 aTime)
+     if (!mGdkWindow)
+         return;
+ 
++    if (!mIsX11Display) {
++        // Don't to the grab on Wayland as it causes a regression
++        // from Bug 1377084.
++        return;
++    }
 +
-+        if (mDrawWindowDecoration) {
-+            size.width += mDecorationSize.left + mDecorationSize.right;
-+            size.height += mDecorationSize.top + mDecorationSize.bottom;
-+        }
-         // This sets the client window size.
-         gtk_window_resize(GTK_WINDOW(mShell), size.width, size.height);
+     gint retval;
+     retval = gdk_pointer_grab(mGdkWindow, TRUE,
+                               (GdkEventMask)(GDK_BUTTON_PRESS_MASK |
+@@ -4812,6 +4749,13 @@ nsWindow::ReleaseGrabs(void)
+     LOG(("ReleaseGrabs\n"));
+ 
+     mRetryPointerGrab = false;
++
++    if (!mIsX11Display) {
++        // Don't to the ungrab on Wayland as it causes a regression
++        // from Bug 1377084.
++        return;
++    }
++
+     gdk_pointer_ungrab(GDK_CURRENT_TIME);
+ }
+ 
+@@ -5058,7 +5002,7 @@ nsWindow::MakeFullScreen(bool aFullScree
+     LOG(("nsWindow::MakeFullScreen [%p] aFullScreen %d\n",
+          (void *)this, aFullScreen));
+ 
+-    if (!IsFullscreenSupported(mShell)) {
++    if (mIsX11Display && !IsFullscreenSupported(mShell)) {
+         return NS_ERROR_NOT_AVAILABLE;
      }
-@@ -5524,6 +5680,33 @@ expose_event_cb(GtkWidget *widget, cairo
+ 
+@@ -5080,7 +5024,7 @@ nsWindow::MakeFullScreen(bool aFullScree
+ }
+ 
+ void
+-nsWindow::HideWindowChrome(bool aShouldHide)
++nsWindow::SetWindowDecoration(nsBorderStyle aStyle)
+ {
+     if (!mShell) {
+         // Pass the request to the toplevel window
+@@ -5092,30 +5036,29 @@ nsWindow::HideWindowChrome(bool aShouldH
+         if (!topWindow)
+             return;
+ 
+-        topWindow->HideWindowChrome(aShouldHide);
++        topWindow->SetWindowDecoration(aStyle);
+         return;
+     }
+ 
++    // We can't use mGdkWindow directly here as it can be
++    // derived from mContainer which is not a top-level GdkWindow.
++    GdkWindow *window = gtk_widget_get_window(mShell);
++
+     // Sawfish, metacity, and presumably other window managers get
+     // confused if we change the window decorations while the window
+     // is visible.
+     bool wasVisible = false;
+-    if (gdk_window_is_visible(mGdkWindow)) {
+-        gdk_window_hide(mGdkWindow);
++    if (gdk_window_is_visible(window)) {
++        gdk_window_hide(window);
+         wasVisible = true;
+     }
+ 
+-    gint wmd;
+-    if (aShouldHide)
+-        wmd = 0;
+-    else
+-        wmd = ConvertBorderStyles(mBorderStyle);
+-
++    gint wmd = ConvertBorderStyles(aStyle);
+     if (wmd != -1)
+-      gdk_window_set_decorations(mGdkWindow, (GdkWMDecoration) wmd);
++      gdk_window_set_decorations(window, (GdkWMDecoration) wmd);
+ 
+     if (wasVisible)
+-        gdk_window_show(mGdkWindow);
++        gdk_window_show(window);
+ 
+     // For some window managers, adding or removing window decorations
+     // requires unmapping and remapping our toplevel window.  Go ahead
+@@ -5123,10 +5066,19 @@ nsWindow::HideWindowChrome(bool aShouldH
+     // error later when this happens (when the persistence timer fires
+     // and GetWindowPos is called)
+ #ifdef MOZ_X11
+-    XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) , False);
+-#else
+-    gdk_flush ();
++    if (mIsX11Display) {
++        XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) , False);
++    } else
+ #endif /* MOZ_X11 */
++    {
++        gdk_flush ();
++    }
++}
++
++void
++nsWindow::HideWindowChrome(bool aShouldHide)
++{
++    SetWindowDecoration(aShouldHide ? eBorderStyle_none : mBorderStyle);
+ }
+ 
+ bool
+@@ -5237,12 +5189,8 @@ is_mouse_in_window (GdkWindow* aWindow,
+         window = gdk_window_get_parent(window);
+     }
+ 
+-#if (MOZ_WIDGET_GTK == 2)
+-    gdk_drawable_get_size(aWindow, &w, &h);
+-#else
+     w = gdk_window_get_width(aWindow);
+     h = gdk_window_get_height(aWindow);
+-#endif
+ 
+     if (aMouseX > x && aMouseX < x + w &&
+         aMouseY > y && aMouseY < y + h)
+@@ -5498,18 +5446,6 @@ get_gtk_cursor(nsCursor aCursor)
+ 
+ // gtk callbacks
+ 
+-#if (MOZ_WIDGET_GTK == 2)
+-static gboolean
+-expose_event_cb(GtkWidget *widget, GdkEventExpose *event)
+-{
+-    RefPtr<nsWindow> window = get_window_for_gdk_window(event->window);
+-    if (!window)
+-        return FALSE;
+-
+-    window->OnExposeEvent(event);
+-    return FALSE;
+-}
+-#else
+ void
+ draw_window_of_widget(GtkWidget *widget, GdkWindow *aWindow, cairo_t *cr)
+ {
+@@ -5561,7 +5497,6 @@ expose_event_cb(GtkWidget *widget, cairo
  
      return FALSE;
  }
-+
-+/* static */
-+gboolean
-+expose_event_decoration_draw_cb(GtkWidget *widget, cairo_t *cr)
-+{
-+  GdkWindow* gdkWindow = gtk_widget_get_window(widget);
-+  if (gtk_cairo_should_draw_window(cr, gdkWindow)) {
-+      RefPtr<nsWindow> window = get_window_for_gtk_widget(widget);
-+      if (!window) {
-+          NS_WARNING("Cannot get nsWindow from GtkWidget");
-+      }
-+      else if (window->IsClientDecorated()) {
-+          cairo_save(cr);
-+          gtk_cairo_transform_to_window(cr, widget, gdkWindow);
-+
-+          GdkRectangle rect = {0,0,0,0};
-+          gtk_window_get_size(GTK_WINDOW(widget), &rect.width, &rect.height);
-+          moz_gtk_window_decoration_paint(cr, &rect);
-+
-+          rect.height = 40;
-+          moz_gtk_header_bar_paint(cr, &rect);
-+          cairo_restore(cr);
-+      }
-+  }
-+  return TRUE;
-+}
-+
- #endif //MOZ_WIDGET_GTK == 2
+-#endif //MOZ_WIDGET_GTK == 2
  
  static gboolean
-@@ -6576,6 +6759,28 @@ nsWindow::ClearCachedResources()
+ configure_event_cb(GtkWidget *widget,
+@@ -5980,7 +5915,6 @@ widget_composited_changed_cb (GtkWidget*
+     window->OnCompositedChanged();
+ }
+ 
+-#if (MOZ_WIDGET_GTK == 3)
+ static void
+ scale_changed_cb (GtkWidget* widget, GParamSpec* aPSpec, gpointer aPointer)
+ {
+@@ -5996,7 +5930,6 @@ scale_changed_cb (GtkWidget* widget, GPa
+     gtk_widget_get_allocation(widget, &allocation);
+     window->OnSizeAllocate(&allocation);
+ }
+-#endif
+ 
+ #if GTK_CHECK_VERSION(3,4,0)
+ static gboolean
+@@ -6174,11 +6107,7 @@ get_inner_gdk_window (GdkWindow *aWindow
+          child = g_list_previous(child)) {
+         auto *childWindow = (GdkWindow *) child->data;
+         if (get_window_for_gdk_window(childWindow)) {
+-#if (MOZ_WIDGET_GTK == 2)
+-            gdk_window_get_geometry(childWindow, &cx, &cy, &cw, &ch, nullptr);
+-#else
+             gdk_window_get_geometry(childWindow, &cx, &cy, &cw, &ch);
+-#endif
+             if ((cx < x) && (x < (cx + cw)) &&
+                 (cy < y) && (y < (cy + ch)) &&
+                 gdk_window_is_visible(childWindow)) {
+@@ -6386,53 +6315,6 @@ nsWindow::GetEditCommands(NativeKeyBindi
+     keyBindings->GetEditCommands(aEvent, aCommands);
+ }
+ 
+-#if defined(MOZ_X11) && (MOZ_WIDGET_GTK == 2)
+-/* static */ already_AddRefed<DrawTarget>
+-nsWindow::GetDrawTargetForGdkDrawable(GdkDrawable* aDrawable,
+-                                      const IntSize& aSize)
+-{
+-    GdkVisual* visual = gdk_drawable_get_visual(aDrawable);
+-    Screen* xScreen =
+-        gdk_x11_screen_get_xscreen(gdk_drawable_get_screen(aDrawable));
+-    Display* xDisplay = DisplayOfScreen(xScreen);
+-    Drawable xDrawable = gdk_x11_drawable_get_xid(aDrawable);
+-
+-    RefPtr<gfxASurface> surface;
+-
+-    if (visual) {
+-        Visual* xVisual = gdk_x11_visual_get_xvisual(visual);
+-
+-        surface = new gfxXlibSurface(xDisplay, xDrawable, xVisual, aSize);
+-    } else {
+-        // no visual? we must be using an xrender format.  Find a format
+-        // for this depth.
+-        XRenderPictFormat *pf = nullptr;
+-        switch (gdk_drawable_get_depth(aDrawable)) {
+-            case 32:
+-                pf = XRenderFindStandardFormat(xDisplay, PictStandardARGB32);
+-                break;
+-            case 24:
+-                pf = XRenderFindStandardFormat(xDisplay, PictStandardRGB24);
+-                break;
+-            default:
+-                NS_ERROR("Don't know how to handle the given depth!");
+-                break;
+-        }
+-
+-        surface = new gfxXlibSurface(xScreen, xDrawable, pf, aSize);
+-    }
+-
+-    RefPtr<DrawTarget> dt =
+-        gfxPlatform::GetPlatform()->CreateDrawTargetForSurface(surface, aSize);
+-
+-    if (!dt || !dt->IsValid()) {
+-        return nullptr;
+-    }
+-
+-    return dt.forget();
+-}
+-#endif
+-
+ already_AddRefed<DrawTarget>
+ nsWindow::StartRemoteDrawingInRegion(LayoutDeviceIntRegion& aInvalidRegion, BufferMode* aBufferMode)
+ {
+@@ -6649,9 +6531,66 @@ nsWindow::SetDrawsInTitlebar(bool aState
+       return;
+ 
+   if (mShell) {
+-      gint wmd = aState ? GDK_DECOR_BORDER : ConvertBorderStyles(mBorderStyle);
+-      gdk_window_set_decorations(gtk_widget_get_window(mShell),
+-                                 (GdkWMDecoration) wmd);
++      if (GetCSDSupportLevel() == CSD_SUPPORT_FULL) {
++          SetWindowDecoration(aState ? eBorderStyle_border : mBorderStyle);
++      }
++      else {
++          /* Window manager does not support GDK_DECOR_BORDER,
++           * emulate it by CSD.
++           *
++           * gtk_window_set_titlebar() works on unrealized widgets only,
++           * we need to handle mShell carefully here.
++           * When CSD is enabled mGdkWindow is owned by mContainer which is good
++           * as we can't delete our mGdkWindow. To make mShell unrealized while
++           * mContainer is preserved we temporary reparent mContainer to an
++           * invisible GtkWindow.
++           */
++          NativeShow(false);
++
++          // Using GTK_WINDOW_POPUP rather than
++          // GTK_WINDOW_TOPLEVEL in the hope that POPUP results in less
++          // initialization and window manager interaction.
++          GtkWidget* tmpWindow = gtk_window_new(GTK_WINDOW_POPUP);
++          gtk_widget_realize(tmpWindow);
++
++          gtk_widget_reparent(GTK_WIDGET(mContainer), tmpWindow);
++          gtk_widget_unrealize(GTK_WIDGET(mShell));
++
++          // Available as of GTK 3.10+
++          static auto sGtkWindowSetTitlebar = (void (*)(GtkWindow*, GtkWidget*))
++              dlsym(RTLD_DEFAULT, "gtk_window_set_titlebar");
++          MOZ_ASSERT(sGtkWindowSetTitlebar,
++              "Missing gtk_window_set_titlebar(), old Gtk+ library?");
++
++          if (aState) {
++              // Add a hidden titlebar widget to trigger CSD, but disable the default
++              // titlebar.  GtkFixed is a somewhat random choice for a simple unused
++              // widget. gtk_window_set_titlebar() takes ownership of the titlebar
++              // widget.
++              sGtkWindowSetTitlebar(GTK_WINDOW(mShell), gtk_fixed_new());
++          } else {
++              sGtkWindowSetTitlebar(GTK_WINDOW(mShell), nullptr);
++          }
++
++          /* A workaround for https://bugzilla.gnome.org/show_bug.cgi?id=791081
++           * gtk_widget_realize() throws:
++           * "In pixman_region32_init_rect: Invalid rectangle passed"
++           * when mShell has default 1x1 size.
++           */
++          GtkAllocation allocation = {0, 0, 0, 0};
++          gtk_widget_get_preferred_width(GTK_WIDGET(mShell), nullptr,
++                                         &allocation.width);
++          gtk_widget_get_preferred_height(GTK_WIDGET(mShell), nullptr,
++                                          &allocation.height);
++          gtk_widget_size_allocate(GTK_WIDGET(mShell), &allocation);
++
++          gtk_widget_realize(GTK_WIDGET(mShell));
++          gtk_widget_reparent(GTK_WIDGET(mContainer), GTK_WIDGET(mShell));
++          mNeedsShow = true;
++          NativeResize();
++
++          gtk_widget_destroy(tmpWindow);
++      }
+   }
+ 
+   mIsCSDEnabled = aState;
+@@ -6762,11 +6701,9 @@ nsWindow::SynthesizeNativeMouseEvent(Lay
+     event.button.window = mGdkWindow;
+     event.button.time = GDK_CURRENT_TIME;
+ 
+-#if (MOZ_WIDGET_GTK == 3)
+     // Get device for event source
+     GdkDeviceManager *device_manager = gdk_display_get_device_manager(display);
+     event.button.device = gdk_device_manager_get_client_pointer(device_manager);
+-#endif
+ 
+     event.button.x_root = DevicePixelsToGdkCoordRoundDown(aPoint.x);
+     event.button.y_root = DevicePixelsToGdkCoordRoundDown(aPoint.y);
+@@ -6809,12 +6746,10 @@ nsWindow::SynthesizeNativeMouseScrollEve
+   event.type = GDK_SCROLL;
+   event.scroll.window = mGdkWindow;
+   event.scroll.time = GDK_CURRENT_TIME;
+-#if (MOZ_WIDGET_GTK == 3)
+   // Get device for event source
+   GdkDisplay* display = gdk_window_get_display(mGdkWindow);
+   GdkDeviceManager *device_manager = gdk_display_get_device_manager(display);
+   event.scroll.device = gdk_device_manager_get_client_pointer(device_manager);
+-#endif
+   event.scroll.x_root = DevicePixelsToGdkCoordRoundDown(aPoint.x);
+   event.scroll.y_root = DevicePixelsToGdkCoordRoundDown(aPoint.y);
+ 
+@@ -6938,27 +6873,54 @@ nsWindow::GetCSDSupportLevel() {
+     if (sCSDSupportLevel != CSD_SUPPORT_UNKNOWN) {
+         return sCSDSupportLevel;
      }
- }
- 
-+NS_IMETHODIMP
-+nsWindow::SetNonClientMargins(LayoutDeviceIntMargin &aMargins)
-+{
-+  SetDrawsInTitlebar(aMargins.top == 0);
-+  return NS_OK;
-+}
+-    // TODO: MATE
 +
-+void
-+nsWindow::SetDrawsInTitlebar(bool aState)
-+{
-+  if (!mIsCSDEnabled || aState == mDrawWindowDecoration)
-+    return;
-+
-+  if (mShell) {
-+    gtk_window_set_decorated(GTK_WINDOW(mShell), !aState);
-+    gtk_widget_set_app_paintable(mShell, aState);
-+  }
-+
-+  mDrawWindowDecoration = aState;
-+  UpdateClientDecorations();
-+}
-+
- gint
- nsWindow::GdkScaleFactor()
- {
-@@ -6846,6 +7051,158 @@ nsWindow::SynthesizeNativeTouchPoint(uin
- }
- #endif
- 
-+bool
-+nsWindow::IsClientDecorated() const
-+{
-+    return mDrawWindowDecoration && mSizeState == nsSizeMode_Normal;
-+}
-+
-+int
-+nsWindow::GetClientResizerSize()
-+{
-+  if (!mShell)
-+    return 0;
-+
-+  // GTK uses a default size of 20px as of 3.20.
-+  gint size = 20;
-+  gtk_widget_style_get(mShell, "decoration-resize-handle", &size, nullptr);
-+
-+  return GdkCoordToDevicePixels(size);
-+}
-+
-+nsWindow::CSDSupportLevel
-+nsWindow::GetCSDSupportLevel() {
-+    if (mCSDSupportLevel != CSD_SUPPORT_UNKNOWN) {
-+        return mCSDSupportLevel;
-+    }
-+    const char* currentDesktop = getenv("XDG_CURRENT_DESKTOP");
-+    if (currentDesktop) {
-+        if (strcmp(currentDesktop, "GNOME") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FULL;
-+        } else if (strcmp(currentDesktop, "XFCE") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FLAT;
-+        } else if (strcmp(currentDesktop, "X-Cinnamon") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FULL;
-+        } else if (strcmp(currentDesktop, "KDE") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FLAT;
-+        } else if (strcmp(currentDesktop, "LXDE") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FLAT;
-+        } else if (strcmp(currentDesktop, "openbox") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FLAT;
-+        } else if (strcmp(currentDesktop, "i3") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_NONE;
-+        } else if (strcmp(currentDesktop, "MATE") == 0) {
-+            mCSDSupportLevel = CSD_SUPPORT_FLAT;
-+        } else {
-+            mCSDSupportLevel = CSD_SUPPORT_NONE;
+     const char* currentDesktop = getenv("XDG_CURRENT_DESKTOP");
+     if (currentDesktop) {
+-        if (strcmp(currentDesktop, "GNOME") == 0) {
+-            sCSDSupportLevel = CSD_SUPPORT_FULL;
+-        } else if (strcmp(currentDesktop, "XFCE") == 0) {
++        if (strstr(currentDesktop, "GNOME") != nullptr) {
+             sCSDSupportLevel = CSD_SUPPORT_FULL;
+-        } else if (strcmp(currentDesktop, "X-Cinnamon") == 0) {
++        } else if (strstr(currentDesktop, "XFCE") != nullptr) {
++            sCSDSupportLevel = CSD_SUPPORT_FLAT;
++        } else if (strstr(currentDesktop, "X-Cinnamon") != nullptr) {
+             sCSDSupportLevel = CSD_SUPPORT_FULL;
+-        } else if (strcmp(currentDesktop, "KDE") == 0) {
++        } else if (strstr(currentDesktop, "KDE") != nullptr) {
+             sCSDSupportLevel = CSD_SUPPORT_FLAT;
+-        } else if (strcmp(currentDesktop, "LXDE") == 0) {
++        } else if (strstr(currentDesktop, "LXDE") != nullptr) {
+             sCSDSupportLevel = CSD_SUPPORT_FLAT;
+-        } else if (strcmp(currentDesktop, "openbox") == 0) {
++        } else if (strstr(currentDesktop, "openbox") != nullptr) {
+             sCSDSupportLevel = CSD_SUPPORT_FLAT;
+-        } else if (strcmp(currentDesktop, "i3") == 0) {
++        } else if (strstr(currentDesktop, "i3") != nullptr) {
+             sCSDSupportLevel = CSD_SUPPORT_NONE;
++        } else if (strstr(currentDesktop, "MATE") != nullptr) {
++            sCSDSupportLevel = CSD_SUPPORT_FLAT;
++        } else if (strstr(currentDesktop, "Unity") != nullptr) {
++            sCSDSupportLevel = CSD_SUPPORT_FLAT;
++        } else if (strstr(currentDesktop, "Pantheon") != nullptr) {
++            sCSDSupportLevel = CSD_SUPPORT_FULL;
+         } else {
++            sCSDSupportLevel = CSD_SUPPORT_FLAT;
 +        }
++    } else {
++        sCSDSupportLevel = CSD_SUPPORT_NONE;
 +    }
-+    return mCSDSupportLevel;
-+}
 +
-+void
-+nsWindow::UpdateClientDecorations()
-+{
-+  // When the CSD is not fully supported by window manager (ie. WM is not
-+  // expecting that application is going to draw window shadows) we can't
-+  // add shadows widths to the window margin. That would lead to completely
-+  // opaque black border of the window.
-+  if (!mDrawWindowDecoration || GetCSDSupportLevel() != CSD_SUPPORT_FULL)
-+      return;
++    // We don't support CSD_SUPPORT_FULL on Wayland
++    if (!GDK_IS_X11_DISPLAY(gdk_display_get_default()) &&
++        sCSDSupportLevel == CSD_SUPPORT_FULL) {
++        sCSDSupportLevel = CSD_SUPPORT_FLAT;
++    }
 +
-+  gint top = 0, right = 0, bottom = 0, left = 0;
-+  if (mSizeState == nsSizeMode_Normal) {
-+      moz_gtk_get_window_border(&top, &right, &bottom, &left);
-+  }
++    // Allow MOZ_GTK_TITLEBAR_DECORATION to override our heuristics
++    const char* decorationOverride = getenv("MOZ_GTK_TITLEBAR_DECORATION");
++    if (decorationOverride) {
++        if (strcmp(decorationOverride, "none") == 0) {
+             sCSDSupportLevel = CSD_SUPPORT_NONE;
++        } else if (strcmp(decorationOverride, "client") == 0) {
++            sCSDSupportLevel = CSD_SUPPORT_FLAT;
++        } else if (strcmp(decorationOverride, "system") == 0) {
++            sCSDSupportLevel = CSD_SUPPORT_FULL;
+         }
+     }
 +
-+  static auto sGdkWindowSetShadowWidth =
-+     (void (*)(GdkWindow*, gint, gint, gint, gint))
-+     dlsym(RTLD_DEFAULT, "gdk_window_set_shadow_width");
-+  sGdkWindowSetShadowWidth(gtk_widget_get_window(mShell),
-+                           left, right, top, bottom);
-+
-+  mDecorationSize.left = left;
-+  mDecorationSize.right = right;
-+  mDecorationSize.top = top;
-+  mDecorationSize.bottom = bottom;
-+
-+  // Gtk+ doesn't like when we set mContainer margin bigger than actual
-+  // mContainer window size. That happens when we're called early and the
-+  // mShell/mContainer is not allocated/resized yet and has default 1x1 size.
-+  // Just resize to some minimal value which will be changed
-+  // by Gecko soon.
-+  GtkAllocation allocation;
-+  gtk_widget_get_allocation(GTK_WIDGET(mContainer), &allocation);
-+  if (allocation.width < left + right || allocation.height < top + bottom) {
-+      gtk_widget_get_preferred_width(GTK_WIDGET(mContainer), nullptr,
-+                                     &allocation.width);
-+      gtk_widget_get_preferred_height(GTK_WIDGET(mContainer), nullptr,
-+                                      &allocation.height);
-+      allocation.width += left + right + 1;
-+      allocation.height += top + bottom + 1;
-+      gtk_widget_size_allocate(GTK_WIDGET(mContainer), &allocation);
-+  }
-+
-+  gtk_widget_set_margin_left(GTK_WIDGET(mContainer), mDecorationSize.left);
-+  gtk_widget_set_margin_right(GTK_WIDGET(mContainer), mDecorationSize.right);
-+  gtk_widget_set_margin_top(GTK_WIDGET(mContainer), mDecorationSize.top);
-+  gtk_widget_set_margin_bottom(GTK_WIDGET(mContainer), mDecorationSize.bottom);
-+}
-+
-+void
-+nsWindow::ApplyCSDClipping()
-+{
-+  if (IsClientDecorated()) {
-+      gint top, right, bottom, left;
-+      moz_gtk_get_header_bar_border(&top, &right, &bottom, &left);
-+      cairo_rectangle_int_t rect = { 0, top, mBounds.width, mBounds.height};
-+      cairo_region_t *region = cairo_region_create_rectangle(&rect);
-+      gdk_window_shape_combine_region(mGdkWindow, region, 0, 0);
-+      cairo_region_destroy(region);
-+  } else {
-+      gdk_window_shape_combine_region(mGdkWindow, nullptr, 0, 0);
-+  }
-+}
-+
-+bool
-+nsWindow::CheckResizerEdge(LayoutDeviceIntPoint aPoint, GdkWindowEdge& aOutEdge)
-+{
-+  gint scale = GdkScaleFactor();
-+  gint left = scale * mDecorationSize.left;
-+  gint top = scale * mDecorationSize.top;
-+  gint right = scale * mDecorationSize.right;
-+  gint bottom = scale * mDecorationSize.bottom;
-+
-+  int resizerSize = GetClientResizerSize();
-+  int topDist = aPoint.y;
-+  int leftDist = aPoint.x;
-+  int rightDist = mBounds.width - aPoint.x;
-+  int bottomDist = mBounds.height - aPoint.y;
-+
-+  //TODO -> wrong sizes
-+
-+  if (leftDist <= resizerSize && topDist <= resizerSize) {
-+    aOutEdge = GDK_WINDOW_EDGE_NORTH_WEST;
-+  } else if (rightDist <= resizerSize && topDist <= resizerSize) {
-+    aOutEdge = GDK_WINDOW_EDGE_NORTH_EAST;
-+  } else if (leftDist <= resizerSize && bottomDist <= resizerSize) {
-+    aOutEdge = GDK_WINDOW_EDGE_SOUTH_WEST;
-+  } else if (rightDist <= resizerSize && bottomDist <= resizerSize) {
-+    aOutEdge = GDK_WINDOW_EDGE_SOUTH_EAST;
-+  } else if (topDist <= top) {
-+    aOutEdge = GDK_WINDOW_EDGE_NORTH;
-+  } else if (leftDist <= left) {
-+    aOutEdge = GDK_WINDOW_EDGE_WEST;
-+  } else if (rightDist <= right) {
-+    aOutEdge = GDK_WINDOW_EDGE_EAST;
-+  } else if (bottomDist <= bottom) {
-+    aOutEdge = GDK_WINDOW_EDGE_SOUTH;
-+  } else {
-+    return false;
-+  }
-+  return true;
-+}
-+
- int32_t
- nsWindow::RoundsWidgetCoordinatesTo()
- {
-diff -up firefox-57.0/widget/gtk/nsWindow.h.1399611 firefox-57.0/widget/gtk/nsWindow.h
---- firefox-57.0/widget/gtk/nsWindow.h.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/gtk/nsWindow.h	2017-11-22 12:17:33.733682473 +0100
-@@ -123,6 +123,7 @@ public:
-                                          double aHeight,
-                                          bool   aRepaint) override;
-     virtual bool       IsEnabled() const override;
-+    bool               IsComposited() const;
+     return sCSDSupportLevel;
+ }
  
-     void               SetZIndex(int32_t aZIndex) override;
-     virtual void       SetSizeMode(nsSizeMode aMode) override;
-@@ -351,6 +352,9 @@ public:
+@@ -6991,3 +6953,24 @@ nsWindow::IsComposited() const
+          (gdk_window_get_visual(mGdkWindow)
+             == gdk_screen_get_rgba_visual(gdkScreen));
+ }
++
++#ifdef MOZ_WAYLAND
++wl_display*
++nsWindow::GetWaylandDisplay()
++{
++  // Available as of GTK 3.8+
++  static auto sGdkWaylandDisplayGetWlDisplay =
++      (wl_display *(*)(GdkDisplay *))
++      dlsym(RTLD_DEFAULT, "gdk_wayland_display_get_wl_display");
++
++  GdkDisplay* gdkDisplay = gdk_display_get_default();
++  return mIsX11Display ? nullptr :
++                         sGdkWaylandDisplayGetWlDisplay(gdkDisplay);
++}
++
++wl_surface*
++nsWindow::GetWaylandSurface()
++{
++  return moz_container_get_wl_surface(MOZ_CONTAINER(mContainer));
++}
++#endif
+diff -up firefox-58.0/widget/gtk/nsWindow.h.1399611 firefox-58.0/widget/gtk/nsWindow.h
+--- firefox-58.0/widget/gtk/nsWindow.h.1399611	2018-01-11 21:17:06.000000000 +0100
++++ firefox-58.0/widget/gtk/nsWindow.h	2018-01-24 10:57:03.720031943 +0100
+@@ -23,7 +23,11 @@
+ 
+ #ifdef MOZ_X11
+ #include <gdk/gdkx.h>
++#include "X11UndefineNone.h"
+ #endif /* MOZ_X11 */
++#ifdef MOZ_WAYLAND
++#include <gdk/gdkwayland.h>
++#endif
+ 
+ #include "mozilla/widget/WindowSurface.h"
+ #include "mozilla/widget/WindowSurfaceProvider.h"
+@@ -172,11 +176,7 @@ public:
+     GdkRectangle DevicePixelsToGdkRectRoundOut(LayoutDeviceIntRect aRect);
+ 
+     // event callbacks
+-#if (MOZ_WIDGET_GTK == 2)
+-    gboolean           OnExposeEvent(GdkEventExpose *aEvent);
+-#else
+     gboolean           OnExposeEvent(cairo_t *cr);
+-#endif
+     gboolean           OnConfigureEvent(GtkWidget *aWidget,
+                                         GdkEventConfigure *aEvent);
+     void               OnContainerUnrealize();
+@@ -315,10 +315,6 @@ public:
+    nsresult            UpdateTranslucentWindowAlphaInternal(const nsIntRect& aRect,
+                                                             uint8_t* aAlphas, int32_t aStride);
+ 
+-#if (MOZ_WIDGET_GTK == 2)
+-    static already_AddRefed<DrawTarget> GetDrawTargetForGdkDrawable(GdkDrawable* aDrawable,
+-                                                                    const mozilla::gfx::IntSize& aSize);
+-#endif
+     virtual void       ReparentNativeWidget(nsIWidget* aNewParent) override;
+ 
+     virtual nsresult SynthesizeNativeMouseEvent(LayoutDeviceIntPoint aPoint,
+@@ -348,9 +344,14 @@ public:
+                                                 nsIObserver* aObserver) override;
  #endif
+ 
++
+ #ifdef MOZ_X11
+     Display* XDisplay() { return mXDisplay; }
+ #endif
++#ifdef MOZ_WAYLAND
++    wl_display* GetWaylandDisplay();
++    wl_surface* GetWaylandSurface();
++#endif
      virtual void GetCompositorWidgetInitData(mozilla::widget::CompositorWidgetInitData* aInitData) override;
  
-+    NS_IMETHOD SetNonClientMargins(LayoutDeviceIntMargin& aMargins) override;
-+    void SetDrawsInTitlebar(bool aState) override;
-+
-     // HiDPI scale conversion
-     gint GdkScaleFactor();
- 
-@@ -367,6 +371,9 @@ public:
-     LayoutDeviceIntRect GdkRectToDevicePixels(GdkRectangle rect);
- 
+     virtual nsresult SetNonClientMargins(LayoutDeviceIntMargin& aMargins) override;
+@@ -374,6 +375,18 @@ public:
      virtual bool WidgetTypeSupportsAcceleration() override;
+ 
+     bool DoDrawTitlebar() const;
 +
-+    // Decorations
-+    bool IsClientDecorated() const;
- protected:
-     virtual ~nsWindow();
- 
-@@ -384,6 +391,16 @@ protected:
- 
-     virtual void RegisterTouchWindow() override;
- 
-+    int GetClientResizerSize();
-+
-+    // Informs the window manager about the size of the shadows surrounding
-+    // a client-side decorated window.
-+    void UpdateClientDecorations();
-+
-+    // Returns true if the given point (in device pixels) is within a resizer
-+    // region of the window. Only used when drawing decorations client side.
-+    bool CheckResizerEdge(LayoutDeviceIntPoint aPoint, GdkWindowEdge& aOutEdge);
-+
-     nsCOMPtr<nsIWidget> mParent;
-     // Is this a toplevel window?
-     bool                mIsTopLevel;
-@@ -432,12 +449,12 @@ private:
-                                    gint* aRootX, gint* aRootY);
-     void               ClearCachedResources();
-     nsIWidgetListener* GetListener();
--    bool               IsComposited() const;
--
-+    void               ApplyCSDClipping();
- 
-     GtkWidget          *mShell;
-     MozContainer       *mContainer;
-     GdkWindow          *mGdkWindow;
-+    bool                mIsCSDEnabled;
-     PlatformCompositorWidgetDelegate* mCompositorWidgetDelegate;
- 
- 
-@@ -536,6 +553,10 @@ private:
-     // leaving fullscreen
-     nsSizeMode         mLastSizeMode;
- 
-+    // If true, draw our own window decorations (where supported).
-+    bool              mDrawWindowDecoration;
-+    GtkBorder         mDecorationSize;
-+
-     static bool DragInProgress(void);
- 
-     void DispatchMissedButtonReleases(GdkEventCrossing *aGdkEvent);
-@@ -567,6 +588,17 @@ private:
-     RefPtr<mozilla::widget::IMContextWrapper> mIMContext;
- 
-     mozilla::UniquePtr<mozilla::CurrentX11TimeGetter> mCurrentTimeGetter;
 +    typedef enum { CSD_SUPPORT_FULL,    // CSD including shadows
 +                   CSD_SUPPORT_FLAT,    // CSD without shadows
 +                   CSD_SUPPORT_NONE,    // WM does not support CSD at all
@@ -1558,188 +1272,41 @@ diff -up firefox-57.0/widget/gtk/nsWindow.h.1399611 firefox-57.0/widget/gtk/nsWi
 +     * Get the support of Client Side Decoration by checking
 +     * the XDG_CURRENT_DESKTOP environment variable.
 +     */
-+    CSDSupportLevel GetCSDSupportLevel();
-+    CSDSupportLevel mCSDSupportLevel;
++    static CSDSupportLevel GetCSDSupportLevel();
++
+ protected:
+     virtual ~nsWindow();
+ 
+@@ -423,6 +436,7 @@ private:
+     nsWindow          *GetContainerWindow();
+     void               SetUrgencyHint(GtkWidget *top_window, bool state);
+     void               SetDefaultIcon(void);
++    void               SetWindowDecoration(nsBorderStyle aStyle);
+     void               InitButtonEvent(mozilla::WidgetMouseEvent& aEvent,
+                                        GdkEventButton* aGdkEvent);
+     bool               DispatchCommandEvent(nsAtom* aCommand);
+@@ -441,7 +455,6 @@ private:
+     nsIWidgetListener* GetListener();
+     bool               IsComposited() const;
+ 
+-
+     GtkWidget          *mShell;
+     MozContainer       *mContainer;
+     GdkWindow          *mGdkWindow;
+@@ -578,16 +591,6 @@ private:
+     RefPtr<mozilla::widget::IMContextWrapper> mIMContext;
+ 
+     mozilla::UniquePtr<mozilla::CurrentX11TimeGetter> mCurrentTimeGetter;
+-    typedef enum { CSD_SUPPORT_FULL,    // CSD including shadows
+-                   CSD_SUPPORT_FLAT,    // CSD without shadows
+-                   CSD_SUPPORT_NONE,    // WM does not support CSD at all
+-                   CSD_SUPPORT_UNKNOWN
+-    } CSDSupportLevel;
+-    /**
+-     * Get the support of Client Side Decoration by checking
+-     * the XDG_CURRENT_DESKTOP environment variable.
+-     */
+-    static CSDSupportLevel GetCSDSupportLevel();
+     static CSDSupportLevel sCSDSupportLevel;
  };
  
- #endif /* __nsWindow_h__ */
-diff -up firefox-57.0/widget/gtk/WidgetStyleCache.cpp.1399611 firefox-57.0/widget/gtk/WidgetStyleCache.cpp
---- firefox-57.0/widget/gtk/WidgetStyleCache.cpp.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/gtk/WidgetStyleCache.cpp	2017-11-22 12:17:33.733682473 +0100
-@@ -26,10 +26,14 @@ static GtkStyleContext*
- GetCssNodeStyleInternal(WidgetNodeType aNodeType);
- 
- static GtkWidget*
--CreateWindowWidget()
-+CreateWindowWidget(WidgetNodeType type)
- {
-   GtkWidget *widget = gtk_window_new(GTK_WINDOW_POPUP);
-   gtk_widget_set_name(widget, "MozillaGtkWidget");
-+  if (type == MOZ_GTK_WINDOW_CSD) {
-+      GtkStyleContext* style = gtk_widget_get_style_context(widget);
-+      gtk_style_context_add_class(style, "csd");
-+  }
-   return widget;
- }
- 
-@@ -101,7 +105,7 @@ CreateTooltipWidget()
- {
-   MOZ_ASSERT(gtk_check_version(3, 20, 0) != nullptr,
-              "CreateTooltipWidget should be used for Gtk < 3.20 only.");
--  GtkWidget* widget = CreateWindowWidget();
-+  GtkWidget* widget = CreateWindowWidget(MOZ_GTK_WINDOW);
-   GtkStyleContext* style = gtk_widget_get_style_context(widget);
-   gtk_style_context_add_class(style, GTK_STYLE_CLASS_TOOLTIP);
-   return widget;
-@@ -529,11 +533,82 @@ CreateNotebookWidget()
- }
- 
- static GtkWidget*
-+CreateHeaderBar(bool aMaximized)
-+{
-+  MOZ_ASSERT(gtk_check_version(3, 10, 0) == nullptr,
-+             "GtkHeaderBar is only available on GTK 3.10+.");
-+  if (gtk_check_version(3, 10, 0) != nullptr)
-+    return nullptr;
-+
-+  static auto sGtkHeaderBarNewPtr = (GtkWidget* (*)())
-+    dlsym(RTLD_DEFAULT, "gtk_header_bar_new");
-+  static const char* MOZ_GTK_STYLE_CLASS_TITLEBAR = "titlebar";
-+
-+  GtkWidget* headerbar = sGtkHeaderBarNewPtr();
-+  if (aMaximized) {
-+    GtkWidget *window = gtk_window_new(GTK_WINDOW_POPUP);
-+    gtk_widget_set_name(window, "MozillaMaximizedGtkWidget");
-+    GtkStyleContext* style = gtk_widget_get_style_context(window);
-+    gtk_style_context_add_class(style, "maximized");
-+    GtkWidget *fixed = gtk_fixed_new();
-+    gtk_container_add(GTK_CONTAINER(window), fixed);
-+    gtk_container_add(GTK_CONTAINER(fixed), headerbar);
-+    // Save the window container so we don't leak it.
-+    sWidgetStorage[MOZ_GTK_WINDOW_MAXIMIZED] = window;
-+  } else {
-+    AddToWindowContainer(headerbar);
-+  }
-+
-+  // Emulate what create_titlebar() at gtkwindow.c does.
-+  GtkStyleContext* style = gtk_widget_get_style_context(headerbar);
-+  gtk_style_context_add_class(style, MOZ_GTK_STYLE_CLASS_TITLEBAR);
-+  gtk_style_context_add_class(style, "default-decoration");
-+
-+  return headerbar;
-+}
-+
-+// TODO - Also return style for buttons located at Maximized toolbar.
-+static GtkWidget*
-+CreateHeaderBarButton(WidgetNodeType aWidgetType)
-+{
-+  MOZ_ASSERT(gtk_check_version(3, 10, 0) == nullptr,
-+             "GtkHeaderBar is only available on GTK 3.10+.");
-+
-+  if (gtk_check_version(3, 10, 0) != nullptr)
-+    return nullptr;
-+
-+  static const char* MOZ_GTK_STYLE_CLASS_TITLEBUTTON = "titlebutton";
-+
-+  GtkWidget* widget = gtk_button_new();
-+  gtk_container_add(GTK_CONTAINER(GetWidget(MOZ_GTK_HEADER_BAR)), widget);
-+
-+  GtkStyleContext* style = gtk_widget_get_style_context(widget);
-+  gtk_style_context_add_class(style, MOZ_GTK_STYLE_CLASS_TITLEBUTTON);
-+
-+  switch (aWidgetType) {
-+    case MOZ_GTK_HEADER_BAR_BUTTON_CLOSE:
-+      gtk_style_context_add_class(style, "close");
-+      break;
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MINIMIZE:
-+      gtk_style_context_add_class(style, "minimize");
-+      break;
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE:
-+      gtk_style_context_add_class(style, "maximize");
-+      break;
-+    default:
-+      break;
-+  }
-+
-+  return widget;
-+}
-+
-+static GtkWidget*
- CreateWidget(WidgetNodeType aWidgetType)
- {
-   switch (aWidgetType) {
-     case MOZ_GTK_WINDOW:
--      return CreateWindowWidget();
-+    case MOZ_GTK_WINDOW_CSD:
-+      return CreateWindowWidget(aWidgetType);
-     case MOZ_GTK_WINDOW_CONTAINER:
-       return CreateWindowContainerWidget();
-     case MOZ_GTK_CHECKBUTTON_CONTAINER:
-@@ -610,6 +685,13 @@ CreateWidget(WidgetNodeType aWidgetType)
-       return CreateComboBoxEntryButtonWidget();
-     case MOZ_GTK_COMBOBOX_ENTRY_ARROW:
-       return CreateComboBoxEntryArrowWidget();
-+    case MOZ_GTK_HEADER_BAR:
-+    case MOZ_GTK_HEADER_BAR_MAXIMIZED:
-+      return CreateHeaderBar(aWidgetType == MOZ_GTK_HEADER_BAR_MAXIMIZED);
-+    case MOZ_GTK_HEADER_BAR_BUTTON_CLOSE:
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MINIMIZE:
-+    case MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE:
-+      return CreateHeaderBarButton(aWidgetType);
-     default:
-       /* Not implemented */
-       return nullptr;
-@@ -1049,6 +1131,10 @@ GetCssNodeStyleInternal(WidgetNodeType a
-       GtkWidget* widget = GetWidget(MOZ_GTK_NOTEBOOK);
-       return gtk_widget_get_style_context(widget);
-     }
-+    case MOZ_GTK_WINDOW_DECORATION:
-+      style = CreateChildCSSNode("decoration",
-+                                 MOZ_GTK_WINDOW_CSD);
-+      break;
-     default:
-       return GetWidgetRootStyle(aNodeType);
-   }
-@@ -1214,6 +1300,8 @@ ResetWidgetCache(void)
-   /* This will destroy all of our widgets */
-   if (sWidgetStorage[MOZ_GTK_WINDOW])
-     gtk_widget_destroy(sWidgetStorage[MOZ_GTK_WINDOW]);
-+  if (sWidgetStorage[MOZ_GTK_WINDOW_MAXIMIZED])
-+    gtk_widget_destroy(sWidgetStorage[MOZ_GTK_WINDOW_MAXIMIZED]);
- 
-   /* Clear already freed arrays */
-   mozilla::PodArrayZero(sWidgetStorage);
-diff -up firefox-57.0/widget/LookAndFeel.h.1399611 firefox-57.0/widget/LookAndFeel.h
---- firefox-57.0/widget/LookAndFeel.h.1399611	2017-11-02 17:16:34.000000000 +0100
-+++ firefox-57.0/widget/LookAndFeel.h	2017-11-22 12:17:33.733682473 +0100
-@@ -405,6 +405,30 @@ public:
-      eIntID_PhysicalHomeButton,
- 
-      /*
-+      * A boolean value indicating whether client-side decorations are
-+      * supported by the user's GTK version.
-+      */
-+     eIntID_GTKCSDAvailable,
-+
-+     /*
-+      * A boolean value indicating whether client-side decorations should
-+      * contain a minimize button.
-+      */
-+     eIntID_GTKCSDMinimizeButton,
-+
-+     /*
-+      * A boolean value indicating whether client-side decorations should
-+      * contain a maximize button.
-+      */
-+     eIntID_GTKCSDMaximizeButton,
-+
-+     /*
-+      * A boolean value indicating whether client-side decorations should
-+      * contain a close button.
-+      */
-+     eIntID_GTKCSDCloseButton,
-+
-+     /*
-       * Controls whether overlay scrollbars display when the user moves
-       * the mouse in a scrollable frame.
-       */

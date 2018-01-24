@@ -98,7 +98,7 @@ ExcludeArch: ppc64 ppc64le aarch64 armv7hl s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        58.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -338,7 +338,7 @@ This package contains results of tests executed during build.
 
 %patch413 -p1 -b .1353817
 # CSD - Disabled now
-#%patch416 -p1 -b .1399611
+%patch416 -p1 -b .1399611
 
 # Debian extension patch
 # Disabled due to new pref module, see
@@ -871,6 +871,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 24 2018 Martin Stransky <stransky@redhat.com> - 58.0-3
+- Enabled titlebar/csd drawing patch again (mozbz#1399611).
+
 * Wed Jan 24 2018 Martin Stransky <stransky@redhat.com> - 58.0-2
 - Ship run-mozilla.sh script.
 
