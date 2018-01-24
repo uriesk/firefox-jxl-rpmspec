@@ -98,7 +98,7 @@ ExcludeArch: ppc64 ppc64le aarch64 armv7hl s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        58.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -745,6 +745,9 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 # Default
 %{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 
+# Copy over run-mozilla.sh
+%{__cp} build/unix/run-mozilla.sh %{buildroot}%{mozappdir}
+
 # Add distribution.ini
 %{__mkdir_p} %{buildroot}%{mozappdir}/distribution
 %{__cp} %{SOURCE26} %{buildroot}%{mozappdir}/distribution
@@ -827,7 +830,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/omni.ja
 %{mozappdir}/browser/icons
 %{mozappdir}/chrome.manifest
-#%{mozappdir}/run-mozilla.sh
+%{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
 %{mozappdir}/pingsender
 %exclude %{mozappdir}/removed-files
@@ -868,6 +871,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 24 2018 Martin Stransky <stransky@redhat.com> - 58.0-2
+- Ship run-mozilla.sh script.
+
 * Tue Jan 23 2018 Martin Stransky <stransky@redhat.com> - 58.0-1
 - Update to 58.0
 
