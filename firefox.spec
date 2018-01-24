@@ -1,6 +1,3 @@
-# Temporary disable
-ExcludeArch: aarch64 armv7hl
-
 # Use system nspr/nss?
 %global system_nss        1
 
@@ -156,6 +153,7 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch416:        mozilla-1399611.patch
+Patch417:        mozilla-1416170.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -339,6 +337,7 @@ This package contains results of tests executed during build.
 %patch413 -p1 -b .1353817
 # CSD - Disabled now
 %patch416 -p1 -b .1399611
+%patch417 -p1 -b .1416170
 
 # Debian extension patch
 # Disabled due to new pref module, see
@@ -872,7 +871,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Wed Jan 24 2018 Martin Stransky <stransky@redhat.com> - 58.0-4
-- Enabled some second arches.
+- Enabled second arches
 
 * Wed Jan 24 2018 Martin Stransky <stransky@redhat.com> - 58.0-3
 - Enabled titlebar/csd drawing patch again (mozbz#1399611).
