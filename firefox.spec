@@ -523,7 +523,7 @@ export MOZ_DEBUG_FLAGS=" "
 MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
 %ifarch %{arm}
-RUSTFLAGS="-Cdebuginfo=0"
+export RUSTFLAGS="-Cdebuginfo=0"
 %endif
 export CFLAGS=$MOZ_OPT_FLAGS
 export CXXFLAGS=$MOZ_OPT_FLAGS
