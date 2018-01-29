@@ -80,25 +80,27 @@
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
-%global tarballdir    %{name}-%{version}%{?pre_version}
+#%global tarballdir    %{name}-%{version}%{?pre_version}
+%global tarballdir     mozilla-beta-64737c752ac4af4766ad6f82720818521f3aca24
 
-%global official_branding       1
-%global build_langpacks         1
+%global official_branding       0
+%global build_langpacks         0
 
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
-%global enable_mozilla_crashreporter       1
+%global enable_mozilla_crashreporter       0
 %endif
 %endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        58.0
-Release:        4%{?pre_tag}%{?dist}
+Version:        59.0
+Release:        0.1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
-Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
+#Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
+Source0:        mozilla-beta-64737c752ac4af4766ad6f82720818521f3aca24.tar.bz2
 %if %{build_langpacks}
 Source1:        firefox-langpacks-%{version}%{?pre_version}-20180123.tar.xz
 %endif
@@ -873,6 +875,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 29 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.1
+- Update to Firefox 59.0 Beta 4
+- Enabled Wayland backend
+
 * Wed Jan 24 2018 Martin Stransky <stransky@redhat.com> - 58.0-4
 - Enabled second arches
 
