@@ -1,3 +1,5 @@
+ExclusiveArch: x86_64 i686
+
 # Use system nspr/nss?
 %global system_nss        0
 
