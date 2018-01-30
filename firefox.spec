@@ -96,7 +96,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        59.0
-Release:        0.1%{?pre_tag}%{?dist}
+Release:        0.2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 #Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -116,7 +116,6 @@ Source27:       google-api-key
 Source28:       firefox-wayland.sh.in
 
 # Build patches
-#Patch0:         firefox-install-dir.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
 Patch18:        xulrunner-24.0-jemalloc-ppc.patch
@@ -125,7 +124,6 @@ Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
 # Also fixes s390x: https://bugzilla.mozilla.org/show_bug.cgi?id=1376268
 Patch29:        build-big-endian.patch
-Patch31:        build-ppc64-s390x-curl.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
 Patch36:        build-missing-xlocale-h.patch
@@ -144,9 +142,6 @@ Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
-Patch230:        firefox-fedora-rhbz-1537287-v2.patch
-Patch231:        build-with-nss-3.34.0.patch
-Patch232:        build-jit-CodeAlignment.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -156,9 +151,6 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
-Patch416:        mozilla-1399611.patch
-# ppc64/le build patch
-Patch417:        mozilla-1416170.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -296,7 +288,6 @@ This package contains results of tests executed during build.
 # Build patches, can't change backup suffix from default because during build
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
-#%patch0  -p1
 
 
 %patch18 -p1 -b .jemalloc-ppc
@@ -304,7 +295,6 @@ This package contains results of tests executed during build.
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 %patch29 -p1 -b .big-endian
-#%patch31 -p1 -b .ppc64-s390x-curl
 %patch37 -p1 -b .jit-atomic-lucky
 
 %patch3  -p1 -b .arm
@@ -319,20 +309,10 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-# NSS stuff
-#%if 0%{?fedora} < 28
-#%patch230 -p1 -b .rhbz-1537287
-#%endif
-#%patch231 -p1
-#%patch232 -p1 -b .CodeAlignment
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
-# CSD - Disabled now
-#%patch416 -p1 -b .1399611
-
-#%patch417 -p1 -b .1416170
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -820,7 +800,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{langpackdir}
 %endif
 %{mozappdir}/browser/omni.ja
-#%{mozappdir}/browser/icons
 %{mozappdir}/chrome.manifest
 %{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
@@ -863,6 +842,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 30 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.2
+- Fixed typo at startup script.
+
 * Mon Jan 29 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.1
 - Update to Firefox 59.0 Beta 4
 - Enabled Wayland backend

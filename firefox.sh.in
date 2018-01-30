@@ -70,7 +70,7 @@ MOZ_LAUNCHER="$MOZ_DIST_BIN/run-mozilla.sh"
 ##
 ## Set X11 backed as a default one
 ##
-if ! [ "$GDK_BACKEND" ] then
+if ! [ "$GDK_BACKEND" ]; then
   export GDK_BACKEND=x11
 fi
 
