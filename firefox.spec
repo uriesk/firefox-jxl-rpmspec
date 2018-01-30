@@ -152,6 +152,11 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 
+# Wayland patches
+Patch450:        mozilla-1431052.patch
+Patch451:        mozilla-1432414.patch
+Patch452:        mozilla-1434202.patch
+
 # Debian patches
 Patch500:        mozilla-440908.patch
 
@@ -313,6 +318,11 @@ This package contains results of tests executed during build.
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
+
+# Wayland patches
+%patch450 -p1 -b .1431052
+%patch451 -p1 -b .1432414
+%patch452 -p1 -b .1434202
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -844,6 +854,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Jan 30 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.2
 - Fixed typo at startup script.
+- Added Wayland specific patches mozbz#1431052 mozbz#1432414
+  mozbz#1434202
 
 * Mon Jan 29 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.1
 - Update to Firefox 59.0 Beta 4

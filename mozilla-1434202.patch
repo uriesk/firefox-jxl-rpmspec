@@ -1,0 +1,25 @@
+diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
+--- a/widget/gtk/nsWindow.cpp
++++ b/widget/gtk/nsWindow.cpp
+@@ -3785,16 +3785,20 @@ nsWindow::Create(nsIWidget* aParent,
+             SetCursor(eCursor_standard);
+ 
+             if (aInitData->mNoAutoHide) {
+                 gint wmd = ConvertBorderStyles(mBorderStyle);
+                 if (wmd != -1)
+                   gdk_window_set_decorations(mGdkWindow, (GdkWMDecoration) wmd);
+             }
+ 
++            if (!mIsX11Display) {
++                gtk_widget_set_app_paintable(mShell, TRUE);
++            }
++
+             // If the popup ignores mouse events, set an empty input shape.
+             if (aInitData->mMouseTransparent) {
+               cairo_rectangle_int_t rect = { 0, 0, 0, 0 };
+               cairo_region_t *region = cairo_region_create_rectangle(&rect);
+ 
+               gdk_window_input_shape_combine_region(mGdkWindow, region, 0, 0);
+               cairo_region_destroy(region);
+             }
+

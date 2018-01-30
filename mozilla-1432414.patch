@@ -1,0 +1,58 @@
+diff --git a/widget/gtk/mozgtk/mozgtk.c b/widget/gtk/mozgtk/mozgtk.c
+--- a/widget/gtk/mozgtk/mozgtk.c
++++ b/widget/gtk/mozgtk/mozgtk.c
+@@ -224,16 +224,17 @@ STUB(gtk_file_chooser_set_preview_widget
+ STUB(gtk_file_chooser_set_preview_widget_active)
+ STUB(gtk_file_chooser_set_select_multiple)
+ STUB(gtk_file_chooser_widget_get_type)
+ STUB(gtk_file_filter_add_pattern)
+ STUB(gtk_file_filter_new)
+ STUB(gtk_file_filter_set_name)
+ STUB(gtk_fixed_new)
+ STUB(gtk_frame_new)
++STUB(gtk_get_current_event_time)
+ STUB(gtk_grab_add)
+ STUB(gtk_grab_remove)
+ STUB(gtk_handle_box_new)
+ STUB(gtk_hbox_new)
+ STUB(gtk_icon_info_free)
+ STUB(gtk_icon_info_load_icon)
+ STUB(gtk_icon_set_add_source)
+ STUB(gtk_icon_set_new)
+diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
+--- a/widget/gtk/nsWindow.cpp
++++ b/widget/gtk/nsWindow.cpp
+@@ -1358,23 +1358,27 @@ SetUserTimeAndStartupIDForActivatedWindo
+     // we don't want to reuse the timestamp next time we raise the window
+     GTKToolkit->SetFocusTimestamp(0);
+     GTKToolkit->SetDesktopStartupID(EmptyCString());
+ }
+ 
+ /* static */ guint32
+ nsWindow::GetLastUserInputTime()
+ {
+-    // gdk_x11_display_get_user_time tracks button and key presses,
+-    // DESKTOP_STARTUP_ID used to start the app, drop events from external
+-    // drags, WM_DELETE_WINDOW delete events, but not usually mouse motion nor
++    // gdk_x11_display_get_user_time/gtk_get_current_event_time tracks
++    // button and key presses, DESKTOP_STARTUP_ID used to start the app,
++    // drop events from external drags,
++    // WM_DELETE_WINDOW delete events, but not usually mouse motion nor
+     // button and key releases.  Therefore use the most recent of
+     // gdk_x11_display_get_user_time and the last time that we have seen.
+-    guint32 timestamp =
+-            gdk_x11_display_get_user_time(gdk_display_get_default());
++    GdkDisplay* gdkDisplay = gdk_display_get_default();
++    guint32 timestamp = GDK_IS_X11_DISPLAY(gdkDisplay) ?
++            gdk_x11_display_get_user_time(gdkDisplay) :
++            gtk_get_current_event_time();
++
+     if (sLastUserInputTime != GDK_CURRENT_TIME &&
+         TimestampIsNewerThan(sLastUserInputTime, timestamp)) {
+         return sLastUserInputTime;
+     }
+ 
+     return timestamp;
+ }
+ 
+
