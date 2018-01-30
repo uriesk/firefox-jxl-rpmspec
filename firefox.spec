@@ -1,5 +1,5 @@
 # Use system nspr/nss?
-%global system_nss        1
+%global system_nss        0
 
 # Use system hunspell?
 %if 0%{?fedora} > 25
@@ -113,9 +113,10 @@ Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
 Source27:       google-api-key
+Source28:       firefox-wayland.sh.in
 
 # Build patches
-Patch0:         firefox-install-dir.patch
+#Patch0:         firefox-install-dir.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
 Patch18:        xulrunner-24.0-jemalloc-ppc.patch
@@ -295,7 +296,7 @@ This package contains results of tests executed during build.
 # Build patches, can't change backup suffix from default because during build
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
-%patch0  -p1
+#%patch0  -p1
 
 
 %patch18 -p1 -b .jemalloc-ppc
@@ -303,12 +304,7 @@ This package contains results of tests executed during build.
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 %patch29 -p1 -b .big-endian
-%patch31 -p1 -b .ppc64-s390x-curl
-# Second arch patches - do we still need them?
-#%patch32 -p1 -b .rust-ppc64le
-#%ifarch ppc ppc64 ppc64le
-#%patch35 -p1 -b .ppc-jit
-#%endif
+#%patch31 -p1 -b .ppc64-s390x-curl
 %patch37 -p1 -b .jit-atomic-lucky
 
 %patch3  -p1 -b .arm
@@ -323,31 +319,20 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%if 0%{?fedora} < 28
-%patch230 -p1 -b .rhbz-1537287
-%endif
-%patch231 -p1
-%patch232 -p1 -b .CodeAlignment
+# NSS stuff
+#%if 0%{?fedora} < 28
+#%patch230 -p1 -b .rhbz-1537287
+#%endif
+#%patch231 -p1
+#%patch232 -p1 -b .CodeAlignment
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
-# Does not apply
-#%ifarch %{arm}
-#%if 0%{?fedora} < 26
-# Workaround for mozbz#1337988
-#%patch412 -p1 -b .1337988
-#%endif
-#%endif
-
 %patch413 -p1 -b .1353817
 # CSD - Disabled now
-%patch416 -p1 -b .1399611
-%patch417 -p1 -b .1416170
+#%patch416 -p1 -b .1399611
 
-# Debian extension patch
-# Disabled due to new pref module, see
-# https://bugzilla.mozilla.org/show_bug.cgi?id=440908
-#%patch500 -p1 -b .440908
+#%patch417 -p1 -b .1416170
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -609,6 +594,8 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
 %{__cat} %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
+%{__cat} %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
+%{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
 
 %{__install} -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
@@ -807,6 +794,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files -f %{name}.lang
 %{_bindir}/firefox
+%{_bindir}/firefox-wayland
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
@@ -832,7 +820,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{langpackdir}
 %endif
 %{mozappdir}/browser/omni.ja
-%{mozappdir}/browser/icons
+#%{mozappdir}/browser/icons
 %{mozappdir}/chrome.manifest
 %{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
