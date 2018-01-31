@@ -98,7 +98,7 @@ ExclusiveArch: x86_64 i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        59.0
-Release:        0.2%{?pre_tag}%{?dist}
+Release:        0.3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 #Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -116,6 +116,7 @@ Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
 Source27:       google-api-key
 Source28:       firefox-wayland.sh.in
+Source29:       firefox-x11.desktop
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -158,6 +159,7 @@ Patch413:        mozilla-1353817.patch
 Patch450:        mozilla-1431052.patch
 Patch451:        mozilla-1432414.patch
 Patch452:        mozilla-1434202.patch
+Patch453:        mozilla-1433081.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -325,6 +327,7 @@ This package contains results of tests executed during build.
 %patch450 -p1 -b .1431052
 %patch451 -p1 -b .1432414
 %patch452 -p1 -b .1434202
+%patch453 -p1 -b .1433081
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -581,6 +584,7 @@ DESTDIR=%{buildroot} make -C objdir install
 %{__mkdir_p} %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
+desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 
 # set up the firefox start script
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
@@ -854,6 +858,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 31 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.3
+- Added X11 launcher
+
 * Tue Jan 30 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.2
 - Fixed typo at startup script.
 - Added Wayland specific patches mozbz#1431052 mozbz#1432414
