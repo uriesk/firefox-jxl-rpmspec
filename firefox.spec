@@ -98,7 +98,7 @@ ExclusiveArch: x86_64 i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        59.0
-Release:        0.3%{?pre_tag}%{?dist}
+Release:        0.4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 #Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -864,6 +864,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 31 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.4
+- Fixed remote launch when no profile name is given.
+
 * Wed Jan 31 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.3
 - Added X11 launcher
 
