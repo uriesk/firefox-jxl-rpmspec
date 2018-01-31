@@ -66,14 +66,6 @@ MOZ_EXTENSIONS_PROFILE_DIR="$HOME/.mozilla/extensions/{ec8030f7-c20a-464f-9b0e-1
 MOZ_PROGRAM="$MOZ_DIST_BIN/$MOZ_FIREFOX_FILE"
 MOZ_LAUNCHER="$MOZ_DIST_BIN/run-mozilla.sh"
 
-
-##
-## Set X11 backed as a default one
-##
-if ! [ "$GDK_BACKEND" ]; then
-  export GDK_BACKEND=x11
-fi
-
 ##
 ## Set MOZ_GRE_CONF
 ##

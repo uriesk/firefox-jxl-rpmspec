@@ -117,6 +117,7 @@ Source26:       distribution.ini
 Source27:       google-api-key
 Source28:       firefox-wayland.sh.in
 Source29:       firefox-x11.desktop
+Source30:       firefox-x11.sh.in
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -592,6 +593,8 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
 %{__cat} %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
+%{__cat} %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
+%{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
 
 %{__install} -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
@@ -791,6 +794,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %files -f %{name}.lang
 %{_bindir}/firefox
 %{_bindir}/firefox-wayland
+%{_bindir}/firefox-x11
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
