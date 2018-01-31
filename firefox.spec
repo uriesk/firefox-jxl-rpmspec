@@ -161,6 +161,7 @@ Patch450:        mozilla-1431052.patch
 Patch451:        mozilla-1432414.patch
 Patch452:        mozilla-1434202.patch
 Patch453:        mozilla-1433081.patch
+Patch454:        remote-profile.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -329,6 +330,7 @@ This package contains results of tests executed during build.
 %patch451 -p1 -b .1432414
 %patch452 -p1 -b .1434202
 %patch453 -p1 -b .1433081
+%patch454 -p1 -b .remote-profile
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
