@@ -1,0 +1,93 @@
+diff --git a/widget/gtk/mozgtk/mozgtk.c b/widget/gtk/mozgtk/mozgtk.c
+--- a/widget/gtk/mozgtk/mozgtk.c
++++ b/widget/gtk/mozgtk/mozgtk.c
+@@ -66,16 +66,17 @@ STUB(gdk_screen_get_number)
+ STUB(gdk_screen_get_resolution)
+ STUB(gdk_screen_get_rgba_visual)
+ STUB(gdk_screen_get_root_window)
+ STUB(gdk_screen_get_system_visual)
+ STUB(gdk_screen_get_width)
+ STUB(gdk_screen_height)
+ STUB(gdk_screen_is_composited)
+ STUB(gdk_screen_width)
++STUB(gdk_selection_owner_get)
+ STUB(gdk_set_program_class)
+ STUB(gdk_unicode_to_keyval)
+ STUB(gdk_visual_get_depth)
+ STUB(gdk_visual_get_system)
+ STUB(gdk_window_add_filter)
+ STUB(gdk_window_begin_move_drag)
+ STUB(gdk_window_begin_resize_drag)
+ STUB(gdk_window_destroy)
+diff --git a/widget/gtk/nsClipboardWayland.cpp b/widget/gtk/nsClipboardWayland.cpp
+--- a/widget/gtk/nsClipboardWayland.cpp
++++ b/widget/gtk/nsClipboardWayland.cpp
+@@ -337,21 +346,68 @@ nsRetrievalContextWayland::GetTargets(in
+     for (int32_t j = 0; j < length; j++) {
+         targetList[j] = mTargetMIMETypes[j];
+     }
+ 
+     *aTargetNum = length;
+     return targetList;
+ }
+ 
++struct fastTrackClipboardData
++{
++    char* data;
++    int   dataLength;
++};
++
++static void
++wayland_clipboard_contents_received(GtkClipboard     *clipboard,
++                                    GtkSelectionData *selection_data,
++                                    gpointer          data)
++{
++    fastTrackClipboardData* clipboardData =
++        static_cast<fastTrackClipboardData*>(data);
++
++    int contentLength = gtk_selection_data_get_length(selection_data);
++    if (contentLength > 0) {
++        clipboardData->data = reinterpret_cast<char*>(
++            g_malloc(sizeof(char)*contentLength));
++        memcpy(clipboardData->data,
++               gtk_selection_data_get_data(selection_data),
++               sizeof(char)*contentLength);
++    }
++
++    clipboardData->dataLength = contentLength;
++}
++
+ const char*
+ nsRetrievalContextWayland::GetClipboardData(const char* aMimeType,
+                                             int32_t aWhichClipboard,
+                                             uint32_t* aContentLength)
+ {
++    /* If actual clipboard data is owned by us we don't need to go
++     * through Wayland but we ask Gtk+ to directly call data
++     * getter callback nsClipboard::SelectionGetEvent().
++     */
++    GdkAtom selection = GetSelectionAtom(aWhichClipboard);
++    if (gdk_selection_owner_get(selection)) {
++        fastTrackClipboardData clipboardData = { nullptr, 0 };
++        gtk_clipboard_request_contents(gtk_clipboard_get(selection),
++                                       gdk_atom_intern(aMimeType, FALSE),
++                                       wayland_clipboard_contents_received,
++                                       &clipboardData);
++        *aContentLength = clipboardData.dataLength;
++        return static_cast<const char*>(clipboardData.data);
++    }
++
++    /* TODO: We need to implement GDK_SELECTION_PRIMARY (X11 text selection)
++     * for Wayland backend.
++     */
++    if (selection == GDK_SELECTION_PRIMARY)
++         return nullptr;
++
+     NS_ASSERTION(mDataOffer, "Requested data without valid data offer!");
+ 
+     if (!mDataOffer) {
+         // TODO
+         // Something went wrong. We're requested to provide clipboard data
+         // but we haven't got any from wayland. Looks like rhbz#1455915.
+         return nullptr;
+     }

@@ -98,7 +98,7 @@ ExclusiveArch: x86_64 i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        59.0
-Release:        0.4%{?pre_tag}%{?dist}
+Release:        0.5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 #Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -162,6 +162,7 @@ Patch451:        mozilla-1432414.patch
 Patch452:        mozilla-1434202.patch
 Patch453:        mozilla-1433081.patch
 Patch454:        remote-profile.patch
+Patch455:        mozilla-1434572.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -331,6 +332,7 @@ This package contains results of tests executed during build.
 %patch452 -p1 -b .1434202
 %patch453 -p1 -b .1433081
 %patch454 -p1 -b .remote-profile
+%patch455 -p1 -b .1434572
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -864,6 +866,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Feb 1 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.5
+- Fixed clipboard copy->paste between Firefox windows
+  (mozbz#1434572).
+
 * Wed Jan 31 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.4
 - Fixed remote launch when no profile name is given.
 
