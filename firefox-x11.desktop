@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Name=Firefox
+Name=Firefox X11
 GenericName=Web Browser
 GenericName[ca]=Navegador web
 GenericName[cs]=Webový prohlížeč
@@ -53,7 +53,7 @@ Keywords=web;browser;internet;
 Actions=new-window;new-private-window;
 
 [Desktop Action new-window]
-Name=Open a New Window
+Name=Open a New Window (X11)
 Name[ach]=Dirica manyen
 Name[af]=Nuwe venster
 Name[an]=Nueva finestra
@@ -163,7 +163,7 @@ Name[zh-TW]=開新視窗
 Exec=firefox-x11 %u
 
 [Desktop Action new-private-window]
-Name=Open a New Private Window
+Name=Open a New Private Window (X11)
 Name[ach]=Dirica manyen me mung
 Name[af]=Nuwe privaatvenster
 Name[an]=Nueva finestra privada
