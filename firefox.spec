@@ -98,7 +98,7 @@ ExclusiveArch: x86_64 i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        59.0
-Release:        0.7%{?pre_tag}%{?dist}
+Release:        0.8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 #Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -164,6 +164,7 @@ Patch453:        mozilla-1433081.patch
 Patch454:        remote-profile.patch
 Patch455:        mozilla-1434572.patch
 Patch456:        mozilla-1434565.patch
+Patch457:        queue-crash.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -335,6 +336,7 @@ This package contains results of tests executed during build.
 %patch454 -p1 -b .remote-profile
 %patch455 -p1 -b .1434572
 %patch456 -p1 -b .1434565
+%patch457 -p1 -b .queue-crash
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -868,6 +870,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Feb 2 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.8
+- Fix crash when e10s is disabled and default wl_queue is processed.
+
 * Fri Feb 2 2018 Martin Stransky <stransky@redhat.com> - 59.0-0.7
 - Fixed Firefox X11 desktop file launcher.
 

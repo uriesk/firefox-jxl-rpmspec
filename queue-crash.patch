@@ -1,0 +1,26 @@
+diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayland.cpp
+--- a/widget/gtk/WindowSurfaceWayland.cpp
++++ b/widget/gtk/WindowSurfaceWayland.cpp
+@@ -268,17 +268,21 @@ nsWaylandDisplay::GetShm()
+ 
+   if (!mShm) {
+     // wl_shm is not provided by Gtk so we need to query wayland directly
+     // See weston/simple-shm.c and create_display() for reference.
+     wl_registry* registry = wl_display_get_registry(mDisplay);
+     wl_registry_add_listener(registry, &registry_listener, this);
+ 
+     wl_proxy_set_queue((struct wl_proxy *)registry, mEventQueue);
+-    wl_display_roundtrip_queue(mDisplay, mEventQueue);
++    if (mEventQueue) {
++      wl_display_roundtrip_queue(mDisplay, mEventQueue);
++    } else {
++      wl_display_roundtrip(mDisplay);
++    }
+ 
+     MOZ_RELEASE_ASSERT(mShm, "Wayland registry query failed!");
+   }
+ 
+   return(mShm);
+ }
+ 
+ bool
