@@ -95,7 +95,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        58.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -131,6 +131,7 @@ Patch36:        build-missing-xlocale-h.patch
 Patch37:        build-jit-atomic-always-lucky.patch
 # Fixing missing cacheFlush when JS_CODEGEN_NONE is used (s390x)
 Patch38:        build-cacheFlush-missing.patch
+Patch39:        mozilla-fix-attr-order.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -308,6 +309,7 @@ This package contains results of tests executed during build.
 #%patch35 -p1 -b .ppc-jit
 #%endif
 %patch37 -p1 -b .jit-atomic-lucky
+%patch39 -p1 -b .fix-attr-order
 
 %patch3  -p1 -b .arm
 
@@ -873,6 +875,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Feb 13 2018 Martin Stransky <stransky@redhat.com> - 58.0.1-2
+- Added build fix for gcc8 by Tom Callaway
+
 * Tue Jan 30 2018 Martin Stransky <stransky@redhat.com> - 58.0.1-1
 - Update to 58.0.1
 
