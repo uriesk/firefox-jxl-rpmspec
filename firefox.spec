@@ -465,6 +465,9 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 echo "ac_add_options --disable-stylo" >> .mozconfig
 %endif
 
+# Avoid issues with rpm
+chmod a-x third_party/rust/itertools/src/lib.rs
+
 #---------------------------------------------------------------------
 
 %build
