@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# Run Firefox under Wayland
+#
+
+export GDK_BACKEND=wayland
+/usr/bin/firefox "$@"
