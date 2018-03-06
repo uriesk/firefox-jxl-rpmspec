@@ -1,0 +1,19 @@
+diff --git a/toolkit/xre/nsAppRunner.cpp b/toolkit/xre/nsAppRunner.cpp
+index 386213efebb4..990ba32acbd4 100644
+--- a/toolkit/xre/nsAppRunner.cpp
++++ b/toolkit/xre/nsAppRunner.cpp
+@@ -3995,6 +3995,14 @@ XREMain::XRE_mainStartup(bool* aExitFlag)
+       }
+     }
+ 
++    if (!profile) {
++#ifdef MOZ_DEV_EDITION
++      profile = "dev-edition-default";
++#else
++      profile = "default";
++#endif
++    }
++
+     nsCOMPtr<nsIFile> mutexDir;
+     rv = GetSpecialSystemDirectory(OS_TemporaryDirectory, getter_AddRefs(mutexDir));
+     if (NS_SUCCEEDED(rv)) {

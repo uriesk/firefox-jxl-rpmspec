@@ -80,27 +80,28 @@
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
-%global tarballdir    %{name}-%{version}%{?pre_version}
+%global release_hash  2f6a4d2cf42c9d59626061d45c043817cb220814
+%global tarballdir    mozilla-release-%{release_hash}
 
 %global official_branding       1
 %global build_langpacks         1
 
-%global enable_mozilla_crashreporter       0
+%global enable_mozilla_crashreporter       1
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
-%global enable_mozilla_crashreporter       1
+%global enable_mozilla_crashreporter       0
 %endif
 %endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        58.0.2
+Version:        59.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
-Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
+Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/%{release_hash}.tar.bz2
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180214.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180306.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -111,9 +112,11 @@ Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
 Source27:       google-api-key
+Source28:       firefox-wayland.sh.in
+Source29:       firefox-x11.desktop
+Source30:       firefox-x11.sh.in
 
 # Build patches
-Patch0:         firefox-install-dir.patch
 Patch3:         mozilla-build-arm.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
 Patch18:        xulrunner-24.0-jemalloc-ppc.patch
@@ -122,7 +125,6 @@ Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
 # Also fixes s390x: https://bugzilla.mozilla.org/show_bug.cgi?id=1376268
 Patch29:        build-big-endian.patch
-Patch31:        build-ppc64-s390x-curl.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
 Patch36:        build-missing-xlocale-h.patch
@@ -142,9 +144,6 @@ Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch229:        firefox-nss-version.patch
-Patch230:        firefox-fedora-rhbz-1537287-v2.patch
-Patch231:        build-with-nss-3.34.0.patch
-Patch232:        build-jit-CodeAlignment.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -154,9 +153,16 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
-Patch416:        mozilla-1399611.patch
-# ppc64/le build patch
-Patch417:        mozilla-1416170.patch
+
+# Wayland patches
+Patch450:        mozilla-1431052.patch
+Patch451:        mozilla-1432414.patch
+Patch452:        mozilla-1434202.patch
+Patch453:        mozilla-1433081.patch
+Patch454:        remote-profile.patch
+Patch455:        mozilla-1434572.patch
+Patch456:        mozilla-1434565.patch
+Patch457:        queue-crash.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -294,7 +300,6 @@ This package contains results of tests executed during build.
 # Build patches, can't change backup suffix from default because during build
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
-%patch0  -p1
 
 
 %patch18 -p1 -b .jemalloc-ppc
@@ -302,12 +307,6 @@ This package contains results of tests executed during build.
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 %patch29 -p1 -b .big-endian
-%patch31 -p1 -b .ppc64-s390x-curl
-# Second arch patches - do we still need them?
-#%patch32 -p1 -b .rust-ppc64le
-#%ifarch ppc ppc64 ppc64le
-#%patch35 -p1 -b .ppc-jit
-#%endif
 %patch37 -p1 -b .jit-atomic-lucky
 %patch39 -p1 -b .fix-attr-order
 
@@ -323,31 +322,20 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%if 0%{?fedora} < 28
-%patch230 -p1 -b .rhbz-1537287
-%endif
-%patch231 -p1
-%patch232 -p1 -b .CodeAlignment
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
-# Does not apply
-#%ifarch %{arm}
-#%if 0%{?fedora} < 26
-# Workaround for mozbz#1337988
-#%patch412 -p1 -b .1337988
-#%endif
-#%endif
-
 %patch413 -p1 -b .1353817
-# CSD - Disabled now
-%patch416 -p1 -b .1399611
-%patch417 -p1 -b .1416170
 
-# Debian extension patch
-# Disabled due to new pref module, see
-# https://bugzilla.mozilla.org/show_bug.cgi?id=440908
-#%patch500 -p1 -b .440908
+# Wayland patches
+%patch450 -p1 -b .1431052
+%patch451 -p1 -b .1432414
+%patch452 -p1 -b .1434202
+%patch453 -p1 -b .1433081
+%patch454 -p1 -b .remote-profile
+%patch455 -p1 -b .1434572
+%patch456 -p1 -b .1434565
+%patch457 -p1 -b .queue-crash
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -464,9 +452,6 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 %ifarch %{ix86}
 echo "ac_add_options --disable-stylo" >> .mozconfig
 %endif
-
-# Avoid issues with rpm
-chmod a-x third_party/rust/itertools/src/lib.rs
 
 #---------------------------------------------------------------------
 
@@ -835,7 +820,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{langpackdir}
 %endif
 %{mozappdir}/browser/omni.ja
-%{mozappdir}/browser/icons
 %{mozappdir}/chrome.manifest
 %{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
@@ -878,17 +862,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Feb 14 2018 Jan Horak <jhorak@redhat.com> - 58.0.2-1
-- Update to 58.0.2
+* Tue Mar 6 2018 Martin Stransky <stransky@redhat.com> - 59.0-1
+- Updated to 59.0
 
 * Tue Feb 13 2018 Martin Stransky <stransky@redhat.com> - 58.0.1-3
 - Added build fix for gcc8 by Tom Callaway
-
-* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 58.0.1-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
-
-* Tue Jan 30 2018 Martin Stransky <stransky@redhat.com> - 58.0.1-1
-- Update to 58.0.1
 
 * Wed Jan 24 2018 Martin Stransky <stransky@redhat.com> - 58.0-4
 - Enabled second arches
