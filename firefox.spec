@@ -9,7 +9,7 @@
 %endif
 
 # Use system sqlite?
-%if 0%{?fedora} > 27
+%if 0%{?fedora} > 28
 %global system_sqlite     1
 %else
 %global system_sqlite     0
@@ -153,16 +153,6 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
-
-# Wayland patches
-Patch450:        mozilla-1431052.patch
-Patch451:        mozilla-1432414.patch
-Patch452:        mozilla-1434202.patch
-Patch453:        mozilla-1433081.patch
-Patch454:        remote-profile.patch
-Patch455:        mozilla-1434572.patch
-Patch456:        mozilla-1434565.patch
-Patch457:        queue-crash.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -326,16 +316,6 @@ This package contains results of tests executed during build.
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
-
-# Wayland patches
-%patch450 -p1 -b .1431052
-%patch451 -p1 -b .1432414
-%patch452 -p1 -b .1434202
-%patch453 -p1 -b .1433081
-%patch454 -p1 -b .remote-profile
-%patch455 -p1 -b .1434572
-%patch456 -p1 -b .1434565
-%patch457 -p1 -b .queue-crash
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
