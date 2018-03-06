@@ -9,7 +9,7 @@
 %endif
 
 # Use system sqlite?
-%if 0%{?fedora} > 28
+%if 0%{?fedora} > 27
 %global system_sqlite     1
 %else
 %global system_sqlite     0
