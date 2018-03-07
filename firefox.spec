@@ -433,6 +433,9 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 echo "ac_add_options --disable-stylo" >> .mozconfig
 %endif
 
+# Remove executable bit to make brp-mangle-shebangs happy.
+chmod -x third_party/rust/itertools/src/lib.rs
+
 #---------------------------------------------------------------------
 
 %build
