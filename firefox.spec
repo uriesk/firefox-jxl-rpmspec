@@ -86,10 +86,10 @@
 %global official_branding       1
 %global build_langpacks         1
 
-%global enable_mozilla_crashreporter       1
+%global enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
-%global enable_mozilla_crashreporter       0
+%global enable_mozilla_crashreporter       1
 %endif
 %endif
 
