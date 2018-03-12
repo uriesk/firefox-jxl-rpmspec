@@ -127,7 +127,6 @@ Patch27:        mozilla-1335250.patch
 Patch29:        build-big-endian.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
-Patch36:        build-missing-xlocale-h.patch
 # Always feel lucky for unsupported platforms:
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1347128
 Patch37:        build-jit-atomic-always-lucky.patch
@@ -320,7 +319,6 @@ This package contains results of tests executed during build.
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
-%patch36 -p2 -b .xlocale
 %endif
 
 %{__rm} -f .mozconfig
