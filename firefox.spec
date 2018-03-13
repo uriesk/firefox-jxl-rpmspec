@@ -96,7 +96,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        59.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/%{release_hash}.tar.bz2
@@ -142,7 +142,7 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-Patch229:        firefox-nss-version.patch
+Patch230:        fedora-enable-csd.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -311,6 +311,7 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
+%patch230 -p1 -R -b .fedora-enable-csd.patch
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
@@ -843,6 +844,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 13 2018 Martin Stransky <stransky@redhat.com> - 59.0-3
+- Enabled rendering to titlebar.
+
 * Mon Mar 12 2018 Martin Stransky <stransky@redhat.com> - 59.0-2
 - Updated to 59.0 build c61f5f5ead48c78a80c80db5c489bdc7cfaf8175
 
