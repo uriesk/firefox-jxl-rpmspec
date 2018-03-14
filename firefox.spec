@@ -96,7 +96,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        59.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/%{release_hash}.tar.bz2
@@ -844,6 +844,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 14 2018 Martin Stransky <stransky@redhat.com> - 59.0-4
+- Fixed broken langpacks.
+
 * Tue Mar 13 2018 Martin Stransky <stransky@redhat.com> - 59.0-3
 - Enabled rendering to titlebar.
 
