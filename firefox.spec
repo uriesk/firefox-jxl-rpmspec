@@ -80,7 +80,7 @@
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
-%global release_hash  c61f5f5ead48c78a80c80db5c489bdc7cfaf8175
+%global release_hash  3db9e3d52b17563efca181ccbb50deb8660c59ae
 %global tarballdir    mozilla-release-%{release_hash}
 
 %global official_branding       1
@@ -95,13 +95,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        59.0
-Release:        4%{?pre_tag}%{?dist}
+Version:        59.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/%{release_hash}.tar.bz2
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180312.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180317.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -844,6 +844,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Mar 17 2018 Martin Stransky <stransky@redhat.com> - 59.0.1-1
+- Updated to 59.0.1
+
 * Wed Mar 14 2018 Martin Stransky <stransky@redhat.com> - 59.0-4
 - Fixed broken langpacks.
 
