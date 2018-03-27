@@ -95,13 +95,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        59.0.1
+Version:        59.0.2
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/%{release_hash}.tar.bz2
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180317.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180327.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -844,6 +844,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 27 2018 Jan Horak <jhorak@redhat.com> - 59.0.2-1
+- Update to 59.0.2
+
 * Sat Mar 17 2018 Martin Stransky <stransky@redhat.com> - 59.0.1-1
 - Updated to 59.0.1
 
