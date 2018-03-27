@@ -80,7 +80,7 @@
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
-%global release_hash  3db9e3d52b17563efca181ccbb50deb8660c59ae
+%global release_hash  239e434d6d2b8e1e2b697c3416d1e96d48fe98e5
 %global tarballdir    mozilla-release-%{release_hash}
 
 %global official_branding       1
