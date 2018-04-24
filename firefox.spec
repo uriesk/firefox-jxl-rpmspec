@@ -831,9 +831,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/plugin-container
 %{mozappdir}/gmp-clearkey
 %{mozappdir}/fonts/EmojiOneMozilla.ttf
-%if !%{?system_libicu}
-%{mozappdir}/icudt*.dat
-%endif
 %if !%{?system_nss}
 %{mozappdir}/libfreeblpriv3.chk
 %{mozappdir}/libnssdbm3.chk
