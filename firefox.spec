@@ -142,7 +142,6 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-Patch230:        fedora-enable-csd.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -152,6 +151,7 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
+Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -311,11 +311,11 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-#%patch230 -p1 -R -b .fedora-enable-csd.patch
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
+%patch414 -p1 -b .ffmpeg-4.0
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
