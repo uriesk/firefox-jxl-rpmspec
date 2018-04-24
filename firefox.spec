@@ -61,12 +61,12 @@
 %endif
 
 %if %{?system_nss}
-%global nspr_version 4.17.0
+%global nspr_version 4.19
 # NSS/NSPR quite often ends in build override, so as requirement the version
 # we're building against could bring us some broken dependencies from time to time.
 #%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.34
+%global nss_version 3.36.1
 #%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %global nss_build_version %{nss_version}
 %endif
@@ -80,11 +80,11 @@
 %global mozappdir     %{_libdir}/%{name}
 %global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
-%global release_hash  239e434d6d2b8e1e2b697c3416d1e96d48fe98e5
-%global tarballdir    mozilla-release-%{release_hash}
+%global tarballdir    firefox-%{version}
 
 %global official_branding       1
 %global build_langpacks         1
+%global pre_version             b13
 
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
@@ -95,13 +95,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        59.0.2
-Release:        1%{?pre_tag}%{?dist}
+Version:        60.0
+Release:        0.1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
-Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/%{release_hash}.tar.bz2
+Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180327.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180418.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -295,9 +295,9 @@ This package contains results of tests executed during build.
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-%patch29 -p1 -b .big-endian
+#%patch29 -p1 -b .big-endian
 %patch37 -p1 -b .jit-atomic-lucky
-%patch39 -p1 -b .fix-attr-order
+#%patch39 -p1 -b .fix-attr-order
 
 %patch3  -p1 -b .arm
 
@@ -311,7 +311,7 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%patch230 -p1 -R -b .fedora-enable-csd.patch
+#%patch230 -p1 -R -b .fedora-enable-csd.patch
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
@@ -844,6 +844,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Apr 24 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.1
+- Update to 60.0 Beta 14
+
 * Tue Mar 27 2018 Jan Horak <jhorak@redhat.com> - 59.0.2-1
 - Update to 59.0.2
 
