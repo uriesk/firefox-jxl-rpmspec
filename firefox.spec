@@ -132,7 +132,7 @@ Patch35:        build-ppc-jit.patch
 Patch37:        build-jit-atomic-always-lucky.patch
 # Fixing missing cacheFlush when JS_CODEGEN_NONE is used (s390x)
 Patch38:        build-cacheFlush-missing.patch
-Patch39:        mozilla-fix-attr-order.patch
+Patch40:        build-aarch64-skia.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -295,9 +295,11 @@ This package contains results of tests executed during build.
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-#%patch29 -p1 -b .big-endian
+%if 0%{?big_endian}
+%patch29 -p1 -b .big-endian
+%endif
 %patch37 -p1 -b .jit-atomic-lucky
-#%patch39 -p1 -b .fix-attr-order
+%patch40 -p1 -b .aarch64-skia
 
 %patch3  -p1 -b .arm
 
