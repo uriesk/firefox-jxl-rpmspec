@@ -84,7 +84,7 @@
 
 %global official_branding       1
 %global build_langpacks         1
-%global pre_version             b13
+%global pre_version             b15
 
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
@@ -101,7 +101,7 @@ URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180418.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180426.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -844,7 +844,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Apr 24 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.1
-- Update to 60.0 Beta 14
+- Update to 60.0 Beta 15
 
 * Tue Mar 27 2018 Jan Horak <jhorak@redhat.com> - 59.0.2-1
 - Update to 59.0.2

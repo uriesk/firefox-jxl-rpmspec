@@ -1,21 +1,44 @@
 diff -up firefox-60.0/gfx/skia/skia/include/core/SkColorPriv.h.big-endian firefox-60.0/gfx/skia/skia/include/core/SkColorPriv.h
+--- firefox-60.0/gfx/skia/skia/include/core/SkColorPriv.h.big-endian	2018-04-09 22:50:48.000000000 +0200
++++ firefox-60.0/gfx/skia/skia/include/core/SkColorPriv.h	2018-04-18 11:51:38.748680174 +0200
+@@ -54,18 +54,19 @@ static inline U8CPU SkUnitScalarClampToB
+  *
+  *  Here we enforce this constraint.
+  */
+-
++/*
+ #ifdef SK_CPU_BENDIAN
+     #define SK_RGBA_R32_SHIFT   24
+     #define SK_RGBA_G32_SHIFT   16
+     #define SK_RGBA_B32_SHIFT   8
+     #define SK_RGBA_A32_SHIFT   0
+ #else
++*/
+     #define SK_RGBA_R32_SHIFT   0
+     #define SK_RGBA_G32_SHIFT   8
+     #define SK_RGBA_B32_SHIFT   16
+     #define SK_RGBA_A32_SHIFT   24
+-#endif
++/*#endif*/
+ 
+ #define SkGetPackedA32(packed)      ((uint32_t)((packed) << (24 - SK_A32_SHIFT)) >> 24)
+ #define SkGetPackedR32(packed)      ((uint32_t)((packed) << (24 - SK_R32_SHIFT)) >> 24)
 diff -up firefox-60.0/gfx/skia/skia/include/core/SkImageInfo.h.big-endian firefox-60.0/gfx/skia/skia/include/core/SkImageInfo.h
---- firefox-60.0/gfx/skia/skia/include/core/SkImageInfo.h.big-endian	2018-04-25 10:28:21.367480569 +0200
-+++ firefox-60.0/gfx/skia/skia/include/core/SkImageInfo.h	2018-04-25 10:34:58.240051062 +0200
-@@ -83,8 +83,8 @@ enum SkColorType {
-     kN32_SkColorType = kBGRA_8888_SkColorType,
+--- firefox-60.0/gfx/skia/skia/include/core/SkImageInfo.h.big-endian	2018-04-09 22:50:48.000000000 +0200
++++ firefox-60.0/gfx/skia/skia/include/core/SkImageInfo.h	2018-04-18 11:51:38.748680174 +0200
+@@ -84,7 +84,8 @@ enum SkColorType {
  #elif SK_PMCOLOR_BYTE_ORDER(R,G,B,A)
      kN32_SkColorType = kRGBA_8888_SkColorType,
--#else
+ #else
 -    #error "SK_*32_SHIFT values must correspond to BGRA or RGBA byte order"
-+#else    
++    //#error "SK_*32_SHIFT values must correspond to BGRA or RGBA byte order"
 +    kN32_SkColorType = kBGRA_8888_SkColorType
  #endif
  };
  
 diff -up firefox-60.0/gfx/skia/skia/include/gpu/GrTypes.h.big-endian firefox-60.0/gfx/skia/skia/include/gpu/GrTypes.h
---- firefox-60.0/gfx/skia/skia/include/gpu/GrTypes.h.big-endian	2018-04-25 10:28:21.367480569 +0200
-+++ firefox-60.0/gfx/skia/skia/include/gpu/GrTypes.h	2018-04-25 10:31:41.692759011 +0200
+--- firefox-60.0/gfx/skia/skia/include/gpu/GrTypes.h.big-endian	2018-04-09 22:50:48.000000000 +0200
++++ firefox-60.0/gfx/skia/skia/include/gpu/GrTypes.h	2018-04-18 11:51:38.748680174 +0200
 @@ -344,15 +344,13 @@ enum GrPixelConfig {
  static const int kGrPixelConfigCnt = kLast_GrPixelConfig + 1;
  
@@ -34,21 +57,28 @@ diff -up firefox-60.0/gfx/skia/skia/include/gpu/GrTypes.h.big-endian firefox-60.
  #endif
  
  /**
-diff -up firefox-60.0/gfx/skia/skia/include/private/GrColor.h.big-endian firefox-60.0/gfx/skia/skia/include/private/GrColor.h
---- firefox-60.0/gfx/skia/skia/include/private/GrColor.h.big-endian	2018-04-16 22:05:28.000000000 +0200
-+++ firefox-60.0/gfx/skia/skia/include/private/GrColor.h	2018-04-25 10:28:21.367480569 +0200
-@@ -74,8 +74,13 @@ static inline GrColor GrColorPackA4(unsi
-  *  Since premultiplied means that alpha >= color, we construct a color with
-  *  each component==255 and alpha == 0 to be "illegal"
+diff -up firefox-60.0/gfx/skia/skia/src/core/SkColorData.h.big-endian firefox-60.0/gfx/skia/skia/src/core/SkColorData.h
+--- firefox-60.0/gfx/skia/skia/src/core/SkColorData.h.big-endian	2018-04-18 13:42:06.980476156 +0200
++++ firefox-60.0/gfx/skia/skia/src/core/SkColorData.h	2018-04-18 13:42:50.493520552 +0200
+@@ -31,18 +31,19 @@
+  *
+  *  Here we enforce this constraint.
   */
--#define GrColor_ILLEGAL     (~(0xFF << GrColor_SHIFT_A))
-+//Just for big endian platforms, little has: (~(0xFF << GrColor_SHIFT_A))
-+#ifdef SK_CPU_BENDIAN
-+#define GrColor_ILLEGAL     0xFFFFFF00
-+#else
-+#define GrColor_ILLEGAL     (~(0xFF << GrColor_SHIFT_A)) 
+-
++/*
+ #ifdef SK_CPU_BENDIAN
+     #define SK_BGRA_B32_SHIFT   24
+     #define SK_BGRA_G32_SHIFT   16
+     #define SK_BGRA_R32_SHIFT   8
+     #define SK_BGRA_A32_SHIFT   0
+ #else
++*/
+     #define SK_BGRA_B32_SHIFT   0
+     #define SK_BGRA_G32_SHIFT   8
+     #define SK_BGRA_R32_SHIFT   16
+     #define SK_BGRA_A32_SHIFT   24
+-#endif
++//#endif
  
-+#endif
- #define GrColor_WHITE 0xFFFFFFFF
- #define GrColor_TRANSPARENT_BLACK 0x0
- 
+ #if defined(SK_PMCOLOR_IS_RGBA) && defined(SK_PMCOLOR_IS_BGRA)
+     #error "can't define PMCOLOR to be RGBA and BGRA"
