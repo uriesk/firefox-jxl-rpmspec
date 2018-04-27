@@ -84,7 +84,7 @@
 
 %global official_branding       1
 %global build_langpacks         1
-%global pre_version             b15
+%global pre_version             b16
 
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
@@ -96,12 +96,12 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        0.1%{?pre_tag}%{?dist}
+Release:        0.2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180426.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180427.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -846,6 +846,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Apr 27 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.2
+- Update to 60.0 Beta 16
+
 * Tue Apr 24 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.1
 - Update to 60.0 Beta 15
 
