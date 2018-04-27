@@ -152,6 +152,7 @@ Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch414:        mozilla-1435212-ffmpeg-4.0.patch
+Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -300,7 +301,6 @@ This package contains results of tests executed during build.
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
 %patch40 -p1 -b .aarch64-skia
-
 %patch3  -p1 -b .arm
 
 # Fedora patches
@@ -318,6 +318,9 @@ This package contains results of tests executed during build.
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
 %patch414 -p1 -b .ffmpeg-4.0
+%ifarch %{arm}
+%patch415 -p1 -b .mozilla-1238661
+%endif
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
