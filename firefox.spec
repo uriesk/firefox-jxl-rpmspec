@@ -84,7 +84,7 @@
 
 %global official_branding       1
 %global build_langpacks         1
-%global pre_version             b13
+%global pre_version             b16
 
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
@@ -96,12 +96,12 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        0.1%{?pre_tag}%{?dist}
+Release:        0.2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180418.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180427.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -132,7 +132,7 @@ Patch35:        build-ppc-jit.patch
 Patch37:        build-jit-atomic-always-lucky.patch
 # Fixing missing cacheFlush when JS_CODEGEN_NONE is used (s390x)
 Patch38:        build-cacheFlush-missing.patch
-Patch39:        mozilla-fix-attr-order.patch
+Patch40:        build-aarch64-skia.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -142,7 +142,6 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-Patch230:        fedora-enable-csd.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -152,6 +151,8 @@ Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
+Patch414:        mozilla-1435212-ffmpeg-4.0.patch
+Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -295,10 +296,11 @@ This package contains results of tests executed during build.
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-#%patch29 -p1 -b .big-endian
+%if 0%{?big_endian}
+%patch29 -p1 -b .big-endian
+%endif
 %patch37 -p1 -b .jit-atomic-lucky
-#%patch39 -p1 -b .fix-attr-order
-
+%patch40 -p1 -b .aarch64-skia
 %patch3  -p1 -b .arm
 
 # Fedora patches
@@ -311,11 +313,14 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-#%patch230 -p1 -R -b .fedora-enable-csd.patch
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
+%patch414 -p1 -b .ffmpeg-4.0
+%ifarch %{arm}
+%patch415 -p1 -b .mozilla-1238661
+%endif
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -491,7 +496,7 @@ MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g1/')
 # (OOM when linking, rhbz#1238225)
 export MOZ_DEBUG_FLAGS=" "
 %endif
-%ifarch s390 %{arm} ppc aarch64
+%ifarch s390 %{arm} ppc aarch64 %{ix86}
 MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
 %ifarch %{arm}
@@ -831,9 +836,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/plugin-container
 %{mozappdir}/gmp-clearkey
 %{mozappdir}/fonts/EmojiOneMozilla.ttf
-%if !%{?system_libicu}
-%{mozappdir}/icudt*.dat
-%endif
 %if !%{?system_nss}
 %{mozappdir}/libfreeblpriv3.chk
 %{mozappdir}/libnssdbm3.chk
@@ -844,8 +846,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Apr 27 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.2
+- Update to 60.0 Beta 16
+
 * Tue Apr 24 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.1
-- Update to 60.0 Beta 14
+- Update to 60.0 Beta 15
 
 * Tue Mar 27 2018 Jan Horak <jhorak@redhat.com> - 59.0.2-1
 - Update to 59.0.2
