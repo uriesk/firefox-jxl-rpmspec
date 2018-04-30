@@ -96,7 +96,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        0.2%{?pre_tag}%{?dist}
+Release:        0.3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -153,6 +153,8 @@ Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
+Patch416:        mozilla-1424422.patch
+Patch417:        complete-csd-window-offset-mozilla-1457691.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -321,6 +323,8 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .mozilla-1238661
 %endif
+%patch416 -p1 -b .1424422
+%patch417 -p1 -b .complete-csd-1457691
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -846,6 +850,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Apr 30 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.3
+- Added patches for correct popups position at CSD mode (mozilla-1457691).
+
 * Fri Apr 27 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.2
 - Update to 60.0 Beta 16
 
