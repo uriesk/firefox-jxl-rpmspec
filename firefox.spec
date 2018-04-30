@@ -154,7 +154,8 @@ Patch413:        mozilla-1353817.patch
 Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch416:        mozilla-1424422.patch
-Patch417:        complete-csd-window-offset-mozilla-1457691.patch
+
+Patch421:        complete-csd-window-offset-mozilla-1457691.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -324,7 +325,8 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .mozilla-1238661
 %endif
 %patch416 -p1 -b .1424422
-%patch417 -p1 -b .complete-csd-1457691
+
+%patch421 -p1 -b .mozilla-1457691
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
