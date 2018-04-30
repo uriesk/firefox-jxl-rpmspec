@@ -1,0 +1,212 @@
+diff -up firefox-60.0/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium.old firefox-60.0/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium
+diff -up firefox-60.0/media/webrtc/trunk/Makefile.old firefox-60.0/media/webrtc/trunk/Makefile
+diff -up firefox-60.0/widget/gtk/gtk3drawing.cpp.old firefox-60.0/widget/gtk/gtk3drawing.cpp
+--- firefox-60.0/widget/gtk/gtk3drawing.cpp.old	2018-04-26 22:07:36.000000000 +0200
++++ firefox-60.0/widget/gtk/gtk3drawing.cpp	2018-04-30 11:59:06.750866104 +0200
+@@ -38,6 +38,16 @@ static ToolbarGTKMetrics sToolbarMetrics
+ #define GTK_STATE_FLAG_CHECKED (1 << 11)
+ #endif
+ 
++static GtkBorder
++operator+=(GtkBorder& first, const GtkBorder& second)
++{
++    first.left += second.left;
++    first.right += second.right;
++    first.top += second.top;
++    first.bottom += second.bottom;
++    return first;
++}
++
+ static gint
+ moz_gtk_get_tab_thickness(GtkStyleContext *style);
+ 
+@@ -3056,6 +3066,76 @@ GetScrollbarMetrics(GtkOrientation aOrie
+     return metrics;
+ }
+ 
++/*
++ * get_shadow_width() from gtkwindow.c is not public so we need
++ * to implement it.
++ */
++bool
++GetCSDDecorationSize(GtkWindow *aGtkWindow, GtkBorder* aDecorationSize)
++{
++    GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(aGtkWindow));
++    bool solidDecorations = gtk_style_context_has_class(context, "solid-csd");
++    context = GetStyleContext(solidDecorations ?
++                              MOZ_GTK_WINDOW_DECORATION_SOLID :
++                              MOZ_GTK_WINDOW_DECORATION);
++
++    /* Always sum border + padding */
++    GtkBorder padding;
++    GtkStateFlags state = gtk_style_context_get_state(context);
++    gtk_style_context_get_border(context, state, aDecorationSize);
++    gtk_style_context_get_padding(context, state, &padding);
++    *aDecorationSize += padding;
++
++    // Available on GTK 3.20+.
++    static auto sGtkRenderBackgroundGetClip =
++        (void (*)(GtkStyleContext*, gdouble, gdouble, gdouble, gdouble, GdkRectangle*))
++        dlsym(RTLD_DEFAULT, "gtk_render_background_get_clip");
++
++    GtkBorder margin;
++    gtk_style_context_get_margin(context, state, &margin);
++
++    GtkBorder extents = {0, 0, 0, 0};
++    if (sGtkRenderBackgroundGetClip) {
++        /* Get shadow extents but combine with style margin; use the bigger value.
++         */
++        GdkRectangle clip;
++        sGtkRenderBackgroundGetClip(context, 0, 0, 0, 0, &clip);
++
++        extents.top = -clip.y;
++        extents.right = clip.width + clip.x;
++        extents.bottom = clip.height + clip.y;
++        extents.left = -clip.x;
++
++        // Margin is used for resize grip size - it's not present on
++        // popup windows.
++        if (gtk_window_get_window_type(aGtkWindow) != GTK_WINDOW_POPUP) {
++            extents.top = MAX(extents.top, margin.top);
++            extents.right = MAX(extents.right, margin.right);
++            extents.bottom = MAX(extents.bottom, margin.bottom);
++            extents.left = MAX(extents.left, margin.left);
++        }
++    } else {
++        /* If we can't get shadow extents use decoration-resize-handle instead
++         * as a workaround. This is inspired by update_border_windows()
++         * from gtkwindow.c although this is not 100% accurate as we emulate
++         * the extents here.
++         */
++        gint handle;
++        gtk_widget_style_get(GetWidget(MOZ_GTK_WINDOW),
++                             "decoration-resize-handle", &handle,
++                             NULL);
++
++        extents.top = handle + margin.top;
++        extents.right = handle + margin.right;
++        extents.bottom = handle + margin.bottom;
++        extents.left = handle + margin.left;
++    }
++
++    *aDecorationSize += extents;
++
++    return (sGtkRenderBackgroundGetClip != nullptr);
++}
++
+ /* cairo_t *cr argument has to be a system-cairo. */
+ gint
+ moz_gtk_widget_paint(WidgetNodeType widget, cairo_t *cr,
+diff -up firefox-60.0/widget/gtk/gtkdrawing.h.old firefox-60.0/widget/gtk/gtkdrawing.h
+--- firefox-60.0/widget/gtk/gtkdrawing.h.old	2018-04-26 22:07:35.000000000 +0200
++++ firefox-60.0/widget/gtk/gtkdrawing.h	2018-04-30 11:59:06.750866104 +0200
+@@ -334,6 +334,10 @@ typedef enum {
+    */
+   MOZ_GTK_HEADER_BAR_BUTTON_MAXIMIZE_RESTORE,
+ 
++  /* Client-side window decoration node. Available on GTK 3.20+. */
++  MOZ_GTK_WINDOW_DECORATION,
++  MOZ_GTK_WINDOW_DECORATION_SOLID,
++
+   MOZ_GTK_WIDGET_NODE_COUNT
+ } WidgetNodeType;
+ 
+@@ -606,4 +610,17 @@ GetToolbarButtonMetrics(WidgetNodeType a
+ int
+ GetGtkHeaderBarButtonLayout(WidgetNodeType* aButtonLayout, int aMaxButtonNums);
+ 
++/**
++ * Get size of CSD window extents of given GtkWindow.
++ *
++ * aGtkWindow      [IN]  Decorated window.
++ * aDecorationSize [OUT] Returns calculated (or estimated) decoration
++ *                       size of given aGtkWindow.
++ *
++ * returns:    True if we have extract decoration size (for GTK 3.20+)
++ *             False if we have only an estimation (for GTK+ before  3.20+)
++ */
++bool
++GetCSDDecorationSize(GtkWindow *aGtkWindow, GtkBorder* aDecorationSize);
++
+ #endif
+diff -up firefox-60.0/widget/gtk/nsWindow.cpp.old firefox-60.0/widget/gtk/nsWindow.cpp
+--- firefox-60.0/widget/gtk/nsWindow.cpp.old	2018-04-30 12:01:38.788343254 +0200
++++ firefox-60.0/widget/gtk/nsWindow.cpp	2018-04-30 12:00:01.012679502 +0200
+@@ -127,6 +127,7 @@ using namespace mozilla::widget;
+ #endif
+ 
+ #include "nsShmImage.h"
++#include "gtkdrawing.h"
+ 
+ #include "nsIDOMWheelEvent.h"
+ 
+@@ -3360,6 +3361,10 @@ nsWindow::OnWindowStateEvent(GtkWidget *
+           aEvent->new_window_state & GDK_WINDOW_STATE_FULLSCREEN);
+       }
+     }
++
++    if (mDrawInTitlebar && mCSDSupportLevel == CSD_SUPPORT_CLIENT) {
++        UpdateClientOffsetForCSDWindow();
++    }
+ }
+ 
+ void
+@@ -6556,6 +6561,32 @@ nsWindow::ClearCachedResources()
+     }
+ }
+ 
++/* nsWindow::UpdateClientOffsetForCSDWindow() is designed to be called from
++ * paint code to update mClientOffset any time. It also propagates
++ * the mClientOffset to child tabs.
++ *
++ * It works only for CSD decorated GtkWindow.
++ */
++void
++nsWindow::UpdateClientOffsetForCSDWindow()
++{
++    // _NET_FRAME_EXTENTS is not set on client decorated windows,
++    // so we need to read offset between mContainer and toplevel mShell
++    // window.
++    if (mSizeState == nsSizeMode_Normal) {
++        GtkBorder decorationSize;
++        GetCSDDecorationSize(GTK_WINDOW(mShell), &decorationSize);
++        mClientOffset = nsIntPoint(decorationSize.left, decorationSize.top);
++    } else {
++        mClientOffset = nsIntPoint(0, 0);
++    }
++
++    // Send a WindowMoved notification. This ensures that TabParent
++    // picks up the new client offset and sends it to the child process
++    // if appropriate.
++    NotifyWindowMoved(mBounds.x, mBounds.y);
++}
++
+ nsresult
+ nsWindow::SetNonClientMargins(LayoutDeviceIntMargin &aMargins)
+ {
+@@ -6628,6 +6659,13 @@ nsWindow::SetDrawsInTitlebar(bool aState
+           mNeedsShow = true;
+           NativeResize();
+ 
++          // When we use system titlebar setup managed by Gtk+ we also get
++          // _NET_FRAME_EXTENTS property for our toplevel window so we can't
++          // update the client offset it here.
++          if (aState) {
++              UpdateClientOffsetForCSDWindow();
++          }
++
+           gtk_widget_destroy(tmpWindow);
+       }
+   }
+diff -up firefox-60.0/widget/gtk/nsWindow.h.old firefox-60.0/widget/gtk/nsWindow.h
+--- firefox-60.0/widget/gtk/nsWindow.h.old	2018-04-26 22:07:35.000000000 +0200
++++ firefox-60.0/widget/gtk/nsWindow.h	2018-04-30 11:57:33.656146337 +0200
+@@ -456,6 +456,8 @@ private:
+     nsIWidgetListener* GetListener();
+     bool               IsComposited() const;
+ 
++    void               UpdateClientOffsetForCSDWindow();
++
+     GtkWidget          *mShell;
+     MozContainer       *mContainer;
+     GdkWindow          *mGdkWindow;
