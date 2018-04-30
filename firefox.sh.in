@@ -239,6 +239,10 @@ do
   esac
 done
 
+if ! [ "$GDK_BACKEND" ]; then
+  export GDK_BACKEND=x11
+fi
+
 # Run the browser
 debugging=0
 if [ $debugging = 1 ]
