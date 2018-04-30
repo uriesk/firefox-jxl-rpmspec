@@ -113,8 +113,6 @@ Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
 Source27:       google-api-key
 Source28:       firefox-wayland.sh.in
-Source29:       firefox-x11.desktop
-Source30:       firefox-x11.sh.in
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
