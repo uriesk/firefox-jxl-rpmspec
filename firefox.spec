@@ -84,7 +84,6 @@
 
 %global official_branding       1
 %global build_langpacks         1
-%global pre_version             b16
 
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
@@ -96,7 +95,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        0.5%{?pre_tag}%{?dist}
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
