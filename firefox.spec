@@ -587,8 +587,6 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
 %{__cat} %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
-
-%{__rm} -rf %{buildroot}%{_bindir}/firefox
 %{__cat} %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
 
