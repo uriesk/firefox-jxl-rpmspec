@@ -588,6 +588,10 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 %{__cat} %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
+%{__rm} -rf %{buildroot}%{_bindir}/firefox
+%{__cat} %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
+%{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
+
 %{__install} -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
 %{__rm} -f %{buildroot}/%{mozappdir}/firefox-config
@@ -785,6 +789,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files -f %{name}.lang
 %{_bindir}/firefox
+%{_bindir}/firefox-wayland
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
