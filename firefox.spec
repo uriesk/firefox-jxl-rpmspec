@@ -102,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -158,6 +158,7 @@ Patch413:        mozilla-1353817.patch
 Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch416:        mozilla-1424422.patch
+Patch417:        bug1375074-save-restore-x28.patch
 
 Patch421:        complete-csd-window-offset-mozilla-1457691.patch
 
@@ -329,6 +330,7 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .mozilla-1238661
 %endif
 %patch416 -p1 -b .1424422
+%patch417 -p1 -b .bug1375074-save-restore-x28
 
 %patch421 -p1 -b .mozilla-1457691
 
@@ -871,6 +873,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 3 2018 Martin Stransky <stransky@redhat.com> - 60.0-3
+- Added patch from mozbz#1375074 - fixes aarch64 baseline JIT crashes
+
 * Thu May 3 2018 Martin Stransky <stransky@redhat.com> - 60.0-2
 - Make Wayland backend optional and disable it by default due to WebGL issues.
 
