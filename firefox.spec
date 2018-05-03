@@ -1,6 +1,13 @@
 # Use system nspr/nss?
 %global system_nss        1
 
+# Wayland backend is not finished yet, see
+# https://bugzilla.mozilla.org/show_bug.cgi?id=635134
+# for details.
+#
+# Build with Wayland Gtk+ backend?
+%global wayland_backend   0
+
 # Use system hunspell?
 %if 0%{?fedora} > 25
 %global system_hunspell   1
@@ -95,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -332,6 +339,11 @@ This package contains results of tests executed during build.
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
+%if %{?wayland_backend}
+echo "ac_add_options --enable-default-toolkit=cairo-gtk3-wayland" >> .mozconfig
+%else
+echo "ac_add_options --enable-default-toolkit=cairo-gtk3" >> .mozconfig
+%endif
 %if %{official_branding}
 echo "ac_add_options --enable-official-branding" >> .mozconfig
 %endif
@@ -587,8 +599,10 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
 %{__cat} %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
+%if %{?wayland_backend}
 %{__cat} %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
+%endif
 
 %{__install} -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
@@ -728,6 +742,9 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 
 # Default
 %{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
+%if %{?wayland_backend}
+echo 'pref("webgl.force-enabled",true);' >> %{buildroot}%{mozappdir}/browser/defaults/preferences
+%endif
 
 # Copy over run-mozilla.sh
 %{__cp} build/unix/run-mozilla.sh %{buildroot}%{mozappdir}
@@ -787,7 +804,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files -f %{name}.lang
 %{_bindir}/firefox
+%if %{?wayland_backend}
 %{_bindir}/firefox-wayland
+%endif
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
@@ -852,6 +871,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 3 2018 Martin Stransky <stransky@redhat.com> - 60.0-2
+- Make Wayland backend optional and disable it by default due to WebGL issues.
+
 * Wed May 2 2018 Martin Stransky <stransky@redhat.com> - 60.0-1
 - Update to Firefox 60 build 1
 - Ship firefox-wayland launch script
@@ -1379,4 +1401,3 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 * Mon Jan 4 2016 Martin Stransky <stransky@redhat.com> - 43.0.3-2
 - Enabled Skia (rhbz#1282134)
-
