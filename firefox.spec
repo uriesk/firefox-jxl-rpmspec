@@ -102,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -144,6 +144,8 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
+# ppc(64)le run-time js patch
+Patch227:        rhbz-1498561.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -318,6 +320,7 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
+%patch227 -p1 -b .rhbz-1498561
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
@@ -870,6 +873,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 16 2018 Martin Stransky <stransky@redhat.com> - 60.0-6
+- Added patch from rhbz#1498561 - second arch (ppc*) crashes.
+
 * Wed May 16 2018 Martin Stransky <stransky@redhat.com> - 60.0-5
 - Disabled jemalloc on second arches.
 
