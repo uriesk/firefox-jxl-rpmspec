@@ -102,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -122,8 +122,6 @@ Source28:       firefox-wayland.sh.in
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
-# https://bugzilla.redhat.com/show_bug.cgi?id=814879#c3
-Patch18:        xulrunner-24.0-jemalloc-ppc.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
@@ -300,7 +298,6 @@ This package contains results of tests executed during build.
 # ignored during this compare.
 
 
-%patch18 -p1 -b .jemalloc-ppc
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
@@ -412,8 +409,8 @@ echo 'ac_add_options --enable-optimize' >> .mozconfig
 echo "ac_add_options --disable-debug" >> .mozconfig
 %endif
 
-# s390(x) fails to start with jemalloc enabled
-%ifarch s390 s390x
+# Second arches fail to start with jemalloc enabled
+%ifnarch %{ix86} x86_64
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
@@ -873,6 +870,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 16 2018 Martin Stransky <stransky@redhat.com> - 60.0-5
+- Disabled jemalloc on second arches.
+
 * Thu May 3 2018 Martin Stransky <stransky@redhat.com> - 60.0-4
 - Updated to Firefox 60 build 2
 
