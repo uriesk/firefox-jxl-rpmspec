@@ -1,0 +1,29 @@
+diff --git a/security/sandbox/linux/SandboxFilter.cpp b/security/sandbox/linux/SandboxFilter.cpp
+--- a/security/sandbox/linux/SandboxFilter.cpp
++++ b/security/sandbox/linux/SandboxFilter.cpp
+@@ -1048,16 +1048,24 @@ public:
+ 
+     case __NR_mprotect:
+     case __NR_brk:
+     case __NR_madvise:
+       // libc's realloc uses mremap (Bug 1286119); wasm does too (bug 1342385).
+     case __NR_mremap:
+       return Allow();
+ 
++      // Bug 1462640: Mesa libEGL uses mincore to test whether values
++      // are pointers, for reasons.
++    case __NR_mincore: {
++      Arg<size_t> length(1);
++      return If(length == getpagesize(), Allow())
++             .Else(SandboxPolicyCommon::EvaluateSyscall(sysno));
++    }
++
+     case __NR_sigaltstack:
+       return Allow();
+ 
+ #ifdef __NR_set_thread_area
+     case __NR_set_thread_area:
+       return Allow();
+ #endif
+ 
+
