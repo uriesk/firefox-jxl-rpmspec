@@ -102,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -160,6 +160,7 @@ Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch416:        mozilla-1424422.patch
 Patch417:        bug1375074-save-restore-x28.patch
+Patch418:        mozilla-1436242.patch
 
 Patch421:        complete-csd-window-offset-mozilla-1457691.patch
 
@@ -347,6 +348,7 @@ This package contains results of tests executed during build.
 %endif
 %patch416 -p1 -b .1424422
 %patch417 -p1 -b .bug1375074-save-restore-x28
+%patch418 -p1 -b .mozilla-1436242
 
 %patch421 -p1 -b .mozilla-1457691
 
@@ -906,6 +908,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri May 25 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-3
+- Added fix for mozbz#1436242 (rhbz#1577277) - Firefox IPC crashes.
+
 * Fri May 25 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-2
 - Enable Wayland backend.
 
