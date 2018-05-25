@@ -1,0 +1,44 @@
+diff --git a/gfx/gl/GLContextProvider.h b/gfx/gl/GLContextProvider.h
+--- a/gfx/gl/GLContextProvider.h
++++ b/gfx/gl/GLContextProvider.h
+@@ -36,30 +36,38 @@ namespace gl {
+ 
+ #ifdef XP_MACOSX
+   #define GL_CONTEXT_PROVIDER_NAME GLContextProviderCGL
+   #include "GLContextProviderImpl.h"
+   #undef GL_CONTEXT_PROVIDER_NAME
+   #define GL_CONTEXT_PROVIDER_DEFAULT GLContextProviderCGL
+ #endif
+ 
+-#if defined(MOZ_X11) && !defined(MOZ_WAYLAND)
++#if defined(MOZ_X11)
+   #define GL_CONTEXT_PROVIDER_NAME GLContextProviderGLX
+   #include "GLContextProviderImpl.h"
+   #undef GL_CONTEXT_PROVIDER_NAME
+   #define GL_CONTEXT_PROVIDER_DEFAULT GLContextProviderGLX
+ #endif
+ 
+ #define GL_CONTEXT_PROVIDER_NAME GLContextProviderEGL
+ #include "GLContextProviderImpl.h"
+ #undef GL_CONTEXT_PROVIDER_NAME
+ #ifndef GL_CONTEXT_PROVIDER_DEFAULT
+   #define GL_CONTEXT_PROVIDER_DEFAULT GLContextProviderEGL
+ #endif
+ 
++#if defined(MOZ_WAYLAND)
++  #define GL_CONTEXT_PROVIDER_NAME GLContextProviderWayland
++  #include "GLContextProviderImpl.h"
++  #undef GL_CONTEXT_PROVIDER_NAME
++  #undef GL_CONTEXT_PROVIDER_DEFAULT
++  #define GL_CONTEXT_PROVIDER_DEFAULT GLContextProviderWayland
++#endif
++
+ #if defined(MOZ_WIDGET_UIKIT)
+ #define GL_CONTEXT_PROVIDER_NAME GLContextProviderEAGL
+ #include "GLContextProviderImpl.h"
+ #undef GL_CONTEXT_PROVIDER_NAME
+ #ifndef GL_CONTEXT_PROVIDER_DEFAULT
+ #define GL_CONTEXT_PROVIDER_DEFAULT GLContextProviderEAGL
+ #endif
+ #endif
+

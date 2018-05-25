@@ -1,0 +1,33 @@
+
+# HG changeset patch
+# User Martin Stransky <stransky@redhat.com>
+# Date 1526299286 -7200
+# Node ID 6495ae9d01e06109539413c538fd25ed942f6eb8
+# Parent  67553a1262de53d0ec85fdfcf1a2b55631eaca44
+Bug 1461306 - [Wayland] Don't use sizeof() to get mime type array size, r=jhorak
+
+MozReview-Commit-ID: GE5helkqoUt
+
+diff --git a/widget/gtk/nsClipboardWayland.cpp b/widget/gtk/nsClipboardWayland.cpp
+--- a/widget/gtk/nsClipboardWayland.cpp
++++ b/widget/gtk/nsClipboardWayland.cpp
+@@ -723,17 +723,17 @@ const char*
+ nsRetrievalContextWayland::GetClipboardText(int32_t aWhichClipboard)
+ {
+     GdkAtom selection = GetSelectionAtom(aWhichClipboard);
+     DataOffer* dataOffer = (selection == GDK_SELECTION_PRIMARY) ?
+                             mPrimaryOffer : mClipboardOffer;
+     if (!dataOffer)
+         return nullptr;
+ 
+-    for (unsigned int i = 0; i < sizeof(sTextMimeTypes); i++) {
++    for (unsigned int i = 0; i < TEXT_MIME_TYPES_NUM; i++) {
+         if (dataOffer->HasTarget(sTextMimeTypes[i])) {
+             uint32_t unused;
+             return GetClipboardData(sTextMimeTypes[i], aWhichClipboard,
+                                     &unused);
+         }
+     }
+     return nullptr;
+ }
+

@@ -1,0 +1,314 @@
+diff -up firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp.rb246410 firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp
+--- firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp	2018-05-25 11:50:38.260890405 +0200
+@@ -29,7 +29,7 @@
+ #include "SharedSurfaceIO.h"
+ #endif
+ 
+-#ifdef GL_PROVIDER_GLX
++#ifdef MOZ_X11
+ #include "GLXLibrary.h"
+ #include "SharedSurfaceGLX.h"
+ #endif
+@@ -83,7 +83,7 @@ GLScreenBuffer::CreateFactory(GLContext*
+     if (useGl) {
+ #if defined(XP_MACOSX)
+         factory = SurfaceFactory_IOSurface::Create(gl, caps, ipcChannel, flags);
+-#elif defined(GL_PROVIDER_GLX)
++#elif defined(MOZ_X11)
+         if (sGLXLibrary.UseTextureFromPixmap())
+             factory = SurfaceFactory_GLXDrawable::Create(gl, caps, ipcChannel, flags);
+ #elif defined(MOZ_WIDGET_UIKIT)
+@@ -119,7 +119,7 @@ GLScreenBuffer::CreateFactory(GLContext*
+ #endif
+     }
+ 
+-#ifdef GL_PROVIDER_GLX
++#ifdef MOZ_X11
+     if (!factory && sGLXLibrary.UseTextureFromPixmap()) {
+         factory = SurfaceFactory_GLXDrawable::Create(gl, caps, ipcChannel, flags);
+     }
+diff -up firefox-60.0.1/gfx/layers/client/TextureClient.cpp.rb246410 firefox-60.0.1/gfx/layers/client/TextureClient.cpp
+--- firefox-60.0.1/gfx/layers/client/TextureClient.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/layers/client/TextureClient.cpp	2018-05-25 11:50:38.260890405 +0200
+@@ -45,10 +45,8 @@
+ #endif
+ #ifdef MOZ_X11
+ #include "mozilla/layers/TextureClientX11.h"
+-#ifdef GL_PROVIDER_GLX
+ #include "GLXLibrary.h"
+ #endif
+-#endif
+ 
+ #ifdef XP_MACOSX
+ #include "mozilla/layers/MacIOSurfaceTextureClientOGL.h"
+@@ -1122,7 +1120,6 @@ TextureClient::CreateForDrawing(TextureF
+   {
+     data = X11TextureData::Create(aSize, aFormat, aTextureFlags, aAllocator);
+   }
+-#ifdef GL_PROVIDER_GLX
+   if (!data && aLayersBackend == LayersBackend::LAYERS_OPENGL &&
+       type == gfxSurfaceType::Xlib &&
+       aFormat != SurfaceFormat::A8 &&
+@@ -1131,7 +1128,6 @@ TextureClient::CreateForDrawing(TextureF
+     data = X11TextureData::Create(aSize, aFormat, aTextureFlags, aAllocator);
+   }
+ #endif
+-#endif
+ 
+ #ifdef XP_MACOSX
+   if (!data && gfxPrefs::UseIOSurfaceTextures()) {
+diff -up firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp.rb246410 firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp
+--- firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp.rb246410	2018-05-16 07:38:29.000000000 +0200
++++ firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp	2018-05-25 11:50:38.260890405 +0200
+@@ -7,10 +7,8 @@
+ #include "X11TextureHost.h"
+ #include "mozilla/layers/BasicCompositor.h"
+ #include "mozilla/layers/X11TextureSourceBasic.h"
+-#ifdef GL_PROVIDER_GLX
+ #include "mozilla/layers/CompositorOGL.h"
+ #include "mozilla/layers/X11TextureSourceOGL.h"
+-#endif
+ #include "gfxXlibSurface.h"
+ #include "gfx2DGlue.h"
+ 
+@@ -43,12 +41,10 @@ X11TextureHost::Lock()
+         mTextureSource =
+           new X11TextureSourceBasic(mCompositor->AsBasicCompositor(), mSurface);
+         break;
+-#ifdef GL_PROVIDER_GLX
+       case LayersBackend::LAYERS_OPENGL:
+         mTextureSource =
+           new X11TextureSourceOGL(mCompositor->AsCompositorOGL(), mSurface);
+         break;
+-#endif
+       default:
+         return false;
+     }
+@@ -78,11 +74,9 @@ X11TextureHost::GetFormat() const
+     return SurfaceFormat::UNKNOWN;
+   }
+   gfxContentType type = mSurface->GetContentType();
+-#ifdef GL_PROVIDER_GLX
+   if (mCompositor->GetBackendType() == LayersBackend::LAYERS_OPENGL) {
+     return X11TextureSourceOGL::ContentTypeToSurfaceFormat(type);
+   }
+-#endif
+   return X11TextureSourceBasic::ContentTypeToSurfaceFormat(type);
+ }
+ 
+diff -up firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp.rb246410 firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp
+--- firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp	2018-05-25 11:50:38.260890405 +0200
+@@ -74,11 +74,9 @@ SurfaceDescriptorX11::SurfaceDescriptorX
+     mFormat = cairo_xlib_surface_get_visual(aSurf->CairoSurface())->visualid;
+   }
+ 
+-#ifdef GL_PROVIDER_GLX
+   if (aForwardGLX) {
+     mGLXPixmap = aSurf->GetGLXPixmap();
+   }
+-#endif
+ }
+ 
+ SurfaceDescriptorX11::SurfaceDescriptorX11(Drawable aDrawable, XID aFormatID,
+@@ -109,10 +107,8 @@ SurfaceDescriptorX11::OpenForeign() cons
+     surf = new gfxXlibSurface(display, mId, visual, mSize);
+   }
+ 
+-#ifdef GL_PROVIDER_GLX
+   if (mGLXPixmap)
+     surf->BindGLXPixmap(mGLXPixmap);
+-#endif
+ 
+   return surf->CairoStatus() ? nullptr : surf.forget();
+ }
+diff -up firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp.rb246410 firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp
+--- firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp	2018-05-25 11:50:38.260890405 +0200
+@@ -4,7 +4,7 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+-#ifdef GL_PROVIDER_GLX
++#ifdef MOZ_X11
+ 
+ #include "X11TextureSourceOGL.h"
+ #include "gfxXlibSurface.h"
+diff -up firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h.rb246410 firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h
+--- firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h	2018-05-25 11:50:38.260890405 +0200
+@@ -7,7 +7,7 @@
+ #ifndef MOZILLA_GFX_X11TEXTURESOURCEOGL__H
+ #define MOZILLA_GFX_X11TEXTURESOURCEOGL__H
+ 
+-#ifdef GL_PROVIDER_GLX
++#ifdef MOZ_X11
+ 
+ #include "mozilla/layers/CompositorOGL.h"
+ #include "mozilla/layers/TextureHostOGL.h"
+diff -up firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp.rb246410 firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp
+--- firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp.rb246410	2018-05-25 11:50:38.250890430 +0200
++++ firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp	2018-05-25 11:52:21.336628487 +0200
+@@ -41,11 +41,9 @@
+ #include "mozilla/Preferences.h"
+ #include "mozilla/X11Util.h"
+ 
+-#ifdef GL_PROVIDER_GLX
+ #include "GLContextProvider.h"
+ #include "GLContextGLX.h"
+ #include "GLXLibrary.h"
+-#endif
+ 
+ /* Undefine the Status from Xlib since it will conflict with system headers on OSX */
+ #if defined(__APPLE__) && defined(Status)
+@@ -528,7 +526,7 @@ gfxPlatformGtk::GetPlatformCMSOutputProf
+ }
+ 
+ 
+-#ifdef GL_PROVIDER_GLX
++#ifdef MOZ_X11
+ 
+ class GLXVsyncSource final : public VsyncSource
+ {
+diff -up firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h.rb246410 firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h
+--- firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h	2018-05-25 11:50:38.260890405 +0200
+@@ -117,7 +117,7 @@ public:
+ 
+     bool AccelerateLayersByDefault() override;
+ 
+-#ifdef GL_PROVIDER_GLX
++#ifdef MOZ_X11
+     already_AddRefed<mozilla::gfx::VsyncSource> CreateHardwareVsyncSource() override;
+ #endif
+ 
+diff -up firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp.rb246410 firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp
+--- firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp	2018-05-25 11:51:59.741683360 +0200
+@@ -25,9 +25,7 @@ using namespace mozilla::gfx;
+ 
+ gfxXlibSurface::gfxXlibSurface(Display *dpy, Drawable drawable, Visual *visual)
+     : mPixmapTaken(false), mDisplay(dpy), mDrawable(drawable)
+-#if defined(GL_PROVIDER_GLX)
+     , mGLXPixmap(X11None)
+-#endif
+ {
+     const gfx::IntSize size = DoSizeQuery();
+     cairo_surface_t *surf = cairo_xlib_surface_create(dpy, drawable, visual, size.width, size.height);
+@@ -36,9 +34,7 @@ gfxXlibSurface::gfxXlibSurface(Display *
+ 
+ gfxXlibSurface::gfxXlibSurface(Display *dpy, Drawable drawable, Visual *visual, const gfx::IntSize& size)
+     : mPixmapTaken(false), mDisplay(dpy), mDrawable(drawable)
+-#if defined(GL_PROVIDER_GLX)
+     , mGLXPixmap(X11None)
+-#endif
+ {
+     NS_ASSERTION(Factory::CheckSurfaceSize(size, XLIB_IMAGE_SIDE_SIZE_LIMIT),
+                  "Bad size");
+@@ -51,9 +47,7 @@ gfxXlibSurface::gfxXlibSurface(Screen *s
+                                const gfx::IntSize& size)
+     : mPixmapTaken(false), mDisplay(DisplayOfScreen(screen)),
+       mDrawable(drawable)
+-#if defined(GL_PROVIDER_GLX)
+-      , mGLXPixmap(X11None)
+-#endif
++    , mGLXPixmap(X11None)
+ {
+     NS_ASSERTION(Factory::CheckSurfaceSize(size, XLIB_IMAGE_SIDE_SIZE_LIMIT),
+                  "Bad Size");
+@@ -67,9 +61,7 @@ gfxXlibSurface::gfxXlibSurface(Screen *s
+ 
+ gfxXlibSurface::gfxXlibSurface(cairo_surface_t *csurf)
+     : mPixmapTaken(false)
+-#if defined(GL_PROVIDER_GLX)
+-      , mGLXPixmap(X11None)
+-#endif
++    , mGLXPixmap(X11None)
+ {
+     NS_PRECONDITION(cairo_surface_status(csurf) == 0,
+                     "Not expecting an error surface");
+@@ -84,11 +76,9 @@ gfxXlibSurface::~gfxXlibSurface()
+ {
+     // gfxASurface's destructor calls RecordMemoryFreed().
+     if (mPixmapTaken) {
+-#if defined(GL_PROVIDER_GLX)
+         if (mGLXPixmap) {
+             gl::sGLXLibrary.DestroyPixmap(mDisplay, mGLXPixmap);
+         }
+-#endif
+         XFreePixmap (mDisplay, mDrawable);
+     }
+ }
+@@ -120,7 +110,7 @@ gfxXlibSurface::TakePixmap()
+     // The bit depth returned from Cairo is technically int, but this is
+     // the last place we'd be worried about that scenario.
+     unsigned int bitDepth = cairo_xlib_surface_get_depth(CairoSurface());
+-    MOZ_ASSERT((bitDepth % 8) == 0, "Memory used not recorded correctly");    
++    MOZ_ASSERT((bitDepth % 8) == 0, "Memory used not recorded correctly");
+ 
+     // Divide by 8 because surface_get_depth gives us the number of *bits* per
+     // pixel.
+@@ -272,7 +262,7 @@ gfxXlibSurface::CreateSimilarSurface(gfx
+ void
+ gfxXlibSurface::Finish()
+ {
+-#if defined(GL_PROVIDER_GLX)
++#if defined(MOZ_X11)
+     if (mPixmapTaken && mGLXPixmap) {
+         gl::sGLXLibrary.DestroyPixmap(mDisplay, mGLXPixmap);
+         mGLXPixmap = X11None;
+@@ -498,7 +488,7 @@ gfxXlibSurface::DepthOfVisual(const Scre
+     NS_ERROR("Visual not on Screen.");
+     return 0;
+ }
+-    
++
+ /* static */
+ Visual*
+ gfxXlibSurface::FindVisual(Screen *screen, gfxImageFormat format)
+@@ -587,7 +577,7 @@ gfxXlibSurface::XRenderFormat()
+     return cairo_xlib_surface_get_xrender_format(CairoSurface());
+ }
+ 
+-#if defined(GL_PROVIDER_GLX)
++#if defined(MOZ_X11)
+ GLXPixmap
+ gfxXlibSurface::GetGLXPixmap()
+ {
+diff -up firefox-60.0.1/gfx/thebes/gfxXlibSurface.h.rb246410 firefox-60.0.1/gfx/thebes/gfxXlibSurface.h
+--- firefox-60.0.1/gfx/thebes/gfxXlibSurface.h.rb246410	2018-05-16 07:38:30.000000000 +0200
++++ firefox-60.0.1/gfx/thebes/gfxXlibSurface.h	2018-05-25 11:50:38.261890402 +0200
+@@ -12,9 +12,7 @@
+ #include <X11/Xlib.h>
+ #include "X11UndefineNone.h"
+ 
+-#if defined(GL_PROVIDER_GLX)
+ #include "GLXLibrary.h"
+-#endif
+ 
+ #include "nsSize.h"
+ 
+@@ -86,12 +84,10 @@ public:
+     // Find a visual and colormap pair suitable for rendering to this surface.
+     bool GetColormapAndVisual(Colormap* colormap, Visual **visual);
+ 
+-#if defined(GL_PROVIDER_GLX)
+     GLXPixmap GetGLXPixmap();
+     // Binds a GLXPixmap backed by this context's surface.
+     // Primarily for use in sharing surfaces.
+     void BindGLXPixmap(GLXPixmap aPixmap);
+-#endif
+ 
+     // Return true if cairo will take its slow path when this surface is used
+     // in a pattern with EXTEND_PAD.  As a workaround for XRender's RepeatPad
+@@ -114,9 +110,7 @@ protected:
+ 
+     const mozilla::gfx::IntSize DoSizeQuery();
+ 
+-#if defined(GL_PROVIDER_GLX)
+     GLXPixmap mGLXPixmap;
+-#endif
+ };
+ 
+ #endif /* GFX_XLIBSURFACE_H */

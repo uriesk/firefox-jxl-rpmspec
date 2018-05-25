@@ -6,7 +6,7 @@
 # for details.
 #
 # Build with Wayland Gtk+ backend?
-%global wayland_backend   0
+%global wayland_backend   1
 
 # Use system hunspell?
 %if 0%{?fedora} > 25
@@ -102,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -119,6 +119,7 @@ Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
 Source27:       google-api-key
 Source28:       firefox-wayland.sh.in
+Source29:       firefox-wayland.desktop
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -161,6 +162,21 @@ Patch416:        mozilla-1424422.patch
 Patch417:        bug1375074-save-restore-x28.patch
 
 Patch421:        complete-csd-window-offset-mozilla-1457691.patch
+
+# Wayland specific upstream patches
+Patch450:        mozilla-1438131.patch
+Patch451:        mozilla-1438136.patch
+Patch452:        mozilla-1460603.patch
+Patch453:        mozilla-1460605-1.patch
+Patch454:        mozilla-1460605-2.patch
+Patch455:        mozilla-1460810.patch
+Patch456:        mozilla-1461306.patch
+Patch457:        mozilla-1462622.patch
+Patch458:        mozilla-1462642.patch
+Patch459:        mozilla-1463753.patch
+Patch560:        rb244010.patch
+Patch561:        rb244012.patch
+Patch562:        rb246410.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -337,6 +353,23 @@ This package contains results of tests executed during build.
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
+%endif
+
+# Wayland specific upstream patches
+%if %{?wayland_backend}
+%patch453 -p1 -b .mozilla-1460605-1
+%patch454 -p1 -b .mozilla-1460605-2
+%patch455 -p1 -b .mozilla-1460810
+%patch456 -p1 -b .mozilla-1461306
+%patch457 -p1 -b .mozilla-1462622
+%patch451 -p1 -b .mozilla-1438136
+%patch450 -p1 -b .mozilla-1438131
+%patch459 -p1 -b .mozilla-1463753
+%patch458 -p1 -b .mozilla-1462642
+%patch452 -p1 -b .mozilla-1460603
+%patch560 -p1 -b .rb244010
+%patch561 -p1 -b .rb244012
+%patch562 -p1 -b .rb246410
 %endif
 
 %{__rm} -f .mozconfig
@@ -596,6 +629,9 @@ DESTDIR=%{buildroot} make -C objdir install
 %{__mkdir_p} %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
+%if %{?wayland_backend}
+desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
+%endif
 
 # set up the firefox start script
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
@@ -744,9 +780,6 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 
 # Default
 %{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
-%if %{?wayland_backend}
-echo 'pref("webgl.force-enabled",true);' >> %{buildroot}%{mozappdir}/browser/defaults/preferences
-%endif
 
 # Copy over run-mozilla.sh
 %{__cp} build/unix/run-mozilla.sh %{buildroot}%{mozappdir}
@@ -873,6 +906,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri May 25 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-2
+- Enable Wayland backend.
+
 * Wed May 23 2018 Jan Horak <jhorak@redhat.com> - 60.0.1-1
 - Update to 60.0.1
 
