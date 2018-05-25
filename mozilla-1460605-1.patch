@@ -1,0 +1,40 @@
+
+# HG changeset patch
+# User Martin Stransky <stransky@redhat.com>
+# Date 1525961643 -7200
+# Node ID c085f9360dfa4d0fc3d04d6db40d37e1369616b3
+# Parent  acaaa40ebdf142fda38d5661f7631f029a2406c6
+Bug 1460605 - Use NS_NATIVE_EGL_WINDOW instead of NS_NATIVE_WINDOW on GTK r=lsalzman
+
+Original patch author is Takuro Ashie <ashie@clear-code.com>
+
+NS_NATIVE_EGL_WINDOW is exported by Gtk toolkit code and provides both X11 window
+handle for X11 Gtk backend and EGL window handle for Wayland backend.
+
+MozReview-Commit-ID: DEmlaLL7zGY
+
+diff --git a/gfx/gl/GLContextProviderEGL.cpp b/gfx/gl/GLContextProviderEGL.cpp
+--- a/gfx/gl/GLContextProviderEGL.cpp
++++ b/gfx/gl/GLContextProviderEGL.cpp
+@@ -1,18 +1,16 @@
+ /* -*- Mode: C++; tab-width: 20; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+ /* This Source Code Form is subject to the terms of the Mozilla Public
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ #if defined(MOZ_WIDGET_GTK)
+-    #include <gdk/gdkx.h>
+-    // we're using default display for now
+-    #define GET_NATIVE_WINDOW_FROM_REAL_WIDGET(aWidget) ((EGLNativeWindowType)GDK_WINDOW_XID((GdkWindow*)aWidget->GetNativeData(NS_NATIVE_WINDOW)))
+-    #define GET_NATIVE_WINDOW_FROM_COMPOSITOR_WIDGET(aWidget) ((EGLNativeWindowType)GDK_WINDOW_XID((GdkWindow*)aWidget->RealWidget()->GetNativeData(NS_NATIVE_WINDOW)))
++    #define GET_NATIVE_WINDOW_FROM_REAL_WIDGET(aWidget) ((EGLNativeWindowType)aWidget->GetNativeData(NS_NATIVE_EGL_WINDOW))
++    #define GET_NATIVE_WINDOW_FROM_COMPOSITOR_WIDGET(aWidget) ((EGLNativeWindowType)aWidget->RealWidget()->GetNativeData(NS_NATIVE_EGL_WINDOW))
+ #elif defined(MOZ_WIDGET_ANDROID)
+     #define GET_NATIVE_WINDOW_FROM_REAL_WIDGET(aWidget) ((EGLNativeWindowType)aWidget->GetNativeData(NS_JAVA_SURFACE))
+     #define GET_NATIVE_WINDOW_FROM_COMPOSITOR_WIDGET(aWidget) (aWidget->AsAndroid()->GetEGLNativeWindow())
+ #elif defined(XP_WIN)
+     #define GET_NATIVE_WINDOW_FROM_REAL_WIDGET(aWidget) ((EGLNativeWindowType)aWidget->GetNativeData(NS_NATIVE_WINDOW))
+     #define GET_NATIVE_WINDOW_FROM_COMPOSITOR_WIDGET(aWidget) ((EGLNativeWindowType)aWidget->AsWindows()->GetHwnd())
+ #else
+     #define GET_NATIVE_WINDOW_FROM_REAL_WIDGET(aWidget) ((EGLNativeWindowType)aWidget->GetNativeData(NS_NATIVE_WINDOW))
+

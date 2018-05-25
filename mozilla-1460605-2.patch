@@ -1,0 +1,292 @@
+
+# HG changeset patch
+# User Martin Stransky <stransky@redhat.com>
+# Date 1525961060 -7200
+# Node ID acaaa40ebdf142fda38d5661f7631f029a2406c6
+# Parent  5543294befe9494593370f33c40ba50c8239e0c6
+Bug 1460605 - Provide NS_NATIVE_EGL_WINDOW to get a native EGL window on Wayland, r=jhorak
+
+Original patch author is Takuro Ashie <ashie@clear-code.com>
+
+Provide ability to create native EGL window and provide it under NS_NATIVE_EGL_WINDOW
+to GL code. The native EGL window is owned/managed by mozcontainer.
+
+MozReview-Commit-ID: 4d0Kk6DRSaD
+
+diff --git a/config/system-headers.mozbuild b/config/system-headers.mozbuild
+--- a/config/system-headers.mozbuild
++++ b/config/system-headers.mozbuild
+@@ -1334,8 +1334,14 @@ if CONFIG['MOZ_SYSTEM_ICU']:
+         'unicode/unistr.h',
+         'unicode/unorm.h',
+         'unicode/unum.h',
+         'unicode/upluralrules.h',
+         'unicode/ureldatefmt.h',
+         'unicode/ustring.h',
+         'unicode/utypes.h',
+     ]
++
++if CONFIG['MOZ_WAYLAND']:
++    system_headers += [
++        'wayland-client.h',
++        'wayland-egl.h',
++    ]
+diff --git a/widget/gtk/mozcontainer.cpp b/widget/gtk/mozcontainer.cpp
+--- a/widget/gtk/mozcontainer.cpp
++++ b/widget/gtk/mozcontainer.cpp
+@@ -5,16 +5,17 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ #include "mozcontainer.h"
+ #include <gtk/gtk.h>
+ #ifdef MOZ_WAYLAND
+ #include <gdk/gdkx.h>
+ #include <gdk/gdkwayland.h>
++#include <wayland-egl.h>
+ #endif
+ #include <stdio.h>
+ #include <dlfcn.h>
+ 
+ #ifdef ACCESSIBILITY
+ #include <atk/atk.h>
+ #include "maiRedundantObjectFactory.h"
+ #endif
+@@ -202,16 +203,21 @@ void
+ moz_container_init (MozContainer *container)
+ {
+     gtk_widget_set_can_focus(GTK_WIDGET(container), TRUE);
+     gtk_container_set_resize_mode(GTK_CONTAINER(container), GTK_RESIZE_IMMEDIATE);
+     gtk_widget_set_redraw_on_allocate(GTK_WIDGET(container), FALSE);
+ 
+ #if defined(MOZ_WAYLAND)
+     {
++      container->subcompositor = nullptr;
++      container->surface = nullptr;
++      container->subsurface = nullptr;
++      container->eglwindow = nullptr;
++
+       GdkDisplay *gdk_display = gtk_widget_get_display(GTK_WIDGET(container));
+       if (GDK_IS_WAYLAND_DISPLAY (gdk_display)) {
+           // Available as of GTK 3.8+
+           static auto sGdkWaylandDisplayGetWlDisplay =
+               (wl_display *(*)(GdkDisplay *))
+               dlsym(RTLD_DEFAULT, "gdk_wayland_display_get_wl_display");
+ 
+           wl_display* display = sGdkWaylandDisplayGetWlDisplay(gdk_display);
+@@ -284,16 +290,17 @@ moz_container_map_surface(MozContainer *
+         wl_region_destroy(region);
+     }
+     return true;
+ }
+ 
+ static void
+ moz_container_unmap_surface(MozContainer *container)
+ {
++    g_clear_pointer(&container->eglwindow, wl_egl_window_destroy);
+     g_clear_pointer(&container->subsurface, wl_subsurface_destroy);
+     g_clear_pointer(&container->surface, wl_surface_destroy);
+ }
+ 
+ #endif
+ 
+ void
+ moz_container_map (GtkWidget *widget)
+@@ -429,16 +436,21 @@ moz_container_size_allocate (GtkWidget  
+     // We need to position our subsurface according to GdkWindow
+     // when offset changes (GdkWindow is maximized for instance).
+     // see gtk-clutter-embed.c for reference.
+     if (container->subsurface) {
+         gint x, y;
+         gdk_window_get_position(gtk_widget_get_window(widget), &x, &y);
+         wl_subsurface_set_position(container->subsurface, x, y);
+     }
++    if (container->eglwindow) {
++        wl_egl_window_resize(container->eglwindow,
++                             allocation->width, allocation->height,
++                             0, 0);
++    }
+ #endif
+ }
+ 
+ void
+ moz_container_remove (GtkContainer *container, GtkWidget *child_widget)
+ {
+     MozContainerChild *child;
+     MozContainer *moz_container;
+@@ -554,9 +566,32 @@ moz_container_get_wl_surface(MozContaine
+         if (!gdk_window_is_visible(window))
+             return nullptr;
+ 
+         moz_container_map_surface(container);
+     }
+ 
+     return container->surface;
+ }
++
++struct wl_egl_window *
++moz_container_get_wl_egl_window(MozContainer *container)
++{
++    if (!container->eglwindow) {
++        struct wl_surface *wlsurf = moz_container_get_wl_surface(container);
++        if (!wlsurf)
++            return nullptr;
++
++      GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(container));
++      container->eglwindow
++            = wl_egl_window_create(wlsurf,
++                                   gdk_window_get_width(window),
++                                   gdk_window_get_height(window));
++    }
++    return container->eglwindow;
++}
++
++gboolean
++moz_container_has_wl_egl_window(MozContainer *container)
++{
++    return container->eglwindow ? true : false;
++}
+ #endif
+diff --git a/widget/gtk/mozcontainer.h b/widget/gtk/mozcontainer.h
+--- a/widget/gtk/mozcontainer.h
++++ b/widget/gtk/mozcontainer.h
+@@ -67,16 +67,17 @@ struct _MozContainer
+ {
+     GtkContainer   container;
+     GList         *children;
+ 
+ #ifdef MOZ_WAYLAND
+     struct wl_subcompositor *subcompositor;
+     struct wl_surface       *surface;
+     struct wl_subsurface    *subsurface;
++    struct wl_egl_window    *eglwindow;
+ #endif
+ };
+ 
+ struct _MozContainerClass
+ {
+     GtkContainerClass parent_class;
+ };
+ 
+@@ -90,11 +91,13 @@ void       moz_container_move          (
+                                         GtkWidget    *child_widget,
+                                         gint          x,
+                                         gint          y,
+                                         gint          width,
+                                         gint          height);
+ 
+ #ifdef MOZ_WAYLAND
+ struct wl_surface* moz_container_get_wl_surface(MozContainer *container);
++struct wl_egl_window* moz_container_get_wl_egl_window(MozContainer *container);
++gboolean moz_container_has_wl_egl_window(MozContainer *container);
+ #endif
+ 
+ #endif /* __MOZ_CONTAINER_H__ */
+diff --git a/widget/gtk/mozwayland/mozwayland.c b/widget/gtk/mozwayland/mozwayland.c
+--- a/widget/gtk/mozwayland/mozwayland.c
++++ b/widget/gtk/mozwayland/mozwayland.c
+@@ -266,8 +266,26 @@ wl_display_read_events(struct wl_display
+    return -1;
+ }
+ 
+ MOZ_EXPORT void
+ wl_log_set_handler_client(wl_log_func_t handler)
+ {
+ }
+ 
++MOZ_EXPORT struct wl_egl_window *
++wl_egl_window_create(struct wl_surface *surface,
++                     int width, int height)
++{
++    return NULL;
++}
++
++MOZ_EXPORT void
++wl_egl_window_destroy(struct wl_egl_window *egl_window)
++{
++}
++
++MOZ_EXPORT void
++wl_egl_window_resize(struct wl_egl_window *egl_window,
++                     int width, int height,
++                     int dx, int dy)
++{
++}
+diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
+--- a/widget/gtk/nsWindow.cpp
++++ b/widget/gtk/nsWindow.cpp
+@@ -1734,16 +1734,25 @@ nsWindow::GetNativeData(uint32_t aDataTy
+         return mIMContext.get();
+     }
+     case NS_NATIVE_OPENGL_CONTEXT:
+       return nullptr;
+ #ifdef MOZ_X11
+     case NS_NATIVE_COMPOSITOR_DISPLAY:
+         return gfxPlatformGtk::GetPlatform()->GetCompositorDisplay();
+ #endif // MOZ_X11
++    case NS_NATIVE_EGL_WINDOW: {
++        if (mIsX11Display)
++            return mGdkWindow ? (void*)GDK_WINDOW_XID(mGdkWindow) : nullptr;
++#ifdef MOZ_WAYLAND
++        if (mContainer)
++            return moz_container_get_wl_egl_window(mContainer);
++#endif
++        return nullptr;
++    }
+     default:
+         NS_WARNING("nsWindow::GetNativeData called with bad value");
+         return nullptr;
+     }
+ }
+ 
+ nsresult
+ nsWindow::SetTitle(const nsAString& aTitle)
+@@ -4303,16 +4312,26 @@ nsWindow::NativeShow(bool aAction)
+         else if (mContainer) {
+             gtk_widget_show(GTK_WIDGET(mContainer));
+         }
+         else if (mGdkWindow) {
+             gdk_window_show_unraised(mGdkWindow);
+         }
+     }
+     else {
++#ifdef MOZ_WAYLAND
++        if (mContainer && moz_container_has_wl_egl_window(mContainer)) {
++            // Because wl_egl_window is destroyed on moz_container_unmap(),
++            // the current compositor cannot use it anymore. To avoid crash,
++            // destroy the compositor & recreate a new compositor on next
++            // expose event.
++            DestroyLayerManager();
++        }
++#endif
++
+         if (mIsTopLevel) {
+             // Workaround window freezes on GTK versions before 3.21.2 by
+             // ensuring that configure events get dispatched to windows before
+             // they are unmapped. See bug 1225044.
+             if (gtk_check_version(3, 21, 2) != nullptr && mPendingConfigures > 0) {
+                 GtkAllocation allocation;
+                 gtk_widget_get_allocation(GTK_WIDGET(mShell), &allocation);
+ 
+diff --git a/widget/nsIWidget.h b/widget/nsIWidget.h
+--- a/widget/nsIWidget.h
++++ b/widget/nsIWidget.h
+@@ -138,16 +138,17 @@ typedef void* nsNativeWidget;
+ #define NS_NATIVE_CHILD_OF_SHAREABLE_WINDOW 105
+ #endif
+ #if defined(MOZ_WIDGET_GTK)
+ // set/get nsPluginNativeWindowGtk, e10s specific
+ #define NS_NATIVE_PLUGIN_OBJECT_PTR    104
+ #ifdef MOZ_X11
+ #define NS_NATIVE_COMPOSITOR_DISPLAY   105
+ #endif // MOZ_X11
++#define NS_NATIVE_EGL_WINDOW           106
+ #endif
+ #ifdef MOZ_WIDGET_ANDROID
+ #define NS_JAVA_SURFACE                100
+ #define NS_PRESENTATION_WINDOW         101
+ #define NS_PRESENTATION_SURFACE        102
+ #endif
+ 
+ // Must be kept in sync with xpcom/rust/xpcom/src/interfaces/nonidl.rs
+
