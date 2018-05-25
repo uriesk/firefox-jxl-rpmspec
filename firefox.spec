@@ -178,6 +178,7 @@ Patch459:        mozilla-1463753.patch
 Patch560:        rb244010.patch
 Patch561:        rb244012.patch
 Patch562:        rb246410.patch
+Patch563:        rb245262.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -372,6 +373,7 @@ This package contains results of tests executed during build.
 %patch560 -p1 -b .rb244010
 %patch561 -p1 -b .rb244012
 %patch562 -p1 -b .rb246410
+%patch563 -p1 -b .rb245262
 %endif
 
 %{__rm} -f .mozconfig
@@ -910,6 +912,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Fri May 25 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-3
 - Added fix for mozbz#1436242 (rhbz#1577277) - Firefox IPC crashes.
+- Added fix for mozbz#1462640 - Sandbox disables eglGetDisplay()
+  call on Wayland/EGL backend.
 
 * Fri May 25 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-2
 - Enable Wayland backend.
