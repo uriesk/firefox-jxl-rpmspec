@@ -1,0 +1,31 @@
+diff --git a/widget/gtk/nsClipboardWayland.cpp b/widget/gtk/nsClipboardWayland.cpp
+--- a/widget/gtk/nsClipboardWayland.cpp
++++ b/widget/gtk/nsClipboardWayland.cpp
+@@ -201,21 +201,25 @@ WaylandDataOffer::DragOfferAccept(const 
+ }
+ 
+ /* We follow logic of gdk_wayland_drag_context_commit_status()/gdkdnd-wayland.c
+  * here.
+  */
+ void
+ WaylandDataOffer::SetDragStatus(GdkDragAction aAction, uint32_t aTime)
+ {
+-    uint32_t dnd_actions = gdk_to_wl_actions(aAction);
+     uint32_t all_actions = WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY |
+                            WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE;
+ 
+-    wl_data_offer_set_actions(mWaylandDataOffer, all_actions, dnd_actions);
++    /* Default Firefox D&D action is move so set it here as a preferred one.
++       Actual D&D action will be select by Wayland compositor and reported
++       at data_offer_action() callback.
++    */
++    wl_data_offer_set_actions(mWaylandDataOffer, all_actions,
++                              WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE);
+ 
+     /* Workaround Wayland D&D architecture here. To get the data_device_drop()
+        signal (which routes to nsDragService::GetData() call) we need to
+        accept at least one mime type before data_device_leave().
+ 
+        Real wl_data_offer_accept() for actualy requested data mime type is
+        called from nsDragService::GetData().
+     */
