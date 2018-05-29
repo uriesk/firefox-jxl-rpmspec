@@ -102,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0.1
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -179,6 +179,7 @@ Patch560:        rb244010.patch
 Patch561:        rb244012.patch
 Patch562:        rb246410.patch
 Patch563:        rb245262.patch
+Patch564:        mozilla-1464808.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -374,6 +375,7 @@ This package contains results of tests executed during build.
 %patch561 -p1 -b .rb244012
 %patch562 -p1 -b .rb246410
 %patch563 -p1 -b .rb245262
+%patch564 -p1 -b .mozilla-1464808
 %endif
 
 %{__rm} -f .mozconfig
@@ -910,6 +912,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue May 29 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-4
+- Added fix for mozbz#1464808 - Set default D&D action to move
+  on Wayland.
+
 * Fri May 25 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-3
 - Added fix for mozbz#1436242 (rhbz#1577277) - Firefox IPC crashes.
 - Added fix for mozbz#1462640 - Sandbox disables eglGetDisplay()
