@@ -1,0 +1,27 @@
+Bug 1464823 - Don't sync rendering on Mesa as the Mesa Wayland implementation is buggy.
+
+diff --git a/gfx/gl/GLContextProviderEGL.cpp b/gfx/gl/GLContextProviderEGL.cpp
+--- a/gfx/gl/GLContextProviderEGL.cpp
++++ b/gfx/gl/GLContextProviderEGL.cpp
+@@ -273,20 +273,17 @@ GLContextEGLFactory::Create(EGLNativeWin
+     if (!gl) {
+         gfxCriticalNote << "Failed to create EGLContext!";
+         mozilla::gl::DestroySurface(surface);
+         return nullptr;
+     }
+ 
+     gl->MakeCurrent();
+     gl->SetIsDoubleBuffered(doubleBuffered);
+-    if (aWebRender && sEGLLibrary.IsANGLE()) {
+-        MOZ_ASSERT(doubleBuffered);
+-        sEGLLibrary.fSwapInterval(EGL_DISPLAY(), 0);
+-    }
++    sEGLLibrary.fSwapInterval(EGL_DISPLAY(), 0);
+     return gl.forget();
+ }
+ 
+ GLContextEGL::GLContextEGL(CreateContextFlags flags, const SurfaceCaps& caps,
+                            bool isOffscreen, EGLConfig config, EGLSurface surface,
+                            EGLContext context)
+     : GLContext(flags, caps, nullptr, isOffscreen, false)
+     , mConfig(config)
