@@ -102,7 +102,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        60.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -181,6 +181,7 @@ Patch562:        rb246410.patch
 Patch563:        rb245262.patch
 Patch564:        mozilla-1464808.patch
 Patch565:        mozilla-1464823.patch
+Patch566:        mozilla-1466473.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -378,6 +379,7 @@ This package contains results of tests executed during build.
 %patch563 -p1 -b .rb245262
 %patch564 -p1 -b .mozilla-1464808
 %patch565 -p1 -b .mozilla-1464823
+%patch566 -p1 -b .mozilla-1466473
 %endif
 
 %{__rm} -f .mozconfig
@@ -914,6 +916,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jun 4 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-6
+- Fixed mozbz#1466473, rhbz#1585300 - Fix GL detection.
+- Fixed desktop file names (rhbz#1585369).
+
 * Wed May 30 2018 Martin Stransky <stransky@redhat.com> - 60.0.1-5
 - Added workaround for mozbz#1464823 which makes GL layer
   compositor usable on Wayland.

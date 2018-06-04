@@ -160,7 +160,7 @@ Name[zh-CN]=新建窗口
 Name[zh-TW]=開新視窗
 
 
-Exec=firefox %u
+Exec=firefox --new-window %u
 
 [Desktop Action new-private-window]
 Name=Open a New Private Window
