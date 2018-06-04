@@ -1,0 +1,42 @@
+diff --git a/toolkit/xre/moz.build b/toolkit/xre/moz.build
+--- a/toolkit/xre/moz.build
++++ b/toolkit/xre/moz.build
+@@ -116,17 +116,17 @@ UNIFIED_SOURCES += [
+ # they pull in OS X system headers.
+ # nsEmbedFunctions.cpp cannot be built in unified mode because it pulls in X11 headers.
+ SOURCES += [
+     'nsAppRunner.cpp',
+     'nsEmbedFunctions.cpp',
+     'ProfileReset.cpp',
+ ]
+ 
+-if CONFIG['MOZ_GL_DEFAULT_PROVIDER'] == 'GLX':
++if CONFIG['MOZ_X11']:
+     UNIFIED_SOURCES += [
+         'glxtest.cpp',
+     ]
+ 
+ if CONFIG['MOZ_INSTRUMENT_EVENT_LOOP']:
+     UNIFIED_SOURCES += [
+         'EventTracer.cpp',
+     ]
+@@ -142,17 +142,17 @@ if CONFIG['MOZ_PDF_PRINTING']:
+     LOCAL_INCLUDES += [
+         '../components/printingui',
+     ]
+ 
+ include('/ipc/chromium/chromium-config.mozbuild')
+ 
+ FINAL_LIBRARY = 'xul'
+ 
+-if CONFIG['MOZ_GL_DEFAULT_PROVIDER'] == 'GLX':
++if CONFIG['MOZ_X11']:
+     DEFINES['USE_GLX_TEST'] = True
+ 
+ for var in ('MOZ_APP_NAME', 'MOZ_APP_BASENAME', 'MOZ_APP_DISPLAYNAME',
+             'MOZ_APP_VERSION', 'OS_TARGET', 'MOZ_WIDGET_TOOLKIT'):
+     DEFINES[var] = '"%s"' % CONFIG[var]
+ 
+ if CONFIG['MOZ_UPDATER'] and CONFIG['MOZ_WIDGET_TOOLKIT'] != 'android':
+     DEFINES['MOZ_UPDATER'] = True
+

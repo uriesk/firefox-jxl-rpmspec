@@ -3,7 +3,7 @@ Version=1.0
 Name=Firefox on Wayland
 GenericName=Web Browser
 Comment=Browse the Web
-Exec=firefox-wayland %u
+Exec=firefox-wayland --name firefox-wayland %u
 Icon=firefox
 Terminal=false
 Type=Application
@@ -119,9 +119,7 @@ Name[wo]=Palanteer bu bees
 Name[xh]=Ifestile entsha
 Name[zh-CN]=新建窗口
 Name[zh-TW]=開新視窗
-
-
-Exec=firefox-wayland %u
+Exec=firefox-wayland --name firefox-wayland --new-window %u
 
 [Desktop Action new-private-window]
 Name=Open a New Private Window
@@ -229,5 +227,5 @@ Name[wo]=Panlanteeru biir bu bees
 Name[xh]=Ifestile yangasese entsha
 Name[zh-CN]=新建隐私浏览窗口
 Name[zh-TW]=新增隱私視窗
-Exec=firefox-wayland --private-window %u
+Exec=firefox-wayland --private-window --name firefox-wayland %u
 
