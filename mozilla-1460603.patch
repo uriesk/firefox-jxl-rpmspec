@@ -31,7 +31,7 @@ diff -up firefox-60.0.1/gfx/gl/GLLibraryEGL.cpp.mozilla-1460603 firefox-60.0.1/g
 +            nativeDisplay = sGdkWaylandDisplayGetWlDisplay(gdkDisplay);
 +            if (!nativeDisplay) {
 +                NS_WARNING("Failed to get wl_display.");
-+                return false;
++                return nullptr;
 +            }
 +        }
 +#endif

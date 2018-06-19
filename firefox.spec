@@ -308,7 +308,7 @@ Requires: %{name}
 %description wayland
 The firefox-wayland package contains launcher and desktop file
 to run Firefox natively on Wayland.
-%files
+%files wayland
 %{_bindir}/firefox-wayland
 %{_datadir}/applications/firefox-wayland.desktop
 %endif
@@ -387,7 +387,7 @@ This package contains results of tests executed during build.
 %patch452 -p1 -b .mozilla-1460603
 %patch560 -p1 -b .rb244010
 %patch561 -p1 -b .rb244012
-#%patch562 -p1 -b .rb246410
+%patch562 -p1 -b .rb246410
 %patch563 -p1 -b .rb245262
 %patch564 -p1 -b .mozilla-1464808
 %patch565 -p1 -b .mozilla-1464823
@@ -861,9 +861,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files -f %{name}.lang
 %{_bindir}/firefox
-%if %{?wayland_backend}
-%{_bindir}/firefox-wayland
-%endif
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %doc %{_mandir}/man1/*
@@ -883,8 +880,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
-%dir %{mozappdir}/browser/extensions
-%{mozappdir}/browser/extensions/*
+#%dir %{mozappdir}/browser/extensions
+#%{mozappdir}/browser/extensions/*
 %if %{build_langpacks}
 %dir %{langpackdir}
 %endif
@@ -917,7 +914,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/platform.ini
 %{mozappdir}/plugin-container
 %{mozappdir}/gmp-clearkey
-%{mozappdir}/fonts/EmojiOneMozilla.ttf
+%{mozappdir}/fonts/TwemojiMozilla.ttf
 %if !%{?system_nss}
 %{mozappdir}/libfreeblpriv3.chk
 %{mozappdir}/libnssdbm3.chk

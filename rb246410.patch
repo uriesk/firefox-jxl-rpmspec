@@ -1,6 +1,6 @@
-diff -up firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp.rb246410 firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp
---- firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp	2018-05-25 11:50:38.260890405 +0200
+diff -up firefox-61.0/gfx/gl/GLScreenBuffer.cpp.rb246410 firefox-61.0/gfx/gl/GLScreenBuffer.cpp
+--- firefox-61.0/gfx/gl/GLScreenBuffer.cpp.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/gl/GLScreenBuffer.cpp	2018-06-19 12:25:27.612265592 +0200
 @@ -29,7 +29,7 @@
  #include "SharedSurfaceIO.h"
  #endif
@@ -28,9 +28,9 @@ diff -up firefox-60.0.1/gfx/gl/GLScreenBuffer.cpp.rb246410 firefox-60.0.1/gfx/gl
      if (!factory && sGLXLibrary.UseTextureFromPixmap()) {
          factory = SurfaceFactory_GLXDrawable::Create(gl, caps, ipcChannel, flags);
      }
-diff -up firefox-60.0.1/gfx/layers/client/TextureClient.cpp.rb246410 firefox-60.0.1/gfx/layers/client/TextureClient.cpp
---- firefox-60.0.1/gfx/layers/client/TextureClient.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/layers/client/TextureClient.cpp	2018-05-25 11:50:38.260890405 +0200
+diff -up firefox-61.0/gfx/layers/client/TextureClient.cpp.rb246410 firefox-61.0/gfx/layers/client/TextureClient.cpp
+--- firefox-61.0/gfx/layers/client/TextureClient.cpp.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/layers/client/TextureClient.cpp	2018-06-19 12:25:27.612265592 +0200
 @@ -45,10 +45,8 @@
  #endif
  #ifdef MOZ_X11
@@ -42,7 +42,7 @@ diff -up firefox-60.0.1/gfx/layers/client/TextureClient.cpp.rb246410 firefox-60.
  
  #ifdef XP_MACOSX
  #include "mozilla/layers/MacIOSurfaceTextureClientOGL.h"
-@@ -1122,7 +1120,6 @@ TextureClient::CreateForDrawing(TextureF
+@@ -1127,7 +1125,6 @@ TextureClient::CreateForDrawing(TextureF
    {
      data = X11TextureData::Create(aSize, aFormat, aTextureFlags, aAllocator);
    }
@@ -50,7 +50,7 @@ diff -up firefox-60.0.1/gfx/layers/client/TextureClient.cpp.rb246410 firefox-60.
    if (!data && aLayersBackend == LayersBackend::LAYERS_OPENGL &&
        type == gfxSurfaceType::Xlib &&
        aFormat != SurfaceFormat::A8 &&
-@@ -1131,7 +1128,6 @@ TextureClient::CreateForDrawing(TextureF
+@@ -1136,7 +1133,6 @@ TextureClient::CreateForDrawing(TextureF
      data = X11TextureData::Create(aSize, aFormat, aTextureFlags, aAllocator);
    }
  #endif
@@ -58,9 +58,9 @@ diff -up firefox-60.0.1/gfx/layers/client/TextureClient.cpp.rb246410 firefox-60.
  
  #ifdef XP_MACOSX
    if (!data && gfxPrefs::UseIOSurfaceTextures()) {
-diff -up firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp.rb246410 firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp
---- firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp.rb246410	2018-05-16 07:38:29.000000000 +0200
-+++ firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp	2018-05-25 11:50:38.260890405 +0200
+diff -up firefox-61.0/gfx/layers/composite/X11TextureHost.cpp.rb246410 firefox-61.0/gfx/layers/composite/X11TextureHost.cpp
+--- firefox-61.0/gfx/layers/composite/X11TextureHost.cpp.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/layers/composite/X11TextureHost.cpp	2018-06-19 12:25:27.612265592 +0200
 @@ -7,10 +7,8 @@
  #include "X11TextureHost.h"
  #include "mozilla/layers/BasicCompositor.h"
@@ -97,9 +97,9 @@ diff -up firefox-60.0.1/gfx/layers/composite/X11TextureHost.cpp.rb246410 firefox
    return X11TextureSourceBasic::ContentTypeToSurfaceFormat(type);
  }
  
-diff -up firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp.rb246410 firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp
---- firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp	2018-05-25 11:50:38.260890405 +0200
+diff -up firefox-61.0/gfx/layers/ipc/ShadowLayerUtilsX11.cpp.rb246410 firefox-61.0/gfx/layers/ipc/ShadowLayerUtilsX11.cpp
+--- firefox-61.0/gfx/layers/ipc/ShadowLayerUtilsX11.cpp.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/layers/ipc/ShadowLayerUtilsX11.cpp	2018-06-19 12:25:27.612265592 +0200
 @@ -74,11 +74,9 @@ SurfaceDescriptorX11::SurfaceDescriptorX
      mFormat = cairo_xlib_surface_get_visual(aSurf->CairoSurface())->visualid;
    }
@@ -123,9 +123,9 @@ diff -up firefox-60.0.1/gfx/layers/ipc/ShadowLayerUtilsX11.cpp.rb246410 firefox-
  
    return surf->CairoStatus() ? nullptr : surf.forget();
  }
-diff -up firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp.rb246410 firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp
---- firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp	2018-05-25 11:50:38.260890405 +0200
+diff -up firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.cpp.rb246410 firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.cpp
+--- firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.cpp.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.cpp	2018-06-19 12:25:27.613265589 +0200
 @@ -4,7 +4,7 @@
   * License, v. 2.0. If a copy of the MPL was not distributed with this
   * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -135,9 +135,9 @@ diff -up firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.cpp.rb246410 firef
  
  #include "X11TextureSourceOGL.h"
  #include "gfxXlibSurface.h"
-diff -up firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h.rb246410 firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h
---- firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h	2018-05-25 11:50:38.260890405 +0200
+diff -up firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.h.rb246410 firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.h
+--- firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.h.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/layers/opengl/X11TextureSourceOGL.h	2018-06-19 12:25:27.613265589 +0200
 @@ -7,7 +7,7 @@
  #ifndef MOZILLA_GFX_X11TEXTURESOURCEOGL__H
  #define MOZILLA_GFX_X11TEXTURESOURCEOGL__H
@@ -147,10 +147,10 @@ diff -up firefox-60.0.1/gfx/layers/opengl/X11TextureSourceOGL.h.rb246410 firefox
  
  #include "mozilla/layers/CompositorOGL.h"
  #include "mozilla/layers/TextureHostOGL.h"
-diff -up firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp.rb246410 firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp
---- firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp.rb246410	2018-05-25 11:50:38.250890430 +0200
-+++ firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp	2018-05-25 11:52:21.336628487 +0200
-@@ -41,11 +41,9 @@
+diff -up firefox-61.0/gfx/thebes/gfxPlatformGtk.cpp.rb246410 firefox-61.0/gfx/thebes/gfxPlatformGtk.cpp
+--- firefox-61.0/gfx/thebes/gfxPlatformGtk.cpp.rb246410	2018-06-19 12:25:27.598265633 +0200
++++ firefox-61.0/gfx/thebes/gfxPlatformGtk.cpp	2018-06-19 12:26:35.751066530 +0200
+@@ -42,11 +42,9 @@
  #include "mozilla/Preferences.h"
  #include "mozilla/X11Util.h"
  
@@ -162,19 +162,19 @@ diff -up firefox-60.0.1/gfx/thebes/gfxPlatformGtk.cpp.rb246410 firefox-60.0.1/gf
  
  /* Undefine the Status from Xlib since it will conflict with system headers on OSX */
  #if defined(__APPLE__) && defined(Status)
-@@ -528,7 +526,7 @@ gfxPlatformGtk::GetPlatformCMSOutputProf
+@@ -508,7 +506,7 @@ gfxPlatformGtk::CheckVariationFontSuppor
+   return major * 1000000 + minor * 1000 + patch >= 2007001;
  }
- 
  
 -#ifdef GL_PROVIDER_GLX
 +#ifdef MOZ_X11
  
  class GLXVsyncSource final : public VsyncSource
  {
-diff -up firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h.rb246410 firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h
---- firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h	2018-05-25 11:50:38.260890405 +0200
-@@ -117,7 +117,7 @@ public:
+diff -up firefox-61.0/gfx/thebes/gfxPlatformGtk.h.rb246410 firefox-61.0/gfx/thebes/gfxPlatformGtk.h
+--- firefox-61.0/gfx/thebes/gfxPlatformGtk.h.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/thebes/gfxPlatformGtk.h	2018-06-19 12:25:27.613265589 +0200
+@@ -97,7 +97,7 @@ public:
  
      bool AccelerateLayersByDefault() override;
  
@@ -183,9 +183,9 @@ diff -up firefox-60.0.1/gfx/thebes/gfxPlatformGtk.h.rb246410 firefox-60.0.1/gfx/
      already_AddRefed<mozilla::gfx::VsyncSource> CreateHardwareVsyncSource() override;
  #endif
  
-diff -up firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp.rb246410 firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp
---- firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp	2018-05-25 11:51:59.741683360 +0200
+diff -up firefox-61.0/gfx/thebes/gfxXlibSurface.cpp.rb246410 firefox-61.0/gfx/thebes/gfxXlibSurface.cpp
+--- firefox-61.0/gfx/thebes/gfxXlibSurface.cpp.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/thebes/gfxXlibSurface.cpp	2018-06-19 12:25:27.613265589 +0200
 @@ -25,9 +25,7 @@ using namespace mozilla::gfx;
  
  gfxXlibSurface::gfxXlibSurface(Display *dpy, Drawable drawable, Visual *visual)
@@ -276,9 +276,9 @@ diff -up firefox-60.0.1/gfx/thebes/gfxXlibSurface.cpp.rb246410 firefox-60.0.1/gf
  GLXPixmap
  gfxXlibSurface::GetGLXPixmap()
  {
-diff -up firefox-60.0.1/gfx/thebes/gfxXlibSurface.h.rb246410 firefox-60.0.1/gfx/thebes/gfxXlibSurface.h
---- firefox-60.0.1/gfx/thebes/gfxXlibSurface.h.rb246410	2018-05-16 07:38:30.000000000 +0200
-+++ firefox-60.0.1/gfx/thebes/gfxXlibSurface.h	2018-05-25 11:50:38.261890402 +0200
+diff -up firefox-61.0/gfx/thebes/gfxXlibSurface.h.rb246410 firefox-61.0/gfx/thebes/gfxXlibSurface.h
+--- firefox-61.0/gfx/thebes/gfxXlibSurface.h.rb246410	2018-06-19 01:03:35.000000000 +0200
++++ firefox-61.0/gfx/thebes/gfxXlibSurface.h	2018-06-19 12:25:27.613265589 +0200
 @@ -12,9 +12,7 @@
  #include <X11/Xlib.h>
  #include "X11UndefineNone.h"
