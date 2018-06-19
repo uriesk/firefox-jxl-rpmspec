@@ -16,7 +16,7 @@
 %endif
 
 # Use system sqlite?
-%if 0%{?fedora} > 27
+%if 0%{?fedora} > 28
 %global system_sqlite     1
 %else
 %global system_sqlite     0
@@ -101,13 +101,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        60.0.2
+Version:        61.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180611.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180619.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -301,6 +301,18 @@ debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
 %endif
 
+%if %{?wayland_backend}
+%package wayland
+Summary: Firefox Wayland launcher.
+Requires: %{name}
+%description wayland
+The firefox-wayland package contains launcher and desktop file
+to run Firefox natively on Wayland.
+%files
+%{_bindir}/firefox-wayland
+%{_datadir}/applications/firefox-wayland.desktop
+%endif
+
 %if %{run_tests}
 %global testsuite_pkg_name mozilla-%{name}-testresults
 %package -n %{testsuite_pkg_name}
@@ -328,7 +340,7 @@ This package contains results of tests executed during build.
 %patch29 -p1 -b .big-endian
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
-%patch40 -p1 -b .aarch64-skia
+#%patch40 -p1 -b .aarch64-skia
 %patch3  -p1 -b .arm
 
 # Fedora patches
@@ -341,20 +353,20 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%patch227 -p1 -b .rhbz-1498561
+#%patch227 -p1 -b .rhbz-1498561
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
-%patch414 -p1 -b .ffmpeg-4.0
+#%patch414 -p1 -b .ffmpeg-4.0
 %ifarch %{arm}
 %patch415 -p1 -b .mozilla-1238661
 %endif
-%patch416 -p1 -b .1424422
-%patch417 -p1 -b .bug1375074-save-restore-x28
+#%patch416 -p1 -b .1424422
+#%patch417 -p1 -b .bug1375074-save-restore-x28
 %patch418 -p1 -b .mozilla-1436242
 
-%patch421 -p1 -b .mozilla-1457691
+#%patch421 -p1 -b .mozilla-1457691
 
 # Patch for big endian platforms only
 %if 0%{?big_endian}
@@ -375,7 +387,7 @@ This package contains results of tests executed during build.
 %patch452 -p1 -b .mozilla-1460603
 %patch560 -p1 -b .rb244010
 %patch561 -p1 -b .rb244012
-%patch562 -p1 -b .rb246410
+#%patch562 -p1 -b .rb246410
 %patch563 -p1 -b .rb245262
 %patch564 -p1 -b .mozilla-1464808
 %patch565 -p1 -b .mozilla-1464823
@@ -860,7 +872,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
 %{_datadir}/appdata/*.appdata.xml
-%{_datadir}/applications/*.desktop
+%{_datadir}/applications/%{name}.desktop
 %dir %{mozappdir}
 %license %{mozappdir}/LICENSE
 %{mozappdir}/browser/chrome
@@ -916,6 +928,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jun 19 2018 Martin Stransky <stransky@redhat.com> - 61.0-1
+- Updated to 61.0
+- Created firefox-wayland subpackage with wayland launcher.
+
 * Mon Jun 11 2018 Jan Horak <jhorak@redhat.com> - 60.0.2-1
 - Update to 60.0.2
 
