@@ -145,8 +145,6 @@ Patch224:        mozilla-1170092.patch
 Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-# ppc(64)le run-time js patch
-Patch227:        rhbz-1498561.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -340,7 +338,7 @@ This package contains results of tests executed during build.
 %patch29 -p1 -b .big-endian
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
-#%patch40 -p1 -b .aarch64-skia
+%patch40 -p1 -b .aarch64-skia
 %patch3  -p1 -b .arm
 
 # Fedora patches
@@ -353,7 +351,6 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-#%patch227 -p1 -b .rhbz-1498561
 
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
@@ -361,7 +358,7 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .mozilla-1238661
 %endif
-#%patch416 -p1 -b .1424422
+%patch416 -p1 -b .1424422
 #%patch417 -p1 -b .bug1375074-save-restore-x28
 %patch418 -p1 -b .mozilla-1436242
 
