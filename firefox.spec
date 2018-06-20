@@ -358,7 +358,6 @@ This package contains results of tests executed during build.
 %patch402 -p1 -b .1196777
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
-#%patch414 -p1 -b .ffmpeg-4.0
 %ifarch %{arm}
 %patch415 -p1 -b .mozilla-1238661
 %endif
@@ -503,10 +502,6 @@ echo "ac_add_options --without-system-icu" >> .mozconfig
 %endif
 %ifarch s390 s390x
 echo "ac_add_options --disable-ion" >> .mozconfig
-%endif
-
-%ifarch %{ix86}
-echo "ac_add_options --disable-stylo" >> .mozconfig
 %endif
 
 # Remove executable bit to make brp-mangle-shebangs happy.
