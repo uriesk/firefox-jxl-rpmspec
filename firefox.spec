@@ -10,7 +10,8 @@
 
 # Use system hunspell?
 %if 0%{?fedora} > 25
-%global system_hunspell   1
+# Disable due to rhbz#1593494
+%global system_hunspell   0
 %else
 %global system_hunspell   0
 %endif
@@ -102,7 +103,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        61.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -917,6 +918,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jun 21 2018 Martin Stransky <stransky@redhat.com> - 61.0-2
+- Disabled system hunspell due to rhbz#1593494
+
 * Tue Jun 19 2018 Martin Stransky <stransky@redhat.com> - 61.0-1
 - Updated to 61.0
 - Created firefox-wayland subpackage with wayland launcher.
