@@ -103,7 +103,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        61.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -359,7 +359,7 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .mozilla-1238661
 %endif
-%patch416 -p1 -b .1424422
+#%patch416 -p1 -b .1424422
 #%patch417 -p1 -b .bug1375074-save-restore-x28
 %patch418 -p1 -b .mozilla-1436242
 
@@ -918,6 +918,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jun 25 2018 Martin Stransky <stransky@redhat.com> - 61.0-4
+- Disabled mozbz#1424422 as it's broken.
+
 * Fri Jun 22 2018 Martin Stransky <stransky@redhat.com> - 61.0-3
 - Update to 61.0 Build 3
 
