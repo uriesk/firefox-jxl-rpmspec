@@ -1,0 +1,81 @@
+diff -up firefox-61.0.1/widget/gtk/mozcontainer.cpp.mozilla-1444437 firefox-61.0.1/widget/gtk/mozcontainer.cpp
+--- firefox-61.0.1/widget/gtk/mozcontainer.cpp.mozilla-1444437	2018-07-16 16:38:36.059138061 +0200
++++ firefox-61.0.1/widget/gtk/mozcontainer.cpp	2018-07-16 17:04:10.127003844 +0200
+@@ -212,6 +212,7 @@ moz_container_init (MozContainer *contai
+       container->surface = nullptr;
+       container->subsurface = nullptr;
+       container->eglwindow = nullptr;
++      container->parent_surface_committed = false;
+ 
+       GdkDisplay *gdk_display = gtk_widget_get_display(GTK_WIDGET(container));
+       if (GDK_IS_WAYLAND_DISPLAY (gdk_display)) {
+@@ -231,6 +232,15 @@ moz_container_init (MozContainer *contai
+ }
+ 
+ #if defined(MOZ_WAYLAND)
++static void
++moz_container_commited_handler(GdkFrameClock *clock, MozContainer *container)
++{
++    container->parent_surface_committed = true;
++    g_signal_handler_disconnect(clock,
++                                container->parent_surface_committed_handler);
++    container->parent_surface_committed_handler = 0;
++}
++
+ /* We want to draw to GdkWindow owned by mContainer from Compositor thread but
+  * Gtk+ can be used in main thread only. So we create wayland wl_surface
+  * and attach it as an overlay to GdkWindow.
+@@ -256,6 +266,21 @@ moz_container_map_surface(MozContainer *
+     if (container->subsurface && container->surface)
+         return true;
+ 
++    if (!container->parent_surface_committed) {
++        if (!container->parent_surface_committed_handler) {
++            GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(container));
++            static auto sGdkWindowGetFrameClock =
++                (GdkFrameClock *(*)(GdkWindow *))
++                dlsym(RTLD_DEFAULT, "gdk_window_get_frame_clock");
++            GdkFrameClock *clock = sGdkWindowGetFrameClock(window);
++            container->parent_surface_committed_handler =
++                g_signal_connect_after(clock, "after-paint",
++                                       G_CALLBACK(moz_container_commited_handler),
++                                       container);
++        }
++        return false;
++    }
++
+     if (!container->surface) {
+         struct wl_compositor *compositor;
+         compositor = sGdkWaylandDisplayGetWlCompositor(display);
+@@ -298,6 +323,19 @@ moz_container_unmap_surface(MozContainer
+     g_clear_pointer(&container->eglwindow, wl_egl_window_destroy);
+     g_clear_pointer(&container->subsurface, wl_subsurface_destroy);
+     g_clear_pointer(&container->surface, wl_surface_destroy);
++
++    if (container->parent_surface_committed_handler) {
++        static auto sGdkWindowGetFrameClock =
++            (GdkFrameClock *(*)(GdkWindow *))
++            dlsym(RTLD_DEFAULT, "gdk_window_get_frame_clock");
++        GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(container));
++        GdkFrameClock *clock = sGdkWindowGetFrameClock(window);
++
++        g_signal_handler_disconnect(clock,
++                                    container->parent_surface_committed_handler);
++        container->parent_surface_committed_handler = 0;
++    }
++    container->parent_surface_committed = false;
+ }
+ 
+ #endif
+diff -up firefox-61.0.1/widget/gtk/mozcontainer.h.mozilla-1444437 firefox-61.0.1/widget/gtk/mozcontainer.h
+--- firefox-61.0.1/widget/gtk/mozcontainer.h.mozilla-1444437	2018-07-16 16:38:36.059138061 +0200
++++ firefox-61.0.1/widget/gtk/mozcontainer.h	2018-07-16 16:38:36.105138588 +0200
+@@ -73,6 +73,8 @@ struct _MozContainer
+     struct wl_surface       *surface;
+     struct wl_subsurface    *subsurface;
+     struct wl_egl_window    *eglwindow;
++    gboolean                 parent_surface_committed;
++    gulong                   parent_surface_committed_handler;
+ #endif
+ };
+ 

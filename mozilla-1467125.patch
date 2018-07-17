@@ -1,0 +1,26 @@
+diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayland.cpp
+--- a/widget/gtk/WindowSurfaceWayland.cpp
++++ b/widget/gtk/WindowSurfaceWayland.cpp
+@@ -146,18 +146,19 @@ static StaticMutex gWaylandDisplaysMutex
+ //
+ // nsWaylandDisplay is our interface to wayland compositor. It provides wayland
+ // global objects as we need (wl_display, wl_shm) and operates wl_event_queue on
+ // compositor (not the main) thread.
+ static nsWaylandDisplay* WaylandDisplayGet(wl_display *aDisplay);
+ static void WaylandDisplayRelease(wl_display *aDisplay);
+ static void WaylandDisplayLoop(wl_display *aDisplay);
+ 
+-// TODO: is the 60pfs loop correct?
+-#define EVENT_LOOP_DELAY (1000/60)
++// TODO: Bug 1467125 - We need to integrate wl_display_dispatch_queue_pending() with
++// compositor event loop.
++#define EVENT_LOOP_DELAY (1000/240)
+ 
+ // Get WaylandDisplay for given wl_display and actual calling thread.
+ static nsWaylandDisplay*
+ WaylandDisplayGetLocked(wl_display *aDisplay, const StaticMutexAutoLock&)
+ {
+   nsWaylandDisplay* waylandDisplay = nullptr;
+ 
+   int len = gWaylandDisplays.Count();
+
