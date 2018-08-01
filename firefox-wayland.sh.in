@@ -4,4 +4,4 @@
 #
 
 export GDK_BACKEND=wayland
-/usr/bin/firefox "$@"
+exec /usr/bin/firefox "$@"

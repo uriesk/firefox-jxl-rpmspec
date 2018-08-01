@@ -930,6 +930,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Aug 1 2018 Ondrej Zoder <ozoder@redhat.com> - 61.0.1-4
+- Fixed rhbz#1610428
+
 * Tue Jul 17 2018 Ondrej Zoder <ozoder@redhat.com> - 61.0.1-3
 - Bump release
 
