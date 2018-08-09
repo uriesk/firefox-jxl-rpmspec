@@ -187,6 +187,7 @@ Patch569:        mozilla-1465371.patch
 Patch570:        mozilla-1467125.patch
 Patch571:        mozilla-1468670.patch
 Patch572:        mozilla-1467128.patch
+Patch573:        rb255772.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -401,6 +402,7 @@ This package contains results of tests executed during build.
 %patch570 -p1 -b .mozilla-1467125
 %patch571 -p1 -b .mozilla-1468670
 %patch572 -p1 -b .mozilla-1467128
+%patch573 -p1 -b .rb255772
 %endif
 
 %{__rm} -f .mozconfig
