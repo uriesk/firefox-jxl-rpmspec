@@ -102,13 +102,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        61.0.1
-Release:        4%{?pre_tag}%{?dist}
+Version:        61.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180710.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180809.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -930,6 +930,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Aug 9 2018 Martin Stransky <stransky@redhat.com> - 61.0.2-1
+- Update to 61.0.2
+
 * Wed Aug 1 2018 Ondrej Zoder <ozoder@redhat.com> - 61.0.1-4
 - Fixed rhbz#1610428
 
