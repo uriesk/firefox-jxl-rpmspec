@@ -103,7 +103,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        61.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -160,6 +160,8 @@ Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch416:        mozilla-1424422.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch418:        mozilla-1436242.patch
+Patch419:        rb244676.patch
+Patch420:        rb246462.patch
 
 Patch421:        complete-csd-window-offset-mozilla-1457691.patch
 
@@ -369,6 +371,8 @@ This package contains results of tests executed during build.
 #%patch416 -p1 -b .1424422
 #%patch417 -p1 -b .bug1375074-save-restore-x28
 %patch418 -p1 -b .mozilla-1436242
+%patch419 -p1 -b .rb244676
+%patch420 -p1 -b .rb246462
 
 #%patch421 -p1 -b .mozilla-1457691
 
@@ -932,6 +936,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Aug 15 2018 Ondrej Zoder <ozoder@redhat.com> - 61.0.2-3
+- Added patches for mozbz#1427700 and mozbz#1463809
+
 * Mon Aug 13 2018 Ondrej Zoder <ozoder@redhat.com> - 61.0.2-2
 - Updated symbolic icon
 
