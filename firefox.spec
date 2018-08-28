@@ -102,13 +102,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        61.0.2
-Release:        3%{?pre_tag}%{?dist}
+Version:        62.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{build_langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20180809.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20180828.tar.xz
 %endif
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
@@ -159,37 +159,15 @@ Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch416:        mozilla-1424422.patch
 Patch417:        bug1375074-save-restore-x28.patch
-Patch418:        mozilla-1436242.patch
 Patch419:        rb244676.patch
 Patch420:        rb246462.patch
 
 Patch421:        complete-csd-window-offset-mozilla-1457691.patch
 
 # Wayland specific upstream patches
-Patch450:        mozilla-1438131.patch
-Patch451:        mozilla-1438136.patch
-Patch452:        mozilla-1460603.patch
-Patch453:        mozilla-1460605-1.patch
-Patch454:        mozilla-1460605-2.patch
-Patch455:        mozilla-1460810.patch
-Patch456:        mozilla-1461306.patch
-Patch457:        mozilla-1462622.patch
-Patch458:        mozilla-1462642.patch
-Patch459:        mozilla-1463753.patch
-Patch560:        rb244010.patch
-Patch561:        rb244012.patch
-Patch562:        rb246410.patch
-Patch563:        rb245262.patch
-Patch564:        mozilla-1464808.patch
-Patch565:        mozilla-1464823.patch
-Patch566:        mozilla-1466473.patch
 Patch567:        mozilla-1444437.patch
-Patch568:        mozilla-1441743.patch
-Patch569:        mozilla-1465371.patch
 Patch570:        mozilla-1467125.patch
-Patch571:        mozilla-1468670.patch
 Patch572:        mozilla-1467128.patch
-Patch573:        rb255772.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -356,7 +334,7 @@ This package contains results of tests executed during build.
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
 %patch224 -p1 -b .1170092
-%patch225 -p1 -b .1005640-accept-lang
+#%patch225 -p1 -b .1005640-accept-lang
 #ARM run-time patch
 %ifarch aarch64
 %patch226 -p1 -b .1354671
@@ -370,7 +348,6 @@ This package contains results of tests executed during build.
 %endif
 #%patch416 -p1 -b .1424422
 #%patch417 -p1 -b .bug1375074-save-restore-x28
-%patch418 -p1 -b .mozilla-1436242
 %patch419 -p1 -b .rb244676
 %patch420 -p1 -b .rb246462
 
@@ -383,30 +360,9 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %if %{?wayland_backend}
-%patch453 -p1 -b .mozilla-1460605-1
-%patch454 -p1 -b .mozilla-1460605-2
-%patch455 -p1 -b .mozilla-1460810
-%patch456 -p1 -b .mozilla-1461306
-%patch457 -p1 -b .mozilla-1462622
-%patch451 -p1 -b .mozilla-1438136
-%patch450 -p1 -b .mozilla-1438131
-%patch459 -p1 -b .mozilla-1463753
-%patch458 -p1 -b .mozilla-1462642
-%patch452 -p1 -b .mozilla-1460603
-%patch560 -p1 -b .rb244010
-%patch561 -p1 -b .rb244012
-%patch562 -p1 -b .rb246410
-%patch563 -p1 -b .rb245262
-%patch564 -p1 -b .mozilla-1464808
-%patch565 -p1 -b .mozilla-1464823
-%patch566 -p1 -b .mozilla-1466473
-%patch567 -p1 -b .mozilla-1444437
-%patch568 -p1 -b .mozilla-1441743
-%patch569 -p1 -b .mozilla-1465371
+#%patch567 -p1 -b .mozilla-1444437  -fix
 %patch570 -p1 -b .mozilla-1467125
-%patch571 -p1 -b .mozilla-1468670
 %patch572 -p1 -b .mozilla-1467128
-%patch573 -p1 -b .rb255772
 %endif
 
 %{__rm} -f .mozconfig
@@ -936,6 +892,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Aug 28 2018 Martin Stransky <stransky@redhat.com> - 62.0-1
+- Update to 62.0
+
 * Wed Aug 15 2018 Ondrej Zoder <ozoder@redhat.com> - 61.0.2-3
 - Added patches for mozbz#1427700 and mozbz#1463809
 
