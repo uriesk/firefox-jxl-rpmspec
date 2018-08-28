@@ -8,20 +8,9 @@
 # Build with Wayland Gtk+ backend?
 %global wayland_backend   1
 
-# Use system hunspell?
-%if 0%{?fedora} > 25
-# Disable due to rhbz#1593494
-%global system_hunspell   0
-%else
-%global system_hunspell   0
-%endif
-
 # Use system sqlite?
-%if 0%{?fedora} > 28
-%global system_sqlite     1
-%else
 %global system_sqlite     0
-%endif
+
 %global system_ffi        1
 
 # Use system cairo?
@@ -31,11 +20,7 @@
 %global system_libvpx     1
 
 # Use system libicu?
-%if 0%{?fedora} > 27
 %global system_libicu     0
-%else
-%global system_libicu     0
-%endif
 
 # Big endian platforms
 %ifarch ppc64 s390x
@@ -195,9 +180,6 @@ BuildRequires:  pkgconfig(pango)
 BuildRequires:  pkgconfig(freetype2) >= %{freetype_version}
 BuildRequires:  pkgconfig(xt)
 BuildRequires:  pkgconfig(xrender)
-%if %{?system_hunspell}
-BuildRequires:  pkgconfig(hunspell)
-%endif
 BuildRequires:  pkgconfig(libstartup-notification-1.0)
 BuildRequires:  pkgconfig(libnotify) >= %{libnotify_version}
 BuildRequires:  pkgconfig(dri)
@@ -404,12 +386,6 @@ echo "ac_add_options --enable-system-ffi" >> .mozconfig
 
 %ifarch %{arm}
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
-%endif
-
-%if %{?system_hunspell}
-echo "ac_add_options --enable-system-hunspell" >> .mozconfig
-%else
-echo "ac_add_options --disable-system-hunspell" >> .mozconfig
 %endif
 
 %if %{?debug_build}
