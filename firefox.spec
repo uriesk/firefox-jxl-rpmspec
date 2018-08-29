@@ -113,7 +113,7 @@ Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
 # Also fixes s390x: https://bugzilla.mozilla.org/show_bug.cgi?id=1376268
-Patch29:        build-big-endian.patch
+#Patch29:        build-big-endian.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
 # Always feel lucky for unsupported platforms:
@@ -304,9 +304,9 @@ This package contains results of tests executed during build.
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-%if 0%{?big_endian}
-%patch29 -p1 -b .big-endian
-%endif
+#%if 0%{?big_endian}
+#%patch29 -p1 -b .big-endian
+#%endif
 %patch37 -p1 -b .jit-atomic-lucky
 %patch40 -p1 -b .aarch64-skia
 %patch3  -p1 -b .arm

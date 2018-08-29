@@ -10,10 +10,3 @@ diff -up firefox-61.0/build/autoconf/icu.m4.icu firefox-61.0/build/autoconf/icu.
  fi
  
  AC_SUBST(MOZ_ICU_VERSION)
-diff -up firefox-61.0/intl/icu/source/data/in/coll/ucadata-implicithan.icu firefox-61.0/intl/icu/source/data/in/coll/ucadata-implicithan
-diff -up firefox-61.0/intl/icu/source/data/in/coll/ucadata-unihan.icu firefox-61.0/intl/icu/source/data/in/coll/ucadata-unihan
-diff -up firefox-61.0/intl/icu/source/data/in/pnames.icu firefox-61.0/intl/icu/source/data/in/pnames
-diff -up firefox-61.0/intl/icu/source/data/in/ubidi.icu firefox-61.0/intl/icu/source/data/in/ubidi
-diff -up firefox-61.0/intl/icu/source/data/in/ucase.icu firefox-61.0/intl/icu/source/data/in/ucase
-diff -up firefox-61.0/intl/icu/source/data/in/unames.icu firefox-61.0/intl/icu/source/data/in/unames
-diff -up firefox-61.0/intl/icu/source/data/in/uprops.icu firefox-61.0/intl/icu/source/data/in/uprops
