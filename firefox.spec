@@ -88,7 +88,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        62.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -868,6 +868,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Sep 4 2018 Martin Stransky <stransky@redhat.com> - 62.0-2
+- Update to 62.0 (Build 2)
+
 * Tue Aug 28 2018 Martin Stransky <stransky@redhat.com> - 62.0-1
 - Update to 62.0
 
