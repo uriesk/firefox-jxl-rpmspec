@@ -29,3 +29,4 @@ pref("browser.display.use_system_colors", false);
 pref("layers.use-image-offscreen-surfaces", false);
 /* Allow sending credetials to all https:// sites */
 pref("network.negotiate-auth.trusted-uris", "https://");
+pref("spellchecker.dictionary_path","/usr/share/myspell");

@@ -88,7 +88,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        62.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -868,6 +868,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 17 2018 Martin Stransky <stransky@redhat.com> - 62.0-3
+- Added spellchecker.dictionary_path pref pointer to /usr/share/myspell.
+  Thanks to Peter Oliver (rhbz#1627837)
+
 * Tue Sep 4 2018 Martin Stransky <stransky@redhat.com> - 62.0-2
 - Update to 62.0 (Build 2)
 
