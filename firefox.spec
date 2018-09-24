@@ -244,6 +244,7 @@ BuildRequires:  xorg-x11-server-Xvfb
 %endif
 BuildRequires:  rust
 BuildRequires:  cargo
+BuildRequires:  clang-devel
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
