@@ -88,7 +88,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        62.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -394,12 +394,6 @@ echo "ac_add_options --enable-debug" >> .mozconfig
 echo "ac_add_options --disable-optimize" >> .mozconfig
 %else
 %global optimize_flags "none"
-# Fedora 26 (gcc7) needs to disable default build flags (mozbz#1342344)
-%if 0%{?fedora} > 25
-%ifnarch s390 s390x
-%global optimize_flags "-g -O2"
-%endif
-%endif
 %ifarch armv7hl
 # ARMv7 need that (rhbz#1426850)
 %global optimize_flags "-g -O2 -fno-schedule-insns"
@@ -869,6 +863,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 25 2018 Martin Stransky <stransky@redhat.com> - 62.0.2-2
+- Disable workaround for mozbz#1342344 - GFX glitches when building
+  with -O3/gcc 7.2
+
 * Mon Sep 24 2018 Jan Horak <jhorak@redhat.com> - 62.0.2-1
 - Update to 62.0.2
 
