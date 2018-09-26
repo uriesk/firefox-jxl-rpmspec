@@ -88,7 +88,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        62.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -112,8 +112,6 @@ Patch3:         mozilla-build-arm.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
 Patch27:        mozilla-1335250.patch
-# Also fixes s390x: https://bugzilla.mozilla.org/show_bug.cgi?id=1376268
-#Patch29:        build-big-endian.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
 # Always feel lucky for unsupported platforms:
@@ -128,7 +126,6 @@ Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
 Patch221:        firefox-fedora-ua.patch
 Patch224:        mozilla-1170092.patch
-Patch225:        mozilla-1005640-accept-lang.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 
@@ -147,12 +144,10 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        rb244676.patch
 Patch420:        rb246462.patch
 
-Patch421:        complete-csd-window-offset-mozilla-1457691.patch
-
 # Wayland specific upstream patches
-Patch567:        mozilla-1444437.patch
 Patch570:        mozilla-1467125.patch
 Patch572:        mozilla-1467128.patch
+Patch573:        mozilla-1415078.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -305,9 +300,6 @@ This package contains results of tests executed during build.
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-#%if 0%{?big_endian}
-#%patch29 -p1 -b .big-endian
-#%endif
 %patch37 -p1 -b .jit-atomic-lucky
 %patch40 -p1 -b .aarch64-skia
 %patch3  -p1 -b .arm
@@ -317,7 +309,6 @@ This package contains results of tests executed during build.
 %patch219 -p2 -b .rhbz-1173156
 %patch221 -p2 -b .fedora-ua
 %patch224 -p1 -b .1170092
-#%patch225 -p1 -b .1005640-accept-lang
 #ARM run-time patch
 %ifarch aarch64
 %patch226 -p1 -b .1354671
@@ -334,8 +325,6 @@ This package contains results of tests executed during build.
 %patch419 -p1 -b .rb244676
 %patch420 -p1 -b .rb246462
 
-#%patch421 -p1 -b .mozilla-1457691
-
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
@@ -343,9 +332,9 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %if %{?wayland_backend}
-#%patch567 -p1 -b .mozilla-1444437  -fix
 %patch570 -p1 -b .mozilla-1467125
 %patch572 -p1 -b .mozilla-1467128
+%patch573 -p1 -b .mozilla-1415078
 %endif
 
 %{__rm} -f .mozconfig
@@ -863,7 +852,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Sep 25 2018 Martin Stransky <stransky@redhat.com> - 62.0.2-2
+* Wed Sep 26 2018 Martin Stransky <stransky@redhat.com> - 62.0.2-3
+- Enabled DBus remote for all Gtk+ backends
+- Removed obsoleted patches
+
+* Tue Sep 25 2018 Martin Stransky <stransky@redhat.com> - 62.0.2-2
 - Disable workaround for mozbz#1342344 - GFX glitches when building
   with -O3/gcc 7.2
 
