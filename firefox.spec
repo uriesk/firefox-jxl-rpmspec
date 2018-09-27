@@ -43,6 +43,12 @@
 # Build as a debug package?
 %global debug_build       0
 
+%global disable_elfhack       0
+%if 0%{?fedora} > 28
+%global disable_elfhack       1
+%endif
+
+
 %global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
 %global firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
 # Minimal required versions
@@ -120,6 +126,7 @@ Patch37:        build-jit-atomic-always-lucky.patch
 # Fixing missing cacheFlush when JS_CODEGEN_NONE is used (s390x)
 Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
+Patch41:        build-disable-elfhack.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -302,6 +309,9 @@ This package contains results of tests executed during build.
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
 %patch40 -p1 -b .aarch64-skia
+%if 0%{?disable_elfhack}
+%patch41 -p1 -b .disable-elfhack
+%endif
 %patch3  -p1 -b .arm
 
 # Fedora patches
@@ -375,9 +385,6 @@ echo "ac_add_options --enable-system-ffi" >> .mozconfig
 %endif
 
 %ifarch %{arm}
-echo "ac_add_options --disable-elf-hack" >> .mozconfig
-%endif
-%if 0%{?fedora} > 28
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
 %endif
 
