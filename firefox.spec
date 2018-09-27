@@ -377,6 +377,9 @@ echo "ac_add_options --enable-system-ffi" >> .mozconfig
 %ifarch %{arm}
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
 %endif
+%if 0%{?fedora} > 28
+echo "ac_add_options --disable-elf-hack" >> .mozconfig
+%endif
 
 %if %{?debug_build}
 echo "ac_add_options --enable-debug" >> .mozconfig
