@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# Run Firefox on X11 backend
+#
+
+export GDK_BACKEND=x11
+exec /usr/bin/firefox "$@"

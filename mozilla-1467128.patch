@@ -1,49 +1,19 @@
-diff --git a/gfx/thebes/gfxPlatformGtk.h b/gfx/thebes/gfxPlatformGtk.h
---- a/gfx/thebes/gfxPlatformGtk.h
-+++ b/gfx/thebes/gfxPlatformGtk.h
-@@ -102,23 +102,42 @@ public:
- #endif
- 
- #ifdef MOZ_X11
-     Display* GetCompositorDisplay() {
-       return mCompositorDisplay;
-     }
- #endif // MOZ_X11
- 
-+#ifdef MOZ_WAYLAND
-+    void SetWaylandLastVsync(uint32_t aVsyncTimestamp) {
-+      mWaylandLastVsyncTimestamp = aVsyncTimestamp;
-+    }
-+    int64_t GetWaylandLastVsync() {
-+      return mWaylandLastVsyncTimestamp;
-+    }
-+    void SetWaylandFrameDelay(int64_t aFrameDelay) {
-+      mWaylandFrameDelay = aFrameDelay;
-+    }
-+    int64_t GetWaylandFrameDelay() {
-+      return mWaylandFrameDelay;
-+    }
-+#endif
-+
- protected:
-     bool CheckVariationFontSupport() override;
- 
-     int8_t mMaxGenericSubstitutions;
- 
- private:
-     virtual void GetPlatformCMSOutputProfile(void *&mem,
-                                              size_t &size) override;
- 
- #ifdef MOZ_X11
-     Display* mCompositorDisplay;
- #endif
-+#ifdef MOZ_WAYLAND
-+    int64_t  mWaylandLastVsyncTimestamp;
-+    int64_t  mWaylandFrameDelay;
-+#endif
- };
- 
- #endif /* GFX_PLATFORM_GTK_H */
+
+# HG changeset patch
+# User Martin Stransky <stransky@redhat.com>
+# Date 1530270941 -7200
+# Node ID 338c0093263be6440a33b79a92801bd2b4658f79
+# Parent  84a6d5a0b551f5da116aab702dd38bb725bc8a08
+Bug 1467128 - [Wayland] Get VSync from Gtk/Wayland, r?lsalzman
+
+VSync on Wayland is a bit tricky as we can get only "last VSync" event signal with
+CLOCK_MONOTONIC timestamp or none (if application is hidden/minimized).
+
+That means we should draw a next frame at "last Vsync + frame delay" time and also
+approximate next VSync event when we don't get any.
+
+MozReview-Commit-ID: FI3Z4nkmDNK
+
 diff --git a/gfx/thebes/gfxPlatformGtk.cpp b/gfx/thebes/gfxPlatformGtk.cpp
 --- a/gfx/thebes/gfxPlatformGtk.cpp
 +++ b/gfx/thebes/gfxPlatformGtk.cpp
@@ -334,26 +304,49 @@ diff --git a/gfx/thebes/gfxPlatformGtk.cpp b/gfx/thebes/gfxPlatformGtk.cpp
      NS_WARNING("SGI_video_sync unsupported. Falling back to software vsync.");
    }
    return gfxPlatform::CreateHardwareVsyncSource();
-diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayland.cpp
---- a/widget/gtk/WindowSurfaceWayland.cpp
-+++ b/widget/gtk/WindowSurfaceWayland.cpp
-@@ -546,16 +546,18 @@ WindowBackBuffer::Lock()
-                                               mWaylandDisplay->GetSurfaceFormat());
- }
+diff --git a/gfx/thebes/gfxPlatformGtk.h b/gfx/thebes/gfxPlatformGtk.h
+--- a/gfx/thebes/gfxPlatformGtk.h
++++ b/gfx/thebes/gfxPlatformGtk.h
+@@ -102,23 +102,42 @@ public:
+ #endif
  
- static void
- frame_callback_handler(void *data, struct wl_callback *callback, uint32_t time)
- {
-   auto surface = reinterpret_cast<WindowSurfaceWayland*>(data);
-   surface->FrameCallbackHandler();
+ #ifdef MOZ_X11
+     Display* GetCompositorDisplay() {
+       return mCompositorDisplay;
+     }
+ #endif // MOZ_X11
+ 
++#ifdef MOZ_WAYLAND
++    void SetWaylandLastVsync(uint32_t aVsyncTimestamp) {
++      mWaylandLastVsyncTimestamp = aVsyncTimestamp;
++    }
++    int64_t GetWaylandLastVsync() {
++      return mWaylandLastVsyncTimestamp;
++    }
++    void SetWaylandFrameDelay(int64_t aFrameDelay) {
++      mWaylandFrameDelay = aFrameDelay;
++    }
++    int64_t GetWaylandFrameDelay() {
++      return mWaylandFrameDelay;
++    }
++#endif
 +
-+  gfxPlatformGtk::GetPlatform()->SetWaylandLastVsync(time);
- }
+ protected:
+     bool CheckVariationFontSupport() override;
  
- static const struct wl_callback_listener frame_listener = {
-   frame_callback_handler
+     int8_t mMaxGenericSubstitutions;
+ 
+ private:
+     virtual void GetPlatformCMSOutputProfile(void *&mem,
+                                              size_t &size) override;
+ 
+ #ifdef MOZ_X11
+     Display* mCompositorDisplay;
+ #endif
++#ifdef MOZ_WAYLAND
++    int64_t  mWaylandLastVsyncTimestamp;
++    int64_t  mWaylandFrameDelay;
++#endif
  };
  
- WindowSurfaceWayland::WindowSurfaceWayland(nsWindow *aWindow)
-   : mWindow(aWindow)
-
+ #endif /* GFX_PLATFORM_GTK_H */

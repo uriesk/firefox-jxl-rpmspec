@@ -1,12 +1,10 @@
 # Use system nspr/nss?
 %global system_nss        1
 
-# Wayland backend is not finished yet, see
-# https://bugzilla.mozilla.org/show_bug.cgi?id=635134
-# for details.
-#
-# Build with Wayland Gtk+ backend?
-%global wayland_backend   1
+# Make Wayland backend default?
+%if 0%{?fedora} > 29
+%global wayland_backend_default 1
+%endif
 
 # Use system sqlite?
 %global system_sqlite     0
@@ -94,7 +92,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        62.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -112,6 +110,8 @@ Source26:       distribution.ini
 Source27:       google-api-key
 Source28:       firefox-wayland.sh.in
 Source29:       firefox-wayland.desktop
+Source30:       firefox-x11.sh.in
+Source31:       firefox-x11.desktop
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -152,9 +152,11 @@ Patch419:        rb244676.patch
 Patch420:        rb246462.patch
 
 # Wayland specific upstream patches
-Patch570:        mozilla-1467125.patch
 Patch572:        mozilla-1467128.patch
 Patch573:        mozilla-1415078.patch
+Patch574:        firefox-pipewire.patch
+Patch577:        mozilla-1444437.patch
+Patch580:        mozilla-wayland-trunk.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -199,6 +201,9 @@ BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
+%if 0%{?fedora} > 27
+BuildRequires:  pipewire-devel
+%endif
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
@@ -272,7 +277,17 @@ debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
 %endif
 
-%if %{?wayland_backend}
+%if %{?wayland_backend_default}
+%package x11
+Summary: Firefox X11 launcher.
+Requires: %{name}
+%description x11
+The firefox-x11 package contains launcher and desktop file
+to run Firefox natively on X11.
+%files x11
+%{_bindir}/firefox-x11
+%{_datadir}/applications/firefox-x11.desktop
+%else
 %package wayland
 Summary: Firefox Wayland launcher.
 Requires: %{name}
@@ -283,6 +298,7 @@ to run Firefox natively on Wayland.
 %{_bindir}/firefox-wayland
 %{_datadir}/applications/firefox-wayland.desktop
 %endif
+
 
 %if %{run_tests}
 %global testsuite_pkg_name mozilla-%{name}-testresults
@@ -328,10 +344,8 @@ This package contains results of tests executed during build.
 %patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
 %ifarch %{arm}
-%patch415 -p1 -b .mozilla-1238661
+%patch415 -p1 -b .1238661
 %endif
-#%patch416 -p1 -b .1424422
-#%patch417 -p1 -b .bug1375074-save-restore-x28
 %patch419 -p1 -b .rb244676
 %patch420 -p1 -b .rb246462
 
@@ -341,19 +355,17 @@ This package contains results of tests executed during build.
 %endif
 
 # Wayland specific upstream patches
-%if %{?wayland_backend}
-%patch570 -p1 -b .mozilla-1467125
-%patch572 -p1 -b .mozilla-1467128
-%patch573 -p1 -b .mozilla-1415078
+%patch572 -p1 -b .1467128
+%patch573 -p1 -b .1415078
+%if 0%{?fedora} > 27
+%patch574 -p1 -b .firefox-pipewire
 %endif
+%patch577 -p1 -b .1444437
+%patch580 -p1 -b .mozilla-wayland-trunk
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
-%if %{?wayland_backend}
 echo "ac_add_options --enable-default-toolkit=cairo-gtk3-wayland" >> .mozconfig
-%else
-echo "ac_add_options --enable-default-toolkit=cairo-gtk3" >> .mozconfig
-%endif
 %if %{official_branding}
 echo "ac_add_options --enable-official-branding" >> .mozconfig
 %endif
@@ -588,15 +600,26 @@ DESTDIR=%{buildroot} make -C objdir install
 %{__mkdir_p} %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
-%if %{?wayland_backend}
+%if %{?wayland_backend_default}
+desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE31}
+%else
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %endif
 
 # set up the firefox start script
+%if %{?wayland_backend_default}
+%global x11_state false
+%else
+%global x11_state true
+%endif
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
-%{__cat} %{SOURCE21} > %{buildroot}%{_bindir}/firefox
+%{__sed} -e 's/__DEFAULT_X11__/%{x11_state}/' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
+
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
-%if %{?wayland_backend}
+%if %{?wayland_backend_default}
+%{__cat} %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
+%{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
+%else
 %{__cat} %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
 %endif
@@ -862,6 +885,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Oct 8 2018 Martin Stransky <stransky@redhat.com> - 62.0.3-2
+- Added pipewire patch (mozbz#1496359)
+- Added Wayland patches from Firefox 63
+- Enable Wayland backed by default on Fedora 30
+
 * Tue Oct 2 2018 Martin Stransky <stransky@redhat.com> - 62.0.3-1
 - Updated to latest upstream (62.0.3)
 

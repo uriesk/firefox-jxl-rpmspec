@@ -67,6 +67,15 @@ MOZ_PROGRAM="$MOZ_DIST_BIN/$MOZ_FIREFOX_FILE"
 MOZ_LAUNCHER="$MOZ_DIST_BIN/run-mozilla.sh"
 
 ##
+## Enable X11 backend by default?
+##
+if __DEFAULT_X11__; then
+    if ! [ "$GDK_BACKEND" ]; then
+      export GDK_BACKEND=x11
+    fi
+fi
+
+##
 ## Set MOZ_GRE_CONF
 ##
 MOZ_GRE_CONF=/etc/gre.d/gre.conf
@@ -239,16 +248,11 @@ do
   esac
 done
 
-if ! [ "$GDK_BACKEND" ]; then
-  export GDK_BACKEND=x11
-fi
-
 # Run the browser
 debugging=0
 if [ $debugging = 1 ]
 then
   echo $MOZ_LAUNCHER $script_args $MOZ_PROGRAM "$@"
 fi
-
 
 exec $MOZ_LAUNCHER $script_args $MOZ_PROGRAM "$@"

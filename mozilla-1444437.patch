@@ -1,0 +1,183 @@
+
+# HG changeset patch
+# User Martin Stransky <stransky@redhat.com>
+# Date 1530185851 -7200
+# Node ID 7dc09bb0f57c3397f68c424b2a4e781e89069517
+# Parent  15c95df467be553beb39f2e8102c206639e05fde
+Bug 1444437 - [Wayland] Don't map mozcontainer subsurface until parent surface is commited, r?ashie
+
+MozReview-Commit-ID: 4qoyGH8VCAU
+
+diff --git a/widget/gtk/mozcontainer.cpp b/widget/gtk/mozcontainer.cpp
+--- a/widget/gtk/mozcontainer.cpp
++++ b/widget/gtk/mozcontainer.cpp
+@@ -207,17 +207,17 @@ moz_container_init (MozContainer *contai
+     gtk_widget_set_redraw_on_allocate(GTK_WIDGET(container), FALSE);
+ 
+ #if defined(MOZ_WAYLAND)
+     {
+       container->subcompositor = nullptr;
+       container->surface = nullptr;
+       container->subsurface = nullptr;
+       container->eglwindow = nullptr;
+-      container->committed = false;
++      container->parent_surface_committed = false;
+ 
+       GdkDisplay *gdk_display = gtk_widget_get_display(GTK_WIDGET(container));
+       if (GDK_IS_WAYLAND_DISPLAY (gdk_display)) {
+           // Available as of GTK 3.8+
+           static auto sGdkWaylandDisplayGetWlDisplay =
+               (wl_display *(*)(GdkDisplay *))
+               dlsym(RTLD_DEFAULT, "gdk_wayland_display_get_wl_display");
+ 
+@@ -228,21 +228,22 @@ moz_container_init (MozContainer *contai
+           wl_display_roundtrip(display);
+         }
+     }
+ #endif
+ }
+ 
+ #if defined(MOZ_WAYLAND)
+ static void
+-moz_container_after_paint(GdkFrameClock *clock, MozContainer *container)
++moz_container_commited_handler(GdkFrameClock *clock, MozContainer *container)
+ {
+-    container->committed = true;
+-    g_signal_handlers_disconnect_by_func(clock,
+-         reinterpret_cast<gpointer>(moz_container_after_paint), container);
++    container->parent_surface_committed = true;
++    g_signal_handler_disconnect(clock,
++                                container->parent_surface_committed_handler);
++    container->parent_surface_committed_handler = 0;
+ }
+ 
+ /* We want to draw to GdkWindow owned by mContainer from Compositor thread but
+  * Gtk+ can be used in main thread only. So we create wayland wl_surface
+  * and attach it as an overlay to GdkWindow.
+  *
+  * see gtk_clutter_embed_ensure_subsurface() at gtk-clutter-embed.c
+  * for reference.
+@@ -263,37 +264,44 @@ moz_container_map_surface(MozContainer *
+ 
+     GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(container));
+     if (GDK_IS_X11_DISPLAY(display))
+         return false;
+ 
+     if (container->subsurface && container->surface)
+         return true;
+ 
++    if (!container->parent_surface_committed) {
++        if (!container->parent_surface_committed_handler) {
++            GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(container));
++            GdkFrameClock *clock = sGdkWindowGetFrameClock(window);
++            container->parent_surface_committed_handler =
++                g_signal_connect_after(clock, "after-paint",
++                                       G_CALLBACK(moz_container_commited_handler),
++                                       container);
++        }
++        return false;
++    }
++
+     if (!container->surface) {
+         struct wl_compositor *compositor;
+         compositor = sGdkWaylandDisplayGetWlCompositor(display);
+         container->surface = wl_compositor_create_surface(compositor);
+     }
+ 
+     if (!container->subsurface) {
+         GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(container));
+         wl_surface* gtk_surface = sGdkWaylandWindowGetWlSurface(window);
+         if (!gtk_surface) {
+           // We requested the underlying wl_surface too early when container
+           // is not realized yet. We'll try again before first rendering
+           // to mContainer.
+           return false;
+         }
+ 
+-        GdkFrameClock *clock = sGdkWindowGetFrameClock(window);
+-        g_signal_connect_after(clock, "after-paint",
+-                               G_CALLBACK(moz_container_after_paint),
+-                               container);
+-
+         container->subsurface =
+           wl_subcompositor_get_subsurface (container->subcompositor,
+                                            container->surface,
+                                            gtk_surface);
+         gint x, y;
+         gdk_window_get_position(window, &x, &y);
+         wl_subsurface_set_position(container->subsurface, x, y);
+         wl_subsurface_set_desync(container->subsurface);
+@@ -310,17 +318,29 @@ moz_container_map_surface(MozContainer *
+ }
+ 
+ static void
+ moz_container_unmap_surface(MozContainer *container)
+ {
+     g_clear_pointer(&container->eglwindow, wl_egl_window_destroy);
+     g_clear_pointer(&container->subsurface, wl_subsurface_destroy);
+     g_clear_pointer(&container->surface, wl_surface_destroy);
+-    container->committed = false;
++
++    if (container->parent_surface_committed_handler) {
++        static auto sGdkWindowGetFrameClock =
++            (GdkFrameClock *(*)(GdkWindow *))
++            dlsym(RTLD_DEFAULT, "gdk_window_get_frame_clock");
++        GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(container));
++        GdkFrameClock *clock = sGdkWindowGetFrameClock(window);
++
++        g_signal_handler_disconnect(clock,
++                                    container->parent_surface_committed_handler);
++        container->parent_surface_committed_handler = 0;
++    }
++    container->parent_surface_committed = false;
+ }
+ 
+ #endif
+ 
+ void
+ moz_container_map (GtkWidget *widget)
+ {
+     MozContainer *container;
+@@ -582,17 +602,17 @@ moz_container_get_wl_surface(MozContaine
+     if (!container->subsurface || !container->surface) {
+         GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(container));
+         if (!gdk_window_is_visible(window))
+             return nullptr;
+ 
+         moz_container_map_surface(container);
+     }
+ 
+-    return container->committed ? container->surface : nullptr;
++    return container->surface;
+ }
+ 
+ struct wl_egl_window *
+ moz_container_get_wl_egl_window(MozContainer *container)
+ {
+     if (!container->eglwindow) {
+         struct wl_surface *wlsurf = moz_container_get_wl_surface(container);
+         if (!wlsurf)
+diff --git a/widget/gtk/mozcontainer.h b/widget/gtk/mozcontainer.h
+--- a/widget/gtk/mozcontainer.h
++++ b/widget/gtk/mozcontainer.h
+@@ -68,17 +68,18 @@ struct _MozContainer
+     GtkContainer   container;
+     GList         *children;
+ 
+ #ifdef MOZ_WAYLAND
+     struct wl_subcompositor *subcompositor;
+     struct wl_surface       *surface;
+     struct wl_subsurface    *subsurface;
+     struct wl_egl_window    *eglwindow;
+-    gboolean                 committed;
++    gboolean                 parent_surface_committed;
++    gulong                   parent_surface_committed_handler;
+ #endif
+ };
+ 
+ struct _MozContainerClass
+ {
+     GtkContainerClass parent_class;
+ };
+ 
+
