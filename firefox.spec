@@ -4,6 +4,8 @@
 # Make Wayland backend default?
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
+%else
+%global wayland_backend_default 0
 %endif
 
 # Use system sqlite?
