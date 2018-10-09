@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        62.0.3
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -159,6 +159,7 @@ Patch573:        mozilla-1415078.patch
 Patch574:        firefox-pipewire.patch
 Patch577:        mozilla-1444437.patch
 Patch580:        mozilla-wayland-trunk.patch
+Patch581:        mozilla-1493081.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -364,6 +365,7 @@ This package contains results of tests executed during build.
 %endif
 %patch577 -p1 -b .1444437
 %patch580 -p1 -b .mozilla-wayland-trunk
+%patch581 -p1 -b .mozilla-1493081
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -887,6 +889,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Oct 9 2018 Martin Stransky <stransky@redhat.com> - 62.0.3-3
+- Added fix for mozbz#1493081 - popups incorrectly placed and sized.
+
 * Mon Oct 8 2018 Martin Stransky <stransky@redhat.com> - 62.0.3-2
 - Added pipewire patch (mozbz#1496359)
 - Added Wayland patches from Firefox 63
