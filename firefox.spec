@@ -94,7 +94,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        62.0.3
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -152,6 +152,7 @@ Patch416:        mozilla-1424422.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        rb244676.patch
 Patch420:        rb246462.patch
+Patch421:        mozilla-1447775.patch
 
 # Wayland specific upstream patches
 Patch572:        mozilla-1467128.patch
@@ -351,11 +352,11 @@ This package contains results of tests executed during build.
 %endif
 %patch419 -p1 -b .rb244676
 %patch420 -p1 -b .rb246462
-
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
+%patch421 -p1 -b .1447775
 
 # Wayland specific upstream patches
 %patch572 -p1 -b .1467128
@@ -889,6 +890,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Oct 9 2018 Martin Stransky <stransky@redhat.com> - 62.0.3-4
+- Added fix for mozbz#1447775 - wrong dropspace sizing.
+
 * Tue Oct 9 2018 Martin Stransky <stransky@redhat.com> - 62.0.3-3
 - Added fix for mozbz#1493081 - popups incorrectly placed and sized.
 
