@@ -41,7 +41,13 @@
 %endif
 
 # Build as a debug package?
+%bcond_without debug_build
+%if %{with debug_build}
+%else
+%global debug_build       1
+%else
 %global debug_build       0
+%endif
 
 %global disable_elfhack       0
 %if 0%{?fedora} > 28
@@ -82,7 +88,8 @@
 %global tarballdir    firefox-%{version}
 
 %global official_branding       1
-%global build_langpacks         1
+
+%bcond_without langpacks
 
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
@@ -97,8 +104,8 @@ Version:        62.0.3
 Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
-Source0:        https://hg.mozilla.org/releases/mozilla-release/archive/firefox-%{version}%{?pre_version}.source.tar.xz
-%if %{build_langpacks}
+Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
+%if %{with langpacks}
 Source1:        firefox-langpacks-%{version}%{?pre_version}-20181002.tar.xz
 %endif
 Source10:       firefox-mozconfig
@@ -686,7 +693,7 @@ SentUpstream: 2014-09-22
 EOF
 
 echo > %{name}.lang
-%if %{build_langpacks}
+%if %{with langpacks}
 # Extract langpacks, make any mods needed, repack the langpack, and install it.
 %{__mkdir_p} %{buildroot}%{langpackdir}
 %{__tar} xf %{SOURCE1}
@@ -732,7 +739,7 @@ create_default_langpack "pa-IN" "pa"
 create_default_langpack "pt-PT" "pt"
 create_default_langpack "sv-SE" "sv"
 create_default_langpack "zh-TW" "zh"
-%endif # build_langpacks
+%endif # with langpacks
 
 
 %{__mkdir_p} %{buildroot}/%{mozappdir}/browser/defaults/preferences
@@ -847,7 +854,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
 #%dir %{mozappdir}/browser/extensions
 #%{mozappdir}/browser/extensions/*
-%if %{build_langpacks}
+%if %{with langpacks}
 %dir %{langpackdir}
 %endif
 %{mozappdir}/browser/omni.ja
