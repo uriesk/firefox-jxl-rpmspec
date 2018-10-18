@@ -210,6 +210,7 @@ BuildRequires:  clang-libs
 %if 0%{?fedora} > 27
 BuildRequires:  pipewire-devel
 %endif
+BuildRequires:  cbindgen
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
