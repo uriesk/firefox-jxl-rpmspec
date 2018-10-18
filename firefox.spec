@@ -1,5 +1,12 @@
 # Use system nspr/nss?
 %global system_nss        1
+%global system_sqlite     0
+%global system_ffi        1
+%global system_cairo      0
+%global system_libvpx     1
+%global system_libicu     0
+%global hardened_build    1
+%global system_jpeg       1
 
 # Make Wayland backend default?
 %if 0%{?fedora} > 29
@@ -8,31 +15,14 @@
 %global wayland_backend_default 0
 %endif
 
-# Use system sqlite?
-%global system_sqlite     0
-
-%global system_ffi        1
-
-# Use system cairo?
-%global system_cairo      0
-
-# Use system libvpx?
-%global system_libvpx     1
-
-# Use system libicu?
-%global system_libicu     0
+%if 0%{?fedora} < 29
+%global use_bundled_cbindgen    1
+%endif
 
 # Big endian platforms
 %ifarch ppc64 s390x
-# Javascript Intl API is not supported on big endian platforms right now:
-# https://bugzilla.mozilla.org/show_bug.cgi?id=1322212
 %global big_endian        1
 %endif
-
-# Hardened build?
-%global hardened_build    1
-
-%global system_jpeg       1
 
 %ifarch %{ix86} x86_64
 %global run_tests         0
@@ -40,7 +30,6 @@
 %global run_tests         0
 %endif
 
-# Build as a debug package?
 %bcond_without debug_build
 %if %{with debug_build}
 %else
@@ -53,7 +42,6 @@
 %if 0%{?fedora} > 28
 %global disable_elfhack       1
 %endif
-
 
 %global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
 %global firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
@@ -108,6 +96,7 @@ Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pr
 %if %{with langpacks}
 Source1:        firefox-langpacks-%{version}%{?pre_version}-20181018.tar.xz
 %endif
+Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
 Source20:       firefox.desktop
@@ -211,7 +200,11 @@ BuildRequires:  clang-libs
 %if 0%{?fedora} > 27
 BuildRequires:  pipewire-devel
 %endif
+
+%if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
+%endif
+
 BuildRequires:  nodejs
 
 Requires:       mozilla-filesystem
@@ -467,6 +460,22 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
 
+%if 0%{?use_bundled_cbindgen}
+
+cd third_party/rust
+%{__tar} xf %{SOURCE2}
+cd -
+mkdir -p .cargo
+cat > .cargo/config <<EOL
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "`pwd`/third_party/rust"
+EOL
+
+env CARGO_HOME=.cargo cargo install cbindgen
+%endif
 #---------------------------------------------------------------------
 
 %build
@@ -479,6 +488,10 @@ case "%{sqlite_build_version}" in
   "$sqlite_version"*) ;;
   *) exit 1 ;;
 esac
+%endif
+
+%if 0%{?use_bundled_cbindgen}
+export PATH=`pwd`/.cargo/bin:$PATH
 %endif
 
 echo "Generate big endian version of config/external/icu/data/icud58l.dat"
