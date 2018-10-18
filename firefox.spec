@@ -211,6 +211,7 @@ BuildRequires:  clang-libs
 BuildRequires:  pipewire-devel
 %endif
 BuildRequires:  cbindgen
+BuildRequires:  nodejs
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
