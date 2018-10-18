@@ -1,0 +1,88 @@
+diff -up firefox-63.0/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium.old firefox-63.0/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium
+diff -up firefox-63.0/media/webrtc/trunk/Makefile.old firefox-63.0/media/webrtc/trunk/Makefile
+diff -up firefox-63.0/third_party/prio/include/mprio.h.old firefox-63.0/third_party/prio/include/mprio.h
+--- firefox-63.0/third_party/prio/include/mprio.h.old	2018-10-18 15:10:24.616102952 +0200
++++ firefox-63.0/third_party/prio/include/mprio.h	2018-10-18 15:10:33.853076714 +0200
+@@ -14,9 +14,9 @@ extern "C" {
+ #endif
+ 
+ #include <msgpack.h>
+-#include <nss/blapit.h>
+-#include <nss/pk11pub.h>
+-#include <nss/seccomon.h>
++#include <blapit.h>
++#include <pk11pub.h>
++#include <seccomon.h>
+ #include <stdbool.h>
+ #include <stddef.h>
+ 
+diff -up firefox-63.0/third_party/prio/prio/encrypt.c.old firefox-63.0/third_party/prio/prio/encrypt.c
+--- firefox-63.0/third_party/prio/prio/encrypt.c.old	2018-10-18 15:15:08.279250181 +0200
++++ firefox-63.0/third_party/prio/prio/encrypt.c	2018-10-18 15:15:14.614229961 +0200
+@@ -6,9 +6,9 @@
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+  */
+ 
+-#include <nss/keyhi.h>
+-#include <nss/keythi.h>
+-#include <nss/pk11pub.h>
++#include <keyhi.h>
++#include <keythi.h>
++#include <pk11pub.h>
+ #include <prerror.h>
+ 
+ #include "encrypt.h"
+diff -up firefox-63.0/third_party/prio/prio/prg.c.old firefox-63.0/third_party/prio/prio/prg.c
+--- firefox-63.0/third_party/prio/prio/prg.c.old	2018-10-18 15:15:21.364208421 +0200
++++ firefox-63.0/third_party/prio/prio/prg.c	2018-10-18 15:15:27.542188720 +0200
+@@ -7,8 +7,8 @@
+  */
+ 
+ #include <mprio.h>
+-#include <nss/blapit.h>
+-#include <nss/pk11pub.h>
++#include <blapit.h>
++#include <pk11pub.h>
+ #include <string.h>
+ 
+ #include "prg.h"
+diff -up firefox-63.0/third_party/prio/prio/prg.h.old firefox-63.0/third_party/prio/prio/prg.h
+--- firefox-63.0/third_party/prio/prio/prg.h.old	2018-10-18 15:15:35.511163303 +0200
++++ firefox-63.0/third_party/prio/prio/prg.h	2018-10-18 15:15:40.568147167 +0200
+@@ -10,7 +10,7 @@
+ #define __PRG_H__
+ 
+ #include <mpi.h>
+-#include <nss/blapit.h>
++#include <blapit.h>
+ #include <stdlib.h>
+ 
+ #include "config.h"
+diff -up firefox-63.0/third_party/prio/prio/rand.c.old firefox-63.0/third_party/prio/prio/rand.c
+--- firefox-63.0/third_party/prio/prio/rand.c.old	2018-10-18 15:15:49.967117182 +0200
++++ firefox-63.0/third_party/prio/prio/rand.c	2018-10-18 15:16:00.130084760 +0200
+@@ -8,9 +8,9 @@
+ 
+ #include <limits.h>
+ #include <mprio.h>
+-#include <nss/nss.h>
+-#include <nss/pk11pub.h>
+-#include <nspr/prinit.h>
++#include <nss.h>
++#include <pk11pub.h>
++#include <prinit.h>
+ 
+ #include "debug.h"
+ #include "rand.h"
+diff -up firefox-63.0/third_party/prio/prio/rand.h.old firefox-63.0/third_party/prio/prio/rand.h
+--- firefox-63.0/third_party/prio/prio/rand.h.old	2018-10-18 15:14:49.689309517 +0200
++++ firefox-63.0/third_party/prio/prio/rand.h	2018-10-18 15:14:56.789286855 +0200
+@@ -10,7 +10,7 @@
+ #define __RAND_H__
+ 
+ #include <mpi.h>
+-#include <nss/seccomon.h>
++#include <seccomon.h>
+ #include <stdlib.h>
+ 
+ /*

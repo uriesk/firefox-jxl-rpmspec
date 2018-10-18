@@ -136,6 +136,7 @@ Patch37:        build-jit-atomic-always-lucky.patch
 Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
+Patch42:        prio-nss-build.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -337,6 +338,7 @@ This package contains results of tests executed during build.
 %patch41 -p1 -b .disable-elfhack
 %endif
 %patch3  -p1 -b .arm
+%patch42 -p1 -b .nss-build
 
 # Fedora patches
 %patch215 -p1 -b .addons
