@@ -466,7 +466,8 @@ chmod -x third_party/rust/itertools/src/lib.rs
 
 %if 0%{?use_bundled_cbindgen}
 
-cd third_party/rust
+mkdir -p my_rust_vendor
+cd my_rust_vendor
 %{__tar} xf %{SOURCE2}
 cd -
 mkdir -p .cargo
@@ -475,7 +476,7 @@ cat > .cargo/config <<EOL
 replace-with = "vendored-sources"
 
 [source.vendored-sources]
-directory = "`pwd`/third_party/rust"
+directory = "`pwd`/my_rust_vendor"
 EOL
 
 env CARGO_HOME=.cargo cargo install cbindgen
