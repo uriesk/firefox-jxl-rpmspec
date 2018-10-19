@@ -1,0 +1,91 @@
+changeset:   441749:bb66c2fdcbe2
+tag:         tip
+user:        Martin Stransky <stransky@redhat.com>
+date:        Fri Oct 19 12:01:02 2018 +0200
+summary:     Bug 1500366 - register all DBus connection to be handled by gmain loop, r=jhorak
+
+diff --git a/netwerk/wifi/nsWifiScannerDBus.cpp b/netwerk/wifi/nsWifiScannerDBus.cpp
+--- a/netwerk/wifi/nsWifiScannerDBus.cpp
++++ b/netwerk/wifi/nsWifiScannerDBus.cpp
+@@ -12,16 +12,17 @@ nsWifiScannerDBus::nsWifiScannerDBus(nsC
+ : mAccessPoints(aAccessPoints)
+ {
+   MOZ_ASSERT(mAccessPoints);
+ 
+   mConnection =
+     already_AddRefed<DBusConnection>(dbus_bus_get(DBUS_BUS_SYSTEM, nullptr));
+ 
+   if (mConnection) {
++    dbus_connection_setup_with_g_main(mConnection, nullptr);
+     dbus_connection_set_exit_on_disconnect(mConnection, false);
+   }
+ 
+   MOZ_COUNT_CTOR(nsWifiScannerDBus);
+ }
+ 
+ nsWifiScannerDBus::~nsWifiScannerDBus()
+ {
+diff --git a/netwerk/wifi/nsWifiScannerDBus.h b/netwerk/wifi/nsWifiScannerDBus.h
+--- a/netwerk/wifi/nsWifiScannerDBus.h
++++ b/netwerk/wifi/nsWifiScannerDBus.h
+@@ -4,16 +4,17 @@
+ 
+ #ifndef NSWIFIAPSCANNERDBUS_H_
+ #define NSWIFIAPSCANNERDBUS_H_
+ 
+ #include "nsCOMArray.h"
+ 
+ #define DBUS_API_SUBJECT_TO_CHANGE
+ #include <dbus/dbus.h>
++#include <dbus/dbus-glib-lowlevel.h>
+ 
+ class nsWifiAccessPoint;
+ 
+ namespace mozilla {
+ 
+ class nsWifiScannerDBus final
+ {
+ public:
+diff --git a/toolkit/components/remote/nsDBusRemoteService.cpp b/toolkit/components/remote/nsDBusRemoteService.cpp
+--- a/toolkit/components/remote/nsDBusRemoteService.cpp
++++ b/toolkit/components/remote/nsDBusRemoteService.cpp
+@@ -169,16 +169,17 @@ nsDBusRemoteService::Startup(const char*
+     return NS_ERROR_INVALID_ARG;
+ 
+   mConnection = already_AddRefed<DBusConnection>(
+     dbus_bus_get(DBUS_BUS_SESSION, nullptr));
+   if (!mConnection) {
+     return NS_ERROR_FAILURE;
+   }
+   dbus_connection_set_exit_on_disconnect(mConnection, false);
++  dbus_connection_setup_with_g_main(mConnection, nullptr);
+ 
+   mAppName = aAppName;
+   ToLowerCase(mAppName);
+ 
+   // D-Bus names can contain only [a-z][A-Z][0-9]_
+   // characters so adjust the profile string properly.
+   nsAutoCString profileName;
+   nsresult rv = mozilla::Base64Encode(nsAutoCString(aProfileName), profileName);
+diff --git a/widget/xremoteclient/DBusRemoteClient.cpp b/widget/xremoteclient/DBusRemoteClient.cpp
+--- a/widget/xremoteclient/DBusRemoteClient.cpp
++++ b/widget/xremoteclient/DBusRemoteClient.cpp
+@@ -38,16 +38,17 @@ DBusRemoteClient::Init()
+     return NS_OK;
+ 
+   mConnection = already_AddRefed<DBusConnection>(
+     dbus_bus_get(DBUS_BUS_SESSION, nullptr));
+   if (!mConnection)
+     return NS_ERROR_FAILURE;
+ 
+   dbus_connection_set_exit_on_disconnect(mConnection, false);
++  dbus_connection_setup_with_g_main(mConnection, nullptr);
+ 
+   return NS_OK;
+ }
+ 
+ void
+ DBusRemoteClient::Shutdown (void)
+ {
+   MOZ_LOG(sRemoteLm, LogLevel::Debug, ("DBusRemoteClient::Shutdown"));
+
