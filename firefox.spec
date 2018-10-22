@@ -1,4 +1,3 @@
-# Use system nspr/nss?
 %global system_nss        1
 %global system_sqlite     0
 %global system_ffi        1
@@ -8,7 +7,6 @@
 %global hardened_build    1
 %global system_jpeg       1
 
-# Make Wayland backend default?
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
 %else
@@ -38,9 +36,9 @@
 %global debug_build       0
 %endif
 
-%global disable_elfhack       0
+%global disable_elfhack   0
 %if 0%{?fedora} > 28
-%global disable_elfhack       1
+%global disable_elfhack   1
 %endif
 
 %global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
@@ -409,8 +407,10 @@ echo "ac_add_options --disable-optimize" >> .mozconfig
 %else
 %global optimize_flags "none"
 %ifarch armv7hl
-# ARMv7 need that (rhbz#1426850)
+# ARMv7 needs that (rhbz#1426850)
 %global optimize_flags "-g -O2 -fno-schedule-insns"
+# Disable libaom due to rhbz#1641623
+echo "ac_add_options --disable-av1" >> .mozconfig
 %endif
 %ifarch ppc64le aarch64
 %global optimize_flags "-g -O2"
