@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        63.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -909,6 +909,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Oct 23 2018 Martin Stransky <stransky@redhat.com> - 63.0-2
+- Updated to latest upstream (63.0 build 2)
+
 * Thu Oct 18 2018 Martin Stransky <stransky@redhat.com> - 63.0-1
 - Updated to latest upstream (63.0)
 - Updated PipeWire patch
