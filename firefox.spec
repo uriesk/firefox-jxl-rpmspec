@@ -86,13 +86,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        63.0
-Release:        2%{?pre_tag}%{?dist}
+Version:        63.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20181018.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20181101.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -138,7 +138,6 @@ Patch226:        rhbz-1354671.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
-Patch407:        mozilla-1348576.patch
 Patch410:        mozilla-1321521.patch
 Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
@@ -909,6 +908,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Nov 1 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-1
+- Updated to latest upstream (63.0.1 build 4)
+
 * Tue Oct 23 2018 Martin Stransky <stransky@redhat.com> - 63.0-2
 - Updated to latest upstream (63.0 build 2)
 
