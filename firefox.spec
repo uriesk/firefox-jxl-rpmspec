@@ -126,6 +126,7 @@ Patch41:        build-disable-elfhack.patch
 Patch42:        prio-nss-build.patch
 Patch43:        mozilla-1500366.patch
 Patch44:        mozilla-1494037.patch
+Patch45:        mozilla-1498938.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -333,6 +334,7 @@ This package contains results of tests executed during build.
 %patch42 -p1 -b .nss-build
 %patch43 -p1 -b .1500366
 %patch44 -p1 -b .1494037
+%patch45 -p1 -b .1498938
 
 # Fedora patches
 %patch215 -p1 -b .addons
