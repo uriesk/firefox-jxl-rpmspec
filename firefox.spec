@@ -87,7 +87,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        63.0.1
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -153,6 +153,7 @@ Patch421:        mozilla-1447775.patch
 Patch573:        mozilla-1415078.patch
 Patch574:        firefox-pipewire.patch
 Patch581:        mozilla-1493081.patch
+Patch582:        mozilla-1504689.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -364,6 +365,7 @@ This package contains results of tests executed during build.
 %patch574 -p1 -b .firefox-pipewire
 %endif
 %patch581 -p1 -b .mozilla-1493081
+%patch582 -p1 -b .mozilla-1504689
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -910,6 +912,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Nov 5 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-4
+- Added clipboard fix (mozbz#1504689)
+
 * Fri Nov 2 2018 Dan Horak <dhorak@redhat.com> - 63.0.1-3
 - Added fixes for ppc64le
 
