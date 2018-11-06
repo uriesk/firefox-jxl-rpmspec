@@ -154,7 +154,6 @@ Patch573:        mozilla-1415078.patch
 Patch574:        firefox-pipewire.patch
 Patch581:        mozilla-1493081.patch
 Patch582:        mozilla-1504689.patch
-Patch583:        mozilla-1497534.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -367,7 +366,6 @@ This package contains results of tests executed during build.
 %endif
 %patch581 -p1 -b .mozilla-1493081
 %patch582 -p1 -b .mozilla-1504689
-%patch583 -p1 -b .mozilla-1497534
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -915,7 +913,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Nov 6 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-5
-- Added fix for mozbz#1497534 - titlebar appearance during D&D
 - Added fix for mozbz#1502457- disable Contextual Feature
   Recommender/shield studies by default.
 
