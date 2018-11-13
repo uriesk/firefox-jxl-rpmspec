@@ -15,8 +15,8 @@ ac_add_options --enable-pulseaudio
 ac_add_options --with-system-icu
 ac_add_options --with-mozilla-api-keyfile=../mozilla-api-key
 ac_add_options --with-google-api-keyfile=../google-api-key
-ac_add_options --enable-release
 ac_add_options --enable-pie
+ac_add_options --enable-release
 ac_add_options --update-channel=release
 # Workaround for mozbz#1341234
 ac_add_options BINDGEN_CFLAGS="$(pkg-config nspr pixman-1 --cflags)"
