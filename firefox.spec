@@ -6,6 +6,7 @@
 %global system_libicu     0
 %global hardened_build    1
 %global system_jpeg       1
+%global build_with_clang  1
 
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
@@ -87,7 +88,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        63.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -557,6 +558,12 @@ export LDFLAGS=$MOZ_LINK_FLAGS
 export PREFIX='%{_prefix}'
 export LIBDIR='%{_libdir}'
 
+%if %{?build_with_clang}
+export CC=clang
+export CXX=clang++
+export LINKER=lld-link
+%endif
+
 MOZ_SMP_FLAGS=-j1
 # On x86 architectures, Mozilla can build up to 4 jobs at once in parallel,
 # however builds tend to fail on other arches when building in parallel.
@@ -912,6 +919,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Nov 13 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-6
+- Build with clang/llvm
+
 * Tue Nov 6 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-5
 - Added fix for mozbz#1502457- disable Contextual Feature
   Recommender/shield studies by default.
@@ -1060,4 +1070,3 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 * Tue Apr 24 2018 Martin Stransky <stransky@redhat.com> - 60.0-0.1
 - Update to 60.0 Beta 15
-
