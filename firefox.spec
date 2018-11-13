@@ -6,7 +6,7 @@
 %global system_libicu     0
 %global hardened_build    1
 %global system_jpeg       1
-%global build_with_clang  1
+%global build_with_clang  0
 
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
@@ -199,6 +199,9 @@ BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
+%if %{?build_with_clang}
+BuildRequires:  lld
+%endif
 %if 0%{?fedora} > 27
 BuildRequires:  pipewire-devel
 %endif
@@ -561,7 +564,11 @@ export LIBDIR='%{_libdir}'
 %if %{?build_with_clang}
 export CC=clang
 export CXX=clang++
-export LINKER=lld-link
+export LLVM_PROFDATA="llvm-profdata"
+export AR="llvm-ar"
+export NM="llvm-nm"
+export RANLIB="llvm-ranlib"
+echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %endif
 
 MOZ_SMP_FLAGS=-j1
@@ -920,7 +927,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Nov 13 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-6
-- Build with clang/llvm
+- Added an option to build with clang/llvm.
 
 * Tue Nov 6 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-5
 - Added fix for mozbz#1502457- disable Contextual Feature
