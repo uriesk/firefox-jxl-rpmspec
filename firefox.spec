@@ -128,6 +128,7 @@ Patch42:        prio-nss-build.patch
 Patch43:        mozilla-1500366.patch
 Patch44:        mozilla-1494037.patch
 Patch45:        mozilla-1498938.patch
+Patch46:        firefox-debug-build.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -155,6 +156,7 @@ Patch573:        mozilla-1415078.patch
 Patch574:        firefox-pipewire.patch
 Patch581:        mozilla-1493081.patch
 Patch582:        mozilla-1504689.patch
+Patch583:        firefox-init-wayland-clipboard.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -340,6 +342,7 @@ This package contains results of tests executed during build.
 %patch43 -p1 -b .1500366
 %patch44 -p1 -b .1494037
 %patch45 -p1 -b .1498938
+%patch46 -p1 -b .debug
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -370,6 +373,7 @@ This package contains results of tests executed during build.
 %endif
 %patch581 -p1 -b .mozilla-1493081
 %patch582 -p1 -b .mozilla-1504689
+%patch583 -p1 -b .init-wayland-clipboard
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -568,7 +572,7 @@ export LLVM_PROFDATA="llvm-profdata"
 export AR="llvm-ar"
 export NM="llvm-nm"
 export RANLIB="llvm-ranlib"
-echo "ac_add_options --enable-linker=lld" >> .mozconfig
+#echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %endif
 
 MOZ_SMP_FLAGS=-j1
@@ -928,6 +932,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Nov 13 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-6
 - Added an option to build with clang/llvm.
+- Fixed debug builds.
+- Fixed warnings at Wayland clipboard code.
 
 * Tue Nov 6 2018 Martin Stransky <stransky@redhat.com> - 63.0.1-5
 - Added fix for mozbz#1502457- disable Contextual Feature
