@@ -1,0 +1,14 @@
+diff -up firefox-63.0.1/browser/installer/package-manifest.in.old firefox-63.0.1/browser/installer/package-manifest.in
+--- firefox-63.0.1/browser/installer/package-manifest.in.old	2018-11-14 11:01:54.326071733 +0100
++++ firefox-63.0.1/browser/installer/package-manifest.in	2018-11-14 11:02:04.402045863 +0100
+@@ -512,8 +512,8 @@
+ 
+ ; [Layout Debugger]
+ #ifdef MOZ_DEBUG
+-@RESPATH@/chrome/layoutdebug@JAREXT@
+-@RESPATH@/chrome/layoutdebug.manifest
++#@RESPATH@/chrome/layoutdebug@JAREXT@
++#@RESPATH@/chrome/layoutdebug.manifest
+ #endif
+ 
+ ; [Personal Security Manager]
