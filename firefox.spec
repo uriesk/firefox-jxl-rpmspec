@@ -88,7 +88,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        63.0.3
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -158,7 +158,7 @@ Patch574:        firefox-pipewire.patch
 Patch581:        mozilla-1493081.patch
 Patch582:        mozilla-1504689.patch
 Patch583:        firefox-init-wayland-clipboard.patch
-Patch584:        firefox-wayland-crash-mozbz1507475.patch
+Patch585:        mozilla-1507475.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -377,7 +377,7 @@ This package contains results of tests executed during build.
 %patch581 -p1 -b .mozilla-1493081
 %patch582 -p1 -b .mozilla-1504689
 %patch583 -p1 -b .init-wayland-clipboard
-%patch584 -p1 -b .mozbz1507475
+%patch585 -p1 -b .mozbz1507475
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -934,8 +934,13 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Nov 26 2018 Martin Stransky <stransky@redhat.com> - 63.0.3-3
+- [Wayland] Fixed issues with Sway compositor and wl_keyboard setup
+  (mozbz#1507475).
+
 * Wed Nov 21 2018 Martin Stransky <stransky@redhat.com> - 63.0.3-2
-- Fixed mozbz#1507475 - crash when display changes (rhbz#1646151).
+- [Wayland] Fixed mozbz#1507475 - crash when display changes
+  (rhbz#1646151).
 
 * Thu Nov 15 2018 Martin Stransky <stransky@redhat.com> - 63.0.3-1
 - Updated to latest upstream (63.0.3)
