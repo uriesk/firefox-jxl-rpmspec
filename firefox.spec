@@ -199,7 +199,7 @@ BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
-%if %{?build_with_clang}
+%if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
 %if 0%{?fedora} > 27
