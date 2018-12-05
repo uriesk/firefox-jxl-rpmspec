@@ -37,7 +37,7 @@
 %endif
 
 %global disable_elfhack   0
-%if 0%{?fedora} > 28
+%if !0%{?build_with_clang}
 %global disable_elfhack   1
 %endif
 
