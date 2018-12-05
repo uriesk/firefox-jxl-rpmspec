@@ -563,7 +563,7 @@ export LDFLAGS=$MOZ_LINK_FLAGS
 export PREFIX='%{_prefix}'
 export LIBDIR='%{_libdir}'
 
-%if %{?build_with_clang}
+%if 0%{?build_with_clang}
 export LLVM_PROFDATA="llvm-profdata"
 #export AR="llvm-ar"
 #export NM="llvm-nm"
