@@ -6,17 +6,15 @@
 %global system_libicu     0
 %global hardened_build    1
 %global system_jpeg       1
+%if 0%{?fedora} >= 29
 %global build_with_clang  1
+%endif
 %global build_with_pgo    0
-
+%global use_bundled_cbindgen    1
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
 %else
 %global wayland_backend_default 0
-%endif
-
-%if 0%{?fedora} < 29
-%global use_bundled_cbindgen    1
 %endif
 
 # Big endian platforms
