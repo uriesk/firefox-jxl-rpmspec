@@ -125,7 +125,6 @@ Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
 Patch42:        prio-nss-build.patch
 Patch44:        mozilla-1494037.patch
-Patch45:        mozilla-1498938.patch
 Patch46:        firefox-debug-build.patch
 
 # Fedora specific patches
@@ -339,7 +338,6 @@ This package contains results of tests executed during build.
 # Build with system nss
 #%patch42 -p1 -b .nss-build
 %patch44 -p1 -b .1494037
-#%patch45 -p1 -b .1498938
 %patch46 -p1 -b .debug
 
 # Fedora patches
