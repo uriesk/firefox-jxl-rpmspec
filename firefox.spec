@@ -1,4 +1,4 @@
-%global system_nss        1
+%global system_nss        0
 %global system_sqlite     0
 %global system_ffi        1
 %global system_cairo      0
@@ -6,7 +6,8 @@
 %global system_libicu     0
 %global hardened_build    1
 %global system_jpeg       1
-%global build_with_clang  0
+%global build_with_clang  1
+%global build_with_pgo    0
 
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
@@ -87,13 +88,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        63.0.3
-Release:        3%{?pre_tag}%{?dist}
+Version:        64.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20181115.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20181204.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -125,7 +126,6 @@ Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
 Patch42:        prio-nss-build.patch
-Patch43:        mozilla-1500366.patch
 Patch44:        mozilla-1494037.patch
 Patch45:        mozilla-1498938.patch
 Patch46:        firefox-debug-build.patch
@@ -153,11 +153,9 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch421:        mozilla-1447775.patch
 
 # Wayland specific upstream patches
-Patch573:        mozilla-1415078.patch
 Patch574:        firefox-pipewire.patch
 Patch581:        mozilla-1493081.patch
 Patch582:        mozilla-1504689.patch
-Patch583:        firefox-init-wayland-clipboard.patch
 Patch585:        mozilla-1507475.patch
 
 # Debian patches
@@ -340,10 +338,10 @@ This package contains results of tests executed during build.
 %patch41 -p1 -b .disable-elfhack
 %endif
 %patch3  -p1 -b .arm
-%patch42 -p1 -b .nss-build
-%patch43 -p1 -b .1500366
+# Build with system nss
+#%patch42 -p1 -b .nss-build
 %patch44 -p1 -b .1494037
-%patch45 -p1 -b .1498938
+#%patch45 -p1 -b .1498938
 %patch46 -p1 -b .debug
 
 # Fedora patches
@@ -370,13 +368,11 @@ This package contains results of tests executed during build.
 %patch421 -p1 -b .1447775
 
 # Wayland specific upstream patches
-%patch573 -p1 -b .1415078
 %if 0%{?fedora} > 27
 %patch574 -p1 -b .firefox-pipewire
 %endif
 %patch581 -p1 -b .mozilla-1493081
 %patch582 -p1 -b .mozilla-1504689
-%patch583 -p1 -b .init-wayland-clipboard
 %patch585 -p1 -b .mozbz1507475
 
 %{__rm} -f .mozconfig
@@ -570,13 +566,17 @@ export PREFIX='%{_prefix}'
 export LIBDIR='%{_libdir}'
 
 %if %{?build_with_clang}
-export CC=clang
-export CXX=clang++
 export LLVM_PROFDATA="llvm-profdata"
-export AR="llvm-ar"
-export NM="llvm-nm"
+#export AR="llvm-ar"
+#export NM="llvm-nm"
 export RANLIB="llvm-ranlib"
-#echo "ac_add_options --enable-linker=lld" >> .mozconfig
+echo "ac_add_options --enable-linker=lld" >> .mozconfig
+%else
+export CC=gcc
+export CXX=g++
+%endif
+%if %{?build_with_pgo}
+echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 %endif
 
 MOZ_SMP_FLAGS=-j1
@@ -934,6 +934,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 4 2018 Martin Stransky <stransky@redhat.com> - 64.0-1
+- Updated to Firefox 64 (Build 1)
+- Build with clang
+
 * Mon Nov 26 2018 Martin Stransky <stransky@redhat.com> - 63.0.3-3
 - [Wayland] Fixed issues with Sway compositor and wl_keyboard setup
   (mozbz#1507475).
