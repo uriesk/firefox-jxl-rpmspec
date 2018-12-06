@@ -549,8 +549,10 @@ MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g1/')
 # (OOM when linking, rhbz#1238225)
 export MOZ_DEBUG_FLAGS=" "
 %endif
+%if !0%{?build_with_clang}
 %ifarch s390 %{arm} ppc aarch64 %{ix86}
 MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
+%endif
 %endif
 %ifarch %{arm}
 export RUSTFLAGS="-Cdebuginfo=0"
