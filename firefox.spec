@@ -37,9 +37,9 @@
 %endif
 
 %global disable_elfhack   0
-%if !0%{?build_with_clang}
-%global disable_elfhack   1
-%endif
+#%if !0%{?build_with_clang}
+#%global disable_elfhack   1
+#%endif
 
 %global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
 %global firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
