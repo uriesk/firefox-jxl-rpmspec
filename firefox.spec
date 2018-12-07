@@ -936,7 +936,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Dec 4 2018 Martin Stransky <stransky@redhat.com> - 64.0-1
-- Updated to Firefox 64 (Build 1)
+- Updated to Firefox 64 (Build 3)
 - Build with clang
 
 * Mon Nov 26 2018 Martin Stransky <stransky@redhat.com> - 63.0.3-3
