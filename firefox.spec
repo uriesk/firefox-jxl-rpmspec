@@ -6,7 +6,7 @@
 %global system_libicu     0
 %global hardened_build    1
 %global system_jpeg       1
-%if 0%{?fedora} >= 28
+%if 0%{?fedora} >= 29
 %ifarch x86_64
 %global build_with_clang  1
 %endif
