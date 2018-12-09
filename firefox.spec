@@ -6,8 +6,9 @@
 %global system_libicu     0
 %global hardened_build    1
 %global system_jpeg       1
+%global build_with_clang  0
 %if 0%{?fedora} >= 29
-%ifarch x86_64
+%ifarch x86_64 aarch64
 %global build_with_clang  1
 %endif
 %endif
@@ -937,7 +938,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Dec 4 2018 Martin Stransky <stransky@redhat.com> - 64.0-1
 - Updated to Firefox 64 (Build 3)
-- Build with clang
+- Built with Clang on some arches.
 
 * Mon Nov 26 2018 Martin Stransky <stransky@redhat.com> - 63.0.3-3
 - [Wayland] Fixed issues with Sway compositor and wl_keyboard setup
