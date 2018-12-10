@@ -576,15 +576,21 @@ echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %else
 export CC=gcc
 export CXX=g++
+echo "ac_add_options --enable-linker=gold" >> .mozconfig
 %endif
-%if %{?build_with_pgo}
+%if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 %endif
 
 MOZ_SMP_FLAGS=-j1
-# On x86 architectures, Mozilla can build up to 4 jobs at once in parallel,
+# On x86_64 architectures, Mozilla can build up to 4 jobs at once in parallel,
 # however builds tend to fail on other arches when building in parallel.
-%ifarch %{ix86} x86_64 ppc ppc64 ppc64le aarch64
+%ifarch %{ix86} %{arm}
+[ -z "$RPM_BUILD_NCPUS" ] && \
+     RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
+[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
+%endif
+%ifarch x86_64 ppc ppc64 ppc64le aarch64
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 [ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
@@ -592,7 +598,6 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 %endif
 
-#make -f client.mk build STRIP="/bin/true" MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS" MOZ_SERVICES_SYNC="1"
 export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
 export MOZ_SERVICES_SYNC="1"
 export STRIP=/bin/true
