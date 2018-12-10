@@ -576,7 +576,7 @@ echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %else
 export CC=gcc
 export CXX=g++
-echo "ac_add_options --enable-linker=gold" >> .mozconfig
+echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
