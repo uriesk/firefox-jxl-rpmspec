@@ -569,14 +569,13 @@ export LIBDIR='%{_libdir}'
 
 %if 0%{?build_with_clang}
 export LLVM_PROFDATA="llvm-profdata"
-#export AR="llvm-ar"
-#export NM="llvm-nm"
+export AR="llvm-ar"
+export NM="llvm-nm"
 export RANLIB="llvm-ranlib"
 echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %else
 export CC=gcc
 export CXX=g++
-echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
