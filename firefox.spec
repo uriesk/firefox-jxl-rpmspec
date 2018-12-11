@@ -1,4 +1,4 @@
-%global system_nss        0
+%global system_nss        1
 %global system_sqlite     0
 %global system_ffi        1
 %global system_cairo      0
@@ -60,7 +60,7 @@
 # we're building against could bring us some broken dependencies from time to time.
 #%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.37.3
+%global nss_version 3.40.1
 #%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %global nss_build_version %{nss_version}
 %endif
@@ -90,7 +90,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        64.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -942,7 +942,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Dec 4 2018 Martin Stransky <stransky@redhat.com> - 64.0-1
+* Tue Dec 4 2018 Martin Stransky <stransky@redhat.com> - 64.0-2
 - Updated to Firefox 64 (Build 3)
 - Built with Clang on some arches.
 
