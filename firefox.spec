@@ -547,10 +547,10 @@ MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
 %if %{?debug_build}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-O2//')
 %endif
-%ifarch s390
+%ifarch s390 %{arm}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g1/')
 # If MOZ_DEBUG_FLAGS is empty, firefox's build will default it to "-g" which
-# overrides the -g1 from line above and breaks building on s390
+# overrides the -g1 from line above and breaks building on s390/arm
 # (OOM when linking, rhbz#1238225)
 export MOZ_DEBUG_FLAGS=" "
 %endif
