@@ -157,6 +157,7 @@ Patch574:        firefox-pipewire.patch
 Patch581:        mozilla-1493081.patch
 Patch582:        mozilla-1504689.patch
 Patch585:        mozilla-1507475.patch
+Patch586:        firefox-wayland-crash-mozbz1507475.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -374,6 +375,7 @@ This package contains results of tests executed during build.
 %patch581 -p1 -b .mozilla-1493081
 %patch582 -p1 -b .mozilla-1504689
 %patch585 -p1 -b .mozbz1507475
+%patch586 -p1 -b .crash-mozbz1507475
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
