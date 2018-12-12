@@ -1,3 +1,6 @@
+# Temporary disable arm due to build failures
+ExcludeArch: armv7hl
+
 %global system_nss        1
 %global system_ffi        1
 %global system_libvpx     1
@@ -8,10 +11,10 @@
 %global build_with_clang  0
 %if 0%{?fedora} >= 29
 %ifarch x86_64 aarch64
-%global build_with_clang  1
+%global build_with_clang  0
 %endif
 %endif
-%global build_with_pgo    1
+%global build_with_pgo    0
 %global use_bundled_cbindgen  1
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
@@ -77,7 +80,7 @@ Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        64.0
 
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -883,6 +886,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 12 2018 Martin Stransky <stransky@redhat.com> - 64.0-4
+- Use gcc on all platforms for official release.
+
 * Wed Dec 12 2018 Martin Stransky <stransky@redhat.com> - 64.0-3
 - Updated PGO build setup.
 
