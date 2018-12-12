@@ -126,7 +126,6 @@ Patch37:        build-jit-atomic-always-lucky.patch
 Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
-Patch42:        prio-nss-build.patch
 Patch44:        mozilla-1494037.patch
 Patch46:        firefox-debug-build.patch
 
@@ -339,8 +338,6 @@ This package contains results of tests executed during build.
 %patch41 -p1 -b .disable-elfhack
 %endif
 %patch3  -p1 -b .arm
-# Build with system nss
-#%patch42 -p1 -b .nss-build
 %patch44 -p1 -b .1494037
 %patch46 -p1 -b .debug
 
@@ -547,11 +544,15 @@ MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
 %if %{?debug_build}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-O2//')
 %endif
-%ifarch s390 %{arm}
+%ifarch s390
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g1/')
 # If MOZ_DEBUG_FLAGS is empty, firefox's build will default it to "-g" which
 # overrides the -g1 from line above and breaks building on s390/arm
 # (OOM when linking, rhbz#1238225)
+export MOZ_DEBUG_FLAGS=" "
+%endif
+%ifarch %{arm}
+MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g0/')
 export MOZ_DEBUG_FLAGS=" "
 %endif
 %if !0%{?build_with_clang}
