@@ -7,7 +7,7 @@ ExcludeArch: armv7hl
 %global hardened_build    1
 %global system_jpeg       1
 %global run_tests         0
-%global disable_elfhack   0
+%global disable_elfhack   1
 %global build_with_clang  0
 %if 0%{?fedora} >= 29
 %ifarch x86_64 aarch64
