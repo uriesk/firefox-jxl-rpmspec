@@ -1,36 +1,27 @@
 %global system_nss        1
-%global system_sqlite     0
 %global system_ffi        1
-%global system_cairo      0
 %global system_libvpx     1
-%global system_libicu     0
 %global hardened_build    1
 %global system_jpeg       1
+%global run_tests         0
+%global disable_elfhack   0
 %global build_with_clang  0
 %if 0%{?fedora} >= 29
 %ifarch x86_64 aarch64
 %global build_with_clang  1
 %endif
 %endif
-%global build_with_pgo    0
-%global use_bundled_cbindgen    1
+%global build_with_pgo    1
+%global use_bundled_cbindgen  1
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
 %else
 %global wayland_backend_default 0
 %endif
-
 # Big endian platforms
 %ifarch ppc64 s390x
 %global big_endian        1
 %endif
-
-%ifarch %{ix86} x86_64
-%global run_tests         0
-%else
-%global run_tests         0
-%endif
-
 %bcond_without debug_build
 %if %{with debug_build}
 %else
@@ -39,10 +30,15 @@
 %global debug_build       0
 %endif
 
-%global disable_elfhack   0
-#%if !0%{?build_with_clang}
-#%global disable_elfhack   1
-#%endif
+%if 0%{?build_with_pgo}
+%global use_xvfb          1
+%global build_tests       1
+%endif
+
+%if !0%{?run_tests}
+%global use_xvfb          1
+%global build_tests       1
+%endif
 
 %global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
 %global firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
@@ -56,19 +52,9 @@
 
 %if %{?system_nss}
 %global nspr_version 4.19
-# NSS/NSPR quite often ends in build override, so as requirement the version
-# we're building against could bring us some broken dependencies from time to time.
-#%global nspr_build_version %(pkg-config --silence-errors --modversion nspr 2>/dev/null || echo 65536)
 %global nspr_build_version %{nspr_version}
 %global nss_version 3.40.1
-#%global nss_build_version %(pkg-config --silence-errors --modversion nss 2>/dev/null || echo 65536)
 %global nss_build_version %{nss_version}
-%endif
-
-%if %{?system_sqlite}
-%global sqlite_version 3.8.4.2
-# The actual sqlite version (see #480989):
-%global sqlite_build_version %(pkg-config --silence-errors --modversion sqlite3 2>/dev/null || echo 65536)
 %endif
 
 %global mozappdir     %{_libdir}/%{name}
@@ -90,7 +76,8 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        64.0
-Release:        2%{?pre_tag}%{?dist}
+
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -165,9 +152,6 @@ Patch500:        mozilla-440908.patch
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
 BuildRequires:  pkgconfig(nss) >= %{nss_version}
 BuildRequires:  nss-static >= %{nss_version}
-%endif
-%if %{?system_cairo}
-BuildRequires:  pkgconfig(cairo) >= %{cairo_version}
 %endif
 BuildRequires:  pkgconfig(libpng)
 %if %{?system_jpeg}
@@ -246,16 +230,11 @@ Requires:       nss >= 3.29.3-1.1
 
 BuildRequires:  desktop-file-utils
 BuildRequires:  system-bookmarks
-%if %{?system_sqlite}
-BuildRequires:  pkgconfig(sqlite3) >= %{sqlite_version}
-Requires:       sqlite >= %{sqlite_build_version}
-%endif
-
 %if %{?system_ffi}
 BuildRequires:  pkgconfig(libffi)
 %endif
 
-%if %{?run_tests}
+%if 0%{?use_xvfb}
 BuildRequires:  xorg-x11-server-Xvfb
 %endif
 BuildRequires:  rust
@@ -391,18 +370,6 @@ echo "ac_add_options --without-system-nspr" >> .mozconfig
 echo "ac_add_options --without-system-nss" >> .mozconfig
 %endif
 
-%if %{?system_sqlite}
-echo "ac_add_options --enable-system-sqlite" >> .mozconfig
-%else
-echo "ac_add_options --disable-system-sqlite" >> .mozconfig
-%endif
-
-%if %{?system_cairo}
-echo "ac_add_options --enable-system-cairo" >> .mozconfig
-%else
-echo "ac_add_options --disable-system-cairo" >> .mozconfig
-%endif
-
 %if %{?system_ffi}
 echo "ac_add_options --enable-system-ffi" >> .mozconfig
 %endif
@@ -446,7 +413,7 @@ echo "ac_add_options --disable-webrtc" >> .mozconfig
 echo "ac_add_options --disable-crashreporter" >> .mozconfig
 %endif
 
-%if %{?run_tests}
+%if 0%{?build_tests}
 echo "ac_add_options --enable-tests" >> .mozconfig
 %endif
 
@@ -462,11 +429,6 @@ echo "ac_add_options --with-system-libvpx" >> .mozconfig
 echo "ac_add_options --without-system-libvpx" >> .mozconfig
 %endif
 
-%if %{?system_libicu}
-echo "ac_add_options --with-system-icu" >> .mozconfig
-%else
-echo "ac_add_options --without-system-icu" >> .mozconfig
-%endif
 %ifarch s390 s390x
 echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
@@ -494,17 +456,6 @@ env CARGO_HOME=.cargo cargo install cbindgen
 #---------------------------------------------------------------------
 
 %build
-%if %{?system_sqlite}
-# Do not proceed with build if the sqlite require would be broken:
-# make sure the minimum requirement is non-empty, ...
-sqlite_version=$(expr "%{sqlite_version}" : '\([0-9]*\.\)[0-9]*\.') || exit 1
-# ... and that major number of the computed build-time version matches:
-case "%{sqlite_build_version}" in
-  "$sqlite_version"*) ;;
-  *) exit 1 ;;
-esac
-%endif
-
 %if 0%{?use_bundled_cbindgen}
 export PATH=`pwd`/.cargo/bin:$PATH
 %endif
@@ -519,13 +470,6 @@ echo "Generate big endian version of config/external/icu/data/icud58l.dat"
 # Update the various config.guess to upstream release for aarch64 support
 find ./ -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
 
-# -fpermissive is needed to build with gcc 4.6+ which has become stricter
-#
-# Mozilla builds with -Wall with exception of a few warnings which show up
-# everywhere in the code; so, don't override that.
-#
-# Disable C++ exceptions since Mozilla code is not exception-safe
-#
 MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 #rhbz#1037063
 # -Werror=format-security causes build failures when -Wno-format is explicitly given
@@ -533,11 +477,6 @@ MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 # Explicitly force the hardening flags for Firefox so it passes the checksec test;
 # See also https://fedoraproject.org/wiki/Changes/Harden_All_Packages
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -Wformat-security -Wformat -Werror=format-security"
-%if 0%{?fedora} > 23
-# Disable null pointer gcc6 optimization in gcc6 (rhbz#1328045)
-MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fno-delete-null-pointer-checks"
-%endif
-# Use hardened build?
 %if %{?hardened_build}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
 %endif
@@ -603,11 +542,14 @@ MOZ_SMP_FLAGS=-j1
 export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
 export MOZ_SERVICES_SYNC="1"
 export STRIP=/bin/true
+%if 0%{?build_with_pgo}
+xvfb-run ./mach build
+%else
 ./mach build
+%endif
 
 # create debuginfo for crash-stats.mozilla.com
 %if %{enable_mozilla_crashreporter}
-#cd %{moz_objdir}
 make -C objdir buildsymbols
 %endif
 
@@ -898,8 +840,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
 %attr(644, root, root) %{mozappdir}/browser/blocklist.xml
-#%dir %{mozappdir}/browser/extensions
-#%{mozappdir}/browser/extensions/*
 %if %{with langpacks}
 %dir %{langpackdir}
 %endif
@@ -943,6 +883,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 12 2018 Martin Stransky <stransky@redhat.com> - 64.0-3
+- Updated PGO build setup.
+
 * Tue Dec 4 2018 Martin Stransky <stransky@redhat.com> - 64.0-2
 - Updated to Firefox 64 (Build 3)
 - Built with Clang on some arches.
