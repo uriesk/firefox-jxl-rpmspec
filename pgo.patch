@@ -1,0 +1,10 @@
+diff -up firefox-64.0/extensions/spellcheck/src/moz.build.old firefox-64.0/extensions/spellcheck/src/moz.build
+--- firefox-64.0/extensions/spellcheck/src/moz.build.old	2018-12-20 12:23:16.103206546 +0100
++++ firefox-64.0/extensions/spellcheck/src/moz.build	2018-12-20 12:23:44.077140279 +0100
+@@ -28,3 +28,5 @@ EXPORTS.mozilla += [
+ 
+ if CONFIG['CC_TYPE'] in ('clang', 'gcc'):
+     CXXFLAGS += ['-Wno-error=shadow']
++
++CXXFLAGS += ['-fno-devirtualize']
+\ No newline at end of file

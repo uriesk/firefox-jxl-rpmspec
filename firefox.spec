@@ -14,12 +14,10 @@ ExcludeArch: armv7hl
 %global build_with_clang  0
 %endif
 %endif
-%global build_with_pgo    0
+%global build_with_pgo    1
 %global use_bundled_cbindgen  1
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
-%else
-%global wayland_backend_default 0
 %endif
 # Big endian platforms
 %ifarch ppc64 s390x
@@ -80,7 +78,7 @@ Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        64.0
 
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -150,6 +148,8 @@ Patch586:        firefox-wayland-crash-mozbz1507475.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
+
+Patch501:        pgo.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -268,7 +268,7 @@ debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
 %endif
 
-%if %{?wayland_backend_default}
+%if 0%{?wayland_backend_default}
 %package x11
 Summary: Firefox X11 launcher.
 Requires: %{name}
@@ -355,6 +355,9 @@ This package contains results of tests executed during build.
 %patch582 -p1 -b .mozilla-1504689
 %patch585 -p1 -b .mozbz1507475
 %patch586 -p1 -b .crash-mozbz1507475
+
+%patch501 -p1 -b .pgo
+
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -607,14 +610,14 @@ DESTDIR=%{buildroot} make -C objdir install
 %{__mkdir_p} %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
-%if %{?wayland_backend_default}
+%if 0%{?wayland_backend_default}
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE31}
 %else
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %endif
 
 # set up the firefox start script
-%if %{?wayland_backend_default}
+%if 0%{?wayland_backend_default}
 %global x11_state false
 %else
 %global x11_state true
@@ -623,7 +626,7 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %{__sed} -e 's/__DEFAULT_X11__/%{x11_state}/' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
-%if %{?wayland_backend_default}
+%if 0%{?wayland_backend_default}
 %{__cat} %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
 %else
@@ -890,6 +893,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Dec 21 2018 Martin Stransky <stransky@redhat.com> - 64.0-5
+- Test PGO build.
+
 * Wed Dec 12 2018 Martin Stransky <stransky@redhat.com> - 64.0-4
 - Use gcc on all platforms for official release.
 
