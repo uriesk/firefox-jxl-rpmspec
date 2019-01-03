@@ -77,7 +77,6 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        64.0
-
 Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
@@ -149,7 +148,10 @@ Patch586:        firefox-wayland-crash-mozbz1507475.patch
 # Debian patches
 Patch500:        mozilla-440908.patch
 
-Patch501:        pgo.patch
+# PGO/LTO patches
+Patch600:        pgo.patch
+Patch601:        mozilla-1516081.patch
+Patch602:        mozilla-1516803.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -356,8 +358,10 @@ This package contains results of tests executed during build.
 %patch585 -p1 -b .mozbz1507475
 %patch586 -p1 -b .crash-mozbz1507475
 
-%patch501 -p1 -b .pgo
-
+# PGO patches
+%patch600 -p1 -b .pgo
+%patch601 -p1 -b .1516081
+%patch602 -p1 -b .1516803
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -553,7 +557,7 @@ export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
 export MOZ_SERVICES_SYNC="1"
 export STRIP=/bin/true
 %if 0%{?build_with_pgo}
-xvfb-run ./mach build
+GDK_BACKEND=x11 xvfb-run ./mach build
 %else
 ./mach build
 %endif
