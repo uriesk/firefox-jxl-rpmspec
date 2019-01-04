@@ -9,13 +9,10 @@ ExcludeArch: armv7hl
 %global run_tests         0
 %global disable_elfhack   1
 %global build_with_clang  0
-%if 0%{?fedora} >= 29
-%ifarch x86_64 aarch64
-%global build_with_clang  0
-%endif
-%endif
-%global build_with_pgo    1
 %global use_bundled_cbindgen  1
+%ifnarch %{ix86}
+%global build_with_pgo    1
+%endif
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
 %endif
@@ -532,9 +529,13 @@ echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %else
 export CC=gcc
 export CXX=g++
+export AR="gcc-ar"
+export NM="gcc-nm"
+export RANLIB="gcc-ranlib"
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
+echo "ac_add_options --enable-lto" >> .mozconfig
 %endif
 
 MOZ_SMP_FLAGS=-j1
