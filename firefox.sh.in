@@ -191,8 +191,8 @@ if [ $MOZILLA_DOWN -ne 0 ]; then
     CURRENT_LOCALE=${CURRENT_LOCALE:-$LANG}
 
     # Try with a local variant first, then without a local variant
-    SHORTMOZLOCALE=`echo $CURRENT_LOCALE | sed "s|_\([^.]*\).*||g"`
-    MOZLOCALE=`echo $CURRENT_LOCALE | sed "s|_\([^.]*\).*|-\1|g"`
+    SHORTMOZLOCALE=`echo $CURRENT_LOCALE | sed "s|_\([^.]*\).*||g" | sed "s|\..*||g"`
+    MOZLOCALE=`echo $CURRENT_LOCALE | sed "s|_\([^.]*\).*|-\1|g" | sed "s|\..*||g"`
 
     function create_langpack_link() {
         local language=$*
