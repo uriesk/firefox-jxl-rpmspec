@@ -443,6 +443,9 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
 
+#---------------------------------------------------------------------
+
+%build
 %if 0%{?use_bundled_cbindgen}
 
 mkdir -p my_rust_vendor
@@ -459,11 +462,6 @@ directory = "`pwd`/my_rust_vendor"
 EOL
 
 env CARGO_HOME=.cargo cargo install cbindgen
-%endif
-#---------------------------------------------------------------------
-
-%build
-%if 0%{?use_bundled_cbindgen}
 export PATH=`pwd`/.cargo/bin:$PATH
 %endif
 
