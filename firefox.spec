@@ -10,7 +10,7 @@ ExcludeArch: armv7hl
 %global disable_elfhack   1
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
-%ifnarch %{ix86}
+%ifnarch %{ix86} ppc64 s390x
 %global build_with_pgo    1
 %endif
 %if 0%{?fedora} > 29
@@ -897,6 +897,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Mon Jan  7 2019 Jan Horak <jhorak@redhat.com> - 64.0-7
 - Pipewire patch rebased (thanks to Tomas Popela)
+- Enabled PGO on some arches.
 
 * Fri Jan 4 2019 Carmen Bianca Bakker <carmenbianca@fedoraproject.org> - 64.0-6
 - Changed locale detector to handle Esperanto (rhbz#1656900)
