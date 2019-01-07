@@ -1,7 +1,7 @@
-diff -up firefox-64.0/config/system-headers.mozbuild.firefox-pipewire firefox-64.0/config/system-headers.mozbuild
---- firefox-64.0/config/system-headers.mozbuild.firefox-pipewire	2018-12-04 00:34:00.000000000 +0100
-+++ firefox-64.0/config/system-headers.mozbuild	2018-12-05 13:04:08.828063572 +0100
-@@ -314,6 +314,7 @@ system_headers = [
+diff -ENwbur firefox-64.0/config/system-headers.mozbuild firefox-webrtc/config/system-headers.mozbuild
+--- firefox-64.0/config/system-headers.mozbuild	2019-01-07 13:18:29.367461827 +0100
++++ firefox-webrtc/config/system-headers.mozbuild	2019-01-07 13:19:30.043067979 +0100
+@@ -314,6 +314,7 @@
      'Gestalt.h',
      'getopt.h',
      'gio/gio.h',
@@ -9,7 +9,7 @@ diff -up firefox-64.0/config/system-headers.mozbuild.firefox-pipewire firefox-64
      'glibconfig.h',
      'glib.h',
      'glib-object.h',
-@@ -607,6 +608,7 @@ system_headers = [
+@@ -607,6 +608,7 @@
      'Pgenerr.h',
      'PGenErr.h',
      'Ph.h',
@@ -17,10 +17,10 @@ diff -up firefox-64.0/config/system-headers.mozbuild.firefox-pipewire firefox-64
      'pixman.h',
      'pk11func.h',
      'pk11pqg.h',
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc.firefox-pipewire	2018-12-05 13:04:08.828063572 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc	2018-12-05 13:04:08.828063572 +0100
-@@ -0,0 +1,55 @@
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc	2019-01-07 13:20:40.141768272 +0100
+@@ -0,0 +1,39 @@
 +/*
 + *  Copyright (c) 2018 The WebRTC project authors. All Rights Reserved.
 + *
@@ -34,24 +34,14 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
 +#include "webrtc/modules/desktop_capture/desktop_capture_options.h"
 +#include "webrtc/modules/desktop_capture/desktop_capturer.h"
 +
-+#if defined(USE_PIPEWIRE)
-+#include "webrtc/modules/desktop_capture/app_capturer_null.cc"
-+#endif // defined(USE_PIPEWIRE)
-+
 +#if defined(USE_X11)
-+#include "webrtc/modules/desktop_capture/app_capturer_x11.cc"
++#include "webrtc/modules/desktop_capture/app_capturer_x11.h"
 +#endif // defined(USE_X11)
 +
 +namespace webrtc {
 +
 +// static
 +AppCapturer* AppCapturer::Create(const DesktopCaptureOptions& options) {
-+#if defined(USE_PIPEWIRE)
-+  if (DesktopCapturer::IsRunningUnderWayland()) {
-+    return new AppCapturerNull();
-+  }
-+#endif // defined(USE_PIPEWIRE)
-+
 +#if defined(USE_X11)
 +    return AppCapturerX11::Create(options);
 +#endif // defined(USE_X11)
@@ -62,12 +52,6 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
 +// static
 +std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawAppCapturer(
 +    const DesktopCaptureOptions& options) {
-+#if defined(USE_PIPEWIRE)
-+  if (DesktopCapturer::IsRunningUnderWayland()) {
-+    return std::unique_ptr<DesktopCapturer>(new AppCapturerNull());
-+  }
-+#endif // defined(USE_PIPEWIRE)
-+
 +#if defined(USE_X11)
 +  return AppCapturerX11::CreateRawAppCapturer(options);
 +#endif // defined(USE_X11)
@@ -76,111 +60,105 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
 +}
 +
 +}  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_null.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_null.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_null.cc.firefox-pipewire	2018-12-04 00:34:15.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_null.cc	2018-12-05 13:04:08.829063566 +0100
-@@ -7,8 +7,8 @@
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc	2019-01-07 13:16:46.374432920 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc	2019-01-07 13:20:40.142768282 +0100
+@@ -7,9 +7,6 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
--#include "webrtc/modules/desktop_capture/window_capturer.h"
- #include "webrtc/modules/desktop_capture/app_capturer.h"
-+#include "webrtc/modules/desktop_capture/desktop_capturer.h"
+-#include "webrtc/modules/desktop_capture/app_capturer.h"
+-#include "webrtc/modules/desktop_capture/shared_desktop_frame.h"
+-#include "webrtc/modules/desktop_capture/x11/shared_x_util.h"
  
  #include <assert.h>
+ #include <string.h>
+@@ -21,80 +18,19 @@
  
-@@ -29,9 +29,11 @@ public:
-   virtual bool BringAppToFront()	override;
+ #include <algorithm>
  
-   // DesktopCapturer interface.
--  virtual void Start(Callback* callback) override;
--  virtual void Stop() override;
--  virtual void Capture(const DesktopRegion& region) override;
-+  void Start(Callback* callback) override;
-+  void Stop() override;
-+  void CaptureFrame() override;
-+  bool GetSourceList(SourceList* sources) override;
-+  bool SelectSource(SourceId id) override;
- 
- private:
-   Callback* callback_;
-@@ -61,7 +63,16 @@ bool AppCapturerNull::BringAppToFront()
-   return false;
- }
- 
--// DesktopCapturer interface.
-+bool AppCapturerNull::GetSourceList(SourceList* sources) {
-+  // Not implemented yet.
-+  return false;
-+}
++#include "webrtc/modules/desktop_capture/app_capturer_x11.h"
 +
-+bool AppCapturerNull::SelectSource(SourceId id) {
-+  // Not implemented yet.
-+  return false;
-+}
-+
- void AppCapturerNull::Start(Callback* callback) {
-   assert(!callback_);
-   assert(callback);
-@@ -73,16 +84,19 @@ void AppCapturerNull::Stop() {
-   callback_ = NULL;
- }
+ #include "webrtc/modules/desktop_capture/desktop_capture_options.h"
+ #include "webrtc/modules/desktop_capture/desktop_frame.h"
+ #include "webrtc/modules/desktop_capture/x11/shared_x_display.h"
++#include "webrtc/modules/desktop_capture/x11/shared_x_util.h"
+ #include "webrtc/modules/desktop_capture/x11/x_error_trap.h"
+ #include "webrtc/modules/desktop_capture/x11/x_server_pixel_buffer.h"
+ #include "webrtc/system_wrappers/include/logging.h"
  
--void AppCapturerNull::Capture(const DesktopRegion& region) {
--  // Not implemented yet: See Bug 1036653
--  callback_->OnCaptureCompleted(NULL);
-+void AppCapturerNull::CaptureFrame() {
-+  // Not implemented yet.
-+  callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
- }
+ namespace webrtc {
  
- }  // namespace
- 
-+#if not defined(USE_PIPEWIRE)
- // static
--AppCapturer* AppCapturer::Create(const DesktopCaptureOptions& options) {
--  return new AppCapturerNull();
-+std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawAppCapturer(
-+    const DesktopCaptureOptions& options) {
-+  return std::unique_ptr<DesktopCapturer>(new AppCapturerNull());
- }
-+#endif // not defined(USE_PIPEWIRE)
- 
- }  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc	2018-12-05 13:04:08.829063566 +0100
-@@ -53,10 +53,13 @@ protected:
-   std::unique_ptr<DesktopFrame> frame_;
- };
- 
+-namespace {
+-
+-class ScreenCapturerProxy : DesktopCapturer::Callback {
+-public:
+-  ScreenCapturerProxy()
+-    : screen_capturer_(DesktopCapturer::CreateScreenCapturer(DesktopCaptureOptions::CreateDefault())) {
+-    screen_capturer_->SelectSource(kFullDesktopScreenId);
+-    screen_capturer_->Start(this);
+-  }
+-  void CaptureFrame() { screen_capturer_->CaptureFrame(); }
+-  std::unique_ptr<DesktopFrame> GetFrame() { return std::move(frame_); }
+-
+-   // Callback interface
+-  virtual void OnCaptureResult(DesktopCapturer::Result result,
+-                               std::unique_ptr<DesktopFrame> frame) {
+-    frame_ = std::move(frame);
+-  }
+-
+-protected:
+-  std::unique_ptr<DesktopCapturer> screen_capturer_;
+-  std::unique_ptr<DesktopFrame> frame_;
+-};
+-
 -class AppCapturerLinux : public AppCapturer {
-+class AppCapturerX11 : public AppCapturer {
- public:
+-public:
 -  AppCapturerLinux(const DesktopCaptureOptions& options);
 -  virtual ~AppCapturerLinux();
-+  AppCapturerX11(const DesktopCaptureOptions& options);
-+  virtual ~AppCapturerX11();
-+
-+  static AppCapturer* Create(const DesktopCaptureOptions& options);
-+  static std::unique_ptr<DesktopCapturer> CreateRawAppCapturer(const DesktopCaptureOptions& options);
- 
-   // AppCapturer interface.
-   virtual bool GetAppList(AppList* apps) override;
-@@ -91,10 +94,9 @@ private:
-   Region rgn_background_;
- 
-   rtc::scoped_refptr<SharedXDisplay> x_display_;
+-
+-  // AppCapturer interface.
+-  virtual bool GetAppList(AppList* apps) override;
+-  virtual bool SelectApp(ProcessId processId) override;
+-  virtual bool BringAppToFront() override;
+-
+-  // DesktopCapturer interface.
+-  virtual void Start(Callback* callback) override;
+-  virtual void Stop() override;
+-  virtual void CaptureFrame() override;
+-  virtual bool SelectSource(SourceId id) override
+-  {
+-    return SelectApp(static_cast<ProcessId>(id));
+-  }
+-
+-protected:
+-  Display* GetDisplay() { return x_display_->display(); }
+-  bool UpdateRegions();
+-
+-  void FillDesktopFrameRegionWithColor(DesktopFrame* pDesktopFrame,Region rgn, uint32_t color);
+-private:
+-  Callback* callback_;
+-  ProcessId selected_process_;
+-
+-  // Sample Mode
+-  ScreenCapturerProxy screen_capturer_proxy_;
+-  // Mask of foreground (non-app windows in front of selected)
+-  Region rgn_mask_;
+-  // Region of selected windows
+-  Region rgn_visual_;
+-  // Mask of background (desktop, non-app windows behind selected)
+-  Region rgn_background_;
+-
+-  rtc::scoped_refptr<SharedXDisplay> x_display_;
 -  RTC_DISALLOW_COPY_AND_ASSIGN(AppCapturerLinux);
-+  RTC_DISALLOW_COPY_AND_ASSIGN(AppCapturerX11);
- };
+-};
 -
 -AppCapturerLinux::AppCapturerLinux(const DesktopCaptureOptions& options)
 +AppCapturerX11::AppCapturerX11(const DesktopCaptureOptions& options)
      : callback_(NULL),
        selected_process_(0),
        x_display_(options.x_display()) {
-@@ -103,7 +105,7 @@ AppCapturerLinux::AppCapturerLinux(const
+@@ -103,7 +39,7 @@
    rgn_background_ = XCreateRegion();
  }
  
@@ -189,7 +167,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
    if (rgn_mask_) {
      XDestroyRegion(rgn_mask_);
    }
-@@ -116,32 +118,32 @@ AppCapturerLinux::~AppCapturerLinux() {
+@@ -116,32 +52,32 @@
  }
  
  // AppCapturer interface.
@@ -228,7 +206,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
    XErrorTrap error_trap(GetDisplay());
  
    //Capture screen >> set root window as capture window
-@@ -169,7 +171,7 @@ void AppCapturerLinux::CaptureFrame() {
+@@ -169,7 +105,7 @@
    }
  }
  
@@ -237,7 +215,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
    XErrorTrap error_trap(GetDisplay());
  
    if (!pDesktopFrame) {
-@@ -192,7 +194,7 @@ void AppCapturerLinux::FillDesktopFrameR
+@@ -192,7 +128,7 @@
    }
  }
  
@@ -246,9 +224,12 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
    XErrorTrap error_trap(GetDisplay());
  
    XSubtractRegion(rgn_visual_, rgn_visual_, rgn_visual_);
-@@ -272,18 +274,18 @@ bool AppCapturerLinux::UpdateRegions() {
- }  // namespace
+@@ -269,21 +205,19 @@
+   return true;
+ }
  
+-}  // namespace
+-
  // static
 -AppCapturer* AppCapturer::Create(const DesktopCaptureOptions& options) {
 -  return new AppCapturerLinux(options);
@@ -269,9 +250,111 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capt
  
    return std::unique_ptr<DesktopCapturer>(std::move(capturer));
  }
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc.firefox-pipewire	2018-12-05 13:04:08.832063551 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc	2018-12-05 13:04:08.832063551 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.h	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.h	2019-01-07 13:20:40.203768892 +0100
+@@ -0,0 +1,98 @@
++/*
++ *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
++ *
++ *  Use of this source code is governed by a BSD-style license
++ *  that can be found in the LICENSE file in the root of the source
++ *  tree. An additional intellectual property rights grant can be found
++ *  in the file PATENTS.  All contributing project authors may
++ *  be found in the AUTHORS file in the root of the source tree.
++ */
++
++#ifndef MODULES_DESKTOP_CAPTURE_APP_CAPTURER_X11_H_
++#define MODULES_DESKTOP_CAPTURE_APP_CAPTURER_X11_H_
++
++#include <X11/X.h>
++#include <X11/Xlib.h>
++#include <memory>
++#include <string>
++
++#include "webrtc/modules/desktop_capture/app_capturer.h"
++#include "webrtc/modules/desktop_capture/shared_desktop_frame.h"
++#include "webrtc/modules/desktop_capture/desktop_capture_options.h"
++#include "webrtc/modules/desktop_capture/desktop_capturer.h"
++#include "webrtc/modules/desktop_capture/desktop_geometry.h"
++#include "webrtc/modules/desktop_capture/x11/shared_x_display.h"
++#include "webrtc/modules/desktop_capture/x11/x_server_pixel_buffer.h"
++#include "webrtc/base/constructormagic.h"
++#include "webrtc/base/scoped_ref_ptr.h"
++
++namespace webrtc {
++
++class ScreenCapturerProxy : DesktopCapturer::Callback {
++public:
++  ScreenCapturerProxy()
++    : screen_capturer_(DesktopCapturer::CreateScreenCapturer(DesktopCaptureOptions::CreateDefault())) {
++    screen_capturer_->SelectSource(kFullDesktopScreenId);
++    screen_capturer_->Start(this);
++  }
++  void CaptureFrame() { screen_capturer_->CaptureFrame(); }
++  std::unique_ptr<DesktopFrame> GetFrame() { return std::move(frame_); }
++
++   // Callback interface
++  virtual void OnCaptureResult(DesktopCapturer::Result result,
++                               std::unique_ptr<DesktopFrame> frame) {
++    frame_ = std::move(frame);
++  }
++
++protected:
++  std::unique_ptr<DesktopCapturer> screen_capturer_;
++  std::unique_ptr<DesktopFrame> frame_;
++};
++
++class AppCapturerX11 : public AppCapturer {
++public:
++  AppCapturerX11(const DesktopCaptureOptions& options);
++  virtual ~AppCapturerX11();
++
++  static AppCapturer* Create(const DesktopCaptureOptions& options);
++  static std::unique_ptr<DesktopCapturer> CreateRawAppCapturer(const DesktopCaptureOptions& options);
++
++  // AppCapturer interface.
++  virtual bool GetAppList(AppList* apps) override;
++  virtual bool SelectApp(ProcessId processId) override;
++  virtual bool BringAppToFront() override;
++
++  // DesktopCapturer interface.
++  virtual void Start(Callback* callback) override;
++  virtual void Stop() override;
++  virtual void CaptureFrame() override;
++  virtual bool SelectSource(SourceId id) override
++  {
++    return SelectApp(static_cast<ProcessId>(id));
++  }
++
++protected:
++  Display* GetDisplay() { return x_display_->display(); }
++  bool UpdateRegions();
++
++  void FillDesktopFrameRegionWithColor(DesktopFrame* pDesktopFrame,Region rgn, uint32_t color);
++private:
++  Callback* callback_;
++  ProcessId selected_process_;
++
++  // Sample Mode
++  ScreenCapturerProxy screen_capturer_proxy_;
++  // Mask of foreground (non-app windows in front of selected)
++  Region rgn_mask_;
++  // Region of selected windows
++  Region rgn_visual_;
++  // Mask of background (desktop, non-app windows behind selected)
++  Region rgn_background_;
++
++  rtc::scoped_refptr<SharedXDisplay> x_display_;
++  RTC_DISALLOW_COPY_AND_ASSIGN(AppCapturerX11);
++};
++
++}  // namespace webrtc
++
++#endif  // MODULES_DESKTOP_CAPTURE_APP_CAPTURER_X11_H_
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc	2019-01-07 13:20:40.143768292 +0100
 @@ -0,0 +1,849 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1122,9 +1205,9 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_cap
 +}
 +
 +}  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h.firefox-pipewire	2018-12-05 13:04:08.832063551 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h	2018-12-05 13:04:08.832063551 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.h	2019-01-07 13:20:40.141768272 +0100
 @@ -0,0 +1,167 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1136,8 +1219,8 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_cap
 + *  be found in the AUTHORS file in the root of the source tree.
 + */
 +
-+#ifndef MODULES_DESKTOP_CAPTURE_LINUX_BASE_CAPTURER_PIPEWIRE_H_
-+#define MODULES_DESKTOP_CAPTURE_LINUX_BASE_CAPTURER_PIPEWIRE_H_
++#ifndef MODULES_DESKTOP_CAPTURE_BASE_CAPTURER_PIPEWIRE_H_
++#define MODULES_DESKTOP_CAPTURE_BASE_CAPTURER_PIPEWIRE_H_
 +
 +#include <gio/gio.h>
 +#define typeof __typeof__
@@ -1292,79 +1375,99 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/base_cap
 +
 +}  // namespace webrtc
 +
-+#endif  // MODULES_DESKTOP_CAPTURE_LINUX_BASE_CAPTURER_PIPEWIRE_H_
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn	2018-12-05 13:04:08.828063572 +0100
-@@ -213,7 +213,6 @@ rtc_static_library("desktop_capture") {
-     if (build_with_mozilla) {
-       sources += [
-         "app_capturer_x11.cc",
--        "app_capturer_x11.h",
-         "x11/desktop_device_info_x11.cc",
-         "x11/desktop_device_info_x11.h",
-         "x11/shared_x_util.cc",
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build.firefox-pipewire	2018-12-05 13:04:08.832063551 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build	2018-12-05 13:12:40.063396138 +0100
-@@ -100,10 +100,6 @@ if CONFIG["OS_TARGET"] == "DragonFly":
-     ]
- 
-     UNIFIED_SOURCES += [
--        "/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_x11.cc",
--        "/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc",
--        "/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc",
--        "/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc",
-         "/media/webrtc/trunk/webrtc/modules/desktop_capture/x11/desktop_device_info_x11.cc",
-         "/media/webrtc/trunk/webrtc/modules/desktop_capture/x11/shared_x_display.cc",
-         "/media/webrtc/trunk/webrtc/modules/desktop_capture/x11/shared_x_util.cc",
-@@ -111,6 +107,38 @@ if CONFIG["OS_TARGET"] == "DragonFly":
++#endif  // MODULES_DESKTOP_CAPTURE_BASE_CAPTURER_PIPEWIRE_H_
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build	2019-01-07 13:16:46.410433280 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_gn/moz.build	2019-01-07 13:20:40.146768322 +0100
+@@ -143,14 +143,26 @@
          "/media/webrtc/trunk/webrtc/modules/desktop_capture/x11/x_server_pixel_buffer.cc"
      ]
  
-+# Common stuff between Pipewire and X11
-+if CONFIG["OS_TARGET"] == "Linux":
-+   
++# Common Linux stuff between X11 and PipeWire
+ if CONFIG["OS_TARGET"] == "Linux":
+ 
+     DEFINES["USE_NSS_CERTS"] = "1"
+-    DEFINES["USE_X11"] = "1"
+     DEFINES["WEBRTC_LINUX"] = True
+     DEFINES["WEBRTC_POSIX"] = True
+     DEFINES["_FILE_OFFSET_BITS"] = "64"
+ 
 +    UNIFIED_SOURCES += [
 +        "/media/webrtc/trunk/webrtc/modules/desktop_capture/app_capturer_linux.cc",
-+        "/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc",
 +        "/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc",
 +        "/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc",
-+        "/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc",
 +        "/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc",
-+        "/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc",
 +    ]
 +
-+# Pipewire
++# X11 specific files
 +if CONFIG["OS_TARGET"] == "Linux":
-+   
-+    DEFINES["USE_PIPEWIRE"] = "1"
-+   
++
++    DEFINES["USE_X11"] = "1"
++
+     OS_LIBS += [
+         "rt",
+         "X11",
+@@ -177,6 +189,27 @@
+         "/media/webrtc/trunk/webrtc/modules/desktop_capture/x11/x_server_pixel_buffer.cc"
+     ]
+ 
++# PipeWire specific files
++if CONFIG["OS_TARGET"] == "Linux":
++
++    DEFINES["WEBRTC_USE_PIPEWIRE"] = "1"
++
 +    OS_LIBS += [
-+        "rt", 
++        "rt",
 +        "pipewire-0.2",
 +        "glib-2.0",
 +        "gio-2.0",
 +        "gobject-2.0"
-+    ]  
-+       
-+    CXXFLAGS += CONFIG['TK_CFLAGS']
-+       
-+    UNIFIED_SOURCES += [
-+        "/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_null.cc"
 +    ]
 +
- if CONFIG["OS_TARGET"] == "FreeBSD":
++    CXXFLAGS += CONFIG['TK_CFLAGS']
++
++    UNIFIED_SOURCES += [
++        "/media/webrtc/trunk/webrtc/modules/desktop_capture/base_capturer_pipewire.cc",
++        "/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc",
++        "/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc"
++    ]
++
+ if CONFIG["OS_TARGET"] == "NetBSD":
  
      DEFINES["USE_X11"] = "1"
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc	2018-12-05 13:04:08.832063551 +0100
-@@ -66,4 +66,17 @@ std::unique_ptr<DesktopCapturer> Desktop
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h	2019-01-07 13:16:46.361432790 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h	2019-01-07 13:20:40.144768302 +0100
+@@ -107,6 +107,11 @@
+   }
+ #endif
+ 
++#if defined(WEBRTC_USE_PIPEWIRE)
++  bool allow_pipewire() const { return allow_pipewire_; }
++  void set_allow_pipewire(bool allow) { allow_pipewire_ = allow; }
++#endif
++
+  private:
+ #if defined(USE_X11)
+   rtc::scoped_refptr<SharedXDisplay> x_display_;
+@@ -129,6 +134,9 @@
+ #endif
+   bool disable_effects_ = true;
+   bool detect_updated_region_ = false;
++#if defined(WEBRTC_USE_PIPEWIRE)
++  bool allow_pipewire_ = true;
++#endif
+ };
+ 
+ }  // namespace webrtc
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc	2019-01-07 13:16:46.389433070 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.cc	2019-01-07 13:20:40.148768342 +0100
+@@ -66,4 +66,17 @@
    return capturer;
  }
  
-+#if defined(USE_PIPEWIRE) || defined(USE_X11)
++#if defined(WEBRTC_USE_PIPEWIRE) || defined(USE_X11)
 +bool DesktopCapturer::IsRunningUnderWayland() {
 +  const char* xdg_session_type = getenv("XDG_SESSION_TYPE");
 +  if (!xdg_session_type || strncmp(xdg_session_type, "wayland", 7) != 0)
@@ -1378,24 +1481,24 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_
 +#endif
 +
  }  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h	2018-12-05 13:04:08.832063551 +0100
-@@ -129,6 +129,10 @@ class DesktopCapturer {
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h	2019-01-07 13:16:46.394433120 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capturer.h	2019-01-07 13:20:40.147768332 +0100
+@@ -129,6 +129,10 @@
    static std::unique_ptr<DesktopCapturer> CreateAppCapturer(
        const DesktopCaptureOptions& options);
  
-+#if defined(USE_PIPEWIRE) || defined(USE_X11)
++#if defined(WEBRTC_USE_PIPEWIRE) || defined(USE_X11)
 +  static bool IsRunningUnderWayland();
 +#endif
 +
   protected:
    // CroppingWindowCapturer needs to create raw capturers without wrappers, so
    // the following two functions are protected.
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc.firefox-pipewire	2018-12-05 13:04:08.832063551 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc	2018-12-05 13:04:08.832063551 +0100
-@@ -0,0 +1,44 @@
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc	2019-01-07 13:20:40.165768512 +0100
+@@ -0,0 +1,40 @@
 +/*
 + *  Copyright (c) 2018 The WebRTC project authors. All Rights Reserved.
 + *
@@ -1408,12 +1511,8 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cu
 +
 +#include "webrtc/modules/desktop_capture/mouse_cursor_monitor.h"
 +
-+#if defined(USE_PIPEWIRE)
-+#include "webrtc/modules/desktop_capture/mouse_cursor_monitor_null.cc"
-+#endif // defined(USE_PIPEWIRE)
-+
 +#if defined(USE_X11)
-+#include "webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc"
++#include "webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.h"
 +#endif // defined(USE_X11)
 +
 +namespace webrtc {
@@ -1440,38 +1539,58 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cu
 +}
 +
 +}  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_null.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_null.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_null.cc.firefox-pipewire	2018-12-04 00:34:15.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_null.cc	2018-12-05 13:04:08.832063551 +0100
-@@ -14,6 +14,7 @@
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc	2019-01-07 13:16:46.368432860 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc	2019-01-07 13:20:40.166768522 +0100
+@@ -16,6 +16,8 @@
+ #include <X11/Xlib.h>
+ #include <X11/Xutil.h>
+ 
++#include "webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.h"
++
+ #include "webrtc/modules/desktop_capture/desktop_capture_options.h"
+ #include "webrtc/modules/desktop_capture/desktop_frame.h"
+ #include "webrtc/modules/desktop_capture/mouse_cursor.h"
+@@ -59,38 +61,6 @@
  
  namespace webrtc {
  
-+#if not defined(USE_PIPEWIRE)
- MouseCursorMonitor* MouseCursorMonitor::CreateForWindow(
+-class MouseCursorMonitorX11 : public MouseCursorMonitor,
+-                              public SharedXDisplay::XEventHandler {
+- public:
+-  MouseCursorMonitorX11(const DesktopCaptureOptions& options, Window window, Window inner_window);
+-  ~MouseCursorMonitorX11() override;
+-
+-  void Start(Callback* callback, Mode mode) override;
+-  void Stop() override;
+-  void Capture() override;
+-
+- private:
+-  // SharedXDisplay::XEventHandler interface.
+-  bool HandleXEvent(const XEvent& event) override;
+-
+-  Display* display() { return x_display_->display(); }
+-
+-  // Captures current cursor shape and stores it in |cursor_shape_|.
+-  void CaptureCursor();
+-
+-  rtc::scoped_refptr<SharedXDisplay> x_display_;
+-  Callback* callback_;
+-  Mode mode_;
+-  Window window_;
+-  Window inner_window_;
+-
+-  bool have_xfixes_;
+-  int xfixes_event_base_;
+-  int xfixes_error_base_;
+-
+-  std::unique_ptr<MouseCursor> cursor_shape_;
+-};
+-
+ MouseCursorMonitorX11::MouseCursorMonitorX11(
      const DesktopCaptureOptions& options,
-     WindowId window) {
-@@ -25,5 +26,6 @@ MouseCursorMonitor* MouseCursorMonitor::
-     ScreenId screen) {
-   return NULL;
- }
-+#endif // not defined(USE_PIPEWIRE)
- 
- }  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.cc	2018-12-05 13:04:08.832063551 +0100
-@@ -69,6 +69,9 @@ class MouseCursorMonitorX11 : public Mou
-   void Stop() override;
-   void Capture() override;
- 
-+  static MouseCursorMonitor* CreateForWindow(const DesktopCaptureOptions& options, WindowId window);
-+  static MouseCursorMonitor* CreateForScreen(const DesktopCaptureOptions& options, ScreenId screen);
-+
-  private:
-   // SharedXDisplay::XEventHandler interface.
-   bool HandleXEvent(const XEvent& event) override;
-@@ -244,7 +247,7 @@ void MouseCursorMonitorX11::CaptureCurso
+     Window window, Window inner_window)
+@@ -244,7 +214,7 @@
  }
  
  // static
@@ -1480,7 +1599,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cu
      const DesktopCaptureOptions& options, WindowId window) {
    if (!options.x_display())
      return NULL;
-@@ -254,7 +257,7 @@ MouseCursorMonitor* MouseCursorMonitor::
+@@ -254,7 +224,7 @@
    return new MouseCursorMonitorX11(options, outer_window, window);
  }
  
@@ -1489,9 +1608,76 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cu
      const DesktopCaptureOptions& options,
      ScreenId screen) {
    if (!options.x_display())
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc.firefox-pipewire	2018-12-05 13:04:08.833063546 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc	2018-12-05 13:04:08.833063546 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.h	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/mouse_cursor_monitor_x11.h	2019-01-07 13:20:40.164768502 +0100
+@@ -0,0 +1,63 @@
++/*
++ *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
++ *
++ *  Use of this source code is governed by a BSD-style license
++ *  that can be found in the LICENSE file in the root of the source
++ *  tree. An additional intellectual property rights grant can be found
++ *  in the file PATENTS.  All contributing project authors may
++ *  be found in the AUTHORS file in the root of the source tree.
++ */
++
++#ifndef MODULES_DESKTOP_CAPTURE_MOUSE_CURSOR_MONITOR_X11_H_
++#define MODULES_DESKTOP_CAPTURE_MOUSE_CURSOR_MONITOR_X11_H_
++
++#include <X11/X.h>
++#include <memory>
++
++#include "webrtc/modules/desktop_capture/desktop_capture_options.h"
++#include "webrtc/modules/desktop_capture/desktop_capture_types.h"
++#include "webrtc/modules/desktop_capture/x11/shared_x_display.h"
++#include "webrtc/modules/desktop_capture/mouse_cursor.h"
++#include "webrtc/modules/desktop_capture/mouse_cursor_monitor.h"
++#include "webrtc/base/scoped_ref_ptr.h"
++
++namespace webrtc {
++
++class MouseCursorMonitorX11 : public MouseCursorMonitor,
++                              public SharedXDisplay::XEventHandler {
++ public:
++  MouseCursorMonitorX11(const DesktopCaptureOptions& options, Window window, Window inner_window);
++  ~MouseCursorMonitorX11() override;
++
++  void Start(Callback* callback, Mode mode) override;
++  void Stop() override;
++  void Capture() override;
++
++  static MouseCursorMonitor* CreateForWindow(const DesktopCaptureOptions& options, WindowId window);
++  static MouseCursorMonitor* CreateForScreen(const DesktopCaptureOptions& options, ScreenId screen);
++
++ private:
++  // SharedXDisplay::XEventHandler interface.
++  bool HandleXEvent(const XEvent& event) override;
++
++  Display* display() { return x_display_->display(); }
++
++  // Captures current cursor shape and stores it in |cursor_shape_|.
++  void CaptureCursor();
++
++  rtc::scoped_refptr<SharedXDisplay> x_display_;
++  Callback* callback_;
++  Mode mode_;
++  Window window_;
++  Window inner_window_;
++
++  bool have_xfixes_;
++  int xfixes_event_base_;
++  int xfixes_error_base_;
++
++  std::unique_ptr<MouseCursor> cursor_shape_;
++};
++
++}  // namespace webrtc
++
++#endif  // MODULES_DESKTOP_CAPTURE_MOUSE_CURSOR_MONITOR_X11_H_
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc	2019-01-07 13:20:40.170768562 +0100
 @@ -0,0 +1,40 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1506,12 +1692,12 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
 +#include "webrtc/modules/desktop_capture/desktop_capture_options.h"
 +#include "webrtc/modules/desktop_capture/desktop_capturer.h"
 +
-+#if defined(USE_PIPEWIRE)
++#if defined(WEBRTC_USE_PIPEWIRE)
 +#include "webrtc/modules/desktop_capture/screen_capturer_pipewire.h"
-+#endif  // defined(USE_PIPEWIRE)
++#endif  // defined(WEBRTC_USE_PIPEWIRE)
 +
 +#if defined(USE_X11)
-+#include "webrtc/modules/desktop_capture/screen_capturer_x11.cc"
++#include "webrtc/modules/desktop_capture/screen_capturer_x11.h"
 +#endif  // defined(USE_X11)
 +
 +namespace webrtc {
@@ -1519,11 +1705,11 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
 +// static
 +std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawScreenCapturer(
 +    const DesktopCaptureOptions& options) {
-+#if defined(USE_PIPEWIRE)
-+  if (DesktopCapturer::IsRunningUnderWayland()) {
++#if defined(WEBRTC_USE_PIPEWIRE)
++  if (options.allow_pipewire() && DesktopCapturer::IsRunningUnderWayland()) {
 +    return ScreenCapturerPipeWire::CreateRawScreenCapturer(options);
 +  }
-+#endif  // defined(USE_PIPEWIRE)
++#endif  // defined(WEBRTC_USE_PIPEWIRE)
 +
 +#if defined(USE_X11)
 +  return ScreenCapturerX11::CreateRawScreenCapturer(options);
@@ -1533,9 +1719,9 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
 +}
 +
 +}  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc.firefox-pipewire	2018-12-05 13:04:08.833063546 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc	2018-12-05 13:04:08.833063546 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.cc	2019-01-07 13:20:40.171768572 +0100
 @@ -0,0 +1,31 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1568,9 +1754,9 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
 +}
 +
 +}  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h.firefox-pipewire	2018-12-05 13:04:08.833063546 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h	2018-12-05 13:04:08.833063546 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_pipewire.h	2019-01-07 13:20:40.168768542 +0100
 @@ -0,0 +1,33 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1582,8 +1768,8 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
 + *  be found in the AUTHORS file in the root of the source tree.
 + */
 +
-+#ifndef MODULES_DESKTOP_CAPTURE_LINUX_SCREEN_CAPTURER_PIPEWIRE_H_
-+#define MODULES_DESKTOP_CAPTURE_LINUX_SCREEN_CAPTURER_PIPEWIRE_H_
++#ifndef MODULES_DESKTOP_CAPTURE_SCREEN_CAPTURER_PIPEWIRE_H_
++#define MODULES_DESKTOP_CAPTURE_SCREEN_CAPTURER_PIPEWIRE_H_
 +
 +#include <memory>
 +
@@ -1604,43 +1790,112 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
 +
 +}  // namespace webrtc
 +
-+#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SCREEN_CAPTURER_PIPEWIRE_H_
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc	2018-12-05 13:04:08.833063546 +0100
-@@ -34,18 +34,20 @@
- namespace webrtc {
- namespace {
++#endif  // MODULES_DESKTOP_CAPTURE_SCREEN_CAPTURER_PIPEWIRE_H_
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc	2019-01-07 13:16:46.376432940 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.cc	2019-01-07 13:20:40.173768592 +0100
+@@ -19,6 +19,8 @@
+ #include <X11/Xlib.h>
+ #include <X11/Xutil.h>
  
++#include "webrtc/modules/desktop_capture/screen_capturer_x11.h"
++
+ #include "webrtc/base/checks.h"
+ #include "webrtc/base/constructormagic.h"
+ #include "webrtc/base/timeutils.h"
+@@ -32,100 +34,12 @@
+ #include "webrtc/system_wrappers/include/logging.h"
+ 
+ namespace webrtc {
+-namespace {
+-
 -// A class to perform video frame capturing for Linux.
-+// A class to perform video frame capturing for Linux on X11.
- //
- // If XDamage is used, this class sets DesktopFrame::updated_region() according
- // to the areas reported by XDamage. Otherwise this class does not detect
- // DesktopFrame::updated_region(), the field is always set to the entire frame
- // rectangle. ScreenCapturerDifferWrapper should be used if that functionality
- // is necessary.
+-//
+-// If XDamage is used, this class sets DesktopFrame::updated_region() according
+-// to the areas reported by XDamage. Otherwise this class does not detect
+-// DesktopFrame::updated_region(), the field is always set to the entire frame
+-// rectangle. ScreenCapturerDifferWrapper should be used if that functionality
+-// is necessary.
 -class ScreenCapturerLinux : public DesktopCapturer,
-+class ScreenCapturerX11 : public DesktopCapturer,
-                             public SharedXDisplay::XEventHandler {
-  public:
+-                            public SharedXDisplay::XEventHandler {
+- public:
 -  ScreenCapturerLinux();
 -  ~ScreenCapturerLinux() override;
-+  ScreenCapturerX11();
-+  ~ScreenCapturerX11() override;
-+
-+  static std::unique_ptr<DesktopCapturer> CreateRawScreenCapturer(const DesktopCaptureOptions& options);
- 
-   // TODO(ajwong): Do we really want this to be synchronous?
-   bool Init(const DesktopCaptureOptions& options);
-@@ -118,14 +120,13 @@ class ScreenCapturerLinux : public Deskt
-   // current with the last buffer used.
-   DesktopRegion last_invalid_region_;
- 
--  RTC_DISALLOW_COPY_AND_ASSIGN(ScreenCapturerLinux);
-+  RTC_DISALLOW_COPY_AND_ASSIGN(ScreenCapturerX11);
- };
 -
+-  // TODO(ajwong): Do we really want this to be synchronous?
+-  bool Init(const DesktopCaptureOptions& options);
+-
+-  // DesktopCapturer interface.
+-  void Start(Callback* delegate) override;
+-  void Stop() override;
+-  void CaptureFrame() override;
+-  bool GetSourceList(SourceList* sources) override;
+-  bool SelectSource(SourceId id) override;
+-
+- private:
+-  Display* display() { return options_.x_display()->display(); }
+-
+-  // SharedXDisplay::XEventHandler interface.
+-  bool HandleXEvent(const XEvent& event) override;
+-
+-  void InitXDamage();
+-
+-  // Capture screen pixels to the current buffer in the queue. In the DAMAGE
+-  // case, the ScreenCapturerHelper already holds the list of invalid rectangles
+-  // from HandleXEvent(). In the non-DAMAGE case, this captures the
+-  // whole screen, then calculates some invalid rectangles that include any
+-  // differences between this and the previous capture.
+-  std::unique_ptr<DesktopFrame> CaptureScreen();
+-
+-  // Called when the screen configuration is changed.
+-  void ScreenConfigurationChanged();
+-
+-  // Synchronize the current buffer with |last_buffer_|, by copying pixels from
+-  // the area of |last_invalid_rects|.
+-  // Note this only works on the assumption that kNumBuffers == 2, as
+-  // |last_invalid_rects| holds the differences from the previous buffer and
+-  // the one prior to that (which will then be the current buffer).
+-  void SynchronizeFrame();
+-
+-  void DeinitXlib();
+-
+-  DesktopCaptureOptions options_;
+-
+-  Callback* callback_ = nullptr;
+-
+-  // X11 graphics context.
+-  GC gc_ = nullptr;
+-  Window root_window_ = BadValue;
+-
+-  // XFixes.
+-  bool has_xfixes_ = false;
+-  int xfixes_event_base_ = -1;
+-  int xfixes_error_base_ = -1;
+-
+-  // XDamage information.
+-  bool use_damage_ = false;
+-  Damage damage_handle_ = 0;
+-  int damage_event_base_ = -1;
+-  int damage_error_base_ = -1;
+-  XserverRegion damage_region_ = 0;
+-
+-  // Access to the X Server's pixel buffer.
+-  XServerPixelBuffer x_server_pixel_buffer_;
+-
+-  // A thread-safe list of invalid rectangles, and the size of the most
+-  // recently captured screen.
+-  ScreenCapturerHelper helper_;
+-
+-  // Queue of the frames buffers.
+-  ScreenCaptureFrameQueue<SharedDesktopFrame> queue_;
+-
+-  // Invalid region from the previous capture. This is used to synchronize the
+-  // current with the last buffer used.
+-  DesktopRegion last_invalid_region_;
+-
+-  RTC_DISALLOW_COPY_AND_ASSIGN(ScreenCapturerLinux);
+-};
+ 
 -ScreenCapturerLinux::ScreenCapturerLinux() {
 +ScreenCapturerX11::ScreenCapturerX11() {
    helper_.SetLogGridSize(4);
@@ -1651,7 +1906,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    options_.x_display()->RemoveEventHandler(ConfigureNotify, this);
    if (use_damage_) {
      options_.x_display()->RemoveEventHandler(
-@@ -134,7 +135,7 @@ ScreenCapturerLinux::~ScreenCapturerLinu
+@@ -134,7 +48,7 @@
    DeinitXlib();
  }
  
@@ -1660,7 +1915,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    options_ = options;
  
    root_window_ = RootWindow(display(), DefaultScreen(display()));
-@@ -177,7 +178,7 @@ bool ScreenCapturerLinux::Init(const Des
+@@ -177,7 +91,7 @@
    return true;
  }
  
@@ -1669,7 +1924,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    // Our use of XDamage requires XFixes.
    if (!has_xfixes_) {
      return;
-@@ -218,18 +219,18 @@ void ScreenCapturerLinux::InitXDamage()
+@@ -218,18 +132,18 @@
    LOG(LS_INFO) << "Using XDamage extension.";
  }
  
@@ -1691,7 +1946,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    int64_t capture_start_time_nanos = rtc::TimeNanos();
  
    queue_.MoveToNextFrame();
-@@ -243,6 +244,7 @@ void ScreenCapturerLinux::CaptureFrame()
+@@ -243,6 +157,7 @@
    // in a good shape.
    if (!x_server_pixel_buffer_.is_initialized()) {
       // We failed to initialize pixel buffer.
@@ -1699,7 +1954,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
       callback_->OnCaptureResult(Result::ERROR_PERMANENT, nullptr);
       return;
    }
-@@ -258,6 +260,7 @@ void ScreenCapturerLinux::CaptureFrame()
+@@ -258,6 +173,7 @@
  
    std::unique_ptr<DesktopFrame> result = CaptureScreen();
    if (!result) {
@@ -1707,7 +1962,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
      callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
      return;
    }
-@@ -268,19 +271,19 @@ void ScreenCapturerLinux::CaptureFrame()
+@@ -268,19 +184,19 @@
    callback_->OnCaptureResult(Result::SUCCESS, std::move(result));
  }
  
@@ -1730,7 +1985,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    if (use_damage_ && (event.type == damage_event_base_ + XDamageNotify)) {
      const XDamageNotifyEvent* damage_event =
          reinterpret_cast<const XDamageNotifyEvent*>(&event);
-@@ -295,7 +298,7 @@ bool ScreenCapturerLinux::HandleXEvent(c
+@@ -295,7 +211,7 @@
    return false;
  }
  
@@ -1739,7 +1994,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    std::unique_ptr<SharedDesktopFrame> frame = queue_.current_frame()->Share();
    RTC_DCHECK(x_server_pixel_buffer_.window_size().equals(frame->size()));
  
-@@ -345,25 +348,26 @@ std::unique_ptr<DesktopFrame> ScreenCapt
+@@ -345,14 +261,15 @@
      // Doing full-screen polling, or this is the first capture after a
      // screen-resolution change.  In either case, need a full-screen capture.
      DesktopRect screen_rect = DesktopRect::MakeSize(frame->size());
@@ -1757,11 +2012,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    // Make sure the frame buffers will be reallocated.
    queue_.Reset();
  
-   helper_.ClearInvalidRegion();
-   if (!x_server_pixel_buffer_.Init(display(), DefaultRootWindow(display()))) {
-     LOG(LS_ERROR) << "Failed to initialize pixel buffer after screen "
--        "configuration change.";
-+                         "configuration change.";
+@@ -363,7 +280,7 @@
    }
  }
  
@@ -1770,7 +2021,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    // Synchronize the current buffer with the previous one since we do not
    // capture the entire desktop. Note that encoder may be reading from the
    // previous buffer at this time so thread access complaints are false
-@@ -383,7 +387,7 @@ void ScreenCapturerLinux::SynchronizeFra
+@@ -383,7 +300,7 @@
    }
  }
  
@@ -1779,9 +2030,12 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
    if (gc_) {
      XFreeGC(display(), gc_);
      gc_ = nullptr;
-@@ -407,17 +411,17 @@ void ScreenCapturerLinux::DeinitXlib() {
- }  // namespace
+@@ -404,20 +321,18 @@
+   }
+ }
  
+-}  // namespace
+-
  // static
 -std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawScreenCapturer(
 +std::unique_ptr<DesktopCapturer> ScreenCapturerX11::CreateRawScreenCapturer(
@@ -1800,9 +2054,137 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_c
  }
  
  }  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc.firefox-pipewire	2018-12-05 13:04:08.833063546 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc	2018-12-05 13:04:08.833063546 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.h	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_x11.h	2019-01-07 13:20:40.169768552 +0100
+@@ -0,0 +1,124 @@
++/*
++ *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
++ *
++ *  Use of this source code is governed by a BSD-style license
++ *  that can be found in the LICENSE file in the root of the source
++ *  tree. An additional intellectual property rights grant can be found
++ *  in the file PATENTS.  All contributing project authors may
++ *  be found in the AUTHORS file in the root of the source tree.
++ */
++
++#ifndef MODULES_DESKTOP_CAPTURE_SCREEN_CAPTURER_X11_H_
++#define MODULES_DESKTOP_CAPTURE_SCREEN_CAPTURER_X11_H_
++
++#include <X11/X.h>
++#include <X11/Xlib.h>
++#include <X11/extensions/Xdamage.h>
++#include <X11/extensions/Xfixes.h>
++#include <memory>
++
++#include "webrtc/modules/desktop_capture/desktop_capture_options.h"
++#include "webrtc/modules/desktop_capture/desktop_capturer.h"
++#include "webrtc/modules/desktop_capture/desktop_frame.h"
++#include "webrtc/modules/desktop_capture/desktop_region.h"
++#include "webrtc/modules/desktop_capture/x11/shared_x_display.h"
++#include "webrtc/modules/desktop_capture/x11/x_server_pixel_buffer.h"
++#include "webrtc/modules/desktop_capture/screen_capture_frame_queue.h"
++#include "webrtc/modules/desktop_capture/screen_capturer_helper.h"
++#include "webrtc/modules/desktop_capture/shared_desktop_frame.h"
++#include "webrtc/base/constructormagic.h"
++
++namespace webrtc {
++
++// A class to perform video frame capturing for Linux on X11.
++//
++// If XDamage is used, this class sets DesktopFrame::updated_region() according
++// to the areas reported by XDamage. Otherwise this class does not detect
++// DesktopFrame::updated_region(), the field is always set to the entire frame
++// rectangle. ScreenCapturerDifferWrapper should be used if that functionality
++// is necessary.
++class ScreenCapturerX11 : public DesktopCapturer,
++                          public SharedXDisplay::XEventHandler {
++ public:
++  ScreenCapturerX11();
++  ~ScreenCapturerX11() override;
++
++  static std::unique_ptr<DesktopCapturer> CreateRawScreenCapturer(const DesktopCaptureOptions& options);
++
++  // TODO(ajwong): Do we really want this to be synchronous?
++  bool Init(const DesktopCaptureOptions& options);
++
++  // DesktopCapturer interface.
++  void Start(Callback* delegate) override;
++  void Stop() override;
++  void CaptureFrame() override;
++  bool GetSourceList(SourceList* sources) override;
++  bool SelectSource(SourceId id) override;
++
++ private:
++  Display* display() { return options_.x_display()->display(); }
++
++  // SharedXDisplay::XEventHandler interface.
++  bool HandleXEvent(const XEvent& event) override;
++
++  void InitXDamage();
++
++  // Capture screen pixels to the current buffer in the queue. In the DAMAGE
++  // case, the ScreenCapturerHelper already holds the list of invalid rectangles
++  // from HandleXEvent(). In the non-DAMAGE case, this captures the
++  // whole screen, then calculates some invalid rectangles that include any
++  // differences between this and the previous capture.
++  std::unique_ptr<DesktopFrame> CaptureScreen();
++
++  // Called when the screen configuration is changed.
++  void ScreenConfigurationChanged();
++
++  // Synchronize the current buffer with |last_buffer_|, by copying pixels from
++  // the area of |last_invalid_rects|.
++  // Note this only works on the assumption that kNumBuffers == 2, as
++  // |last_invalid_rects| holds the differences from the previous buffer and
++  // the one prior to that (which will then be the current buffer).
++  void SynchronizeFrame();
++
++  void DeinitXlib();
++
++  DesktopCaptureOptions options_;
++
++  Callback* callback_ = nullptr;
++
++  // X11 graphics context.
++  GC gc_ = nullptr;
++  Window root_window_ = BadValue;
++
++  // XFixes.
++  bool has_xfixes_ = false;
++  int xfixes_event_base_ = -1;
++  int xfixes_error_base_ = -1;
++
++  // XDamage information.
++  bool use_damage_ = false;
++  Damage damage_handle_ = 0;
++  int damage_event_base_ = -1;
++  int damage_error_base_ = -1;
++  XserverRegion damage_region_ = 0;
++
++  // Access to the X Server's pixel buffer.
++  XServerPixelBuffer x_server_pixel_buffer_;
++
++  // A thread-safe list of invalid rectangles, and the size of the most
++  // recently captured screen.
++  ScreenCapturerHelper helper_;
++
++  // Queue of the frames buffers.
++  ScreenCaptureFrameQueue<SharedDesktopFrame> queue_;
++
++  // Invalid region from the previous capture. This is used to synchronize the
++  // current with the last buffer used.
++  DesktopRegion last_invalid_region_;
++
++  RTC_DISALLOW_COPY_AND_ASSIGN(ScreenCapturerX11);
++};
++
++}  // namespace webrtc
++
++#endif  // MODULES_DESKTOP_CAPTURE_SCREEN_CAPTURER_X11_H_
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc	2019-01-07 13:20:40.196768822 +0100
 @@ -0,0 +1,40 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1817,12 +2199,12 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
 +#include "webrtc/modules/desktop_capture/desktop_capture_options.h"
 +#include "webrtc/modules/desktop_capture/desktop_capturer.h"
 +
-+#if defined(USE_PIPEWIRE)
++#if defined(WEBRTC_USE_PIPEWIRE)
 +#include "webrtc/modules/desktop_capture/window_capturer_pipewire.h"
-+#endif  // defined(USE_PIPEWIRE)
++#endif  // defined(WEBRTC_USE_PIPEWIRE)
 +
 +#if defined(USE_X11)
-+#include "webrtc/modules/desktop_capture/window_capturer_x11.cc"
++#include "webrtc/modules/desktop_capture/window_capturer_x11.h"
 +#endif  // defined(USE_X11)
 +
 +namespace webrtc {
@@ -1830,11 +2212,11 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
 +// static
 +std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawWindowCapturer(
 +    const DesktopCaptureOptions& options) {
-+#if defined(USE_PIPEWIRE)
-+  if (DesktopCapturer::IsRunningUnderWayland()) {
++#if defined(WEBRTC_USE_PIPEWIRE)
++  if (options.allow_pipewire() && DesktopCapturer::IsRunningUnderWayland()) {
 +    return WindowCapturerPipeWire::CreateRawWindowCapturer(options);
 +  }
-+#endif  // defined(USE_PIPEWIRE)
++#endif  // defined(WEBRTC_USE_PIPEWIRE)
 +
 +#if defined(USE_X11)
 +  return WindowCapturerX11::CreateRawWindowCapturer(options);
@@ -1844,25 +2226,9 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
 +}
 +
 +}  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_null.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_null.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_null.cc.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_null.cc	2018-12-05 13:04:08.833063546 +0100
-@@ -67,10 +67,12 @@ void WindowCapturerNull::CaptureFrame()
- 
- }  // namespace
- 
-+#if not defined(USE_PIPEWIRE)
- // static
- std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawWindowCapturer(
-     const DesktopCaptureOptions& options) {
-   return std::unique_ptr<DesktopCapturer>(new WindowCapturerNull());
- }
-+#endif // not defined(USE_PIPEWIRE)
- 
- }  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc.firefox-pipewire	2018-12-05 13:04:08.833063546 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc	2018-12-05 13:04:08.833063546 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.cc	2019-01-07 13:20:40.197768832 +0100
 @@ -0,0 +1,28 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1892,9 +2258,9 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
 +  return std::move(capturer);
 +}
 +}  // namespace webrtc
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h.firefox-pipewire	2018-12-05 13:04:08.833063546 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h	2018-12-05 13:04:08.833063546 +0100
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_pipewire.h	2019-01-07 13:20:40.177768632 +0100
 @@ -0,0 +1,33 @@
 +/*
 + *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
@@ -1906,8 +2272,8 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
 + *  be found in the AUTHORS file in the root of the source tree.
 + */
 +
-+#ifndef MODULES_DESKTOP_CAPTURE_LINUX_WINDOW_CAPTURER_PIPEWIRE_H_
-+#define MODULES_DESKTOP_CAPTURE_LINUX_WINDOW_CAPTURER_PIPEWIRE_H_
++#ifndef MODULES_DESKTOP_CAPTURE_WINDOW_CAPTURER_PIPEWIRE_H_
++#define MODULES_DESKTOP_CAPTURE_WINDOW_CAPTURER_PIPEWIRE_H_
 +
 +#include <memory>
 +
@@ -1928,41 +2294,80 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
 +
 +}  // namespace webrtc
 +
-+#endif  // MODULES_DESKTOP_CAPTURE_LINUX_WINDOW_CAPTURER_PIPEWIRE_H_
-diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc.firefox-pipewire firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc
---- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc.firefox-pipewire	2018-12-04 00:34:14.000000000 +0100
-+++ firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc	2018-12-05 13:04:08.833063546 +0100
-@@ -32,11 +32,13 @@ namespace webrtc {
++#endif  // MODULES_DESKTOP_CAPTURE_WINDOW_CAPTURER_PIPEWIRE_H_
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc	2019-01-07 13:16:46.375432930 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.cc	2019-01-07 13:20:40.198768842 +0100
+@@ -17,6 +17,8 @@
  
- namespace {
+ #include <algorithm>
  
++#include "webrtc/modules/desktop_capture/window_capturer_x11.h"
++
+ #include "webrtc/base/constructormagic.h"
+ #include "webrtc/base/scoped_ref_ptr.h"
+ #include "webrtc/modules/desktop_capture/desktop_capturer.h"
+@@ -30,58 +32,7 @@
+ 
+ namespace webrtc {
+ 
+-namespace {
+-
 -class WindowCapturerLinux : public DesktopCapturer,
-+class WindowCapturerX11 : public DesktopCapturer,
-                             public SharedXDisplay::XEventHandler {
-  public:
+-                            public SharedXDisplay::XEventHandler {
+- public:
 -  WindowCapturerLinux(const DesktopCaptureOptions& options);
 -  ~WindowCapturerLinux() override;
-+  WindowCapturerX11(const DesktopCaptureOptions& options);
-+  ~WindowCapturerX11() override;
-+
-+  static std::unique_ptr<DesktopCapturer> CreateRawWindowCapturer(const DesktopCaptureOptions& options);
- 
-   // DesktopCapturer interface.
-   void Start(Callback* callback) override;
-@@ -78,10 +80,10 @@ class WindowCapturerLinux : public Deskt
-   ::Window selected_window_ = 0;
-   XServerPixelBuffer x_server_pixel_buffer_;
- 
+-
+-  // DesktopCapturer interface.
+-  void Start(Callback* callback) override;
+-  void Stop() override;
+-  void CaptureFrame() override;
+-  bool GetSourceList(SourceList* sources) override;
+-  bool SelectSource(SourceId id) override;
+-  bool FocusOnSelectedSource() override;
+-
+-  // SharedXDisplay::XEventHandler interface.
+-  bool HandleXEvent(const XEvent& event) override;
+-
+- private:
+-  Display* display() { return x_display_->display(); }
+-
+-  // Iterates through |window| hierarchy to find first visible window, i.e. one
+-  // that has WM_STATE property set to NormalState.
+-  // See http://tronche.com/gui/x/icccm/sec-4.html#s-4.1.3.1 .
+-  ::Window GetApplicationWindow(::Window window);
+-
+-  // Returns true if the |window| is a desktop element.
+-  bool IsDesktopElement(::Window window);
+-
+-  // Returns window title for the specified X |window|.
+-  bool GetWindowTitle(::Window window, std::string* title);
+-
+-  // Returns the id of the owning process.
+-  int GetWindowProcessID(::Window window);
+-
+-  Callback* callback_ = nullptr;
+-
+-  rtc::scoped_refptr<SharedXDisplay> x_display_;
+-
+-  Atom wm_state_atom_;
+-  Atom window_type_atom_;
+-  Atom normal_window_type_atom_;
+-  bool has_composite_extension_ = false;
+-
+-  ::Window selected_window_ = 0;
+-  XServerPixelBuffer x_server_pixel_buffer_;
+-
 -  RTC_DISALLOW_COPY_AND_ASSIGN(WindowCapturerLinux);
-+  RTC_DISALLOW_COPY_AND_ASSIGN(WindowCapturerX11);
- };
- 
+-};
+-
 -WindowCapturerLinux::WindowCapturerLinux(const DesktopCaptureOptions& options)
 +WindowCapturerX11::WindowCapturerX11(const DesktopCaptureOptions& options)
      : x_display_(options.x_display()) {
    // Create Atoms so we don't need to do it every time they are used.
    wm_state_atom_ = XInternAtom(display(), "WM_STATE", True);
-@@ -102,11 +104,11 @@ WindowCapturerLinux::WindowCapturerLinux
+@@ -102,11 +53,11 @@
    x_display_->AddEventHandler(ConfigureNotify, this);
  }
  
@@ -1976,7 +2381,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    SourceList result;
  
    XErrorTrap error_trap(display());
-@@ -159,7 +161,7 @@ bool WindowCapturerLinux::GetSourceList(
+@@ -159,7 +110,7 @@
    return true;
  }
  
@@ -1985,7 +2390,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    if (!x_server_pixel_buffer_.Init(display(), id))
      return false;
  
-@@ -180,7 +182,7 @@ bool WindowCapturerLinux::SelectSource(S
+@@ -180,7 +131,7 @@
    return true;
  }
  
@@ -1994,7 +2399,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    if (!selected_window_)
      return false;
  
-@@ -229,18 +231,18 @@ bool WindowCapturerLinux::FocusOnSelecte
+@@ -229,18 +180,18 @@
    return true;
  }
  
@@ -2016,7 +2421,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    x_display_->ProcessPendingXEvents();
  
    if (!x_server_pixel_buffer_.IsWindowValid()) {
-@@ -274,7 +276,7 @@ void WindowCapturerLinux::CaptureFrame()
+@@ -274,7 +225,7 @@
    callback_->OnCaptureResult(Result::SUCCESS, std::move(frame));
  }
  
@@ -2025,7 +2430,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    if (event.type == ConfigureNotify) {
      XConfigureEvent xce = event.xconfigure;
      if (!DesktopSize(xce.width, xce.height).equals(
-@@ -288,7 +290,7 @@ bool WindowCapturerLinux::HandleXEvent(c
+@@ -288,7 +239,7 @@
    return false;
  }
  
@@ -2034,7 +2439,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    // Get WM_STATE property of the window.
    XWindowProperty<uint32_t> window_state(display(), window, wm_state_atom_);
  
-@@ -326,7 +328,7 @@ bool WindowCapturerLinux::HandleXEvent(c
+@@ -326,7 +277,7 @@
    return app_window;
  }
  
@@ -2043,7 +2448,7 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    if (window == 0)
      return false;
  
-@@ -361,7 +363,7 @@ bool WindowCapturerLinux::IsDesktopEleme
+@@ -361,7 +312,7 @@
    return result;
  }
  
@@ -2052,16 +2457,18 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
    int status;
    bool result = false;
    XTextProperty window_name;
-@@ -392,7 +394,7 @@ bool WindowCapturerLinux::GetWindowTitle
+@@ -390,9 +341,7 @@
+   return result;
+ }
  
- }  // namespace
- 
+-}  // namespace
+-
 -int WindowCapturerLinux::GetWindowProcessID(::Window window) {
 +int WindowCapturerX11::GetWindowProcessID(::Window window) {
    // Get _NET_WM_PID property of the window.
    Atom process_atom = XInternAtom(display(), "_NET_WM_PID", True);
    XWindowProperty<uint32_t> process_id(display(), window, process_atom);
-@@ -401,11 +403,11 @@ int WindowCapturerLinux::GetWindowProces
+@@ -401,11 +350,11 @@
  }
  
  // static
@@ -2075,3 +2482,90 @@ diff -up firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_c
  }
  
  }  // namespace webrtc
+diff -ENwbur firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.h firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.h
+--- firefox-64.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.h	1970-01-01 01:00:00.000000000 +0100
++++ firefox-webrtc/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_x11.h	2019-01-07 13:20:40.177768632 +0100
+@@ -0,0 +1,83 @@
++/*
++ *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
++ *
++ *  Use of this source code is governed by a BSD-style license
++ *  that can be found in the LICENSE file in the root of the source
++ *  tree. An additional intellectual property rights grant can be found
++ *  in the file PATENTS.  All contributing project authors may
++ *  be found in the AUTHORS file in the root of the source tree.
++ */
++
++#ifndef MODULES_DESKTOP_CAPTURE_WINDOW_CAPTURER_X11_H_
++#define MODULES_DESKTOP_CAPTURE_WINDOW_CAPTURER_X11_H_
++
++#include <X11/X.h>
++#include <X11/Xlib.h>
++#include <memory>
++#include <string>
++
++#include "webrtc/modules/desktop_capture/desktop_capture_options.h"
++#include "webrtc/modules/desktop_capture/desktop_capturer.h"
++#include "webrtc/modules/desktop_capture/desktop_geometry.h"
++#include "webrtc/modules/desktop_capture/x11/shared_x_display.h"
++#include "webrtc/modules/desktop_capture/x11/x_server_pixel_buffer.h"
++#include "webrtc/base/constructormagic.h"
++#include "webrtc/base/scoped_ref_ptr.h"
++
++namespace webrtc {
++
++class WindowCapturerX11 : public DesktopCapturer,
++                          public SharedXDisplay::XEventHandler {
++ public:
++  explicit WindowCapturerX11(const DesktopCaptureOptions& options);
++  ~WindowCapturerX11() override;
++
++  static std::unique_ptr<DesktopCapturer> CreateRawWindowCapturer(
++      const DesktopCaptureOptions& options);
++
++  // DesktopCapturer interface.
++  void Start(Callback* callback) override;
++  void Stop() override;
++  void CaptureFrame() override;
++  bool GetSourceList(SourceList* sources) override;
++  bool SelectSource(SourceId id) override;
++  bool FocusOnSelectedSource() override;
++
++  // SharedXDisplay::XEventHandler interface.
++  bool HandleXEvent(const XEvent& event) override;
++
++ private:
++  Display* display() { return x_display_->display(); }
++
++  // Iterates through |window| hierarchy to find first visible window, i.e. one
++  // that has WM_STATE property set to NormalState.
++  // See http://tronche.com/gui/x/icccm/sec-4.html#s-4.1.3.1 .
++  ::Window GetApplicationWindow(::Window window);
++
++  // Returns true if the |window| is a desktop element.
++  bool IsDesktopElement(::Window window);
++
++  // Returns window title for the specified X |window|.
++  bool GetWindowTitle(::Window window, std::string* title);
++
++  // Returns the id of the owning process.
++  int GetWindowProcessID(::Window window);
++
++  Callback* callback_ = nullptr;
++
++  rtc::scoped_refptr<SharedXDisplay> x_display_;
++
++  Atom wm_state_atom_;
++  Atom window_type_atom_;
++  Atom normal_window_type_atom_;
++  bool has_composite_extension_ = false;
++
++  ::Window selected_window_ = 0;
++  XServerPixelBuffer x_server_pixel_buffer_;
++
++  RTC_DISALLOW_COPY_AND_ASSIGN(WindowCapturerX11);
++};
++
++}  // namespace webrtc
++
++#endif  // MODULES_DESKTOP_CAPTURE_WINDOW_CAPTURER_X11_H_

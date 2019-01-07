@@ -347,8 +347,7 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 27
-# Temporary disabled due to build failures
-#%patch574 -p1 -b .firefox-pipewire
+%patch574 -p1 -b .firefox-pipewire
 %endif
 %patch581 -p1 -b .mozilla-1493081
 %patch582 -p1 -b .mozilla-1504689
