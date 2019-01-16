@@ -895,7 +895,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Jan 16 2018 Martin Stransky <stransky@redhat.com> - 64.0.2-2
+* Wed Jan 16 2019 Martin Stransky <stransky@redhat.com> - 64.0.2-2
 - Rebuild
 
 * Thu Jan 10 2019 Jan Horak <jhorak@redhat.com> - 64.0.2-1
