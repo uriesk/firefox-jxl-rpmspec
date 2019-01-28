@@ -73,13 +73,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        64.0.2
-Release:        2%{?pre_tag}%{?dist}
+Version:        65.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190110.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190128.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -110,7 +110,6 @@ Patch37:        build-jit-atomic-always-lucky.patch
 Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
-Patch44:        mozilla-1494037.patch
 Patch46:        firefox-debug-build.patch
 
 # Fedora specific patches
@@ -133,14 +132,9 @@ Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch416:        mozilla-1424422.patch
 Patch417:        bug1375074-save-restore-x28.patch
-Patch421:        mozilla-1447775.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
-Patch581:        mozilla-1493081.patch
-Patch582:        mozilla-1504689.patch
-Patch585:        mozilla-1507475.patch
-Patch586:        firefox-wayland-crash-mozbz1507475.patch
 
 # Debian patches
 Patch500:        mozilla-440908.patch
@@ -314,18 +308,18 @@ This package contains results of tests executed during build.
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 %patch37 -p1 -b .jit-atomic-lucky
-%patch40 -p1 -b .aarch64-skia
+# TODO Fix later
+#%patch40 -p1 -b .aarch64-skia
 %if 0%{?disable_elfhack}
 %patch41 -p1 -b .disable-elfhack
 %endif
 %patch3  -p1 -b .arm
-%patch44 -p1 -b .1494037
 %patch46 -p1 -b .debug
 
 # Fedora patches
 %patch215 -p1 -b .addons
-%patch219 -p2 -b .rhbz-1173156
-%patch221 -p2 -b .fedora-ua
+%patch219 -p1 -b .rhbz-1173156
+%patch221 -p1 -b .fedora-ua
 %patch224 -p1 -b .1170092
 #ARM run-time patch
 %ifarch aarch64
@@ -343,16 +337,12 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
-%patch421 -p1 -b .1447775
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 28
-%patch574 -p1 -b .firefox-pipewire
+# TODO
+#%patch574 -p1 -b .firefox-pipewire
 %endif
-%patch581 -p1 -b .mozilla-1493081
-%patch582 -p1 -b .mozilla-1504689
-%patch585 -p1 -b .mozbz1507475
-%patch586 -p1 -b .crash-mozbz1507475
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -895,6 +885,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 28 2019 Martin Stransky <stransky@redhat.com> - 65.0-1
+- Update to 65.0 build 2 
+
 * Wed Jan 16 2019 Martin Stransky <stransky@redhat.com> - 64.0.2-2
 - Rebuild
 

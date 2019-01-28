@@ -1,33 +1,32 @@
-diff -up firefox-63.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092 firefox-63.0/extensions/pref/autoconfig/src/nsReadConfig.cpp
---- firefox-63.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092	2018-10-15 21:20:45.000000000 +0200
-+++ firefox-63.0/extensions/pref/autoconfig/src/nsReadConfig.cpp	2018-10-18 13:37:55.993001292 +0200
-@@ -265,9 +265,20 @@ nsresult nsReadConfig::openAndEvaluateJS
-             return rv;
+diff -up firefox-65.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092 firefox-65.0/extensions/pref/autoconfig/src/nsReadConfig.cpp
+--- firefox-65.0/extensions/pref/autoconfig/src/nsReadConfig.cpp.1170092	2019-01-24 19:48:40.000000000 +0100
++++ firefox-65.0/extensions/pref/autoconfig/src/nsReadConfig.cpp	2019-01-28 14:35:05.084756038 +0100
+@@ -244,8 +244,20 @@ nsresult nsReadConfig::openAndEvaluateJS
+     if (NS_FAILED(rv)) return rv;
  
-         rv = NS_NewLocalFileInputStream(getter_AddRefs(inStr), jsFile);
--        if (NS_FAILED(rv))
--            return rv;
-+        if (NS_FAILED(rv)) {
-+          // Look for cfg file in /etc/<application>/pref
-+          rv = NS_GetSpecialDirectory(NS_APP_PREFS_SYSTEM_CONFIG_DIR,
-+                                      getter_AddRefs(jsFile));
-+          NS_ENSURE_SUCCESS(rv, rv);
+     rv = NS_NewLocalFileInputStream(getter_AddRefs(inStr), jsFile);
+-    if (NS_FAILED(rv)) return rv;
++    if (NS_FAILED(rv)) {
++      // Look for cfg file in /etc/<application>/pref
++      rv = NS_GetSpecialDirectory(NS_APP_PREFS_SYSTEM_CONFIG_DIR,
++                                  getter_AddRefs(jsFile));
++      NS_ENSURE_SUCCESS(rv, rv);
 +
-+          rv = jsFile->AppendNative(NS_LITERAL_CSTRING("pref"));
-+          NS_ENSURE_SUCCESS(rv, rv);
-+          rv = jsFile->AppendNative(nsDependentCString(aFileName));
-+          NS_ENSURE_SUCCESS(rv, rv);
++      rv = jsFile->AppendNative(NS_LITERAL_CSTRING("pref"));
++      NS_ENSURE_SUCCESS(rv, rv);
++      rv = jsFile->AppendNative(nsDependentCString(aFileName));
++      NS_ENSURE_SUCCESS(rv, rv);
  
-+          rv = NS_NewLocalFileInputStream(getter_AddRefs(inStr), jsFile);
-+          NS_ENSURE_SUCCESS(rv, rv);
-+        }
-     } else {
-         nsAutoCString location("resource://gre/defaults/autoconfig/");
-         location += aFileName;
-diff -up firefox-63.0/modules/libpref/Preferences.cpp.1170092 firefox-63.0/modules/libpref/Preferences.cpp
---- firefox-63.0/modules/libpref/Preferences.cpp.1170092	2018-10-15 21:20:49.000000000 +0200
-+++ firefox-63.0/modules/libpref/Preferences.cpp	2018-10-18 13:37:55.994001285 +0200
-@@ -4873,6 +4873,8 @@ Preferences::InitInitialObjects(bool aIs
++      rv = NS_NewLocalFileInputStream(getter_AddRefs(inStr), jsFile);
++      NS_ENSURE_SUCCESS(rv, rv);
++    }
+   } else {
+     nsAutoCString location("resource://gre/defaults/autoconfig/");
+     location += aFileName;
+diff -up firefox-65.0/modules/libpref/Preferences.cpp.1170092 firefox-65.0/modules/libpref/Preferences.cpp
+--- firefox-65.0/modules/libpref/Preferences.cpp.1170092	2019-01-24 19:48:47.000000000 +0100
++++ firefox-65.0/modules/libpref/Preferences.cpp	2019-01-28 14:35:05.085756034 +0100
+@@ -4406,6 +4406,8 @@ float MOZ_MAYBE_UNUSED GetPref<float>(co
    //
    // Thus, in the omni.jar case, we always load app-specific default
    // preferences from omni.jar, whether or not `$app == $gre`.
@@ -36,9 +35,9 @@ diff -up firefox-63.0/modules/libpref/Preferences.cpp.1170092 firefox-63.0/modul
  
    nsresult rv;
    nsZipFind* findPtr;
-diff -up firefox-63.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-63.0/toolkit/xre/nsXREDirProvider.cpp
---- firefox-63.0/toolkit/xre/nsXREDirProvider.cpp.1170092	2018-10-15 21:20:52.000000000 +0200
-+++ firefox-63.0/toolkit/xre/nsXREDirProvider.cpp	2018-10-18 13:41:06.969581700 +0200
+diff -up firefox-65.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-65.0/toolkit/xre/nsXREDirProvider.cpp
+--- firefox-65.0/toolkit/xre/nsXREDirProvider.cpp.1170092	2019-01-24 19:48:56.000000000 +0100
++++ firefox-65.0/toolkit/xre/nsXREDirProvider.cpp	2019-01-28 14:36:31.645396051 +0100
 @@ -57,6 +57,7 @@
  #endif
  #ifdef XP_UNIX
@@ -47,10 +46,11 @@ diff -up firefox-63.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-63.0/tool
  #endif
  #ifdef XP_IOS
  #include "UIKitDirProvider.h"
-@@ -527,6 +528,20 @@ nsXREDirProvider::GetFile(const char* aP
+@@ -525,6 +526,21 @@ nsXREDirProvider::GetFile(const char* aP
        }
      }
    }
++
 +#if defined(XP_UNIX)
 +  if (!strcmp(aProperty, NS_APP_PREFS_SYSTEM_CONFIG_DIR)) {
 +    nsCString sysConfigDir = NS_LITERAL_CSTRING("/etc/");
@@ -65,33 +65,34 @@ diff -up firefox-63.0/toolkit/xre/nsXREDirProvider.cpp.1170092 firefox-63.0/tool
 +  }
 +#endif
 +
-   if (NS_FAILED(rv) || !file)
-     return NS_ERROR_FAILURE;
+   if (NS_FAILED(rv) || !file) return NS_ERROR_FAILURE;
  
-@@ -863,6 +878,15 @@ nsXREDirProvider::GetFilesInternal(const
-     LoadDirsIntoArray(mAppBundleDirectories,
-                       kAppendPrefDir, directories);
+   if (ensureFilePermissions) {
+@@ -881,6 +897,16 @@ nsresult nsXREDirProvider::GetFilesInter
+     LoadDirIntoArray(mXULAppDir, kAppendPrefDir, directories);
+     LoadDirsIntoArray(mAppBundleDirectories, kAppendPrefDir, directories);
  
 +    // Add /etc/<application>/pref/ directory if it exists
 +    nsCOMPtr<nsIFile> systemPrefDir;
-+    rv = NS_GetSpecialDirectory(NS_APP_PREFS_SYSTEM_CONFIG_DIR, getter_AddRefs(systemPrefDir));
++    rv = NS_GetSpecialDirectory(NS_APP_PREFS_SYSTEM_CONFIG_DIR,
++                                getter_AddRefs(systemPrefDir));
 +    if (NS_SUCCEEDED(rv)) {
 +      rv = systemPrefDir->AppendNative(NS_LITERAL_CSTRING("pref"));
 +      if (NS_SUCCEEDED(rv))
-+        directories.AppendObject(systemPrefDir); 
++        directories.AppendObject(systemPrefDir);
 +    }
 +
      rv = NS_NewArrayEnumerator(aResult, directories, NS_GET_IID(nsIFile));
-   }
-   else if (!strcmp(aProperty, NS_APP_CHROME_DIR_LIST)) {
-diff -up firefox-63.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092 firefox-63.0/xpcom/io/nsAppDirectoryServiceDefs.h
---- firefox-63.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092	2018-10-15 21:20:52.000000000 +0200
-+++ firefox-63.0/xpcom/io/nsAppDirectoryServiceDefs.h	2018-10-18 13:37:55.994001285 +0200
-@@ -59,6 +59,7 @@
- #define NS_APP_PREFS_50_FILE                    "PrefF"
- #define NS_APP_PREFS_DEFAULTS_DIR_LIST          "PrefDL"
- #define NS_APP_PREFS_OVERRIDE_DIR               "PrefDOverride" // Directory for per-profile defaults
+   } else if (!strcmp(aProperty, NS_APP_CHROME_DIR_LIST)) {
+     // NS_APP_CHROME_DIR_LIST is only used to get default (native) icons
+diff -up firefox-65.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092 firefox-65.0/xpcom/io/nsAppDirectoryServiceDefs.h
+--- firefox-65.0/xpcom/io/nsAppDirectoryServiceDefs.h.1170092	2019-01-24 19:48:56.000000000 +0100
++++ firefox-65.0/xpcom/io/nsAppDirectoryServiceDefs.h	2019-01-28 14:35:05.086756030 +0100
+@@ -62,6 +62,7 @@
+ #define NS_APP_PREFS_DEFAULTS_DIR_LIST "PrefDL"
+ #define NS_APP_PREFS_OVERRIDE_DIR \
+   "PrefDOverride"  // Directory for per-profile defaults
 +#define NS_APP_PREFS_SYSTEM_CONFIG_DIR          "PrefSysConf"   // Directory with system-wide configuration
  
- #define NS_APP_USER_PROFILE_50_DIR              "ProfD"
- #define NS_APP_USER_PROFILE_LOCAL_50_DIR        "ProfLD"
+ #define NS_APP_USER_PROFILE_50_DIR "ProfD"
+ #define NS_APP_USER_PROFILE_LOCAL_50_DIR "ProfLD"

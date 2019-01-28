@@ -1,8 +1,8 @@
-diff -up firefox-63.0/toolkit/moz.configure.disable-elfhack firefox-63.0/toolkit/moz.configure
---- firefox-63.0/toolkit/moz.configure.disable-elfhack	2018-10-18 13:35:35.870039190 +0200
-+++ firefox-63.0/toolkit/moz.configure	2018-10-18 13:36:41.682515492 +0200
-@@ -1010,7 +1010,7 @@ with only_when('--enable-compile-environ
-                help='Disable elf hacks')
+diff -up firefox-65.0/toolkit/moz.configure.disable-elfhack firefox-65.0/toolkit/moz.configure
+--- firefox-65.0/toolkit/moz.configure.disable-elfhack	2019-01-28 14:16:48.530345132 +0100
++++ firefox-65.0/toolkit/moz.configure	2019-01-28 14:18:03.231029682 +0100
+@@ -1036,7 +1036,7 @@ with only_when('--enable-compile-environ
+                help='{Enable|Disable} elf hacks')
  
          set_config('USE_ELF_HACK',
 -                   depends_if('--enable-elf-hack')(lambda _: True))
