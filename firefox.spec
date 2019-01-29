@@ -100,7 +100,6 @@ Source31:       firefox-x11.desktop
 Patch3:         mozilla-build-arm.patch
 Patch25:        rhbz-1219542-s390-build.patch
 Patch26:        build-icu-big-endian.patch
-Patch27:        mozilla-1335250.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
 # Always feel lucky for unsupported platforms:
@@ -124,20 +123,14 @@ Patch227:        firefox-locale-debug.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch406:        mozilla-256180.patch
-Patch410:        mozilla-1321521.patch
-Patch411:        mozilla-1321521-2.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch414:        mozilla-1435212-ffmpeg-4.0.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
-Patch416:        mozilla-1424422.patch
 Patch417:        bug1375074-save-restore-x28.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
-
-# Debian patches
-Patch500:        mozilla-440908.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
