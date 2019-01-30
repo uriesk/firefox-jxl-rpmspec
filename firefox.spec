@@ -332,7 +332,7 @@ This package contains results of tests executed during build.
 # Wayland specific upstream patches
 %if 0%{?fedora} > 28
 # TODO
-#%patch574 -p1 -b .firefox-pipewire
+%patch574 -p1 -b .firefox-pipewire
 %endif
 
 # PGO patches
