@@ -130,6 +130,7 @@ Patch417:        bug1375074-save-restore-x28.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
+Patch575:        mozilla-1522780.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -334,6 +335,7 @@ This package contains results of tests executed during build.
 # TODO
 #%patch574 -p1 -b .firefox-pipewire
 %endif
+%patch575 -p1 -b .1522780
 
 # PGO patches
 %patch600 -p1 -b .pgo
