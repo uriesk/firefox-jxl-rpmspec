@@ -602,14 +602,14 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 
 # set up the firefox start script
 %if 0%{?wayland_backend_default}
-%global x11_state false
+%global wayland_default true
 %else
-%global x11_state true
+%global wayland_default false
 %endif
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
-%{__sed} -e 's/__DEFAULT_X11__/%{x11_state}/' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
-
+%{__sed} -e 's/__DEFAULT_WAYLAND__/%{wayland_default}/' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
+
 %if 0%{?wayland_backend_default}
 %{__cat} %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
