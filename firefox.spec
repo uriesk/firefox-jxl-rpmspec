@@ -74,7 +74,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        65.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -332,7 +332,6 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 28
-# TODO
 %patch574 -p1 -b .firefox-pipewire
 %endif
 %patch575 -p1 -b .1522780
@@ -878,6 +877,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 4 2019 Martin Stransky <stransky@redhat.com> - 65.0-4
+- Added fix for mozbz#1522780
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 65.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
