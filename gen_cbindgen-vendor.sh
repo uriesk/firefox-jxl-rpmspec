@@ -1,4 +1,6 @@
 #!/bin/bash
+set -x
+
 # Dummy Cargo.toml file with cbindgen dependency
 cat > Cargo.toml <<EOL
 [package]
