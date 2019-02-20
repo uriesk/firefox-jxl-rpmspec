@@ -1,5 +1,9 @@
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
+# Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
+%if 0%{?fedora} == 28
+ExcludeArch: s390x
+%endif
 
 %global system_nss        1
 %global system_ffi        1
@@ -877,6 +881,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Feb 20 2019 Martin Stransky <stransky@redhat.com> - 65.0.1-1
+- Disabled s390x/f28 builds due to
+  https://pagure.io/fedora-infrastructure/issue/7581
+
 * Fri Feb 15 2019 Jan Horak <jhorak@redhat.com> - 65.0.1-1
 - Update to 65.0.1
 
