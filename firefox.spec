@@ -67,14 +67,18 @@ ExcludeArch: armv7hl
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
+# Disable crashreporter for Fedora 30 / Rawhide
+# to collect Wayland crashes.
+%if 0%{?fedora} < 30
 %global enable_mozilla_crashreporter       1
+%endif
 %endif
 %endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        65.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -877,6 +881,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Feb 28 2019 Martin Stransky <stransky@redhat.com> - 65.0.1-2
+- Enable ARBT for Fedora 30 / Rawhide to catch wayland crashes.
+
 * Wed Feb 20 2019 Martin Stransky <stransky@redhat.com> - 65.0.1-1
 - Disabled s390x/f28 builds due to
   https://pagure.io/fedora-infrastructure/issue/7581
