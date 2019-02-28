@@ -3,7 +3,12 @@ ExcludeArch: armv7hl
 
 %global system_nss        1
 %global system_ffi        1
+# libvpx is too new for Firefox 65
+%if 0%{?fedora} < 30
 %global system_libvpx     1
+%else
+%global system_libvpx     0
+%endif
 %global hardened_build    1
 %global system_jpeg       1
 %global run_tests         0
@@ -69,7 +74,7 @@ ExcludeArch: armv7hl
 %ifarch %{ix86} x86_64
 # Disable crashreporter for Fedora 30 / Rawhide
 # to collect Wayland crashes.
-%if 0%{?fedora} < 30
+%if 0%{?fedora} < 29
 %global enable_mozilla_crashreporter       1
 %endif
 %endif
@@ -882,7 +887,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Thu Feb 28 2019 Martin Stransky <stransky@redhat.com> - 65.0.1-2
-- Enable ARBT for Fedora 30 / Rawhide to catch wayland crashes.
+- Enable ARBT for Fedora 29 and later to catch wayland crashes.
+- Disable system libvpx for Fedora 30 and later.
 
 * Wed Feb 20 2019 Martin Stransky <stransky@redhat.com> - 65.0.1-1
 - Disabled s390x/f28 builds due to
