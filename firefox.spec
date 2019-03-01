@@ -1,5 +1,5 @@
 # Disabled arm due to rhbz#1658940
-ExcludeArch: armv7hl
+ExcludeArch: armv7hl, s390x, ppc64
 
 %global system_nss        1
 %global system_ffi        1
