@@ -1,5 +1,7 @@
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
+# Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
+ExcludeArch: s390x
 
 %global system_nss        1
 %global system_ffi        1
@@ -898,6 +900,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 - Updated to 65.0.2
 - Disabled PGO+LTO for Fedora 30
 - Disabled Mozilla Crashreporter to get Wayland crashes by ABRT
+- Disabled s390x builds due to
+  https://pagure.io/fedora-infrastructure/issue/7581
+
 
 * Thu Feb 28 2019 Martin Stransky <stransky@redhat.com> - 65.0.1-2
 - Enable ARBT for Fedora 29 and later to catch wayland crashes.
