@@ -16,7 +16,7 @@ ExcludeArch: armv7hl
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
 %ifnarch %{ix86} ppc64 s390x
-%global build_with_pgo    1
+%global build_with_pgo    0
 %endif
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
@@ -30,7 +30,7 @@ ExcludeArch: armv7hl
 %else
 %global debug_build       1
 %else
-%global debug_build       0
+%global debug_build       1
 %endif
 
 %if 0%{?build_with_pgo}
@@ -83,7 +83,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        65.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        2.debug%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
