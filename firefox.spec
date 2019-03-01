@@ -15,8 +15,12 @@ ExcludeArch: armv7hl
 %global disable_elfhack   1
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
+# Disable PGO+LTO on Fedora 30 due to broken gdb which can't process
+# LTO debuginfo.
+%if 0%{?fedora} < 30
 %ifnarch %{ix86} ppc64 s390x
 %global build_with_pgo    1
+%endif
 %endif
 %if 0%{?fedora} > 29
 %global wayland_backend_default 1
@@ -72,9 +76,8 @@ ExcludeArch: armv7hl
 %global enable_mozilla_crashreporter       0
 %if !%{debug_build}
 %ifarch %{ix86} x86_64
-# Disable crashreporter for Fedora 30 / Rawhide
-# to collect Wayland crashes.
-%if 0%{?fedora} < 29
+# Disable crashreporter sa we want to collect Wayland crashes.
+%if 0%{?fedora} < 28
 %global enable_mozilla_crashreporter       1
 %endif
 %endif
@@ -82,13 +85,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        65.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        65.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190215.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190301.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -891,6 +894,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 1 2019 Martin Stransky <stransky@redhat.com> - 65.0.2-1
+- Updated to 65.0.2
+- Disabled PGO+LTO for Fedora 30
+- Disabled Mozilla Crashreporter to get Wayland crashes by ABRT
+
 * Thu Feb 28 2019 Martin Stransky <stransky@redhat.com> - 65.0.1-2
 - Enable ARBT for Fedora 29 and later to catch wayland crashes.
 - Disable system libvpx for Fedora 30 and later.
