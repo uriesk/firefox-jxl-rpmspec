@@ -1,3 +1,6 @@
+# Set to true if it's going to be submitted as update.
+%global release_build     0
+
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
@@ -17,11 +20,11 @@ ExcludeArch: s390x
 %global disable_elfhack   1
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
-# Disable PGO+LTO on Fedora 30 due to broken gdb which can't process
-# LTO debuginfo.
-%if 0%{?fedora} < 30
 %ifnarch %{ix86} ppc64 s390x
+%if %{release_build}
 %global build_with_pgo    1
+%else
+%global build_with_pgo    0
 %endif
 %endif
 %if 0%{?fedora} > 29
@@ -85,15 +88,19 @@ ExcludeArch: s390x
 %endif
 %endif
 
+%if !%{release_build}
+%global pre_tag .test
+%endif
+
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        65.0.2
+Version:        66.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190301.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190312.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -123,7 +130,6 @@ Patch37:        build-jit-atomic-always-lucky.patch
 Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
-Patch46:        firefox-debug-build.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -136,7 +142,6 @@ Patch227:        firefox-locale-debug.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
-Patch406:        mozilla-256180.patch
 Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
@@ -144,7 +149,8 @@ Patch417:        bug1375074-save-restore-x28.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
-Patch575:        mozilla-1522780.patch
+Patch575:        mozilla-1423598-popup.patch
+Patch576:        mozilla-1532643-popup.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -313,14 +319,13 @@ This package contains results of tests executed during build.
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-%patch37 -p1 -b .jit-atomic-lucky
+#%patch37 -p1 -b .jit-atomic-lucky
 # TODO Fix later
 #%patch40 -p1 -b .aarch64-skia
 %if 0%{?disable_elfhack}
 %patch41 -p1 -b .disable-elfhack
 %endif
 %patch3  -p1 -b .arm
-%patch46 -p1 -b .debug
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -334,7 +339,6 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 
 %patch402 -p1 -b .1196777
-%patch406 -p1 -b .256180
 %patch413 -p1 -b .1353817
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
@@ -346,9 +350,10 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 28
-%patch574 -p1 -b .firefox-pipewire
+#%patch574 -p1 -b .firefox-pipewire
 %endif
-%patch575 -p1 -b .1522780
+%patch575 -p1 -b .mozilla-1423598-popup
+%patch576 -p1 -b .mozilla-1532643-popup
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -896,6 +901,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 12 2019 Martin Stransky <stransky@redhat.com> - 66.0-1
+- Updated to 66 Build 1
+
 * Fri Mar 1 2019 Martin Stransky <stransky@redhat.com> - 65.0.2-1
 - Updated to 65.0.2
 - Disabled PGO+LTO for Fedora 30
