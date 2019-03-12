@@ -201,12 +201,11 @@ BuildRequires:  lld
 %if 0%{?fedora} > 28
 BuildRequires:  pipewire-devel
 %endif
-
 %if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
 %endif
-
 BuildRequires:  nodejs
+BuildRequires:  nasm >= 1.13
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
