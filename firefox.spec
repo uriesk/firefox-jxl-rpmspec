@@ -132,6 +132,7 @@ Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
 Patch42:        mozilla-1515641-av1-build-1.patch
 Patch43:        mozilla-1515641-av1-build-2.patch
+Patch44:        build-arm-libopus.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -329,6 +330,7 @@ This package contains results of tests executed during build.
 %patch3  -p1 -b .arm
 %patch42 -p1 -b .mozilla-1515641
 %patch43 -p1 -b .mozilla-1515641
+%patch44 -p1 -b .build-arm-libopus
 
 # Fedora patches
 %patch215 -p1 -b .addons
