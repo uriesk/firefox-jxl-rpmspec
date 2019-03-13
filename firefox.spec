@@ -355,7 +355,7 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 28
-#%patch574 -p1 -b .firefox-pipewire
+%patch574 -p1 -b .firefox-pipewire
 %endif
 %patch575 -p1 -b .mozilla-1423598-popup
 %patch576 -p1 -b .mozilla-1532643-popup
