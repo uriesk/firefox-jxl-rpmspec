@@ -4,7 +4,7 @@
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
-ExcludeArch: s390x
+# ExcludeArch: s390x
 
 %global system_nss        1
 %global system_ffi        1
@@ -154,6 +154,8 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch574:        firefox-pipewire.patch
 Patch575:        mozilla-1423598-popup.patch
 Patch576:        mozilla-1532643-popup.patch
+Patch577:        mozilla-1535567.patch
+Patch578:        mozilla-1431399.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -359,6 +361,8 @@ This package contains results of tests executed during build.
 %endif
 %patch575 -p1 -b .mozilla-1423598-popup
 %patch576 -p1 -b .mozilla-1532643-popup
+%patch577 -p1 -b .mozilla-1535567
+%patch578 -p1 -b .mozilla-1431399
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -906,8 +910,13 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 15 2019 Martin Stransky <stransky@redhat.com> - 66.0-2
+- Updated to 66.0 (Build 3)
+- Re-enable s390x arches
+- Fixed Wayland specific bugs mozbz#1535567, mozbz#1431399
+
 * Tue Mar 12 2019 Martin Stransky <stransky@redhat.com> - 66.0-1
-- Updated to 66 Build 1
+- Updated to 66.0 (Build 1)
 
 * Fri Mar 1 2019 Martin Stransky <stransky@redhat.com> - 65.0.2-1
 - Updated to 65.0.2
