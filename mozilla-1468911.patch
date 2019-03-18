@@ -1,0 +1,300 @@
+changeset:   465236:be9a6c98a4a7
+tag:         tip
+user:        Martin Stransky <stransky@redhat.com>
+date:        Mon Mar 18 10:42:48 2019 +0100
+summary:     tearing
+
+diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayland.cpp
+--- a/widget/gtk/WindowSurfaceWayland.cpp
++++ b/widget/gtk/WindowSurfaceWayland.cpp
+@@ -15,16 +15,32 @@
+ #include "nsTArray.h"
+ #include "base/message_loop.h"  // for MessageLoop
+ #include "base/task.h"          // for NewRunnableMethod, etc
+ 
+ #include <sys/mman.h>
+ #include <fcntl.h>
+ #include <errno.h>
+ 
++#undef LOG
++#ifdef MOZ_LOGGING
++
++#  include "mozilla/Logging.h"
++#  include "nsTArray.h"
++#  include "Units.h"
++
++extern mozilla::LazyLogModule gWidgetWaylandLog;
++#  define LOGWAYLAND(args) MOZ_LOG(gWidgetWaylandLog, mozilla::LogLevel::Debug, args)
++
++#else
++
++#  define LOGWAYLAND(args)
++
++#endif /* MOZ_LOGGING */
++
+ namespace mozilla {
+ namespace widget {
+ 
+ /*
+   Wayland multi-thread rendering scheme
+ 
+   Every rendering thread (main thread, compositor thread) contains its own
+   nsWaylandDisplay object connected to Wayland compositor (Mutter, Weston, etc.)
+@@ -283,23 +299,30 @@ WindowBackBuffer::WindowBackBuffer(nsWay
+   Create(aWidth, aHeight);
+ }
+ 
+ WindowBackBuffer::~WindowBackBuffer() { Release(); }
+ 
+ bool WindowBackBuffer::Resize(int aWidth, int aHeight) {
+   if (aWidth == mWidth && aHeight == mHeight) return true;
+ 
++  LOGWAYLAND(("WindowBackBuffer::Resize [%p] %d %d\n",
++    (void*)this, aWidth, aHeight));
++
+   Release();
+   Create(aWidth, aHeight);
++  Clear();
+ 
+   return (mWaylandBuffer != nullptr);
+ }
+ 
+ void WindowBackBuffer::Attach(wl_surface* aSurface) {
++  LOGWAYLAND(("WindowBackBuffer::Attach [%p] wl_surface %p\n",
++    (void*)this, (void *)aSurface));
++
+   wl_surface_attach(aSurface, mWaylandBuffer, 0, 0);
+   wl_surface_commit(aSurface);
+   wl_display_flush(mWaylandDisplay->GetDisplay());
+   mAttached = true;
+ }
+ 
+ void WindowBackBuffer::Detach() { mAttached = false; }
+ 
+@@ -340,17 +363,18 @@ WindowSurfaceWayland::WindowSurfaceWayla
+       mFrameCallback(nullptr),
+       mLastCommittedSurface(nullptr),
+       mDisplayThreadMessageLoop(MessageLoop::current()),
+       mDelayedCommitHandle(nullptr),
+       mDrawToWaylandBufferDirectly(true),
+       mPendingCommit(false),
+       mWaylandBufferFullScreenDamage(false),
+       mIsMainThread(NS_IsMainThread()),
+-      mNeedScaleFactorUpdate(true) {
++      mNeedScaleFactorUpdate(true),
++      mNeedFullScreenUpdate(true) {
+   for (int i = 0; i < BACK_BUFFER_NUM; i++) mBackupBuffer[i] = nullptr;
+ }
+ 
+ WindowSurfaceWayland::~WindowSurfaceWayland() {
+   if (mPendingCommit) {
+     NS_WARNING("Deleted WindowSurfaceWayland with a pending commit!");
+   }
+ 
+@@ -392,16 +416,17 @@ WindowBackBuffer* WindowSurfaceWayland::
+   }
+ 
+   if (!mWaylandBuffer->IsAttached()) {
+     if (!mWaylandBuffer->IsMatchingSize(aWidth, aHeight)) {
+       mWaylandBuffer->Resize(aWidth, aHeight);
+       // There's a chance that scale factor has been changed
+       // when buffer size changed
+       mNeedScaleFactorUpdate = true;
++      mNeedFullScreenUpdate = true;
+     }
+     return mWaylandBuffer;
+   }
+ 
+   MOZ_ASSERT(!mPendingCommit,
+              "Uncommitted buffer switch, screen artifacts ahead.");
+ 
+   // Front buffer is used by compositor, select a back buffer
+@@ -490,39 +515,36 @@ already_AddRefed<gfx::DrawTarget> Window
+ 
+   B) Lock() is requested for part(s) of screen. We need to provide temporary
+      surface to draw into and copy result (clipped) to target wl_surface.
+  */
+ already_AddRefed<gfx::DrawTarget> WindowSurfaceWayland::Lock(
+     const LayoutDeviceIntRegion& aRegion) {
+   MOZ_ASSERT(mIsMainThread == NS_IsMainThread());
+ 
+-  LayoutDeviceIntRect screenRect = mWindow->GetBounds();
+-  gfx::IntRect bounds = aRegion.GetBounds().ToUnknownRect();
+-  gfx::IntSize lockSize(bounds.XMost(), bounds.YMost());
++  LOGWAYLAND(("WindowSurfaceWayland::Lock [%p]\n", (void*)this));
+ 
+   // Are we asked for entire nsWindow to draw?
+-  mDrawToWaylandBufferDirectly =
+-      (aRegion.GetNumRects() == 1 && bounds.x == 0 && bounds.y == 0 &&
+-       lockSize.width == screenRect.width &&
+-       lockSize.height == screenRect.height);
+-
++  mDrawToWaylandBufferDirectly = IsFullScreenDraw(aRegion);
+   if (mDrawToWaylandBufferDirectly) {
++    LayoutDeviceIntRect screenRect = mWindow->GetBounds();
+     RefPtr<gfx::DrawTarget> dt =
+         LockWaylandBuffer(screenRect.width, screenRect.height,
+                           mWindow->WaylandSurfaceNeedsClear());
+     if (dt) {
+       return dt.forget();
+     }
+ 
+     // We don't have any front buffer available. Try indirect drawing
+     // to mImageSurface which is mirrored to front buffer at commit.
+     mDrawToWaylandBufferDirectly = false;
+   }
+ 
++  gfx::IntRect bounds = aRegion.GetBounds().ToUnknownRect();
++  gfx::IntSize lockSize(bounds.XMost(), bounds.YMost());
+   return LockImageSurface(lockSize);
+ }
+ 
+ bool WindowSurfaceWayland::CommitImageSurfaceToWaylandBuffer(
+     const LayoutDeviceIntRegion& aRegion) {
+   MOZ_ASSERT(!mDrawToWaylandBufferDirectly);
+ 
+   LayoutDeviceIntRect screenRect = mWindow->GetBounds();
+@@ -611,31 +633,42 @@ void WindowSurfaceWayland::CommitWayland
+     // If our stored wl_surface does not match the actual one it means the frame
+     // callback is no longer active and we should release it.
+     wl_callback_destroy(mFrameCallback);
+     mFrameCallback = nullptr;
+     mLastCommittedSurface = nullptr;
+   }
+ 
+   if (mWaylandBufferFullScreenDamage) {
++    // We know we can safely redraw whole screen.
+     LayoutDeviceIntRect rect = mWindow->GetBounds();
+     wl_surface_damage(waylandSurface, 0, 0, rect.width, rect.height);
+     mWaylandBufferFullScreenDamage = false;
+   } else {
+     gint scaleFactor = mWindow->GdkScaleFactor();
+     for (auto iter = mWaylandBufferDamage.RectIter(); !iter.Done();
+          iter.Next()) {
+       const mozilla::LayoutDeviceIntRect& r = iter.Get();
+       // We need to remove the scale factor because the wl_surface_damage
+       // also multiplies by current  scale factor.
+       wl_surface_damage(waylandSurface, r.x / scaleFactor, r.y / scaleFactor,
+                         r.width / scaleFactor, r.height / scaleFactor);
+     }
++
++    // We have to wait untill whole screen is drawn by Gecko, that happens
++    // when window is created or resized.
++    if (mNeedFullScreenUpdate) {
++      if (!IsFullScreenDraw(mWaylandBufferDamage)) {
++        return;
++      }
++    }
+   }
+ 
++  mNeedFullScreenUpdate = false;
++
+   // Clear all back buffer damage as we're committing
+   // all requested regions.
+   mWaylandBufferDamage.SetEmpty();
+ 
+   mFrameCallback = wl_surface_frame(waylandSurface);
+   wl_callback_add_listener(mFrameCallback, &frame_listener, this);
+ 
+   if (mNeedScaleFactorUpdate || mLastCommittedSurface != waylandSurface) {
+@@ -648,16 +681,18 @@ void WindowSurfaceWayland::CommitWayland
+ 
+   // There's no pending commit, all changes are sent to compositor.
+   mPendingCommit = false;
+ }
+ 
+ void WindowSurfaceWayland::Commit(const LayoutDeviceIntRegion& aInvalidRegion) {
+   MOZ_ASSERT(mIsMainThread == NS_IsMainThread());
+ 
++  LOGWAYLAND(("WindowSurfaceWayland::Commit [%p]\n", (void*)this));
++
+   // We have new content at mImageSurface - copy data to mWaylandBuffer first.
+   if (!mDrawToWaylandBufferDirectly) {
+     CommitImageSurfaceToWaylandBuffer(aInvalidRegion);
+   }
+ 
+   // If we're not at fullscreen damage add drawing area from aInvalidRegion
+   if (!mWaylandBufferFullScreenDamage) {
+     mWaylandBufferDamage.OrWith(aInvalidRegion);
+@@ -690,10 +725,22 @@ void WindowSurfaceWayland::DelayedCommit
+   free(mDelayedCommitHandle);
+   mDelayedCommitHandle = nullptr;
+ 
+   if (mPendingCommit) {
+     CommitWaylandBuffer();
+   }
+ }
+ 
++bool WindowSurfaceWayland::IsFullScreenDraw(
++  const LayoutDeviceIntRegion& aRegion) {
++  LayoutDeviceIntRect screenRect = mWindow->GetBounds();
++  gfx::IntRect bounds = aRegion.GetBounds().ToUnknownRect();
++  gfx::IntSize lockSize(bounds.XMost(), bounds.YMost());
++
++  // Are we asked to update entire nsWindow?
++  return (bounds.x == 0 && bounds.y == 0 &&
++       lockSize.width == screenRect.width &&
++       lockSize.height == screenRect.height);
++}
++
+ }  // namespace widget
+ }  // namespace mozilla
+diff --git a/widget/gtk/WindowSurfaceWayland.h b/widget/gtk/WindowSurfaceWayland.h
+--- a/widget/gtk/WindowSurfaceWayland.h
++++ b/widget/gtk/WindowSurfaceWayland.h
+@@ -94,16 +94,17 @@ class WindowSurfaceWayland : public Wind
+ 
+  private:
+   WindowBackBuffer* GetWaylandBufferToDraw(int aWidth, int aHeight);
+ 
+   already_AddRefed<gfx::DrawTarget> LockWaylandBuffer(int aWidth, int aHeight,
+                                                       bool aClearBuffer);
+   already_AddRefed<gfx::DrawTarget> LockImageSurface(
+       const gfx::IntSize& aLockSize);
++  bool IsFullScreenDraw(const LayoutDeviceIntRegion& aRegion);
+   bool CommitImageSurfaceToWaylandBuffer(const LayoutDeviceIntRegion& aRegion);
+   void CommitWaylandBuffer();
+ 
+   // TODO: Do we need to hold a reference to nsWindow object?
+   nsWindow* mWindow;
+   nsWaylandDisplay* mWaylandDisplay;
+   WindowBackBuffer* mWaylandBuffer;
+   LayoutDeviceIntRegion mWaylandBufferDamage;
+@@ -113,14 +114,15 @@ class WindowSurfaceWayland : public Wind
+   wl_surface* mLastCommittedSurface;
+   MessageLoop* mDisplayThreadMessageLoop;
+   WindowSurfaceWayland** mDelayedCommitHandle;
+   bool mDrawToWaylandBufferDirectly;
+   bool mPendingCommit;
+   bool mWaylandBufferFullScreenDamage;
+   bool mIsMainThread;
+   bool mNeedScaleFactorUpdate;
++  bool mNeedFullScreenUpdate;
+ };
+ 
+ }  // namespace widget
+ }  // namespace mozilla
+ 
+ #endif  // _MOZILLA_WIDGET_GTK_WINDOW_SURFACE_WAYLAND_H
+diff --git a/widget/gtk/nsAppShell.cpp b/widget/gtk/nsAppShell.cpp
+--- a/widget/gtk/nsAppShell.cpp
++++ b/widget/gtk/nsAppShell.cpp
+@@ -35,16 +35,17 @@ using mozilla::widget::ScreenHelperGTK;
+ using mozilla::widget::ScreenManager;
+ 
+ #define NOTIFY_TOKEN 0xFA
+ 
+ LazyLogModule gWidgetLog("Widget");
+ LazyLogModule gWidgetFocusLog("WidgetFocus");
+ LazyLogModule gWidgetDragLog("WidgetDrag");
+ LazyLogModule gWidgetDrawLog("WidgetDraw");
++LazyLogModule gWidgetWaylandLog("WidgetWayland");
+ 
+ static GPollFunc sPollFunc;
+ 
+ // Wrapper function to disable hang monitoring while waiting in poll().
+ static gint PollWrapper(GPollFD* ufds, guint nfsd, gint timeout_) {
+   mozilla::BackgroundHangMonitor().NotifyWait();
+   gint result;
+   {
+

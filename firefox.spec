@@ -1,10 +1,10 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
-# ExcludeArch: s390x
+ExcludeArch: s390x
 
 %global system_nss        1
 %global system_ffi        1
@@ -95,7 +95,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        66.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -156,6 +156,7 @@ Patch575:        mozilla-1423598-popup.patch
 Patch576:        mozilla-1532643-popup.patch
 Patch577:        mozilla-1535567.patch
 Patch578:        mozilla-1431399.patch
+Patch579:        mozilla-1468911.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -363,6 +364,7 @@ This package contains results of tests executed during build.
 %patch576 -p1 -b .mozilla-1532643-popup
 %patch577 -p1 -b .mozilla-1535567
 %patch578 -p1 -b .mozilla-1431399
+%patch579 -p1 -b .mozilla-1468911
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -910,6 +912,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 18 2019 Martin Stransky <stransky@redhat.com> - 66.0-5
+- Added fix for mozbz#1468911
+
 * Mon Mar 18 2019 Martin Stransky <stransky@redhat.com> - 66.0-4
 - Release build
 
