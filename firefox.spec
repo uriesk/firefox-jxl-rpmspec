@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -27,7 +27,7 @@ ExcludeArch: s390x
 %global build_with_pgo    0
 %endif
 %endif
-%if 0%{?fedora} > 29
+%if 0%{?fedora} > 30
 %global wayland_backend_default 1
 %endif
 # Big endian platforms
@@ -95,7 +95,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        66.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -912,6 +912,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 18 2019 Martin Stransky <stransky@redhat.com> - 66.0-6
+- Build release candidate
+- Disabled default Wayland backend for Fedora 30
+
 * Mon Mar 18 2019 Martin Stransky <stransky@redhat.com> - 66.0-5
 - Added fix for mozbz#1468911
 
