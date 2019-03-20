@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -95,7 +95,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        66.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -242,7 +242,9 @@ Requires:       nss >= 3.29.3-1.1
 %endif
 
 BuildRequires:  desktop-file-utils
+%if %{release_build}
 BuildRequires:  system-bookmarks
+%endif
 %if %{?system_ffi}
 BuildRequires:  pkgconfig(libffi)
 %endif
@@ -617,7 +619,9 @@ rm -f  objdir/dist/bin/pk12util
 %install
 
 # set up our default bookmarks
+%if %{release_build}
 %{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/en-US/locale/browser/bookmarks.html
+%endif
 
 # Make sure locale works for langpacks
 %{__cat} > objdir/dist/bin/browser/defaults/preferences/firefox-l10n.js << EOF
@@ -912,6 +916,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 20 2019 Martin Stransky <stransky@redhat.com> - 66.0-7.test
+- Switched to test builds
+
 * Mon Mar 18 2019 Martin Stransky <stransky@redhat.com> - 66.0-6
 - Build release candidate
 - Disabled default Wayland backend for Fedora 30
