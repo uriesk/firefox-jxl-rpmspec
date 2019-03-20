@@ -39,7 +39,7 @@ ExcludeArch: s390x
 %else
 %global debug_build       1
 %else
-%global debug_build       0
+%global debug_build       1
 %endif
 
 %if 0%{?build_with_pgo}
@@ -218,7 +218,9 @@ Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
 BuildRequires:  python2-devel
+%if %{release_build}
 Requires:       u2f-hidraw-policy
+%endif
 
 %if 0%{?fedora} > 25
 # For early testing of rhbz#1400293 mozbz#1324096 on F26 and Rawhide,
