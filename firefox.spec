@@ -39,7 +39,7 @@ ExcludeArch: s390x
 %else
 %global debug_build       1
 %else
-%global debug_build       1
+%global debug_build       0
 %endif
 
 %if 0%{?build_with_pgo}
@@ -920,6 +920,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Wed Mar 20 2019 Martin Stransky <stransky@redhat.com> - 66.0-7.test
 - Switched to test builds
+- Updated mozbz#1468911 patch
 
 * Mon Mar 18 2019 Martin Stransky <stransky@redhat.com> - 66.0-6
 - Build release candidate
