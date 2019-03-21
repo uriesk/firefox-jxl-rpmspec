@@ -1,7 +1,7 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 # Special config to build as module
-%global module_build      1
+%global module_build      0
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -97,7 +97,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        66.0
-Release:        8%{?pre_tag}%{?dist}
+Release:        9%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -507,6 +507,9 @@ MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -Wformat-security -Wformat -Werror=format-security
 %else
 # Workaround for mozbz#1531309
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-Werror=format-security//')
+%endif
+%if 0%{?fedora} > 30
+MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fpermissive"
 %endif
 %if %{?hardened_build}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
@@ -924,6 +927,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-9
+- Release build
+
 * Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-8.test
 - Added module specific build config
 - Fixed mozbz#1423598 for multi-monitor setup
