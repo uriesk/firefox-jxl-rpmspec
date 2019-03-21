@@ -1,5 +1,7 @@
 # Set to true if it's going to be submitted as update.
 %global release_build     0
+# Special config to build as module
+%global module_build      1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -95,7 +97,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        66.0
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -202,8 +204,10 @@ BuildRequires:  clang-libs
 %if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
+%if !%{module_build}
 %if 0%{?fedora} > 28
 BuildRequires:  pipewire-devel
+%endif
 %endif
 %if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
@@ -218,7 +222,7 @@ Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
 BuildRequires:  python2-devel
-%if %{release_build}
+%if !%{module_build}
 Requires:       u2f-hidraw-policy
 %endif
 
@@ -244,7 +248,7 @@ Requires:       nss >= 3.29.3-1.1
 %endif
 
 BuildRequires:  desktop-file-utils
-%if %{release_build}
+%if !%{module_build}
 BuildRequires:  system-bookmarks
 %endif
 %if %{?system_ffi}
@@ -361,8 +365,10 @@ This package contains results of tests executed during build.
 %endif
 
 # Wayland specific upstream patches
+%if !%{module_build}
 %if 0%{?fedora} > 28
 %patch574 -p1 -b .firefox-pipewire
+%endif
 %endif
 %patch575 -p1 -b .mozilla-1423598-popup
 %patch576 -p1 -b .mozilla-1532643-popup
@@ -621,7 +627,7 @@ rm -f  objdir/dist/bin/pk12util
 %install
 
 # set up our default bookmarks
-%if %{release_build}
+%if !%{module_build}
 %{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/en-US/locale/browser/bookmarks.html
 %endif
 
@@ -918,6 +924,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-8.test
+- Added module specific build config
+
 * Wed Mar 20 2019 Martin Stransky <stransky@redhat.com> - 66.0-7.test
 - Switched to test builds
 - Updated mozbz#1468911 patch
