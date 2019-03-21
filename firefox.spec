@@ -1,7 +1,7 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 # Special config to build as module
-%global module_build      0
+%global module_build      1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -97,7 +97,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        66.0
-Release:        9%{?pre_tag}%{?dist}
+Release:        10%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -597,8 +597,8 @@ make -C objdir buildsymbols
 
 %if %{?run_tests}
 %if %{?system_nss}
-ln -s /usr/bin/certutil objdir/dist/bin/certutil
-ln -s /usr/bin/pk12util objdir/dist/bin/pk12util
+ln -s %{_prefix}/bin/certutil objdir/dist/bin/certutil
+ln -s %{_prefix}/bin/pk12util objdir/dist/bin/pk12util
 
 %endif
 mkdir test_results
@@ -657,14 +657,15 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %global wayland_default false
 %endif
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
-%{__sed} -e 's/__DEFAULT_WAYLAND__/%{wayland_default}/' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
+%{__sed} -e 's/__DEFAULT_WAYLAND__/%{wayland_default}/' \
+         -e 's,__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
 %if 0%{?wayland_backend_default}
-%{__cat} %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
+%{__sed} -e 's,__PREFIX__,%{_prefix},g' %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
 %else
-%{__cat} %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
+%{__sed} -e 's,__PREFIX__,%{_prefix},g' %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
 %endif
 
@@ -927,6 +928,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-10.test
+- Test build
+
 * Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-9
 - Release build
 
@@ -985,7 +989,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 - Re-enable PipeWire support
 
 * Mon Jan 28 2019 Martin Stransky <stransky@redhat.com> - 65.0-1
-- Update to 65.0 build 2 
+- Update to 65.0 build 2
 
 * Wed Jan 16 2019 Martin Stransky <stransky@redhat.com> - 64.0.2-2
 - Rebuild

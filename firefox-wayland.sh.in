@@ -4,4 +4,4 @@
 #
 
 export MOZ_ENABLE_WAYLAND=1
-exec /usr/bin/firefox "$@"
+exec /__PREFIX__/bin/firefox "$@"
