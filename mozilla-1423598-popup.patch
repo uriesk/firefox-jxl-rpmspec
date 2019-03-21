@@ -38,11 +38,11 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
 +                GdkAnchorHints, gint, gint))
 +                dlsym(RTLD_DEFAULT, "gdk_window_move_to_rect");
 +
++  if (aSize) {
++    gtk_window_resize(GTK_WINDOW(mShell), aSize->width, aSize->height);
++  }
 +  if (!sGdkWindowMoveToRect) {
 +    gtk_window_move(GTK_WINDOW(mShell), aPosition->x, aPosition->y);
-+    if (aSize) {
-+      gtk_window_resize(GTK_WINDOW(mShell), aSize->width, aSize->height);
-+    }
 +    return;
 +  }
 +

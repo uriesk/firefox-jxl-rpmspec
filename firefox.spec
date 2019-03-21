@@ -926,6 +926,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-8.test
 - Added module specific build config
+- Fixed mozbz#1423598 for multi-monitor setup
 
 * Wed Mar 20 2019 Martin Stransky <stransky@redhat.com> - 66.0-7.test
 - Switched to test builds
