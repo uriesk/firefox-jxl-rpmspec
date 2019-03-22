@@ -1,7 +1,5 @@
 # Set to true if it's going to be submitted as update.
 %global release_build     0
-# Special config to build as module
-%global module_build      1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -135,6 +133,7 @@ Patch41:        build-disable-elfhack.patch
 Patch42:        mozilla-1515641-av1-build-1.patch
 Patch43:        mozilla-1515641-av1-build-2.patch
 Patch44:        build-arm-libopus.patch
+Patch45:        mozilla-1533969.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -204,7 +203,7 @@ BuildRequires:  clang-libs
 %if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
-%if !%{module_build}
+%if !0{?flatpak}
 %if 0%{?fedora} > 28
 BuildRequires:  pipewire-devel
 %endif
@@ -222,7 +221,7 @@ Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
 BuildRequires:  python2-devel
-%if !%{module_build}
+%if !0{?flatpak}
 Requires:       u2f-hidraw-policy
 %endif
 
@@ -248,7 +247,7 @@ Requires:       nss >= 3.29.3-1.1
 %endif
 
 BuildRequires:  desktop-file-utils
-%if !%{module_build}
+%if !0{?flatpak}
 BuildRequires:  system-bookmarks
 %endif
 %if %{?system_ffi}
@@ -342,6 +341,7 @@ This package contains results of tests executed during build.
 %patch42 -p1 -b .mozilla-1515641
 %patch43 -p1 -b .mozilla-1515641
 %patch44 -p1 -b .build-arm-libopus
+%patch45 -p1 -b .mozilla-1533969
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -365,7 +365,7 @@ This package contains results of tests executed during build.
 %endif
 
 # Wayland specific upstream patches
-%if !%{module_build}
+%if !0{?flatpak}
 %if 0%{?fedora} > 28
 %patch574 -p1 -b .firefox-pipewire
 %endif
@@ -630,7 +630,7 @@ rm -f  objdir/dist/bin/pk12util
 %install
 
 # set up our default bookmarks
-%if !%{module_build}
+%if !0{?flatpak}
 %{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/en-US/locale/browser/bookmarks.html
 %endif
 
@@ -929,7 +929,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-10.test
-- Test build
+- Test module build, use flatpak global define
+- Added fix for F31 (mozbz#1533969)
 
 * Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-9
 - Release build
