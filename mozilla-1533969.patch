@@ -1,0 +1,36 @@
+diff --git a/js/src/util/NativeStack.cpp b/js/src/util/NativeStack.cpp
+--- a/js/src/util/NativeStack.cpp
++++ b/js/src/util/NativeStack.cpp
+@@ -25,7 +25,7 @@
+ #    include <sys/syscall.h>
+ #    include <sys/types.h>
+ #    include <unistd.h>
+-static pid_t gettid() { return syscall(__NR_gettid); }
++#    define gettid() static_cast<pid_t>(syscall(__NR_gettid))
+ #  endif
+ #else
+ #  error "Unsupported platform"
+diff --git a/tools/profiler/core/platform.h b/tools/profiler/core/platform.h
+--- a/tools/profiler/core/platform.h
++++ b/tools/profiler/core/platform.h
+@@ -39,16 +39,16 @@
+ #include <functional>
+ #include <stdint.h>
+ 
+-// We need a definition of gettid(), but glibc doesn't provide a
++// We need a definition of gettid(), but old glibc versions don't provide a
+ // wrapper for it.
+ #if defined(__GLIBC__)
+ #  include <unistd.h>
+ #  include <sys/syscall.h>
+-static inline pid_t gettid() { return (pid_t)syscall(SYS_gettid); }
++#  define gettid() static_cast<pid_t>(syscall(SYS_gettid))
+ #elif defined(GP_OS_darwin)
+ #  include <unistd.h>
+ #  include <sys/syscall.h>
+-static inline pid_t gettid() { return (pid_t)syscall(SYS_thread_selfid); }
++#  define gettid() static_cast<pid_t>(syscall(SYS_thread_selfid))
+ #elif defined(GP_OS_android)
+ #  include <unistd.h>
+ #elif defined(GP_OS_windows)
+
