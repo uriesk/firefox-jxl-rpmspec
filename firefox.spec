@@ -203,7 +203,7 @@ BuildRequires:  clang-libs
 %if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
-%if !0{?flatpak}
+%if !0%{?flatpak}
 %if 0%{?fedora} > 28
 BuildRequires:  pipewire-devel
 %endif
@@ -221,7 +221,7 @@ Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
 BuildRequires:  python2-devel
-%if !0{?flatpak}
+%if !0%{?flatpak}
 Requires:       u2f-hidraw-policy
 %endif
 
@@ -247,7 +247,7 @@ Requires:       nss >= 3.29.3-1.1
 %endif
 
 BuildRequires:  desktop-file-utils
-%if !0{?flatpak}
+%if !0%{?flatpak}
 BuildRequires:  system-bookmarks
 %endif
 %if %{?system_ffi}
@@ -365,7 +365,7 @@ This package contains results of tests executed during build.
 %endif
 
 # Wayland specific upstream patches
-%if !0{?flatpak}
+%if !0%{?flatpak}
 %if 0%{?fedora} > 28
 %patch574 -p1 -b .firefox-pipewire
 %endif
@@ -630,7 +630,7 @@ rm -f  objdir/dist/bin/pk12util
 %install
 
 # set up our default bookmarks
-%if !0{?flatpak}
+%if !0%{?flatpak}
 %{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/en-US/locale/browser/bookmarks.html
 %endif
 
