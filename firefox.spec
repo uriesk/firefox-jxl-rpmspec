@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -94,13 +94,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        66.0
-Release:        10%{?pre_tag}%{?dist}
+Version:        66.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190315.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190322.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -928,6 +928,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 22 2019 Martin Stransky <stransky@redhat.com> - 66.0.1-1
+- Updated to 66.0.1 (Build 1)
+
 * Thu Mar 21 2019 Martin Stransky <stransky@redhat.com> - 66.0-10.test
 - Test module build, use flatpak global define
 - Added fix for F31 (mozbz#1533969)
