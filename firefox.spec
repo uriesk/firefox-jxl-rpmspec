@@ -30,6 +30,9 @@ ExcludeArch: s390x
 %if 0%{?fedora} > 30
 %global wayland_backend_default 1
 %endif
+%if 0%{?flatpak}
+%global wayland_backend_default 1
+%endif
 # Big endian platforms
 %ifarch ppc64 s390x
 %global big_endian        1
