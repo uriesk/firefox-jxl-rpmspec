@@ -32,6 +32,7 @@ ExcludeArch: s390x
 %endif
 %if 0%{?flatpak}
 %global wayland_backend_default 1
+%global build_with_pgo    0
 %endif
 # Big endian platforms
 %ifarch ppc64 s390x
