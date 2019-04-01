@@ -98,13 +98,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        66.0.1
-Release:        4%{?pre_tag}%{?dist}
+Version:        66.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190322.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190401.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -155,6 +155,8 @@ Patch412:        mozilla-1337988.patch
 Patch413:        mozilla-1353817.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
+Patch418:        mozilla-1526243.patch
+Patch419:        mozilla-1540145.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -368,6 +370,8 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
+%patch418 -p1 -b .mozilla-1526243
+%patch419 -p1 -b .mozilla-1540145
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 28
@@ -932,6 +936,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Apr 1 2019 Martin Stransky <stransky@redhat.com> - 66.0.2-1
+- Updated to 66.0.2 (Build 1)
+- Added fixes for mozbz#1526243, mozbz#1540145
+
 * Thu Mar 28 2019 Martin Stransky <stransky@redhat.com> - 66.0.1-4
 - Added fix for mozbz#1539471 - wayland popups/tooltips
 
