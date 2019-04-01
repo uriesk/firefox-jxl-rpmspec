@@ -666,14 +666,14 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %endif
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
 %{__sed} -e 's/__DEFAULT_WAYLAND__/%{wayland_default}/' \
-         -e 's,__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
+         -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
 %if 0%{?wayland_backend_default}
-%{__sed} -e 's,__PREFIX__,%{_prefix},g' %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
+%{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
 %else
-%{__sed} -e 's,__PREFIX__,%{_prefix},g' %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
+%{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
 %endif
 
