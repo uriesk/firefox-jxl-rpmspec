@@ -1,0 +1,207 @@
+diff -up firefox-66.0.3/widget/gtk/mozcontainer.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/mozcontainer.cpp
+--- firefox-66.0.3/widget/gtk/mozcontainer.cpp.mozilla-1517205	2019-04-11 13:12:24.583232286 +0200
++++ firefox-66.0.3/widget/gtk/mozcontainer.cpp	2019-04-11 13:20:06.900192082 +0200
+@@ -609,7 +609,6 @@ struct wl_surface *moz_container_get_wl_
+ 
+     wl_surface_commit(container->surface);
+     wl_display_flush(waylandDisplay->GetDisplay());
+-    WaylandDisplayRelease(waylandDisplay);
+   }
+ 
+   LOG(("moz_container_get_wl_surface() [%p] created surface %p\n",
+diff -up firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp
+--- firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp.mozilla-1517205	2019-04-09 22:00:47.000000000 +0200
++++ firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp	2019-04-11 13:12:24.583232286 +0200
+@@ -639,7 +639,6 @@ static gboolean offer_hash_remove(gpoint
+ nsRetrievalContextWayland::~nsRetrievalContextWayland(void) {
+   g_hash_table_foreach_remove(mActiveOffers, offer_hash_remove, nullptr);
+   g_hash_table_destroy(mActiveOffers);
+-  WaylandDisplayRelease(mDisplay);
+ }
+ 
+ GdkAtom *nsRetrievalContextWayland::GetTargets(int32_t aWhichClipboard,
+diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp
+--- firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205	2019-04-09 22:01:14.000000000 +0200
++++ firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp	2019-04-11 13:20:26.169157682 +0200
+@@ -19,6 +19,13 @@ namespace widget {
+ static nsWaylandDisplay *gWaylandDisplays[MAX_DISPLAY_CONNECTIONS];
+ static StaticMutex gWaylandDisplaysMutex;
+ 
++static void ReleaseDisplaysAtExit() {
++  for (int i = 0; i < MAX_DISPLAY_CONNECTIONS; i++) {
++    delete gWaylandDisplays[i];
++    gWaylandDisplays[i] = nullptr;
++  }
++}
++
+ // Each thread which is using wayland connection (wl_display) has to operate
+ // its own wl_event_queue. Main Firefox thread wl_event_queue is handled
+ // by Gtk main loop, other threads/wl_event_queue has to be handled by us.
+@@ -33,7 +40,6 @@ static nsWaylandDisplay *WaylandDisplayG
+                                                  const StaticMutexAutoLock &) {
+   for (auto &display : gWaylandDisplays) {
+     if (display && display->Matches(aDisplay)) {
+-      NS_ADDREF(display);
+       return display;
+     }
+   }
+@@ -41,7 +47,7 @@ static nsWaylandDisplay *WaylandDisplayG
+   for (auto &display : gWaylandDisplays) {
+     if (display == nullptr) {
+       display = new nsWaylandDisplay(aDisplay);
+-      NS_ADDREF(display);
++      atexit(ReleaseDisplaysAtExit);
+       return display;
+     }
+   }
+@@ -65,26 +71,6 @@ nsWaylandDisplay *WaylandDisplayGet(GdkD
+   return WaylandDisplayGetLocked(display, lock);
+ }
+ 
+-static bool WaylandDisplayReleaseLocked(nsWaylandDisplay *aDisplay,
+-                                        const StaticMutexAutoLock &) {
+-  for (auto &display : gWaylandDisplays) {
+-    if (display == aDisplay) {
+-      int rc = display->Release();
+-      if (rc == 0) {
+-        display = nullptr;
+-      }
+-      return true;
+-    }
+-  }
+-  MOZ_ASSERT(false, "Missing nsWaylandDisplay for this thread!");
+-  return false;
+-}
+-
+-void WaylandDisplayRelease(nsWaylandDisplay *aDisplay) {
+-  StaticMutexAutoLock lock(gWaylandDisplaysMutex);
+-  WaylandDisplayReleaseLocked(aDisplay, lock);
+-}
+-
+ static void WaylandDisplayLoopLocked(wl_display *aDisplay,
+                                      const StaticMutexAutoLock &) {
+   for (auto &display : gWaylandDisplays) {
+@@ -128,6 +114,8 @@ static void global_registry_handler(void
+                                     uint32_t id, const char *interface,
+                                     uint32_t version) {
+   auto display = reinterpret_cast<nsWaylandDisplay *>(data);
++  if (!display)
++    return;
+ 
+   if (strcmp(interface, "wl_shm") == 0) {
+     auto shm = static_cast<wl_shm *>(
+@@ -178,9 +166,7 @@ bool nsWaylandDisplay::Matches(wl_displa
+   return mThreadId == PR_GetCurrentThread() && aDisplay == mDisplay;
+ }
+ 
+-NS_IMPL_ISUPPORTS(nsWaylandDisplay, nsISupports);
+-
+-nsWaylandDisplay::nsWaylandDisplay(wl_display *aDisplay)
++nsWaylandDisplay::nsWaylandDisplay(wl_display* aDisplay)
+     : mThreadId(PR_GetCurrentThread()),
+       mDisplay(aDisplay),
+       mEventQueue(nullptr),
+@@ -188,9 +174,10 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+       mSubcompositor(nullptr),
+       mSeat(nullptr),
+       mShm(nullptr),
+-      mPrimarySelectionDeviceManager(nullptr) {
+-  wl_registry *registry = wl_display_get_registry(mDisplay);
+-  wl_registry_add_listener(registry, &registry_listener, this);
++      mPrimarySelectionDeviceManager(nullptr),
++      mRegistry(nullptr) {
++  mRegistry = wl_display_get_registry(mDisplay);
++  wl_registry_add_listener(mRegistry, &registry_listener, this);
+ 
+   if (NS_IsMainThread()) {
+     // Use default event queue in main thread operated by Gtk+.
+@@ -201,17 +188,19 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+     mEventQueue = wl_display_create_queue(mDisplay);
+     MessageLoop::current()->PostTask(NewRunnableFunction(
+         "WaylandDisplayLoop", &WaylandDisplayLoop, mDisplay));
+-    wl_proxy_set_queue((struct wl_proxy *)registry, mEventQueue);
++    wl_proxy_set_queue((struct wl_proxy *)mRegistry, mEventQueue);
+     wl_display_roundtrip_queue(mDisplay, mEventQueue);
+     wl_display_roundtrip_queue(mDisplay, mEventQueue);
+   }
+ }
+ 
+ nsWaylandDisplay::~nsWaylandDisplay() {
+-  MOZ_ASSERT(mThreadId == PR_GetCurrentThread());
+   // Owned by Gtk+, we don't need to release
+   mDisplay = nullptr;
+ 
++  wl_registry_destroy(mRegistry);
++  mRegistry = nullptr;
++
+   if (mEventQueue) {
+     wl_event_queue_destroy(mEventQueue);
+     mEventQueue = nullptr;
+diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.h.mozilla-1517205 firefox-66.0.3/widget/gtk/nsWaylandDisplay.h
+--- firefox-66.0.3/widget/gtk/nsWaylandDisplay.h.mozilla-1517205	2019-04-09 22:01:13.000000000 +0200
++++ firefox-66.0.3/widget/gtk/nsWaylandDisplay.h	2019-04-11 13:12:24.584232284 +0200
+@@ -20,11 +20,10 @@ namespace widget {
+ 
+ // Our general connection to Wayland display server,
+ // holds our display connection and runs event loop.
+-class nsWaylandDisplay : public nsISupports {
+-  NS_DECL_THREADSAFE_ISUPPORTS
+-
++class nsWaylandDisplay {
+  public:
+   explicit nsWaylandDisplay(wl_display* aDisplay);
++  virtual ~nsWaylandDisplay();
+ 
+   bool DisplayLoop();
+   bool Matches(wl_display* aDisplay);
+@@ -41,7 +40,6 @@ class nsWaylandDisplay : public nsISuppo
+     return mPrimarySelectionDeviceManager;
+   };
+ 
+- public:
+   void SetShm(wl_shm* aShm);
+   void SetSubcompositor(wl_subcompositor* aSubcompositor);
+   void SetDataDeviceManager(wl_data_device_manager* aDataDeviceManager);
+@@ -49,9 +47,7 @@ class nsWaylandDisplay : public nsISuppo
+   void SetPrimarySelectionDeviceManager(
+       gtk_primary_selection_device_manager* aPrimarySelectionDeviceManager);
+ 
+- private:
+-  virtual ~nsWaylandDisplay();
+-
++private:
+   PRThread* mThreadId;
+   wl_display* mDisplay;
+   wl_event_queue* mEventQueue;
+@@ -60,10 +56,10 @@ class nsWaylandDisplay : public nsISuppo
+   wl_seat* mSeat;
+   wl_shm* mShm;
+   gtk_primary_selection_device_manager* mPrimarySelectionDeviceManager;
++  wl_registry *mRegistry;
+ };
+ 
+ nsWaylandDisplay* WaylandDisplayGet(GdkDisplay* aGdkDisplay = nullptr);
+-void WaylandDisplayRelease(nsWaylandDisplay* aDisplay);
+ 
+ }  // namespace widget
+ }  // namespace mozilla
+diff -up firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1517205	2019-04-11 13:12:24.577232301 +0200
++++ firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp	2019-04-11 13:12:24.583232286 +0200
+@@ -413,16 +413,6 @@ WindowSurfaceWayland::~WindowSurfaceWayl
+       delete mBackupBuffer[i];
+     }
+   }
+-
+-  if (!mIsMainThread) {
+-    // We can be destroyed from main thread even though we was created/used
+-    // in compositor thread. We have to unref/delete WaylandDisplay in
+-    // compositor thread then and we can't use MessageLoop::current() here.
+-    mDisplayThreadMessageLoop->PostTask(NewRunnableFunction(
+-        "WaylandDisplayRelease", &WaylandDisplayRelease, mWaylandDisplay));
+-  } else {
+-    WaylandDisplayRelease(mWaylandDisplay);
+-  }
+ }
+ 
+ WindowBackBuffer* WindowSurfaceWayland::GetWaylandBufferToDraw(int aWidth,

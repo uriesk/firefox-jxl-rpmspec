@@ -98,13 +98,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        66.0.2
+Version:        66.0.3
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190401.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190410.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -166,6 +166,8 @@ Patch577:        mozilla-1535567.patch
 Patch578:        mozilla-1431399.patch
 Patch579:        mozilla-1468911.patch
 Patch580:        mozilla-1539471.patch
+Patch581:        mozilla-1517205.patch
+Patch582:        mozilla-1508378.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -383,6 +385,8 @@ This package contains results of tests executed during build.
 %patch578 -p1 -b .mozilla-1431399
 %patch579 -p1 -b .mozilla-1468911
 %patch580 -p1 -b .mozilla-1539471
+%patch581 -p1 -b .mozilla-1517205
+%patch582 -p1 -b .mozilla-1508378
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -936,6 +940,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 11 2019 Martin Stransky <stransky@redhat.com> - 66.0.3-1
+- Updated to 66.0.3 (Build 1)
+
 * Mon Apr 1 2019 Martin Stransky <stransky@redhat.com> - 66.0.2-1
 - Updated to 66.0.2 (Build 1)
 - Added fixes for mozbz#1526243, mozbz#1540145
