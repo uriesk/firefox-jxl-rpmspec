@@ -99,7 +99,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        66.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -147,7 +147,6 @@ Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
-Patch228:        mozilla-526293.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -361,7 +360,6 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
-%patch228 -p1 -b .mozilla-526293
 
 %patch402 -p1 -b .1196777
 %patch413 -p1 -b .1353817
@@ -940,6 +938,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 2 2019 Martin Stransky <stransky@redhat.com> - 66.0.3-2
+- Removed fix for mozbz#526293 as it's broken and does not
+  bring any new functionality.
+
 * Thu Apr 11 2019 Martin Stransky <stransky@redhat.com> - 66.0.3-1
 - Updated to 66.0.3 (Build 1)
 
