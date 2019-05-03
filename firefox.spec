@@ -4,7 +4,7 @@
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
-# ExcludeArch: s390x
+ExcludeArch: s390x
 
 %global system_nss        1
 %global system_ffi        1
