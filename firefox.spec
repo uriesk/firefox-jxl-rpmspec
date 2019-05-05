@@ -98,13 +98,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        66.0.3
-Release:        2%{?pre_tag}%{?dist}
+Version:        66.0.4
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190410.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190505.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -938,6 +938,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sun May 5 2019 Martin Stransky <stransky@redhat.com> - 66.0.4-1
+- Updated to 66.0.4
+
 * Thu May 2 2019 Martin Stransky <stransky@redhat.com> - 66.0.3-2
 - Removed fix for mozbz#526293 as it's broken and does not
   bring any new functionality.
