@@ -1,15 +1,7 @@
-diff -up firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.mozilla-1540145 firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp
---- firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.mozilla-1540145	2019-03-22 06:06:07.000000000 +0100
-+++ firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp	2019-04-01 09:33:18.621166482 +0200
-@@ -6,7 +6,6 @@
- #include "nsISystemProxySettings.h"
- #include "mozilla/ModuleUtils.h"
- #include "nsIServiceManager.h"
--#include "nsIGConfService.h"
- #include "nsIURI.h"
- #include "nsReadableUtils.h"
- #include "nsArrayUtils.h"
-@@ -32,16 +31,10 @@ class nsUnixSystemProxySettings final :
+diff -up firefox-67.0/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.mozilla-1540145 firefox-67.0/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp
+--- firefox-67.0/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.mozilla-1540145	2019-05-14 01:08:35.000000000 +0200
++++ firefox-67.0/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp	2019-05-15 15:20:13.365502186 +0200
+@@ -34,16 +34,10 @@ class nsUnixSystemProxySettings final :
   private:
    ~nsUnixSystemProxySettings() = default;
  
@@ -27,28 +19,24 @@ diff -up firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.m
    nsresult GetProxyFromGSettings(const nsACString& aScheme,
                                   const nsACString& aHost, int32_t aPort,
                                   nsACString& aResult);
-@@ -66,20 +59,10 @@ nsresult nsUnixSystemProxySettings::Init
+@@ -68,16 +62,6 @@ void nsUnixSystemProxySettings::Init() {
          NS_LITERAL_CSTRING("org.gnome.system.proxy"),
          getter_AddRefs(mProxySettings));
    }
 -  if (!mProxySettings) {
 -    mGConf = do_GetService(NS_GCONFSERVICE_CONTRACTID);
 -  }
- 
-   return NS_OK;
- }
- 
+-}
+-
 -bool nsUnixSystemProxySettings::IsProxyMode(const char* aMode) {
 -  nsAutoCString mode;
 -  return NS_SUCCEEDED(mGConf->GetString(
 -             NS_LITERAL_CSTRING("/system/proxy/mode"), mode)) &&
 -         mode.EqualsASCII(aMode);
--}
--
+ }
+ 
  nsresult nsUnixSystemProxySettings::GetPACURI(nsACString& aResult) {
-   if (mProxySettings) {
-     nsCString proxyMode;
-@@ -92,14 +75,8 @@ nsresult nsUnixSystemProxySettings::GetP
+@@ -92,14 +76,8 @@ nsresult nsUnixSystemProxySettings::GetP
      }
      /* The org.gnome.system.proxy schema has been found, but auto mode is not
       * set. Don't try the GConf and return empty string. */
@@ -63,7 +51,7 @@ diff -up firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.m
    // Return an empty string when auto mode is not set.
    aResult.Truncate();
    return NS_OK;
-@@ -217,30 +194,6 @@ static nsresult GetProxyFromEnvironment(
+@@ -217,30 +195,6 @@ static nsresult GetProxyFromEnvironment(
    return NS_OK;
  }
  
@@ -94,7 +82,7 @@ diff -up firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.m
  nsresult nsUnixSystemProxySettings::SetProxyResultFromGSettings(
      const char* aKeyBase, const char* aType, nsACString& aResult) {
    nsDependentCString key(aKeyBase);
-@@ -366,63 +319,6 @@ static bool HostIgnoredByProxy(const nsA
+@@ -366,63 +320,6 @@ static bool HostIgnoredByProxy(const nsA
    return memcmp(&ignoreAddr, &hostAddr, sizeof(PRIPv6Addr)) == 0;
  }
  
@@ -158,7 +146,7 @@ diff -up firefox-66.0.1/toolkit/system/unixproxy/nsUnixSystemProxySettings.cpp.m
  nsresult nsUnixSystemProxySettings::GetProxyFromGSettings(
      const nsACString& aScheme, const nsACString& aHost, int32_t aPort,
      nsACString& aResult) {
-@@ -494,7 +390,6 @@ nsresult nsUnixSystemProxySettings::GetP
+@@ -494,7 +391,6 @@ nsresult nsUnixSystemProxySettings::GetP
      nsresult rv = GetProxyFromGSettings(aScheme, aHost, aPort, aResult);
      if (NS_SUCCEEDED(rv)) return rv;
    }

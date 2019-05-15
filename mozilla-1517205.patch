@@ -1,17 +1,19 @@
-diff -up firefox-66.0.3/widget/gtk/mozcontainer.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/mozcontainer.cpp
---- firefox-66.0.3/widget/gtk/mozcontainer.cpp.mozilla-1517205	2019-04-11 13:12:24.583232286 +0200
-+++ firefox-66.0.3/widget/gtk/mozcontainer.cpp	2019-04-11 13:20:06.900192082 +0200
-@@ -609,7 +609,6 @@ struct wl_surface *moz_container_get_wl_
+diff -up firefox-67.0/widget/gtk/mozcontainer.cpp.mozilla-1517205 firefox-67.0/widget/gtk/mozcontainer.cpp
+--- firefox-67.0/widget/gtk/mozcontainer.cpp.mozilla-1517205	2019-05-15 16:00:23.366366060 +0200
++++ firefox-67.0/widget/gtk/mozcontainer.cpp	2019-05-15 16:02:01.596967825 +0200
+@@ -567,8 +567,7 @@ struct wl_surface *moz_container_get_wl_
+                                 moz_container_get_scale(container));
  
      wl_surface_commit(container->surface);
-     wl_display_flush(waylandDisplay->GetDisplay());
+-    wl_display_flush(waylandDisplay->GetDisplay());
 -    WaylandDisplayRelease(waylandDisplay);
++    wl_display_flush(waylandDisplay->GetDisplay());    
    }
  
-   LOG(("moz_container_get_wl_surface() [%p] created surface %p\n",
-diff -up firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp
---- firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp.mozilla-1517205	2019-04-09 22:00:47.000000000 +0200
-+++ firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp	2019-04-11 13:12:24.583232286 +0200
+   return container->surface;
+diff -up firefox-67.0/widget/gtk/nsClipboardWayland.cpp.mozilla-1517205 firefox-67.0/widget/gtk/nsClipboardWayland.cpp
+--- firefox-67.0/widget/gtk/nsClipboardWayland.cpp.mozilla-1517205	2019-05-14 01:08:37.000000000 +0200
++++ firefox-67.0/widget/gtk/nsClipboardWayland.cpp	2019-05-15 16:00:23.367366056 +0200
 @@ -639,7 +639,6 @@ static gboolean offer_hash_remove(gpoint
  nsRetrievalContextWayland::~nsRetrievalContextWayland(void) {
    g_hash_table_foreach_remove(mActiveOffers, offer_hash_remove, nullptr);
@@ -20,10 +22,10 @@ diff -up firefox-66.0.3/widget/gtk/nsClipboardWayland.cpp.mozilla-1517205 firefo
  }
  
  GdkAtom *nsRetrievalContextWayland::GetTargets(int32_t aWhichClipboard,
-diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp
---- firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205	2019-04-09 22:01:14.000000000 +0200
-+++ firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp	2019-04-11 13:20:26.169157682 +0200
-@@ -19,6 +19,13 @@ namespace widget {
+diff -up firefox-67.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-67.0/widget/gtk/nsWaylandDisplay.cpp
+--- firefox-67.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205	2019-05-14 01:08:37.000000000 +0200
++++ firefox-67.0/widget/gtk/nsWaylandDisplay.cpp	2019-05-15 16:00:23.368366052 +0200
+@@ -21,6 +21,13 @@ namespace widget {
  static nsWaylandDisplay *gWaylandDisplays[MAX_DISPLAY_CONNECTIONS];
  static StaticMutex gWaylandDisplaysMutex;
  
@@ -37,7 +39,7 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
  // Each thread which is using wayland connection (wl_display) has to operate
  // its own wl_event_queue. Main Firefox thread wl_event_queue is handled
  // by Gtk main loop, other threads/wl_event_queue has to be handled by us.
-@@ -33,7 +40,6 @@ static nsWaylandDisplay *WaylandDisplayG
+@@ -35,7 +42,6 @@ static nsWaylandDisplay *WaylandDisplayG
                                                   const StaticMutexAutoLock &) {
    for (auto &display : gWaylandDisplays) {
      if (display && display->Matches(aDisplay)) {
@@ -45,7 +47,7 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
        return display;
      }
    }
-@@ -41,7 +47,7 @@ static nsWaylandDisplay *WaylandDisplayG
+@@ -43,7 +49,7 @@ static nsWaylandDisplay *WaylandDisplayG
    for (auto &display : gWaylandDisplays) {
      if (display == nullptr) {
        display = new nsWaylandDisplay(aDisplay);
@@ -54,7 +56,7 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
        return display;
      }
    }
-@@ -65,26 +71,6 @@ nsWaylandDisplay *WaylandDisplayGet(GdkD
+@@ -67,26 +73,6 @@ nsWaylandDisplay *WaylandDisplayGet(GdkD
    return WaylandDisplayGetLocked(display, lock);
  }
  
@@ -81,7 +83,7 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
  static void WaylandDisplayLoopLocked(wl_display *aDisplay,
                                       const StaticMutexAutoLock &) {
    for (auto &display : gWaylandDisplays) {
-@@ -128,6 +114,8 @@ static void global_registry_handler(void
+@@ -130,6 +116,8 @@ static void global_registry_handler(void
                                      uint32_t id, const char *interface,
                                      uint32_t version) {
    auto display = reinterpret_cast<nsWaylandDisplay *>(data);
@@ -90,7 +92,7 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
  
    if (strcmp(interface, "wl_shm") == 0) {
      auto shm = static_cast<wl_shm *>(
-@@ -178,9 +166,7 @@ bool nsWaylandDisplay::Matches(wl_displa
+@@ -180,9 +168,7 @@ bool nsWaylandDisplay::Matches(wl_displa
    return mThreadId == PR_GetCurrentThread() && aDisplay == mDisplay;
  }
  
@@ -101,7 +103,7 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
      : mThreadId(PR_GetCurrentThread()),
        mDisplay(aDisplay),
        mEventQueue(nullptr),
-@@ -188,9 +174,10 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+@@ -190,9 +176,10 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
        mSubcompositor(nullptr),
        mSeat(nullptr),
        mShm(nullptr),
@@ -115,7 +117,7 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
  
    if (NS_IsMainThread()) {
      // Use default event queue in main thread operated by Gtk+.
-@@ -201,17 +188,19 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+@@ -203,17 +190,19 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
      mEventQueue = wl_display_create_queue(mDisplay);
      MessageLoop::current()->PostTask(NewRunnableFunction(
          "WaylandDisplayLoop", &WaylandDisplayLoop, mDisplay));
@@ -137,9 +139,9 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.cpp.mozilla-1517205 firefox-
    if (mEventQueue) {
      wl_event_queue_destroy(mEventQueue);
      mEventQueue = nullptr;
-diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.h.mozilla-1517205 firefox-66.0.3/widget/gtk/nsWaylandDisplay.h
---- firefox-66.0.3/widget/gtk/nsWaylandDisplay.h.mozilla-1517205	2019-04-09 22:01:13.000000000 +0200
-+++ firefox-66.0.3/widget/gtk/nsWaylandDisplay.h	2019-04-11 13:12:24.584232284 +0200
+diff -up firefox-67.0/widget/gtk/nsWaylandDisplay.h.mozilla-1517205 firefox-67.0/widget/gtk/nsWaylandDisplay.h
+--- firefox-67.0/widget/gtk/nsWaylandDisplay.h.mozilla-1517205	2019-05-14 01:08:27.000000000 +0200
++++ firefox-67.0/widget/gtk/nsWaylandDisplay.h	2019-05-15 16:00:23.368366052 +0200
 @@ -20,11 +20,10 @@ namespace widget {
  
  // Our general connection to Wayland display server,
@@ -185,9 +187,9 @@ diff -up firefox-66.0.3/widget/gtk/nsWaylandDisplay.h.mozilla-1517205 firefox-66
  
  }  // namespace widget
  }  // namespace mozilla
-diff -up firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1517205 firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp
---- firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1517205	2019-04-11 13:12:24.577232301 +0200
-+++ firefox-66.0.3/widget/gtk/WindowSurfaceWayland.cpp	2019-04-11 13:12:24.583232286 +0200
+diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1517205 firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1517205	2019-05-15 16:00:23.335366185 +0200
++++ firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp	2019-05-15 16:00:23.368366052 +0200
 @@ -413,16 +413,6 @@ WindowSurfaceWayland::~WindowSurfaceWayl
        delete mBackupBuffer[i];
      }

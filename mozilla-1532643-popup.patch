@@ -1,6 +1,6 @@
-diff -up firefox-66.0/layout/xul/moz.build.mozilla-1532643-popup firefox-66.0/layout/xul/moz.build
---- firefox-66.0/layout/xul/moz.build.mozilla-1532643-popup	2019-03-12 01:22:20.000000000 +0100
-+++ firefox-66.0/layout/xul/moz.build	2019-03-12 12:21:43.036982252 +0100
+diff -up firefox-67.0/layout/xul/moz.build.mozilla-1532643-popup firefox-67.0/layout/xul/moz.build
+--- firefox-67.0/layout/xul/moz.build.mozilla-1532643-popup	2019-05-14 01:08:24.000000000 +0200
++++ firefox-67.0/layout/xul/moz.build	2019-05-15 15:31:39.714299754 +0200
 @@ -88,3 +88,6 @@ LOCAL_INCLUDES += [
  
  if CONFIG['CC_TYPE'] in ('clang', 'gcc'):
@@ -8,9 +8,9 @@ diff -up firefox-66.0/layout/xul/moz.build.mozilla-1532643-popup firefox-66.0/la
 +
 +CFLAGS += CONFIG['TK_CFLAGS']
 +CXXFLAGS += CONFIG['TK_CFLAGS']
-diff -up firefox-66.0/layout/xul/nsMenuPopupFrame.cpp.mozilla-1532643-popup firefox-66.0/layout/xul/nsMenuPopupFrame.cpp
---- firefox-66.0/layout/xul/nsMenuPopupFrame.cpp.mozilla-1532643-popup	2019-03-12 01:22:20.000000000 +0100
-+++ firefox-66.0/layout/xul/nsMenuPopupFrame.cpp	2019-03-12 12:23:11.860770255 +0100
+diff -up firefox-67.0/layout/xul/nsMenuPopupFrame.cpp.mozilla-1532643-popup firefox-67.0/layout/xul/nsMenuPopupFrame.cpp
+--- firefox-67.0/layout/xul/nsMenuPopupFrame.cpp.mozilla-1532643-popup	2019-05-14 01:08:24.000000000 +0200
++++ firefox-67.0/layout/xul/nsMenuPopupFrame.cpp	2019-05-15 15:37:01.121215863 +0200
 @@ -55,6 +55,10 @@
  #include "mozilla/dom/KeyboardEvent.h"
  #include "mozilla/dom/KeyboardEventBinding.h"
@@ -21,8 +21,8 @@ diff -up firefox-66.0/layout/xul/nsMenuPopupFrame.cpp.mozilla-1532643-popup fire
 +#endif /* MOZ_WAYLAND */
  
  using namespace mozilla;
- using mozilla::dom::Event;
-@@ -298,11 +302,29 @@ nsresult nsMenuPopupFrame::CreateWidgetF
+ using mozilla::dom::Document;
+@@ -301,11 +305,29 @@ nsresult nsMenuPopupFrame::CreateWidgetF
        !(mode == eTransparencyTransparent || tag == nsGkAtoms::menulist);
    widgetData.mPopupLevel = PopupLevel(widgetData.mNoAutoHide);
  
@@ -53,10 +53,10 @@ diff -up firefox-66.0/layout/xul/nsMenuPopupFrame.cpp.mozilla-1532643-popup fire
      nsCOMPtr<nsIDocShellTreeItem> dsti = PresContext()->GetDocShell();
      if (!dsti) return NS_ERROR_FAILURE;
  
-diff -up firefox-66.0/widget/gtk/nsWindow.cpp.mozilla-1532643-popup firefox-66.0/widget/gtk/nsWindow.cpp
---- firefox-66.0/widget/gtk/nsWindow.cpp.mozilla-1532643-popup	2019-03-12 12:21:43.034982257 +0100
-+++ firefox-66.0/widget/gtk/nsWindow.cpp	2019-03-12 12:21:43.037982249 +0100
-@@ -3485,11 +3485,7 @@ nsresult nsWindow::Create(nsIWidget *aPa
+diff -up firefox-67.0/widget/gtk/nsWindow.cpp.mozilla-1532643-popup firefox-67.0/widget/gtk/nsWindow.cpp
+--- firefox-67.0/widget/gtk/nsWindow.cpp.mozilla-1532643-popup	2019-05-15 15:31:39.712299764 +0200
++++ firefox-67.0/widget/gtk/nsWindow.cpp	2019-05-15 15:31:39.716299744 +0200
+@@ -3527,11 +3527,7 @@ nsresult nsWindow::Create(nsIWidget *aPa
          } else {
            switch (aInitData->mPopupHint) {
              case ePopupTypeMenu:

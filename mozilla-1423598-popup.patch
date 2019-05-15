@@ -1,21 +1,7 @@
-diff --git a/widget/gtk/nsWindow.h b/widget/gtk/nsWindow.h
---- a/widget/gtk/nsWindow.h
-+++ b/widget/gtk/nsWindow.h
-@@ -457,6 +457,10 @@
-   nsWindow* GetTransientForWindowIfPopup();
-   bool IsHandlingTouchSequence(GdkEventSequence* aSequence);
- 
-+  void NativeMoveResizeWaylandPopup(GdkPoint* aPosition, GdkRectangle* aSize);
-+
-+  GtkTextDirection GetTextDirection();
-+
- #ifdef MOZ_X11
-   typedef enum {GTK_WIDGET_COMPOSIDED_DEFAULT = 0,
-                 GTK_WIDGET_COMPOSIDED_DISABLED = 1,
-diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
---- a/widget/gtk/nsWindow.cpp
-+++ b/widget/gtk/nsWindow.cpp
-@@ -1109,13 +1109,89 @@
+diff -up firefox-67.0/widget/gtk/nsWindow.cpp.mozilla-1423598-popup firefox-67.0/widget/gtk/nsWindow.cpp
+--- firefox-67.0/widget/gtk/nsWindow.cpp.mozilla-1423598-popup	2019-05-15 15:21:25.590222702 +0200
++++ firefox-67.0/widget/gtk/nsWindow.cpp	2019-05-15 15:24:26.925439991 +0200
+@@ -1115,13 +1115,89 @@ void nsWindow::Move(double aX, double aY
    NotifyRollupGeometryChange();
  }
  
@@ -110,7 +96,7 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
    }
  }
  
-@@ -3397,11 +3473,6 @@
+@@ -3412,11 +3488,6 @@ nsresult nsWindow::Create(nsIWidget *aPa
                                   GDK_WINDOW_TYPE_HINT_DIALOG);
          gtk_window_set_transient_for(GTK_WINDOW(mShell), topLevelParent);
        } else if (mWindowType == eWindowType_popup) {
@@ -122,7 +108,7 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
          gtk_window_set_wmclass(GTK_WINDOW(mShell), "Popup",
                                 gdk_get_program_class());
  
-@@ -3456,6 +3527,14 @@
+@@ -3475,6 +3546,14 @@ nsresult nsWindow::Create(nsIWidget *aPa
          if (topLevelParent) {
            gtk_window_set_transient_for(GTK_WINDOW(mShell), topLevelParent);
          }
@@ -137,7 +123,7 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
        } else {  // must be eWindowType_toplevel
          SetDefaultIcon();
          gtk_window_set_wmclass(GTK_WINDOW(mShell), "Toplevel",
-@@ -3895,23 +3974,27 @@
+@@ -3918,23 +3997,27 @@ void nsWindow::NativeMoveResize() {
    LOG(("nsWindow::NativeMoveResize [%p] %d %d %d %d\n", (void *)this, topLeft.x,
         topLeft.y, size.width, size.height));
  
@@ -182,8 +168,8 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
    }
  
  #ifdef MOZ_X11
-@@ -6791,3 +6874,18 @@
-                                     nsChangeHint_RepaintFrame);
+@@ -6818,3 +6901,18 @@ void nsWindow::ForceTitlebarRedraw(void)
+                                     RestyleHint{0}, nsChangeHint_RepaintFrame);
    }
  }
 +
@@ -201,4 +187,17 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
 +  bool isFrameRTL = !(wm.IsVertical() ? wm.IsVerticalLR() : wm.IsBidiLTR());
 +  return isFrameRTL ? GTK_TEXT_DIR_RTL : GTK_TEXT_DIR_LTR;
 +}
-
+diff -up firefox-67.0/widget/gtk/nsWindow.h.mozilla-1423598-popup firefox-67.0/widget/gtk/nsWindow.h
+--- firefox-67.0/widget/gtk/nsWindow.h.mozilla-1423598-popup	2019-05-14 01:08:37.000000000 +0200
++++ firefox-67.0/widget/gtk/nsWindow.h	2019-05-15 15:21:25.890221541 +0200
+@@ -460,6 +460,10 @@ class nsWindow final : public nsBaseWidg
+   nsWindow* GetTransientForWindowIfPopup();
+   bool IsHandlingTouchSequence(GdkEventSequence* aSequence);
+ 
++  void NativeMoveResizeWaylandPopup(GdkPoint* aPosition, GdkRectangle* aSize);
++
++  GtkTextDirection GetTextDirection();
++
+ #ifdef MOZ_X11
+   typedef enum {GTK_WIDGET_COMPOSIDED_DEFAULT = 0,
+                 GTK_WIDGET_COMPOSIDED_DISABLED = 1,

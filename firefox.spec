@@ -98,13 +98,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        66.0.5
+Version:        67.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190508.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190515.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -134,10 +134,7 @@ Patch37:        build-jit-atomic-always-lucky.patch
 Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
-Patch42:        mozilla-1515641-av1-build-1.patch
-Patch43:        mozilla-1515641-av1-build-2.patch
 Patch44:        build-arm-libopus.patch
-Patch45:        mozilla-1533969.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -162,7 +159,6 @@ Patch574:        firefox-pipewire.patch
 Patch575:        mozilla-1423598-popup.patch
 Patch576:        mozilla-1532643-popup.patch
 Patch577:        mozilla-1535567.patch
-Patch578:        mozilla-1431399.patch
 Patch579:        mozilla-1468911.patch
 Patch580:        mozilla-1539471.patch
 Patch581:        mozilla-1517205.patch
@@ -345,10 +341,7 @@ This package contains results of tests executed during build.
 %patch41 -p1 -b .disable-elfhack
 %endif
 %patch3  -p1 -b .arm
-%patch42 -p1 -b .mozilla-1515641
-%patch43 -p1 -b .mozilla-1515641
 %patch44 -p1 -b .build-arm-libopus
-%patch45 -p1 -b .mozilla-1533969
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -380,7 +373,6 @@ This package contains results of tests executed during build.
 %patch575 -p1 -b .mozilla-1423598-popup
 %patch576 -p1 -b .mozilla-1532643-popup
 %patch577 -p1 -b .mozilla-1535567
-%patch578 -p1 -b .mozilla-1431399
 %patch579 -p1 -b .mozilla-1468911
 %patch580 -p1 -b .mozilla-1539471
 %patch581 -p1 -b .mozilla-1517205
@@ -938,6 +930,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 15 2019 Martin Stransky <stransky@redhat.com> - 67.0-1
+- Updated to 67.0
+
 * Wed May 8 2019 Martin Stransky <stransky@redhat.com> - 66.0.5-1
 - Updated to 66.0.5
 
