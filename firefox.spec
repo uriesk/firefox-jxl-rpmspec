@@ -99,7 +99,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        67.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -745,7 +745,8 @@ for langpack in `ls firefox-langpacks/*.xpi`; do
 
   %{__install} -m 644 ${extensionID}.xpi %{buildroot}%{langpackdir}
   language=`echo $language | sed -e 's/-/_/g'`
-  echo "%%lang($language) %{langpackdir}/${extensionID}.xpi" >> %{name}.lang
+  #echo "%%lang($language) %{langpackdir}/${extensionID}.xpi" >> %{name}.lang
+  echo "%{langpackdir}/${extensionID}.xpi" >> %{name}.lang
 done
 %{__rm} -rf firefox-langpacks
 
@@ -930,6 +931,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 16 2019 Jan Horak <jhorak@redhat.com> - 67.0-2
+- Removed %lang() prefix from langpacks file list due to flatpak
+
 * Wed May 15 2019 Martin Stransky <stransky@redhat.com> - 67.0-1
 - Updated to 67.0
 
