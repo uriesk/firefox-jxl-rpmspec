@@ -57,11 +57,11 @@ diff -up firefox-67.0/widget/gtk/mozcontainer.cpp.mozilla-1535567 firefox-67.0/w
 +          ? wl_proxy_get_id((struct wl_proxy *)gtk_container_surface)
 +          : -1;
 +
-+  LOG(
-+      ("%s [%p] frame_callback_handler %p "
-+       "frame_callback_handler_surface_id %d\n",
-+       __FUNCTION__, (void *)container, container->frame_callback_handler,
-+       container->frame_callback_handler_surface_id));
++
++
++
++
++
 +
 +  if (container->frame_callback_handler &&
 +      container->frame_callback_handler_surface_id ==
@@ -109,8 +109,8 @@ diff -up firefox-67.0/widget/gtk/mozcontainer.cpp.mozilla-1535567 firefox-67.0/w
  
      window = gdk_window_new(parent, &attributes, attributes_mask);
 +
-+    LOG(("moz_container_realize() [%p] GdkWindow %p\n", (void *)container,
-+         (void *)window));
++
++
 +
      gdk_window_set_user_data(window, widget);
    } else {
