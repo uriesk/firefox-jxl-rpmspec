@@ -104,7 +104,7 @@ URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190515.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190517.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -936,6 +936,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Fri May 17 2019 Martin Stransky <stransky@redhat.com> - 67.0-3
 - Use %lang() in regular builds.
+- Updated to 67.0 Build 2
 
 * Thu May 16 2019 Jan Horak <jhorak@redhat.com> - 67.0-2
 - Removed %lang() prefix from langpacks file list due to flatpak
