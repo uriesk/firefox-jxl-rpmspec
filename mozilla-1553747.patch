@@ -1,6 +1,6 @@
-diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.old firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp
---- firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.old	2019-05-23 09:57:11.794580879 +0200
-+++ firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp	2019-05-23 10:05:15.505606976 +0200
+diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1553747 firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1553747	2019-05-23 13:17:03.169677512 +0200
++++ firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp	2019-05-23 13:17:03.172677504 +0200
 @@ -416,7 +416,7 @@ WindowSurfaceWayland::~WindowSurfaceWayl
  }
  
@@ -54,11 +54,16 @@ diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.old firefox-67.0/widge
    RefPtr<gfx::SourceSurface> surf =
        gfx::Factory::CreateSourceSurfaceForCairoSurface(
            mImageSurface->CairoSurface(), mImageSurface->GetSize(),
-diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.h.old firefox-67.0/widget/gtk/WindowSurfaceWayland.h
---- firefox-67.0/widget/gtk/WindowSurfaceWayland.h.old	2019-05-23 09:57:16.208572833 +0200
-+++ firefox-67.0/widget/gtk/WindowSurfaceWayland.h	2019-05-23 09:58:34.497430120 +0200
-@@ -96,7 +96,7 @@ class WindowSurfaceWayland : public Wind
-   WindowBackBuffer* GetWaylandBufferToDraw(int aWidth, int aHeight);
+diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1553747 firefox-67.0/widget/gtk/WindowSurfaceWayland.h
+--- firefox-67.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1553747	2019-05-23 13:17:03.169677512 +0200
++++ firefox-67.0/widget/gtk/WindowSurfaceWayland.h	2019-05-23 14:21:16.002920509 +0200
+@@ -93,10 +93,11 @@ class WindowSurfaceWayland : public Wind
+   void DelayedCommitHandler();
+ 
+  private:
+-  WindowBackBuffer* GetWaylandBufferToDraw(int aWidth, int aHeight);
++  WindowBackBuffer* GetWaylandBufferToDraw(int aWidth, int aHeight,
++      bool aFullScreenUpdate);
  
    already_AddRefed<gfx::DrawTarget> LockWaylandBuffer(int aWidth, int aHeight,
 -                                                      bool aClearBuffer);
