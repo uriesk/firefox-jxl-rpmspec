@@ -1,0 +1,68 @@
+diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.old firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.old	2019-05-23 09:57:11.794580879 +0200
++++ firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp	2019-05-23 10:05:15.505606976 +0200
+@@ -416,7 +416,7 @@ WindowSurfaceWayland::~WindowSurfaceWayl
+ }
+ 
+ WindowBackBuffer* WindowSurfaceWayland::GetWaylandBufferToDraw(int aWidth,
+-                                                               int aHeight) {
++  int aHeight, bool aFullScreenUpdate) {
+   if (!mWaylandBuffer) {
+     LOGWAYLAND(("%s [%p] Create [%d x %d]\n", __PRETTY_FUNCTION__, (void*)this,
+                 aWidth, aHeight));
+@@ -473,8 +473,10 @@ WindowBackBuffer* WindowSurfaceWayland::
+                 (void*)this, aWidth, aHeight));
+     // Former front buffer has the same size as a requested one.
+     // Gecko may expect a content already drawn on screen so copy
+-    // existing data to the new buffer.
+-    mWaylandBuffer->SetImageDataFromBuffer(lastWaylandBuffer);
++    // existing data to the new buffer if we don't do fullscreen redraw.
++    if (!aFullScreenUpdate) {
++      mWaylandBuffer->SetImageDataFromBuffer(lastWaylandBuffer);
++    }
+     // When buffer switches we need to damage whole screen
+     // (https://bugzilla.redhat.com/show_bug.cgi?id=1418260)
+     mWaylandBufferFullScreenDamage = true;
+@@ -491,8 +493,9 @@ WindowBackBuffer* WindowSurfaceWayland::
+ }
+ 
+ already_AddRefed<gfx::DrawTarget> WindowSurfaceWayland::LockWaylandBuffer(
+-    int aWidth, int aHeight, bool aClearBuffer) {
+-  WindowBackBuffer* buffer = GetWaylandBufferToDraw(aWidth, aHeight);
++    int aWidth, int aHeight, bool aClearBuffer, bool aFullScreenUpdate) {
++  WindowBackBuffer* buffer = GetWaylandBufferToDraw(aWidth, aHeight,
++    aFullScreenUpdate);
+   if (!buffer) {
+     NS_WARNING(
+         "WindowSurfaceWayland::LockWaylandBuffer(): No buffer available");
+@@ -557,7 +560,7 @@ already_AddRefed<gfx::DrawTarget> Window
+   if (mDrawToWaylandBufferDirectly) {
+     RefPtr<gfx::DrawTarget> dt =
+         LockWaylandBuffer(screenRect.width, screenRect.height,
+-                          mWindow->WaylandSurfaceNeedsClear());
++                          mWindow->WaylandSurfaceNeedsClear(), true);
+     if (dt) {
+       // When we have a request to update whole screen at once
+       // (surface was created, resized or changed somehow)
+@@ -590,7 +593,8 @@ bool WindowSurfaceWayland::CommitImageSu
+   }
+ 
+   RefPtr<gfx::DrawTarget> dt = LockWaylandBuffer(
+-      screenRect.width, screenRect.height, mWindow->WaylandSurfaceNeedsClear());
++      screenRect.width, screenRect.height, mWindow->WaylandSurfaceNeedsClear(),
++      false);
+   RefPtr<gfx::SourceSurface> surf =
+       gfx::Factory::CreateSourceSurfaceForCairoSurface(
+           mImageSurface->CairoSurface(), mImageSurface->GetSize(),
+diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.h.old firefox-67.0/widget/gtk/WindowSurfaceWayland.h
+--- firefox-67.0/widget/gtk/WindowSurfaceWayland.h.old	2019-05-23 09:57:16.208572833 +0200
++++ firefox-67.0/widget/gtk/WindowSurfaceWayland.h	2019-05-23 09:58:34.497430120 +0200
+@@ -96,7 +96,7 @@ class WindowSurfaceWayland : public Wind
+   WindowBackBuffer* GetWaylandBufferToDraw(int aWidth, int aHeight);
+ 
+   already_AddRefed<gfx::DrawTarget> LockWaylandBuffer(int aWidth, int aHeight,
+-                                                      bool aClearBuffer);
++      bool aClearBuffer, bool aFullScreenUpdate);
+   already_AddRefed<gfx::DrawTarget> LockImageSurface(
+       const gfx::IntSize& aLockSize);
+   bool CommitImageSurfaceToWaylandBuffer(const LayoutDeviceIntRegion& aRegion);

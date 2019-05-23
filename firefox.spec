@@ -99,7 +99,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        67.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -163,6 +163,7 @@ Patch579:        mozilla-1468911.patch
 Patch580:        mozilla-1539471.patch
 Patch581:        mozilla-1517205.patch
 Patch582:        mozilla-1508378.patch
+Patch583:        mozilla-1553747.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -377,6 +378,7 @@ This package contains results of tests executed during build.
 %patch580 -p1 -b .mozilla-1539471
 %patch581 -p1 -b .mozilla-1517205
 %patch582 -p1 -b .mozilla-1508378
+%patch583 -p1 -b .mozilla-1553747
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -934,6 +936,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 23 2019 Martin Stransky <stransky@redhat.com> - 67.0-4
+- Added wayland buffer optimization (mozilla#1553747).
+
 * Fri May 17 2019 Martin Stransky <stransky@redhat.com> - 67.0-3
 - Use %lang() in regular builds.
 - Updated to 67.0 Build 2
