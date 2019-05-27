@@ -1,0 +1,256 @@
+diff --git a/gfx/thebes/gfxPlatform.cpp b/gfx/thebes/gfxPlatform.cpp
+--- a/gfx/thebes/gfxPlatform.cpp
++++ b/gfx/thebes/gfxPlatform.cpp
+@@ -70,6 +70,10 @@
+ #  include "mozilla/gfx/DeviceManagerDx.h"
+ #endif
+ 
++#ifdef MOZ_WAYLAND
++#  include "mozilla/widget/nsWaylandDisplayShutdown.h"
++#endif
++
+ #include "nsGkAtoms.h"
+ #include "gfxPlatformFontList.h"
+ #include "gfxContext.h"
+@@ -1276,6 +1280,9 @@
+       layers::PaintThread::Shutdown();
+     }
+   } else if (XRE_IsParentProcess()) {
++#ifdef MOZ_WAYLAND
++    widget::WaylandDisplayShutdown();
++#endif
+     gfx::VRManagerChild::ShutDown();
+     layers::CompositorManagerChild::Shutdown();
+     layers::ImageBridgeChild::ShutDown();
+diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayland.cpp
+--- a/widget/gtk/WindowSurfaceWayland.cpp
++++ b/widget/gtk/WindowSurfaceWayland.cpp
+@@ -144,6 +144,8 @@
+ (wl_buffer/wl_surface).
+ */
+ 
++#define EVENT_LOOP_DELAY (1000 / 240)
++
+ #define BUFFER_BPP 4
+ gfx::SurfaceFormat WindowBackBuffer::mFormat = gfx::SurfaceFormat::B8G8R8A8;
+ 
+diff --git a/widget/gtk/moz.build b/widget/gtk/moz.build
+--- a/widget/gtk/moz.build
++++ b/widget/gtk/moz.build
+@@ -101,6 +101,9 @@
+         'nsWaylandDisplay.cpp',
+         'WindowSurfaceWayland.cpp',
+     ]
++    EXPORTS.mozilla.widget += [
++        'nsWaylandDisplayShutdown.h'
++    ]
+ 
+ if CONFIG['ACCESSIBILITY']:
+     UNIFIED_SOURCES += [
+diff --git a/widget/gtk/nsAppShell.cpp b/widget/gtk/nsAppShell.cpp
+--- a/widget/gtk/nsAppShell.cpp
++++ b/widget/gtk/nsAppShell.cpp
+@@ -27,6 +27,9 @@
+ #include "ScreenHelperGTK.h"
+ #include "HeadlessScreenHelper.h"
+ #include "mozilla/widget/ScreenManager.h"
++#ifdef MOZ_WAYLAND
++#  include "nsWaylandDisplay.h"
++#endif
+ 
+ using mozilla::LazyLogModule;
+ using mozilla::Unused;
+@@ -267,5 +270,9 @@
+ }
+ 
+ bool nsAppShell::ProcessNextNativeEvent(bool mayWait) {
+-  return g_main_context_iteration(nullptr, mayWait);
++  bool ret = g_main_context_iteration(nullptr, mayWait);
++#ifdef MOZ_WAYLAND
++  WaylandDispatchDisplays();
++#endif
++  return ret;
+ }
+diff --git a/widget/gtk/nsWaylandDisplay.h b/widget/gtk/nsWaylandDisplay.h
+--- a/widget/gtk/nsWaylandDisplay.h
++++ b/widget/gtk/nsWaylandDisplay.h
+@@ -14,10 +14,6 @@
+ namespace mozilla {
+ namespace widget {
+ 
+-// TODO: Bug 1467125 - We need to integrate wl_display_dispatch_queue_pending()
+-// with compositor event loop.
+-#define EVENT_LOOP_DELAY (1000 / 240)
+-
+ // Our general connection to Wayland display server,
+ // holds our display connection and runs event loop.
+ class nsWaylandDisplay {
+@@ -25,9 +21,10 @@
+   explicit nsWaylandDisplay(wl_display* aDisplay);
+   virtual ~nsWaylandDisplay();
+ 
+-  bool DisplayLoop();
++  bool DispatchEventQueue();
+   bool Matches(wl_display* aDisplay);
+ 
++  MessageLoop* GetDispatcherThreadLoop() { return mDispatcherThreadLoop; }
+   wl_display* GetDisplay() { return mDisplay; };
+   wl_event_queue* GetEventQueue() { return mEventQueue; };
+   wl_subcompositor* GetSubcompositor(void) { return mSubcompositor; };
+@@ -47,7 +44,10 @@
+   void SetPrimarySelectionDeviceManager(
+       gtk_primary_selection_device_manager* aPrimarySelectionDeviceManager);
+ 
++  void Shutdown();
++
+  private:
++  MessageLoop* mDispatcherThreadLoop;
+   PRThread* mThreadId;
+   wl_display* mDisplay;
+   wl_event_queue* mEventQueue;
+@@ -59,6 +59,7 @@
+   wl_registry* mRegistry;
+ };
+ 
++void WaylandDispatchDisplays();
+ nsWaylandDisplay* WaylandDisplayGet(GdkDisplay* aGdkDisplay = nullptr);
+ 
+ }  // namespace widget
+diff --git a/widget/gtk/nsWaylandDisplay.cpp b/widget/gtk/nsWaylandDisplay.cpp
+--- a/widget/gtk/nsWaylandDisplay.cpp
++++ b/widget/gtk/nsWaylandDisplay.cpp
+@@ -21,6 +21,15 @@
+ static nsWaylandDisplay *gWaylandDisplays[MAX_DISPLAY_CONNECTIONS];
+ static StaticMutex gWaylandDisplaysMutex;
+ 
++void WaylandDisplayShutdown() {
++  StaticMutexAutoLock lock(gWaylandDisplaysMutex);
++  for (auto &display : gWaylandDisplays) {
++    if (display) {
++      display->Shutdown();
++    }
++  }
++}
++
+ static void ReleaseDisplaysAtExit() {
+   for (int i = 0; i < MAX_DISPLAY_CONNECTIONS; i++) {
+     delete gWaylandDisplays[i];
+@@ -28,6 +37,10 @@
+   }
+ }
+ 
++static void DispatchDisplay(nsWaylandDisplay *aDisplay) {
++  aDisplay->DispatchEventQueue();
++}
++
+ // Each thread which is using wayland connection (wl_display) has to operate
+ // its own wl_event_queue. Main Firefox thread wl_event_queue is handled
+ // by Gtk main loop, other threads/wl_event_queue has to be handled by us.
+@@ -35,7 +48,15 @@
+ // nsWaylandDisplay is our interface to wayland compositor. It provides wayland
+ // global objects as we need (wl_display, wl_shm) and operates wl_event_queue on
+ // compositor (not the main) thread.
+-static void WaylandDisplayLoop(wl_display *aDisplay);
++void WaylandDispatchDisplays() {
++  StaticMutexAutoLock lock(gWaylandDisplaysMutex);
++  for (auto &display : gWaylandDisplays) {
++    if (display && display->GetDispatcherThreadLoop()) {
++      display->GetDispatcherThreadLoop()->PostTask(NewRunnableFunction(
++          "WaylandDisplayDispatch", &DispatchDisplay, display));
++    }
++  }
++}
+ 
+ // Get WaylandDisplay for given wl_display and actual calling thread.
+ static nsWaylandDisplay *WaylandDisplayGetLocked(GdkDisplay *aGdkDisplay,
+@@ -73,27 +94,6 @@
+   return WaylandDisplayGetLocked(aGdkDisplay, lock);
+ }
+ 
+-static void WaylandDisplayLoopLocked(wl_display *aDisplay,
+-                                     const StaticMutexAutoLock &) {
+-  for (auto &display : gWaylandDisplays) {
+-    if (display && display->Matches(aDisplay)) {
+-      if (display->DisplayLoop()) {
+-        MessageLoop::current()->PostDelayedTask(
+-            NewRunnableFunction("WaylandDisplayLoop", &WaylandDisplayLoop,
+-                                aDisplay),
+-            EVENT_LOOP_DELAY);
+-      }
+-      break;
+-    }
+-  }
+-}
+-
+-static void WaylandDisplayLoop(wl_display *aDisplay) {
+-  MOZ_ASSERT(!NS_IsMainThread());
+-  StaticMutexAutoLock lock(gWaylandDisplaysMutex);
+-  WaylandDisplayLoopLocked(aDisplay, lock);
+-}
+-
+ void nsWaylandDisplay::SetShm(wl_shm *aShm) { mShm = aShm; }
+ 
+ void nsWaylandDisplay::SetSubcompositor(wl_subcompositor *aSubcompositor) {
+@@ -158,7 +158,7 @@
+ static const struct wl_registry_listener registry_listener = {
+     global_registry_handler, global_registry_remover};
+ 
+-bool nsWaylandDisplay::DisplayLoop() {
++bool nsWaylandDisplay::DispatchEventQueue() {
+   wl_display_dispatch_queue_pending(mDisplay, mEventQueue);
+   return true;
+ }
+@@ -168,7 +168,8 @@
+ }
+ 
+ nsWaylandDisplay::nsWaylandDisplay(wl_display *aDisplay)
+-    : mThreadId(PR_GetCurrentThread()),
++    : mDispatcherThreadLoop(nullptr),
++      mThreadId(PR_GetCurrentThread()),
+       mDisplay(aDisplay),
+       mEventQueue(nullptr),
+       mDataDeviceManager(nullptr),
+@@ -186,15 +187,16 @@
+     wl_display_roundtrip(mDisplay);
+     wl_display_roundtrip(mDisplay);
+   } else {
++    mDispatcherThreadLoop = MessageLoop::current();
+     mEventQueue = wl_display_create_queue(mDisplay);
+-    MessageLoop::current()->PostTask(NewRunnableFunction(
+-        "WaylandDisplayLoop", &WaylandDisplayLoop, mDisplay));
+     wl_proxy_set_queue((struct wl_proxy *)mRegistry, mEventQueue);
+     wl_display_roundtrip_queue(mDisplay, mEventQueue);
+     wl_display_roundtrip_queue(mDisplay, mEventQueue);
+   }
+ }
+ 
++void nsWaylandDisplay::Shutdown() { mDispatcherThreadLoop = nullptr; }
++
+ nsWaylandDisplay::~nsWaylandDisplay() {
+   // Owned by Gtk+, we don't need to release
+   mDisplay = nullptr;
+diff --git a/widget/gtk/nsWaylandDisplayShutdown.h b/widget/gtk/nsWaylandDisplayShutdown.h
+new file mode 100644
+--- /dev/null
++++ b/widget/gtk/nsWaylandDisplayShutdown.h
+@@ -0,0 +1,19 @@
++/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
++/* vim:expandtab:shiftwidth=4:tabstop=4:
++ */
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++#ifndef __MOZ_WAYLAND_DISPLAY_SHUTDOWN_H__
++#define __MOZ_WAYLAND_DISPLAY_SHUTDOWN_H__
++
++namespace mozilla {
++namespace widget {
++
++void WaylandDisplayShutdown();
++
++}  // namespace widget
++}  // namespace mozilla
++
++#endif  // __MOZ_WAYLAND_DISPLAY_SHUTDOWN_H__
+
