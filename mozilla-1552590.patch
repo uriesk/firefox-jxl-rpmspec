@@ -1,0 +1,2507 @@
+diff -up firefox-67.0/gfx/2d/moz.build.mozilla-1552590 firefox-67.0/gfx/2d/moz.build
+--- firefox-67.0/gfx/2d/moz.build.mozilla-1552590	2019-05-17 02:34:18.000000000 +0200
++++ firefox-67.0/gfx/2d/moz.build	2019-05-27 12:15:32.030414339 +0200
+@@ -260,3 +260,15 @@ if CONFIG['MOZ_ENABLE_SKIA_GPU']:
+     LOCAL_INCLUDES += [
+         '/gfx/skia/skia/src/gpu',
+     ]
++
++#if CONFIG['MOZ_WAYLAND'] and CONFIG['HAVE_LIBDRM']:
++if CONFIG['HAVE_LIBDRM']:
++    SOURCES += [
++        'WaylandDMABufSurface.cpp',
++    ]
++    EXPORTS.mozilla.gfx += [
++        'WaylandDMABufSurface.h',
++    ]
++    CFLAGS += CONFIG['TK_CFLAGS']
++    CXXFLAGS += CONFIG['TK_CFLAGS']
++
+diff -up firefox-67.0/gfx/2d/WaylandDMABufSurface.cpp.mozilla-1552590 firefox-67.0/gfx/2d/WaylandDMABufSurface.cpp
+--- firefox-67.0/gfx/2d/WaylandDMABufSurface.cpp.mozilla-1552590	2019-05-27 12:15:32.030414339 +0200
++++ firefox-67.0/gfx/2d/WaylandDMABufSurface.cpp	2019-05-27 12:15:32.030414339 +0200
+@@ -0,0 +1,274 @@
++/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
++/* vim: set ts=8 sts=2 et sw=2 tw=80: */
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++// Based on weston/simple-dmabuf-egl.c
++
++#include "WaylandDMABufSurface.h"
++
++#include <fcntl.h>
++#include <getopt.h>
++#include <signal.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <sys/time.h>
++#include <dlfcn.h>
++
++#include <gbm.h>
++
++using namespace mozilla;
++using namespace mozilla::widget;
++
++#ifndef DRM_FORMAT_MOD_INVALID
++#  define DRM_FORMAT_MOD_INVALID ((1ULL << 56) - 1)
++#endif
++#define BUFFER_FLAGS 0
++
++bool WaylandDMABufSurface::mAvailable = false;
++bool WaylandDMABufSurface::mInitialized = false;
++
++bool WaylandDMABufSurface::IsAvailable() {
++  if (!mInitialized) {
++    mInitialized = true;
++    if (!nsGbmLib::IsAvailable()) {
++      return false;
++    }
++
++    // Test Alpha and non-alpha formats
++    nsWaylandDisplay* display = WaylandDisplayGet();
++    if (!display->GetGbmFormat(false) || !display->GetGbmFormat(true)) {
++      return false;
++    }
++    mAvailable = true;
++  }
++  return static_cast<bool>(mAvailable);
++}
++
++static void buffer_release(void* data, wl_buffer* buffer) {
++  auto surface = reinterpret_cast<WaylandDMABufSurface*>(data);
++  surface->WLBufferDetach();
++}
++
++static const struct wl_buffer_listener buffer_listener = {buffer_release};
++
++static void buffer_created(void* data,
++                           struct zwp_linux_buffer_params_v1* params,
++                           struct wl_buffer* new_buffer) {
++  auto surface = static_cast<WaylandDMABufSurface*>(data);
++
++  surface->SetWLBuffer(new_buffer);
++
++  nsWaylandDisplay* display = WaylandDisplayGet();
++  /* When not using explicit synchronization listen to wl_buffer.release
++   * for release notifications, otherwise we are going to use
++   * zwp_linux_buffer_release_v1. */
++  if (!display->IsExplicitSyncEnabled()) {
++    wl_buffer_add_listener(new_buffer, &buffer_listener, surface);
++  }
++  zwp_linux_buffer_params_v1_destroy(params);
++}
++
++static void buffer_create_failed(void* data,
++                                 struct zwp_linux_buffer_params_v1* params) {
++  zwp_linux_buffer_params_v1_destroy(params);
++}
++
++static const struct zwp_linux_buffer_params_v1_listener params_listener = {
++    buffer_created, buffer_create_failed};
++
++WaylandDMABufSurface::WaylandDMABufSurface()
++    : mWidth(0),
++      mHeight(0),
++      mGmbFormat(nullptr),
++      mWLBuffer(nullptr),
++      mMappedRegion(nullptr),
++      mGbmBufferObject(nullptr),
++      mBufferModifier(DRM_FORMAT_MOD_INVALID),
++      mBufferPlaneCount(1),
++      mWLBufferAttached(false),
++      mFastWLBufferCreation(true) {
++  for (int i = 0; i < DMABUF_BUFFER_PLANES; i++) {
++    mDmabufFds[i] = -1;
++    mStrides[i] = 0;
++    mOffsets[i] = 0;
++  }
++}
++
++WaylandDMABufSurface::~WaylandDMABufSurface() { Release(); }
++
++bool WaylandDMABufSurface::Create(int aWidth, int aHeight, bool aHasAlpha) {
++  MOZ_ASSERT(mWLBuffer == nullptr);
++
++  mWidth = aWidth;
++  mHeight = aHeight;
++
++  nsWaylandDisplay* display = WaylandDisplayGet();
++  mGmbFormat = display->GetGbmFormat(aHasAlpha);
++  if (!mGmbFormat) {
++    // Requested DRM format is not supposed.
++    return false;
++  }
++
++#ifdef HAVE_GBM_MODIFIERS
++  if (nsGbmLib::IsModifierAvailable() && mGmbFormat->mModifiersCount > 0) {
++    mGbmBufferObject = nsGbmLib::CreateWithModifiers(
++        display->GetGbmDevice(), mWidth, mHeight, mGmbFormat->mFormat,
++        mGmbFormat->mModifiers, mGmbFormat->mModifiersCount);
++    if (mGbmBufferObject) {
++      mBufferModifier = nsGbmLib::GetModifier(mGbmBufferObject);
++    }
++  }
++#endif
++
++  if (!mGbmBufferObject) {
++    mGbmBufferObject =
++        nsGbmLib::Create(display->GetGbmDevice(), mWidth, mHeight,
++                         mGmbFormat->mFormat, GBM_BO_USE_RENDERING);
++  }
++
++  if (!mGbmBufferObject) {
++    return false;
++  }
++
++#ifdef HAVE_GBM_MODIFIERS
++  if (nsGbmLib::IsModifierAvailable()) {
++    mBufferPlaneCount = nsGbmLib::GetPlaneCount(mGbmBufferObject);
++    for (int i = 0; i < mBufferPlaneCount; i++) {
++      uint32_t handle = nsGbmLib::GetHandleForPlane(mGbmBufferObject, i).u32;
++      int ret = nsGbmLib::DrmPrimeHandleToFD(display->GetGbmDeviceFd(), handle,
++                                             0, &mDmabufFds[i]);
++      if (ret < 0 || mDmabufFds[i] < 0) {
++        Release();
++        return false;
++      }
++      mStrides[i] = nsGbmLib::GetStrideForPlane(mGbmBufferObject, i);
++      mOffsets[i] = nsGbmLib::GetOffset(mGbmBufferObject, i);
++    }
++  } else
++#endif
++  {
++    mBufferPlaneCount = 1;
++    mStrides[0] = nsGbmLib::GetStride(mGbmBufferObject);
++    mDmabufFds[0] = nsGbmLib::GetFd(mGbmBufferObject);
++    if (mDmabufFds[0] < 0) {
++      Release();
++      return false;
++    }
++  }
++
++  struct zwp_linux_buffer_params_v1* params =
++      zwp_linux_dmabuf_v1_create_params(display->GetDmabuf());
++  for (int i = 0; i < mBufferPlaneCount; i++) {
++    zwp_linux_buffer_params_v1_add(params, mDmabufFds[i], i, mOffsets[i],
++                                   mStrides[i], mBufferModifier >> 32,
++                                   mBufferModifier & 0xffffffff);
++  }
++  zwp_linux_buffer_params_v1_add_listener(params, &params_listener, this);
++
++  if (mFastWLBufferCreation) {
++    mWLBuffer = zwp_linux_buffer_params_v1_create_immed(
++        params, mWidth, mHeight, mGmbFormat->mFormat, BUFFER_FLAGS);
++    /* When not using explicit synchronization listen to
++     * wl_buffer.release for release notifications, otherwise we
++     * are going to use zwp_linux_buffer_release_v1. */
++    if (!display->IsExplicitSyncEnabled()) {
++      wl_buffer_add_listener(mWLBuffer, &buffer_listener, this);
++    }
++  } else {
++    zwp_linux_buffer_params_v1_create(params, mWidth, mHeight,
++                                      mGmbFormat->mFormat, BUFFER_FLAGS);
++  }
++
++  return true;
++}
++
++void WaylandDMABufSurface::Release() {
++  MOZ_ASSERT(!IsMapped(), "We can't release mapped buffer!");
++
++  if (mWLBuffer) {
++    wl_buffer_destroy(mWLBuffer);
++    mWLBuffer = nullptr;
++  }
++
++  if (mGbmBufferObject) {
++    nsGbmLib::Destroy(mGbmBufferObject);
++    mGbmBufferObject = nullptr;
++  }
++
++  for (int i = 0; i < mBufferPlaneCount; i++) {
++    if (mDmabufFds[i] >= 0) {
++      close(mDmabufFds[i]);
++      mDmabufFds[i] = 0;
++    }
++  }
++}
++
++void* WaylandDMABufSurface::MapReadOnly(uint32_t aX, uint32_t aY,
++                                        uint32_t aWidth, uint32_t aHeight,
++                                        uint32_t* aStride) {
++  NS_ASSERTION(mMappedRegion == nullptr, "Already mapped?");
++  void* map_data = nullptr;
++  *aStride = 0;
++  mMappedRegion = nsGbmLib::Map(mGbmBufferObject, aX, aY, aWidth, aHeight,
++                                GBM_BO_TRANSFER_READ, aStride, &map_data);
++  return mMappedRegion;
++}
++
++void* WaylandDMABufSurface::MapReadOnly(uint32_t* aStride) {
++  return MapReadOnly(0, 0, mWidth, mHeight, aStride);
++}
++
++void* WaylandDMABufSurface::Map(uint32_t aX, uint32_t aY, uint32_t aWidth,
++                                uint32_t aHeight, uint32_t* aStride) {
++  NS_ASSERTION(mMappedRegion == nullptr, "Already mapped?");
++  void* map_data = nullptr;
++  *aStride = 0;
++  mMappedRegion = nsGbmLib::Map(mGbmBufferObject, aX, aY, aWidth, aHeight,
++                                GBM_BO_TRANSFER_READ_WRITE, aStride, &map_data);
++  return mMappedRegion;
++}
++
++void* WaylandDMABufSurface::Map(uint32_t* aStride) {
++  return Map(0, 0, mWidth, mHeight, aStride);
++}
++
++void WaylandDMABufSurface::Unmap() {
++  if (mMappedRegion) {
++    nsGbmLib::Unmap(mGbmBufferObject, mMappedRegion);
++    mMappedRegion = nullptr;
++  }
++}
++
++bool WaylandDMABufSurface::Resize(int aWidth, int aHeight) {
++  if (aWidth == mWidth && aHeight == mHeight) {
++    return true;
++  }
++
++  if (IsMapped()) {
++    NS_WARNING("We can't resize mapped surface!");
++    return false;
++  }
++
++  Release();
++  return Create(aWidth, aHeight, mGmbFormat->mHasAlpha);
++}
++
++bool WaylandDMABufSurface::CopyFrom(
++    class WaylandDMABufSurface* aSourceSurface) {
++  // Not implemented - we should not call that.
++  MOZ_CRASH();
++}
++
++// TODO - EGL clear
++void WaylandDMABufSurface::Clear() {
++  uint32_t destStride;
++  void* destData = Map(&destStride);
++  memset(destData, 0, GetHeight() * destStride);
++  Unmap();
++}
+diff -up firefox-67.0/gfx/2d/WaylandDMABufSurface.h.mozilla-1552590 firefox-67.0/gfx/2d/WaylandDMABufSurface.h
+--- firefox-67.0/gfx/2d/WaylandDMABufSurface.h.mozilla-1552590	2019-05-27 12:15:32.030414339 +0200
++++ firefox-67.0/gfx/2d/WaylandDMABufSurface.h	2019-05-27 12:15:32.030414339 +0200
+@@ -0,0 +1,73 @@
++/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
++/* vim: set ts=8 sts=2 et sw=2 tw=80: */
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++#ifndef WaylandDMABufSurface_h__
++#define WaylandDMABufSurface_h__
++
++#include <stdint.h>
++#include "mozilla/widget/nsWaylandDisplay.h"
++
++#define DMABUF_BUFFER_PLANES 4
++
++class WaylandDMABufSurface {
++ public:
++  static bool IsAvailable();
++
++  bool CreateFrameBuffer(int aWidth, int aHeight);
++  bool CreateEGLImage(int aWidth, int aHeight);
++
++  bool Create(int aWidth, int aHeight, bool aHasAlpha = true);
++  bool Resize(int aWidth, int aHeight);
++  void Release();
++  void Clear();
++
++  bool CopyFrom(class WaylandDMABufSurface* aSourceSurface);
++
++  int GetWidth() { return mWidth; };
++  int GetHeight() { return mHeight; };
++
++  void* MapReadOnly(uint32_t aX, uint32_t aY, uint32_t aWidth, uint32_t aHeight,
++                    uint32_t* aStride);
++  void* MapReadOnly(uint32_t* aStride);
++  void* Map(uint32_t aX, uint32_t aY, uint32_t aWidth, uint32_t aHeight,
++            uint32_t* aStride);
++  void* Map(uint32_t* aStride);
++  bool IsMapped() { return mMappedRegion; };
++  void Unmap();
++
++  void SetWLBuffer(struct wl_buffer* aWLBuffer) { mWLBuffer = aWLBuffer; };
++  wl_buffer* GetWLBuffer() { return mWLBuffer; };
++
++  void WLBufferDetach() { mWLBufferAttached = false; };
++  bool WLBufferIsAttached() { return mWLBufferAttached; };
++  void WLBufferSetAttached() { mWLBufferAttached = true; };
++
++  WaylandDMABufSurface();
++  ~WaylandDMABufSurface();
++
++ private:
++  int mWidth;
++  int mHeight;
++  mozilla::widget::GbmFormat* mGmbFormat;
++
++  wl_buffer* mWLBuffer;
++  void* mMappedRegion;
++
++  struct gbm_bo* mGbmBufferObject;
++  uint64_t mBufferModifier;
++  int mBufferPlaneCount;
++  int mDmabufFds[DMABUF_BUFFER_PLANES];
++  uint32_t mStrides[DMABUF_BUFFER_PLANES];
++  uint32_t mOffsets[DMABUF_BUFFER_PLANES];
++
++  bool mWLBufferAttached;
++  bool mFastWLBufferCreation;
++
++  static bool mAvailable;
++  static bool mInitialized;
++};
++
++#endif
+diff -up firefox-67.0/modules/libpref/init/all.js.mozilla-1552590 firefox-67.0/modules/libpref/init/all.js
+--- firefox-67.0/modules/libpref/init/all.js.mozilla-1552590	2019-05-17 02:33:43.000000000 +0200
++++ firefox-67.0/modules/libpref/init/all.js	2019-05-27 12:15:32.031414339 +0200
+@@ -5138,6 +5138,11 @@ pref("widget.chrome.allow-gtk-dark-theme
+ pref("widget.content.allow-gtk-dark-theme", false);
+ #endif
+ #endif
++#ifdef MOZ_WAYLAND
++#ifdef HAVE_LIBDRM
++pref("gfx.wayland_dmabuf_backend.enabled", false);
++#endif
++#endif
+ 
+ pref("widget.window-transforms.disabled", false);
+ 
+diff -up firefox-67.0/toolkit/moz.configure.mozilla-1552590 firefox-67.0/toolkit/moz.configure
+--- firefox-67.0/toolkit/moz.configure.mozilla-1552590	2019-05-27 12:15:31.992414348 +0200
++++ firefox-67.0/toolkit/moz.configure	2019-05-27 12:15:32.031414339 +0200
+@@ -265,6 +265,14 @@ def wayland_headers(wayland, toolkit_gtk
+ set_config('MOZ_WAYLAND', depends_if(wayland_headers)(lambda _: True))
+ set_define('MOZ_WAYLAND', depends_if(wayland_headers)(lambda _: True))
+ 
++drm_headers = pkg_check_modules('HAVE_LIBDRM', 'libdrm > 2.4', when=wayland_headers)
++set_config('HAVE_LIBDRM', depends_if(drm_headers)(lambda _: True))
++set_define('HAVE_LIBDRM', depends_if(drm_headers)(lambda _: True))
++
++gbm_modifiers = pkg_check_modules('HAVE_GBM_MODIFIERS', 'gbm >= 17.1', when=drm_headers)
++set_config('HAVE_GBM_MODIFIERS', depends_if(gbm_modifiers)(lambda _: True))
++set_define('HAVE_GBM_MODIFIERS', depends_if(gbm_modifiers)(lambda _: True))
++
+ # GL Provider
+ # ==============================================================
+ option('--with-gl-provider', nargs=1, help='Set GL provider backend type')
+diff -up firefox-67.0/widget/gtk/moz.build.mozilla-1552590 firefox-67.0/widget/gtk/moz.build
+--- firefox-67.0/widget/gtk/moz.build.mozilla-1552590	2019-05-17 02:34:02.000000000 +0200
++++ firefox-67.0/widget/gtk/moz.build	2019-05-27 12:15:32.031414339 +0200
+@@ -101,6 +101,9 @@ if CONFIG['MOZ_WAYLAND']:
+         'nsWaylandDisplay.cpp',
+         'WindowSurfaceWayland.cpp',
+     ]
++    EXPORTS.mozilla.widget += [
++        'nsWaylandDisplay.h',
++    ]
+ 
+ if CONFIG['ACCESSIBILITY']:
+     UNIFIED_SOURCES += [
+diff -up firefox-67.0/widget/gtk/mozcontainer.cpp.mozilla-1552590 firefox-67.0/widget/gtk/mozcontainer.cpp
+--- firefox-67.0/widget/gtk/mozcontainer.cpp.mozilla-1552590	2019-05-27 12:15:32.026414340 +0200
++++ firefox-67.0/widget/gtk/mozcontainer.cpp	2019-05-27 12:15:32.031414339 +0200
+@@ -567,7 +567,7 @@ struct wl_surface *moz_container_get_wl_
+                                 moz_container_get_scale(container));
+ 
+     wl_surface_commit(container->surface);
+-    wl_display_flush(waylandDisplay->GetDisplay());    
++    wl_display_flush(waylandDisplay->GetDisplay());
+   }
+ 
+   return container->surface;
+@@ -596,9 +596,13 @@ gboolean moz_container_has_wl_egl_window
+ 
+ gboolean moz_container_surface_needs_clear(MozContainer *container) {
+   gboolean state = container->surface_needs_clear;
+-  container->surface_needs_clear = false;
+   return state;
+ }
++
++void moz_container_surface_cleared(MozContainer* container) {
++   container->surface_needs_clear = false;
++}
++
+ #endif
+ 
+ void moz_container_force_default_visual(MozContainer *container) {
+diff -up firefox-67.0/widget/gtk/mozcontainer.h.mozilla-1552590 firefox-67.0/widget/gtk/mozcontainer.h
+--- firefox-67.0/widget/gtk/mozcontainer.h.mozilla-1552590	2019-05-27 12:15:32.021414342 +0200
++++ firefox-67.0/widget/gtk/mozcontainer.h	2019-05-27 12:15:32.031414339 +0200
+@@ -101,6 +101,7 @@ struct wl_egl_window *moz_container_get_
+ 
+ gboolean moz_container_has_wl_egl_window(MozContainer *container);
+ gboolean moz_container_surface_needs_clear(MozContainer *container);
++void moz_container_surface_cleared(MozContainer* container);
+ void moz_container_scale_changed(MozContainer *container,
+                                  GtkAllocation *aAllocation);
+ void moz_container_set_initial_draw_callback(
+diff -up firefox-67.0/widget/gtk/mozwayland/moz.build.mozilla-1552590 firefox-67.0/widget/gtk/mozwayland/moz.build
+--- firefox-67.0/widget/gtk/mozwayland/moz.build.mozilla-1552590	2019-05-17 02:35:09.000000000 +0200
++++ firefox-67.0/widget/gtk/mozwayland/moz.build	2019-05-27 12:15:32.031414339 +0200
+@@ -7,7 +7,11 @@
+ SOURCES += [
+     'mozwayland.c',
+ ]
++EXPORTS.mozilla.widget += [
++    'mozwayland.h',
++]
+ 
+ SharedLibrary('mozwayland')
+ 
+ CFLAGS += CONFIG['TK_CFLAGS']
++
+diff -up firefox-67.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1552590 firefox-67.0/widget/gtk/nsWaylandDisplay.cpp
+--- firefox-67.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1552590	2019-05-27 12:15:32.027414340 +0200
++++ firefox-67.0/widget/gtk/nsWaylandDisplay.cpp	2019-05-27 13:41:39.335407884 +0200
+@@ -7,10 +7,6 @@
+ 
+ #include "nsWaylandDisplay.h"
+ 
+-#include "base/message_loop.h"  // for MessageLoop
+-#include "base/task.h"          // for NewRunnableMethod, etc
+-#include "mozilla/StaticMutex.h"
+-
+ namespace mozilla {
+ namespace widget {
+ 
+@@ -58,7 +54,7 @@ static nsWaylandDisplay *WaylandDisplayG
+   return nullptr;
+ }
+ 
+-nsWaylandDisplay *WaylandDisplayGet(GdkDisplay *aGdkDisplay) {
++nsWaylandDisplay* WaylandDisplayGet(GdkDisplay* aGdkDisplay) {
+   if (!aGdkDisplay) {
+     aGdkDisplay = gdk_display_get_default();
+   }
+@@ -90,84 +86,193 @@ static void WaylandDisplayLoopLocked(wl_
+ 
+ static void WaylandDisplayLoop(wl_display *aDisplay) {
+   MOZ_ASSERT(!NS_IsMainThread());
++
+   StaticMutexAutoLock lock(gWaylandDisplaysMutex);
+   WaylandDisplayLoopLocked(aDisplay, lock);
+ }
+ 
+-void nsWaylandDisplay::SetShm(wl_shm *aShm) { mShm = aShm; }
++void nsWaylandDisplay::SetShm(wl_shm* aShm) { mShm = aShm; }
+ 
+-void nsWaylandDisplay::SetSubcompositor(wl_subcompositor *aSubcompositor) {
++void nsWaylandDisplay::SetSubcompositor(wl_subcompositor* aSubcompositor) {
+   mSubcompositor = aSubcompositor;
+ }
+ 
+ void nsWaylandDisplay::SetDataDeviceManager(
+-    wl_data_device_manager *aDataDeviceManager) {
++    wl_data_device_manager* aDataDeviceManager) {
+   mDataDeviceManager = aDataDeviceManager;
+ }
+ 
+-void nsWaylandDisplay::SetSeat(wl_seat *aSeat) { mSeat = aSeat; }
++void nsWaylandDisplay::SetSeat(wl_seat* aSeat) { mSeat = aSeat; }
+ 
+ void nsWaylandDisplay::SetPrimarySelectionDeviceManager(
+-    gtk_primary_selection_device_manager *aPrimarySelectionDeviceManager) {
++    gtk_primary_selection_device_manager* aPrimarySelectionDeviceManager) {
+   mPrimarySelectionDeviceManager = aPrimarySelectionDeviceManager;
+ }
+ 
+-static void global_registry_handler(void *data, wl_registry *registry,
+-                                    uint32_t id, const char *interface,
++#ifdef HAVE_LIBDRM
++void nsWaylandDisplay::SetDmabuf(zwp_linux_dmabuf_v1* aDmabuf) {
++  mDmabuf = aDmabuf;
++}
++
++GbmFormat* nsWaylandDisplay::GetGbmFormat(bool aHasAlpha) {
++  GbmFormat* format = aHasAlpha ? &mARGBFormat : &mXRGBFormat;
++  return format->mIsSupported ? format : nullptr;
++}
++
++void nsWaylandDisplay::AddFormatModifier(bool aHasAlpha, int aFormat,
++                                         uint32_t mModifierHi,
++                                         uint32_t mModifierLo) {
++  GbmFormat* format = aHasAlpha ? &mARGBFormat : &mXRGBFormat;
++  format->mIsSupported = true;
++  format->mHasAlpha = aHasAlpha;
++  format->mFormat = aFormat;
++  format->mModifiersCount++;
++  format->mModifiers =
++      (uint64_t*)realloc(format->mModifiers,
++                         format->mModifiersCount * sizeof(*format->mModifiers));
++  format->mModifiers[format->mModifiersCount - 1] =
++      ((uint64_t)mModifierHi << 32) | mModifierLo;
++}
++
++static void dmabuf_modifiers(void* data,
++                             struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf,
++                             uint32_t format, uint32_t modifier_hi,
++                             uint32_t modifier_lo) {
++  auto display = reinterpret_cast<nsWaylandDisplay*>(data);
++  switch (format) {
++    case DRM_FORMAT_ARGB8888:
++      display->AddFormatModifier(true, format, modifier_hi, modifier_lo);
++      break;
++    case DRM_FORMAT_XRGB8888:
++      display->AddFormatModifier(false, format, modifier_hi, modifier_lo);
++      break;
++    default:
++      break;
++  }
++}
++
++static void dmabuf_format(void* data,
++                          struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf,
++                          uint32_t format) {
++  // XXX: deprecated
++}
++
++static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
++    dmabuf_format, dmabuf_modifiers};
++#endif
++
++static void global_registry_handler(void* data, wl_registry* registry,
++                                    uint32_t id, const char* interface,
+                                     uint32_t version) {
+-  auto display = reinterpret_cast<nsWaylandDisplay *>(data);
+-  if (!display)
+-    return;
++  auto display = reinterpret_cast<nsWaylandDisplay*>(data);
++  if (!display) return;
+ 
+   if (strcmp(interface, "wl_shm") == 0) {
+-    auto shm = static_cast<wl_shm *>(
++    auto shm = static_cast<wl_shm*>(
+         wl_registry_bind(registry, id, &wl_shm_interface, 1));
+-    wl_proxy_set_queue((struct wl_proxy *)shm, display->GetEventQueue());
++    wl_proxy_set_queue((struct wl_proxy*)shm, display->GetEventQueue());
+     display->SetShm(shm);
+   } else if (strcmp(interface, "wl_data_device_manager") == 0) {
+     int data_device_manager_version = MIN(version, 3);
+-    auto data_device_manager = static_cast<wl_data_device_manager *>(
++    auto data_device_manager = static_cast<wl_data_device_manager*>(
+         wl_registry_bind(registry, id, &wl_data_device_manager_interface,
+                          data_device_manager_version));
+-    wl_proxy_set_queue((struct wl_proxy *)data_device_manager,
++    wl_proxy_set_queue((struct wl_proxy*)data_device_manager,
+                        display->GetEventQueue());
+     display->SetDataDeviceManager(data_device_manager);
+   } else if (strcmp(interface, "wl_seat") == 0) {
+-    auto seat = static_cast<wl_seat *>(
++    auto seat = static_cast<wl_seat*>(
+         wl_registry_bind(registry, id, &wl_seat_interface, 1));
+-    wl_proxy_set_queue((struct wl_proxy *)seat, display->GetEventQueue());
++    wl_proxy_set_queue((struct wl_proxy*)seat, display->GetEventQueue());
+     display->SetSeat(seat);
+   } else if (strcmp(interface, "gtk_primary_selection_device_manager") == 0) {
+     auto primary_selection_device_manager =
+-        static_cast<gtk_primary_selection_device_manager *>(wl_registry_bind(
++        static_cast<gtk_primary_selection_device_manager*>(wl_registry_bind(
+             registry, id, &gtk_primary_selection_device_manager_interface, 1));
+-    wl_proxy_set_queue((struct wl_proxy *)primary_selection_device_manager,
++    wl_proxy_set_queue((struct wl_proxy*)primary_selection_device_manager,
+                        display->GetEventQueue());
+     display->SetPrimarySelectionDeviceManager(primary_selection_device_manager);
+   } else if (strcmp(interface, "wl_subcompositor") == 0) {
+-    auto subcompositor = static_cast<wl_subcompositor *>(
++    auto subcompositor = static_cast<wl_subcompositor*>(
+         wl_registry_bind(registry, id, &wl_subcompositor_interface, 1));
+-    wl_proxy_set_queue((struct wl_proxy *)subcompositor,
++    wl_proxy_set_queue((struct wl_proxy*)subcompositor,
+                        display->GetEventQueue());
+     display->SetSubcompositor(subcompositor);
+   }
++#ifdef HAVE_LIBDRM
++  else if (strcmp(interface, "zwp_linux_dmabuf_v1") == 0 && version > 2) {
++    auto dmabuf = static_cast<zwp_linux_dmabuf_v1*>(
++        wl_registry_bind(registry, id, &zwp_linux_dmabuf_v1_interface, 3));
++    display->SetDmabuf(dmabuf);
++    zwp_linux_dmabuf_v1_add_listener(dmabuf, &dmabuf_listener, data);
++  }
++#endif
+ }
+ 
+-static void global_registry_remover(void *data, wl_registry *registry,
++static void global_registry_remover(void* data, wl_registry* registry,
+                                     uint32_t id) {}
+ 
+ static const struct wl_registry_listener registry_listener = {
+     global_registry_handler, global_registry_remover};
+ 
+-bool nsWaylandDisplay::DisplayLoop() {
++bool nsWaylandDisplay::DispatchEventQueue() {
+   wl_display_dispatch_queue_pending(mDisplay, mEventQueue);
+   return true;
+ }
+ 
+-bool nsWaylandDisplay::Matches(wl_display *aDisplay) {
++bool nsWaylandDisplay::Matches(wl_display* aDisplay) {
+   return mThreadId == PR_GetCurrentThread() && aDisplay == mDisplay;
+ }
+ 
++#ifdef HAVE_LIBDRM
++bool nsWaylandDisplay::ConfigureGbm() {
++  if (!nsGbmLib::IsAvailable()) {
++    return false;
++  }
++
++  // TODO
++  const char* drm_render_node = getenv("MOZ_WAYLAND_DRM_DEVICE");
++  if (!drm_render_node) {
++    drm_render_node = "/dev/dri/renderD128";
++  }
++
++  mGbmFd = open(drm_render_node, O_RDWR);
++  if (mGbmFd < 0) {
++    NS_WARNING(
++        nsPrintfCString("Failed to open drm render node %s\n", drm_render_node)
++            .get());
++    return false;
++  }
++
++  mGbmDevice = nsGbmLib::CreateDevice(mGbmFd);
++  if (mGbmDevice == nullptr) {
++    NS_WARNING(nsPrintfCString("Failed to create drm render device %s\n",
++                               drm_render_node)
++                   .get());
++    close(mGbmFd);
++    return false;
++  }
++
++  return true;
++}
++
++gbm_device* nsWaylandDisplay::GetGbmDevice() {
++  if (!mGdmConfigured) {
++    ConfigureGbm();
++    mGdmConfigured = true;
++  }
++  return mGbmDevice;
++}
++
++int nsWaylandDisplay::GetGbmDeviceFd() {
++  if (!mGdmConfigured) {
++    ConfigureGbm();
++    mGdmConfigured = true;
++  }
++  return mGbmFd;
++}
++#endif
++
+ nsWaylandDisplay::nsWaylandDisplay(wl_display* aDisplay)
+     : mThreadId(PR_GetCurrentThread()),
+       mDisplay(aDisplay),
+@@ -177,7 +282,17 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+       mSeat(nullptr),
+       mShm(nullptr),
+       mPrimarySelectionDeviceManager(nullptr),
+-      mRegistry(nullptr) {
++      mRegistry(nullptr)
++#ifdef HAVE_LIBDRM
++      ,
++      mGbmDevice(nullptr),
++      mGbmFd(-1),
++      mGdmConfigured(false),
++      mExplicitSync(false),
++      mXRGBFormat({false, false, -1, nullptr, 0}),
++      mARGBFormat({false, false, -1, nullptr, 0})
++#endif
++{
+   mRegistry = wl_display_get_registry(mDisplay);
+   wl_registry_add_listener(mRegistry, &registry_listener, this);
+ 
+@@ -190,7 +305,7 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+     mEventQueue = wl_display_create_queue(mDisplay);
+     MessageLoop::current()->PostTask(NewRunnableFunction(
+         "WaylandDisplayLoop", &WaylandDisplayLoop, mDisplay));
+-    wl_proxy_set_queue((struct wl_proxy *)mRegistry, mEventQueue);
++    wl_proxy_set_queue((struct wl_proxy*)mRegistry, mEventQueue);
+     wl_display_roundtrip_queue(mDisplay, mEventQueue);
+     wl_display_roundtrip_queue(mDisplay, mEventQueue);
+   }
+@@ -209,5 +324,79 @@ nsWaylandDisplay::~nsWaylandDisplay() {
+   }
+ }
+ 
++#ifdef HAVE_LIBDRM
++void* nsGbmLib::sGbmLibHandle = nullptr;
++void* nsGbmLib::sXf86DrmLibHandle = nullptr;
++bool nsGbmLib::sLibLoaded = false;
++CreateDeviceFunc nsGbmLib::sCreateDevice;
++CreateFunc nsGbmLib::sCreate;
++CreateWithModifiersFunc nsGbmLib::sCreateWithModifiers;
++GetModifierFunc nsGbmLib::sGetModifier;
++GetStrideFunc nsGbmLib::sGetStride;
++GetFdFunc nsGbmLib::sGetFd;
++DestroyFunc nsGbmLib::sDestroy;
++MapFunc nsGbmLib::sMap;
++UnmapFunc nsGbmLib::sUnmap;
++GetPlaneCountFunc nsGbmLib::sGetPlaneCount;
++GetHandleForPlaneFunc nsGbmLib::sGetHandleForPlane;
++GetStrideForPlaneFunc nsGbmLib::sGetStrideForPlane;
++GetOffsetFunc nsGbmLib::sGetOffset;
++DrmPrimeHandleToFDFunc nsGbmLib::sDrmPrimeHandleToFD;
++
++bool nsGbmLib::IsAvailable() {
++  if (!Load()) {
++    return false;
++  }
++  return sCreateDevice != nullptr && sCreate != nullptr &&
++         sCreateWithModifiers != nullptr && sGetModifier != nullptr &&
++         sGetStride != nullptr && sGetFd != nullptr && sDestroy != nullptr &&
++         sMap != nullptr && sUnmap != nullptr;
++}
++
++bool nsGbmLib::IsModifierAvailable() {
++  if (!Load()) {
++    return false;
++  }
++  return sDrmPrimeHandleToFD != nullptr;
++}
++
++bool nsGbmLib::Load() {
++  if (!sGbmLibHandle && !sLibLoaded) {
++    sLibLoaded = true;
++
++    sGbmLibHandle = dlopen("libgbm.so", RTLD_LAZY | RTLD_LOCAL);
++    if (!sGbmLibHandle) {
++      return false;
++    }
++
++    sCreateDevice = (CreateDeviceFunc)dlsym(sGbmLibHandle, "gbm_create_device");
++    sCreate = (CreateFunc)dlsym(sGbmLibHandle, "gbm_bo_create");
++    sCreateWithModifiers = (CreateWithModifiersFunc)dlsym(
++        sGbmLibHandle, "gbm_bo_create_with_modifiers");
++    sGetModifier = (GetModifierFunc)dlsym(sGbmLibHandle, "gbm_bo_get_modifier");
++    sGetStride = (GetStrideFunc)dlsym(sGbmLibHandle, "gbm_bo_get_stride");
++    sGetFd = (GetFdFunc)dlsym(sGbmLibHandle, "gbm_bo_get_fd");
++    sDestroy = (DestroyFunc)dlsym(sGbmLibHandle, "gbm_bo_destroy");
++    sMap = (MapFunc)dlsym(sGbmLibHandle, "gbm_bo_map");
++    sUnmap = (UnmapFunc)dlsym(sGbmLibHandle, "gbm_bo_unmap");
++    sGetPlaneCount =
++        (GetPlaneCountFunc)dlsym(sGbmLibHandle, "gbm_bo_get_plane_count");
++    sGetHandleForPlane = (GetHandleForPlaneFunc)dlsym(
++        sGbmLibHandle, "gbm_bo_get_handle_for_plane");
++    sGetStrideForPlane = (GetStrideForPlaneFunc)dlsym(
++        sGbmLibHandle, "gbm_bo_get_stride_for_plane");
++    sGetOffset = (GetOffsetFunc)dlsym(sGbmLibHandle, "gbm_bo_get_offset");
++
++    sXf86DrmLibHandle = dlopen("libdrm.so", RTLD_LAZY | RTLD_LOCAL);
++    if (sXf86DrmLibHandle) {
++      sDrmPrimeHandleToFD = (DrmPrimeHandleToFDFunc)dlsym(sXf86DrmLibHandle,
++                                                          "drmPrimeHandleToFD");
++    }
++  }
++
++  return sGbmLibHandle;
++}
++#endif
++
+ }  // namespace widget
+ }  // namespace mozilla
+diff -up firefox-67.0/widget/gtk/nsWaylandDisplay.h.mozilla-1552590 firefox-67.0/widget/gtk/nsWaylandDisplay.h
+--- firefox-67.0/widget/gtk/nsWaylandDisplay.h.mozilla-1552590	2019-05-27 12:15:32.027414340 +0200
++++ firefox-67.0/widget/gtk/nsWaylandDisplay.h	2019-05-27 13:38:56.012798548 +0200
+@@ -5,19 +5,38 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+-#ifndef __MOZ_WAYLAND_REGISTRY_H__
+-#define __MOZ_WAYLAND_REGISTRY_H__
++#ifndef __MOZ_WAYLAND_DISPLAY_H__
++#define __MOZ_WAYLAND_DISPLAY_H__
+ 
+-#include "mozwayland/mozwayland.h"
+-#include "wayland/gtk-primary-selection-client-protocol.h"
++#include "mozilla/widget/mozwayland.h"
++#include "mozilla/widget/gtk-primary-selection-client-protocol.h"
+ 
+-namespace mozilla {
+-namespace widget {
++#include "base/message_loop.h"  // for MessageLoop
++#include "base/task.h"          // for NewRunnableMethod, etc
++#include "mozilla/StaticMutex.h"
++
++#ifdef HAVE_LIBDRM
++#  include <drm/drm_fourcc.h>
++#  include <xf86drm.h>
++#  include <gbm.h>
++#  include "mozilla/widget/linux-dmabuf-unstable-v1-client-protocol.h"
++#endif
+ 
+ // TODO: Bug 1467125 - We need to integrate wl_display_dispatch_queue_pending()
+ // with compositor event loop.
+ #define EVENT_LOOP_DELAY (1000 / 240)
+ 
++namespace mozilla {
++namespace widget {
++
++struct GbmFormat {
++  bool mIsSupported;
++  bool mHasAlpha;
++  int mFormat;
++  uint64_t* mModifiers;
++  int mModifiersCount;
++};
++
+ // Our general connection to Wayland display server,
+ // holds our display connection and runs event loop.
+ class nsWaylandDisplay {
+@@ -26,6 +45,7 @@ class nsWaylandDisplay {
+   virtual ~nsWaylandDisplay();
+ 
+   bool DisplayLoop();
++  bool DispatchEventQueue();
+   bool Matches(wl_display* aDisplay);
+ 
+   wl_display* GetDisplay() { return mDisplay; };
+@@ -47,7 +67,22 @@ class nsWaylandDisplay {
+   void SetPrimarySelectionDeviceManager(
+       gtk_primary_selection_device_manager* aPrimarySelectionDeviceManager);
+ 
+-private:
++#ifdef HAVE_LIBDRM
++  void SetDmabuf(zwp_linux_dmabuf_v1* aDmabuf);
++  zwp_linux_dmabuf_v1* GetDmabuf() { return mDmabuf; };
++  gbm_device* GetGbmDevice();
++  int GetGbmDeviceFd();
++  bool IsExplicitSyncEnabled() { return mExplicitSync; }
++  GbmFormat* GetGbmFormat(bool aHasAlpha);
++  void AddFormatModifier(bool aHasAlpha, int aFormat, uint32_t mModifierHi,
++                         uint32_t mModifierLo);
++#endif
++
++ private:
++#ifdef HAVE_LIBDRM
++  bool ConfigureGbm();
++#endif
++
+   PRThread* mThreadId;
+   wl_display* mDisplay;
+   wl_event_queue* mEventQueue;
+@@ -56,12 +91,113 @@ private:
+   wl_seat* mSeat;
+   wl_shm* mShm;
+   gtk_primary_selection_device_manager* mPrimarySelectionDeviceManager;
+-  wl_registry *mRegistry;
++  wl_registry* mRegistry;
++#ifdef HAVE_LIBDRM
++  zwp_linux_dmabuf_v1* mDmabuf;
++  gbm_device* mGbmDevice;
++  int mGbmFd;
++  bool mGdmConfigured;
++  bool mExplicitSync;
++  GbmFormat mXRGBFormat;
++  GbmFormat mARGBFormat;
++#endif
+ };
+ 
++void WaylandDispatchDisplays();
+ nsWaylandDisplay* WaylandDisplayGet(GdkDisplay* aGdkDisplay = nullptr);
+ 
++#ifdef HAVE_LIBDRM
++typedef struct gbm_device* (*CreateDeviceFunc)(int);
++typedef struct gbm_bo* (*CreateFunc)(struct gbm_device*, uint32_t, uint32_t,
++                                     uint32_t, uint32_t);
++typedef struct gbm_bo* (*CreateFunc)(struct gbm_device*, uint32_t, uint32_t,
++                                     uint32_t, uint32_t);
++typedef struct gbm_bo* (*CreateWithModifiersFunc)(struct gbm_device*, uint32_t,
++                                                  uint32_t, uint32_t,
++                                                  const uint64_t*,
++                                                  const unsigned int);
++typedef uint64_t (*GetModifierFunc)(struct gbm_bo*);
++typedef uint32_t (*GetStrideFunc)(struct gbm_bo*);
++typedef int (*GetFdFunc)(struct gbm_bo*);
++typedef void (*DestroyFunc)(struct gbm_bo*);
++typedef void* (*MapFunc)(struct gbm_bo*, uint32_t, uint32_t, uint32_t, uint32_t,
++                         uint32_t, uint32_t*, void**);
++typedef void (*UnmapFunc)(struct gbm_bo*, void*);
++typedef int (*GetPlaneCountFunc)(struct gbm_bo*);
++typedef union gbm_bo_handle (*GetHandleForPlaneFunc)(struct gbm_bo*, int);
++typedef uint32_t (*GetStrideForPlaneFunc)(struct gbm_bo*, int);
++typedef uint32_t (*GetOffsetFunc)(struct gbm_bo*, int);
++
++typedef int (*DrmPrimeHandleToFDFunc)(int, uint32_t, uint32_t, int*);
++
++class nsGbmLib {
++ public:
++  static bool Load();
++  static bool IsAvailable();
++  static bool IsModifierAvailable();
++
++  static struct gbm_device* CreateDevice(int fd) { return sCreateDevice(fd); };
++  static struct gbm_bo* Create(struct gbm_device* gbm, uint32_t width,
++                               uint32_t height, uint32_t format,
++                               uint32_t flags) {
++    return sCreate(gbm, width, height, format, flags);
++  }
++  static void Destroy(struct gbm_bo* bo) { sDestroy(bo); }
++  static uint32_t GetStride(struct gbm_bo* bo) { return sGetStride(bo); }
++  static int GetFd(struct gbm_bo* bo) { return sGetFd(bo); }
++  static void* Map(struct gbm_bo* bo, uint32_t x, uint32_t y, uint32_t width,
++                   uint32_t height, uint32_t flags, uint32_t* stride,
++                   void** map_data) {
++    return sMap(bo, x, y, width, height, flags, stride, map_data);
++  }
++  static void Unmap(struct gbm_bo* bo, void* map_data) { sUnmap(bo, map_data); }
++  static struct gbm_bo* CreateWithModifiers(struct gbm_device* gbm,
++                                            uint32_t width, uint32_t height,
++                                            uint32_t format,
++                                            const uint64_t* modifiers,
++                                            const unsigned int count) {
++    return sCreateWithModifiers(gbm, width, height, format, modifiers, count);
++  }
++  static uint64_t GetModifier(struct gbm_bo* bo) { return sGetModifier(bo); }
++  static int GetPlaneCount(struct gbm_bo* bo) { return sGetPlaneCount(bo); }
++  static union gbm_bo_handle GetHandleForPlane(struct gbm_bo* bo, int plane) {
++    return sGetHandleForPlane(bo, plane);
++  }
++  static uint32_t GetStrideForPlane(struct gbm_bo* bo, int plane) {
++    return sGetStrideForPlane(bo, plane);
++  }
++  static uint32_t GetOffset(struct gbm_bo* bo, int plane) {
++    return sGetOffset(bo, plane);
++  }
++
++  static int DrmPrimeHandleToFD(int fd, uint32_t handle, uint32_t flags,
++                                int* prime_fd) {
++    return sDrmPrimeHandleToFD(fd, handle, flags, prime_fd);
++  }
++
++ private:
++  static CreateDeviceFunc sCreateDevice;
++  static CreateFunc sCreate;
++  static CreateWithModifiersFunc sCreateWithModifiers;
++  static GetModifierFunc sGetModifier;
++  static GetStrideFunc sGetStride;
++  static GetFdFunc sGetFd;
++  static DestroyFunc sDestroy;
++  static MapFunc sMap;
++  static UnmapFunc sUnmap;
++  static GetPlaneCountFunc sGetPlaneCount;
++  static GetHandleForPlaneFunc sGetHandleForPlane;
++  static GetStrideForPlaneFunc sGetStrideForPlane;
++  static GetOffsetFunc sGetOffset;
++  static DrmPrimeHandleToFDFunc sDrmPrimeHandleToFD;
++
++  static void* sGbmLibHandle;
++  static void* sXf86DrmLibHandle;
++  static bool sLibLoaded;
++};
++#endif
++
+ }  // namespace widget
+ }  // namespace mozilla
+ 
+-#endif  // __MOZ_WAYLAND_REGISTRY_H__
++#endif  // __MOZ_WAYLAND_DISPLAY_H__
+diff -up firefox-67.0/widget/gtk/nsWindow.cpp.mozilla-1552590 firefox-67.0/widget/gtk/nsWindow.cpp
+--- firefox-67.0/widget/gtk/nsWindow.cpp.mozilla-1552590	2019-05-27 12:15:32.025414340 +0200
++++ firefox-67.0/widget/gtk/nsWindow.cpp	2019-05-27 12:15:32.032414339 +0200
+@@ -6785,11 +6785,14 @@ bool nsWindow::WaylandSurfaceNeedsClear(
+   if (mContainer) {
+     return moz_container_surface_needs_clear(MOZ_CONTAINER(mContainer));
+   }
+-
+-  NS_WARNING(
+-      "nsWindow::WaylandSurfaceNeedsClear(): We don't have any mContainer!");
+   return false;
+ }
++
++void nsWindow::WaylandSurfaceCleared() {
++  if (mContainer) {
++    return moz_container_surface_cleared(MOZ_CONTAINER(mContainer));
++  }
++}
+ #endif
+ 
+ #ifdef MOZ_X11
+diff -up firefox-67.0/widget/gtk/nsWindow.h.mozilla-1552590 firefox-67.0/widget/gtk/nsWindow.h
+--- firefox-67.0/widget/gtk/nsWindow.h.mozilla-1552590	2019-05-27 12:15:32.025414340 +0200
++++ firefox-67.0/widget/gtk/nsWindow.h	2019-05-27 12:15:32.033414339 +0200
+@@ -345,6 +345,7 @@ class nsWindow final : public nsBaseWidg
+   wl_display* GetWaylandDisplay();
+   wl_surface* GetWaylandSurface();
+   bool WaylandSurfaceNeedsClear();
++  void WaylandSurfaceCleared();
+ #endif
+   virtual void GetCompositorWidgetInitData(
+       mozilla::widget::CompositorWidgetInitData* aInitData) override;
+diff -up firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-client-protocol.h.mozilla-1552590 firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-client-protocol.h
+--- firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-client-protocol.h.mozilla-1552590	2019-05-27 12:15:32.033414339 +0200
++++ firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-client-protocol.h	2019-05-27 12:15:32.033414339 +0200
+@@ -0,0 +1,650 @@
++/* Generated by wayland-scanner 1.17.0 */
++
++#ifndef LINUX_DMABUF_UNSTABLE_V1_CLIENT_PROTOCOL_H
++#define LINUX_DMABUF_UNSTABLE_V1_CLIENT_PROTOCOL_H
++
++#include <stdint.h>
++#include <stddef.h>
++#include "wayland-client.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/**
++ * @page page_linux_dmabuf_unstable_v1 The linux_dmabuf_unstable_v1 protocol
++ * @section page_ifaces_linux_dmabuf_unstable_v1 Interfaces
++ * - @subpage page_iface_zwp_linux_dmabuf_v1 - factory for creating dmabuf-based
++ * wl_buffers
++ * - @subpage page_iface_zwp_linux_buffer_params_v1 - parameters for creating a
++ * dmabuf-based wl_buffer
++ * @section page_copyright_linux_dmabuf_unstable_v1 Copyright
++ * <pre>
++ *
++ * Copyright © 2014, 2015 Collabora, Ltd.
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice (including the next
++ * paragraph) shall be included in all copies or substantial portions of the
++ * Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
++ * DEALINGS IN THE SOFTWARE.
++ * </pre>
++ */
++struct wl_buffer;
++struct zwp_linux_buffer_params_v1;
++struct zwp_linux_dmabuf_v1;
++
++/**
++ * @page page_iface_zwp_linux_dmabuf_v1 zwp_linux_dmabuf_v1
++ * @section page_iface_zwp_linux_dmabuf_v1_desc Description
++ *
++ * Following the interfaces from:
++ * https://www.khronos.org/registry/egl/extensions/EXT/EGL_EXT_image_dma_buf_import.txt
++ * and the Linux DRM sub-system's AddFb2 ioctl.
++ *
++ * This interface offers ways to create generic dmabuf-based
++ * wl_buffers. Immediately after a client binds to this interface,
++ * the set of supported formats and format modifiers is sent with
++ * 'format' and 'modifier' events.
++ *
++ * The following are required from clients:
++ *
++ * - Clients must ensure that either all data in the dma-buf is
++ * coherent for all subsequent read access or that coherency is
++ * correctly handled by the underlying kernel-side dma-buf
++ * implementation.
++ *
++ * - Don't make any more attachments after sending the buffer to the
++ * compositor. Making more attachments later increases the risk of
++ * the compositor not being able to use (re-import) an existing
++ * dmabuf-based wl_buffer.
++ *
++ * The underlying graphics stack must ensure the following:
++ *
++ * - The dmabuf file descriptors relayed to the server will stay valid
++ * for the whole lifetime of the wl_buffer. This means the server may
++ * at any time use those fds to import the dmabuf into any kernel
++ * sub-system that might accept it.
++ *
++ * To create a wl_buffer from one or more dmabufs, a client creates a
++ * zwp_linux_dmabuf_params_v1 object with a zwp_linux_dmabuf_v1.create_params
++ * request. All planes required by the intended format are added with
++ * the 'add' request. Finally, a 'create' or 'create_immed' request is
++ * issued, which has the following outcome depending on the import success.
++ *
++ * The 'create' request,
++ * - on success, triggers a 'created' event which provides the final
++ * wl_buffer to the client.
++ * - on failure, triggers a 'failed' event to convey that the server
++ * cannot use the dmabufs received from the client.
++ *
++ * For the 'create_immed' request,
++ * - on success, the server immediately imports the added dmabufs to
++ * create a wl_buffer. No event is sent from the server in this case.
++ * - on failure, the server can choose to either:
++ * - terminate the client by raising a fatal error.
++ * - mark the wl_buffer as failed, and send a 'failed' event to the
++ * client. If the client uses a failed wl_buffer as an argument to any
++ * request, the behaviour is compositor implementation-defined.
++ *
++ * Warning! The protocol described in this file is experimental and
++ * backward incompatible changes may be made. Backward compatible changes
++ * may be added together with the corresponding interface version bump.
++ * Backward incompatible changes are done by bumping the version number in
++ * the protocol and interface names and resetting the interface version.
++ * Once the protocol is to be declared stable, the 'z' prefix and the
++ * version number in the protocol and interface names are removed and the
++ * interface version number is reset.
++ * @section page_iface_zwp_linux_dmabuf_v1_api API
++ * See @ref iface_zwp_linux_dmabuf_v1.
++ */
++/**
++ * @defgroup iface_zwp_linux_dmabuf_v1 The zwp_linux_dmabuf_v1 interface
++ *
++ * Following the interfaces from:
++ * https://www.khronos.org/registry/egl/extensions/EXT/EGL_EXT_image_dma_buf_import.txt
++ * and the Linux DRM sub-system's AddFb2 ioctl.
++ *
++ * This interface offers ways to create generic dmabuf-based
++ * wl_buffers. Immediately after a client binds to this interface,
++ * the set of supported formats and format modifiers is sent with
++ * 'format' and 'modifier' events.
++ *
++ * The following are required from clients:
++ *
++ * - Clients must ensure that either all data in the dma-buf is
++ * coherent for all subsequent read access or that coherency is
++ * correctly handled by the underlying kernel-side dma-buf
++ * implementation.
++ *
++ * - Don't make any more attachments after sending the buffer to the
++ * compositor. Making more attachments later increases the risk of
++ * the compositor not being able to use (re-import) an existing
++ * dmabuf-based wl_buffer.
++ *
++ * The underlying graphics stack must ensure the following:
++ *
++ * - The dmabuf file descriptors relayed to the server will stay valid
++ * for the whole lifetime of the wl_buffer. This means the server may
++ * at any time use those fds to import the dmabuf into any kernel
++ * sub-system that might accept it.
++ *
++ * To create a wl_buffer from one or more dmabufs, a client creates a
++ * zwp_linux_dmabuf_params_v1 object with a zwp_linux_dmabuf_v1.create_params
++ * request. All planes required by the intended format are added with
++ * the 'add' request. Finally, a 'create' or 'create_immed' request is
++ * issued, which has the following outcome depending on the import success.
++ *
++ * The 'create' request,
++ * - on success, triggers a 'created' event which provides the final
++ * wl_buffer to the client.
++ * - on failure, triggers a 'failed' event to convey that the server
++ * cannot use the dmabufs received from the client.
++ *
++ * For the 'create_immed' request,
++ * - on success, the server immediately imports the added dmabufs to
++ * create a wl_buffer. No event is sent from the server in this case.
++ * - on failure, the server can choose to either:
++ * - terminate the client by raising a fatal error.
++ * - mark the wl_buffer as failed, and send a 'failed' event to the
++ * client. If the client uses a failed wl_buffer as an argument to any
++ * request, the behaviour is compositor implementation-defined.
++ *
++ * Warning! The protocol described in this file is experimental and
++ * backward incompatible changes may be made. Backward compatible changes
++ * may be added together with the corresponding interface version bump.
++ * Backward incompatible changes are done by bumping the version number in
++ * the protocol and interface names and resetting the interface version.
++ * Once the protocol is to be declared stable, the 'z' prefix and the
++ * version number in the protocol and interface names are removed and the
++ * interface version number is reset.
++ */
++extern const struct wl_interface zwp_linux_dmabuf_v1_interface;
++/**
++ * @page page_iface_zwp_linux_buffer_params_v1 zwp_linux_buffer_params_v1
++ * @section page_iface_zwp_linux_buffer_params_v1_desc Description
++ *
++ * This temporary object is a collection of dmabufs and other
++ * parameters that together form a single logical buffer. The temporary
++ * object may eventually create one wl_buffer unless cancelled by
++ * destroying it before requesting 'create'.
++ *
++ * Single-planar formats only require one dmabuf, however
++ * multi-planar formats may require more than one dmabuf. For all
++ * formats, an 'add' request must be called once per plane (even if the
++ * underlying dmabuf fd is identical).
++ *
++ * You must use consecutive plane indices ('plane_idx' argument for 'add')
++ * from zero to the number of planes used by the drm_fourcc format code.
++ * All planes required by the format must be given exactly once, but can
++ * be given in any order. Each plane index can be set only once.
++ * @section page_iface_zwp_linux_buffer_params_v1_api API
++ * See @ref iface_zwp_linux_buffer_params_v1.
++ */
++/**
++ * @defgroup iface_zwp_linux_buffer_params_v1 The zwp_linux_buffer_params_v1
++ * interface
++ *
++ * This temporary object is a collection of dmabufs and other
++ * parameters that together form a single logical buffer. The temporary
++ * object may eventually create one wl_buffer unless cancelled by
++ * destroying it before requesting 'create'.
++ *
++ * Single-planar formats only require one dmabuf, however
++ * multi-planar formats may require more than one dmabuf. For all
++ * formats, an 'add' request must be called once per plane (even if the
++ * underlying dmabuf fd is identical).
++ *
++ * You must use consecutive plane indices ('plane_idx' argument for 'add')
++ * from zero to the number of planes used by the drm_fourcc format code.
++ * All planes required by the format must be given exactly once, but can
++ * be given in any order. Each plane index can be set only once.
++ */
++extern const struct wl_interface zwp_linux_buffer_params_v1_interface;
++
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ * @struct zwp_linux_dmabuf_v1_listener
++ */
++struct zwp_linux_dmabuf_v1_listener {
++  /**
++   * supported buffer format
++   *
++   * This event advertises one buffer format that the server
++   * supports. All the supported formats are advertised once when the
++   * client binds to this interface. A roundtrip after binding
++   * guarantees that the client has received all supported formats.
++   *
++   * For the definition of the format codes, see the
++   * zwp_linux_buffer_params_v1::create request.
++   *
++   * Warning: the 'format' event is likely to be deprecated and
++   * replaced with the 'modifier' event introduced in
++   * zwp_linux_dmabuf_v1 version 3, described below. Please refrain
++   * from using the information received from this event.
++   * @param format DRM_FORMAT code
++   */
++  void (*format)(void* data, struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1,
++                 uint32_t format);
++  /**
++   * supported buffer format modifier
++   *
++   * This event advertises the formats that the server supports,
++   * along with the modifiers supported for each format. All the
++   * supported modifiers for all the supported formats are advertised
++   * once when the client binds to this interface. A roundtrip after
++   * binding guarantees that the client has received all supported
++   * format-modifier pairs.
++   *
++   * For the definition of the format and modifier codes, see the
++   * zwp_linux_buffer_params_v1::create request.
++   * @param format DRM_FORMAT code
++   * @param modifier_hi high 32 bits of layout modifier
++   * @param modifier_lo low 32 bits of layout modifier
++   * @since 3
++   */
++  void (*modifier)(void* data, struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1,
++                   uint32_t format, uint32_t modifier_hi, uint32_t modifier_lo);
++};
++
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ */
++static inline int zwp_linux_dmabuf_v1_add_listener(
++    struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1,
++    const struct zwp_linux_dmabuf_v1_listener* listener, void* data) {
++  return wl_proxy_add_listener((struct wl_proxy*)zwp_linux_dmabuf_v1,
++                               (void (**)(void))listener, data);
++}
++
++#define ZWP_LINUX_DMABUF_V1_DESTROY 0
++#define ZWP_LINUX_DMABUF_V1_CREATE_PARAMS 1
++
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ */
++#define ZWP_LINUX_DMABUF_V1_FORMAT_SINCE_VERSION 1
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ */
++#define ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION 3
++
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ */
++#define ZWP_LINUX_DMABUF_V1_DESTROY_SINCE_VERSION 1
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ */
++#define ZWP_LINUX_DMABUF_V1_CREATE_PARAMS_SINCE_VERSION 1
++
++/** @ingroup iface_zwp_linux_dmabuf_v1 */
++static inline void zwp_linux_dmabuf_v1_set_user_data(
++    struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1, void* user_data) {
++  wl_proxy_set_user_data((struct wl_proxy*)zwp_linux_dmabuf_v1, user_data);
++}
++
++/** @ingroup iface_zwp_linux_dmabuf_v1 */
++static inline void* zwp_linux_dmabuf_v1_get_user_data(
++    struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1) {
++  return wl_proxy_get_user_data((struct wl_proxy*)zwp_linux_dmabuf_v1);
++}
++
++static inline uint32_t zwp_linux_dmabuf_v1_get_version(
++    struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1) {
++  return wl_proxy_get_version((struct wl_proxy*)zwp_linux_dmabuf_v1);
++}
++
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ *
++ * Objects created through this interface, especially wl_buffers, will
++ * remain valid.
++ */
++static inline void zwp_linux_dmabuf_v1_destroy(
++    struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1) {
++  wl_proxy_marshal((struct wl_proxy*)zwp_linux_dmabuf_v1,
++                   ZWP_LINUX_DMABUF_V1_DESTROY);
++
++  wl_proxy_destroy((struct wl_proxy*)zwp_linux_dmabuf_v1);
++}
++
++/**
++ * @ingroup iface_zwp_linux_dmabuf_v1
++ *
++ * This temporary object is used to collect multiple dmabuf handles into
++ * a single batch to create a wl_buffer. It can only be used once and
++ * should be destroyed after a 'created' or 'failed' event has been
++ * received.
++ */
++static inline struct zwp_linux_buffer_params_v1*
++zwp_linux_dmabuf_v1_create_params(
++    struct zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1) {
++  struct wl_proxy* params_id;
++
++  params_id = wl_proxy_marshal_constructor(
++      (struct wl_proxy*)zwp_linux_dmabuf_v1, ZWP_LINUX_DMABUF_V1_CREATE_PARAMS,
++      &zwp_linux_buffer_params_v1_interface, NULL);
++
++  return (struct zwp_linux_buffer_params_v1*)params_id;
++}
++
++#ifndef ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ENUM
++#  define ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ENUM
++enum zwp_linux_buffer_params_v1_error {
++  /**
++   * the dmabuf_batch object has already been used to create a wl_buffer
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ALREADY_USED = 0,
++  /**
++   * plane index out of bounds
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_PLANE_IDX = 1,
++  /**
++   * the plane index was already set
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_PLANE_SET = 2,
++  /**
++   * missing or too many planes to create a buffer
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INCOMPLETE = 3,
++  /**
++   * format not supported
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_FORMAT = 4,
++  /**
++   * invalid width or height
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_DIMENSIONS = 5,
++  /**
++   * offset + stride * height goes out of dmabuf bounds
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS = 6,
++  /**
++   * invalid wl_buffer resulted from importing dmabufs via                the
++   * create_immed request on given buffer_params
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_WL_BUFFER = 7,
++};
++#endif /* ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ENUM */
++
++#ifndef ZWP_LINUX_BUFFER_PARAMS_V1_FLAGS_ENUM
++#  define ZWP_LINUX_BUFFER_PARAMS_V1_FLAGS_ENUM
++enum zwp_linux_buffer_params_v1_flags {
++  /**
++   * contents are y-inverted
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_FLAGS_Y_INVERT = 1,
++  /**
++   * content is interlaced
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_FLAGS_INTERLACED = 2,
++  /**
++   * bottom field first
++   */
++  ZWP_LINUX_BUFFER_PARAMS_V1_FLAGS_BOTTOM_FIRST = 4,
++};
++#endif /* ZWP_LINUX_BUFFER_PARAMS_V1_FLAGS_ENUM */
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ * @struct zwp_linux_buffer_params_v1_listener
++ */
++struct zwp_linux_buffer_params_v1_listener {
++  /**
++   * buffer creation succeeded
++   *
++   * This event indicates that the attempted buffer creation was
++   * successful. It provides the new wl_buffer referencing the
++   * dmabuf(s).
++   *
++   * Upon receiving this event, the client should destroy the
++   * zlinux_dmabuf_params object.
++   * @param buffer the newly created wl_buffer
++   */
++  void (*created)(void* data,
++                  struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1,
++                  struct wl_buffer* buffer);
++  /**
++   * buffer creation failed
++   *
++   * This event indicates that the attempted buffer creation has
++   * failed. It usually means that one of the dmabuf constraints has
++   * not been fulfilled.
++   *
++   * Upon receiving this event, the client should destroy the
++   * zlinux_buffer_params object.
++   */
++  void (*failed)(void* data,
++                 struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1);
++};
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ */
++static inline int zwp_linux_buffer_params_v1_add_listener(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1,
++    const struct zwp_linux_buffer_params_v1_listener* listener, void* data) {
++  return wl_proxy_add_listener((struct wl_proxy*)zwp_linux_buffer_params_v1,
++                               (void (**)(void))listener, data);
++}
++
++#define ZWP_LINUX_BUFFER_PARAMS_V1_DESTROY 0
++#define ZWP_LINUX_BUFFER_PARAMS_V1_ADD 1
++#define ZWP_LINUX_BUFFER_PARAMS_V1_CREATE 2
++#define ZWP_LINUX_BUFFER_PARAMS_V1_CREATE_IMMED 3
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ */
++#define ZWP_LINUX_BUFFER_PARAMS_V1_CREATED_SINCE_VERSION 1
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ */
++#define ZWP_LINUX_BUFFER_PARAMS_V1_FAILED_SINCE_VERSION 1
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ */
++#define ZWP_LINUX_BUFFER_PARAMS_V1_DESTROY_SINCE_VERSION 1
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ */
++#define ZWP_LINUX_BUFFER_PARAMS_V1_ADD_SINCE_VERSION 1
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ */
++#define ZWP_LINUX_BUFFER_PARAMS_V1_CREATE_SINCE_VERSION 1
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ */
++#define ZWP_LINUX_BUFFER_PARAMS_V1_CREATE_IMMED_SINCE_VERSION 2
++
++/** @ingroup iface_zwp_linux_buffer_params_v1 */
++static inline void zwp_linux_buffer_params_v1_set_user_data(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1,
++    void* user_data) {
++  wl_proxy_set_user_data((struct wl_proxy*)zwp_linux_buffer_params_v1,
++                         user_data);
++}
++
++/** @ingroup iface_zwp_linux_buffer_params_v1 */
++static inline void* zwp_linux_buffer_params_v1_get_user_data(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1) {
++  return wl_proxy_get_user_data((struct wl_proxy*)zwp_linux_buffer_params_v1);
++}
++
++static inline uint32_t zwp_linux_buffer_params_v1_get_version(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1) {
++  return wl_proxy_get_version((struct wl_proxy*)zwp_linux_buffer_params_v1);
++}
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ *
++ * Cleans up the temporary data sent to the server for dmabuf-based
++ * wl_buffer creation.
++ */
++static inline void zwp_linux_buffer_params_v1_destroy(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1) {
++  wl_proxy_marshal((struct wl_proxy*)zwp_linux_buffer_params_v1,
++                   ZWP_LINUX_BUFFER_PARAMS_V1_DESTROY);
++
++  wl_proxy_destroy((struct wl_proxy*)zwp_linux_buffer_params_v1);
++}
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ *
++ * This request adds one dmabuf to the set in this
++ * zwp_linux_buffer_params_v1.
++ *
++ * The 64-bit unsigned value combined from modifier_hi and modifier_lo
++ * is the dmabuf layout modifier. DRM AddFB2 ioctl calls this the
++ * fb modifier, which is defined in drm_mode.h of Linux UAPI.
++ * This is an opaque token. Drivers use this token to express tiling,
++ * compression, etc. driver-specific modifications to the base format
++ * defined by the DRM fourcc code.
++ *
++ * This request raises the PLANE_IDX error if plane_idx is too large.
++ * The error PLANE_SET is raised if attempting to set a plane that
++ * was already set.
++ */
++static inline void zwp_linux_buffer_params_v1_add(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1, int32_t fd,
++    uint32_t plane_idx, uint32_t offset, uint32_t stride, uint32_t modifier_hi,
++    uint32_t modifier_lo) {
++  wl_proxy_marshal((struct wl_proxy*)zwp_linux_buffer_params_v1,
++                   ZWP_LINUX_BUFFER_PARAMS_V1_ADD, fd, plane_idx, offset,
++                   stride, modifier_hi, modifier_lo);
++}
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ *
++ * This asks for creation of a wl_buffer from the added dmabuf
++ * buffers. The wl_buffer is not created immediately but returned via
++ * the 'created' event if the dmabuf sharing succeeds. The sharing
++ * may fail at runtime for reasons a client cannot predict, in
++ * which case the 'failed' event is triggered.
++ *
++ * The 'format' argument is a DRM_FORMAT code, as defined by the
++ * libdrm's drm_fourcc.h. The Linux kernel's DRM sub-system is the
++ * authoritative source on how the format codes should work.
++ *
++ * The 'flags' is a bitfield of the flags defined in enum "flags".
++ * 'y_invert' means the that the image needs to be y-flipped.
++ *
++ * Flag 'interlaced' means that the frame in the buffer is not
++ * progressive as usual, but interlaced. An interlaced buffer as
++ * supported here must always contain both top and bottom fields.
++ * The top field always begins on the first pixel row. The temporal
++ * ordering between the two fields is top field first, unless
++ * 'bottom_first' is specified. It is undefined whether 'bottom_first'
++ * is ignored if 'interlaced' is not set.
++ *
++ * This protocol does not convey any information about field rate,
++ * duration, or timing, other than the relative ordering between the
++ * two fields in one buffer. A compositor may have to estimate the
++ * intended field rate from the incoming buffer rate. It is undefined
++ * whether the time of receiving wl_surface.commit with a new buffer
++ * attached, applying the wl_surface state, wl_surface.frame callback
++ * trigger, presentation, or any other point in the compositor cycle
++ * is used to measure the frame or field times. There is no support
++ * for detecting missed or late frames/fields/buffers either, and
++ * there is no support whatsoever for cooperating with interlaced
++ * compositor output.
++ *
++ * The composited image quality resulting from the use of interlaced
++ * buffers is explicitly undefined. A compositor may use elaborate
++ * hardware features or software to deinterlace and create progressive
++ * output frames from a sequence of interlaced input buffers, or it
++ * may produce substandard image quality. However, compositors that
++ * cannot guarantee reasonable image quality in all cases are recommended
++ * to just reject all interlaced buffers.
++ *
++ * Any argument errors, including non-positive width or height,
++ * mismatch between the number of planes and the format, bad
++ * format, bad offset or stride, may be indicated by fatal protocol
++ * errors: INCOMPLETE, INVALID_FORMAT, INVALID_DIMENSIONS,
++ * OUT_OF_BOUNDS.
++ *
++ * Dmabuf import errors in the server that are not obvious client
++ * bugs are returned via the 'failed' event as non-fatal. This
++ * allows attempting dmabuf sharing and falling back in the client
++ * if it fails.
++ *
++ * This request can be sent only once in the object's lifetime, after
++ * which the only legal request is destroy. This object should be
++ * destroyed after issuing a 'create' request. Attempting to use this
++ * object after issuing 'create' raises ALREADY_USED protocol error.
++ *
++ * It is not mandatory to issue 'create'. If a client wants to
++ * cancel the buffer creation, it can just destroy this object.
++ */
++static inline void zwp_linux_buffer_params_v1_create(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1,
++    int32_t width, int32_t height, uint32_t format, uint32_t flags) {
++  wl_proxy_marshal((struct wl_proxy*)zwp_linux_buffer_params_v1,
++                   ZWP_LINUX_BUFFER_PARAMS_V1_CREATE, width, height, format,
++                   flags);
++}
++
++/**
++ * @ingroup iface_zwp_linux_buffer_params_v1
++ *
++ * This asks for immediate creation of a wl_buffer by importing the
++ * added dmabufs.
++ *
++ * In case of import success, no event is sent from the server, and the
++ * wl_buffer is ready to be used by the client.
++ *
++ * Upon import failure, either of the following may happen, as seen fit
++ * by the implementation:
++ * - the client is terminated with one of the following fatal protocol
++ * errors:
++ * - INCOMPLETE, INVALID_FORMAT, INVALID_DIMENSIONS, OUT_OF_BOUNDS,
++ * in case of argument errors such as mismatch between the number
++ * of planes and the format, bad format, non-positive width or
++ * height, or bad offset or stride.
++ * - INVALID_WL_BUFFER, in case the cause for failure is unknown or
++ * plaform specific.
++ * - the server creates an invalid wl_buffer, marks it as failed and
++ * sends a 'failed' event to the client. The result of using this
++ * invalid wl_buffer as an argument in any request by the client is
++ * defined by the compositor implementation.
++ *
++ * This takes the same arguments as a 'create' request, and obeys the
++ * same restrictions.
++ */
++static inline struct wl_buffer* zwp_linux_buffer_params_v1_create_immed(
++    struct zwp_linux_buffer_params_v1* zwp_linux_buffer_params_v1,
++    int32_t width, int32_t height, uint32_t format, uint32_t flags) {
++  struct wl_proxy* buffer_id;
++
++  buffer_id = wl_proxy_marshal_constructor(
++      (struct wl_proxy*)zwp_linux_buffer_params_v1,
++      ZWP_LINUX_BUFFER_PARAMS_V1_CREATE_IMMED, &wl_buffer_interface, NULL,
++      width, height, format, flags);
++
++  return (struct wl_buffer*)buffer_id;
++}
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+diff -up firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-protocol.c.mozilla-1552590 firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-protocol.c
+--- firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-protocol.c.mozilla-1552590	2019-05-27 12:15:32.033414339 +0200
++++ firefox-67.0/widget/gtk/wayland/linux-dmabuf-unstable-v1-protocol.c	2019-05-27 12:15:32.033414339 +0200
+@@ -0,0 +1,81 @@
++/* Generated by wayland-scanner 1.17.0 */
++
++/*
++ * Copyright © 2014, 2015 Collabora, Ltd.
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice (including the next
++ * paragraph) shall be included in all copies or substantial portions of the
++ * Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
++ * DEALINGS IN THE SOFTWARE.
++ */
++
++#include <stdlib.h>
++#include <stdint.h>
++#include "wayland-util.h"
++
++#pragma GCC visibility push(default)
++extern const struct wl_interface wl_buffer_interface;
++extern const struct wl_interface zwp_linux_buffer_params_v1_interface;
++#pragma GCC visibility pop
++
++static const struct wl_interface* types[] = {
++    NULL,
++    NULL,
++    NULL,
++    NULL,
++    NULL,
++    NULL,
++    &zwp_linux_buffer_params_v1_interface,
++    &wl_buffer_interface,
++    NULL,
++    NULL,
++    NULL,
++    NULL,
++    &wl_buffer_interface,
++};
++
++static const struct wl_message zwp_linux_dmabuf_v1_requests[] = {
++    {"destroy", "", types + 0},
++    {"create_params", "n", types + 6},
++};
++
++static const struct wl_message zwp_linux_dmabuf_v1_events[] = {
++    {"format", "u", types + 0},
++    {"modifier", "3uuu", types + 0},
++};
++
++const struct wl_interface zwp_linux_dmabuf_v1_interface = {
++    "zwp_linux_dmabuf_v1",        3, 2,
++    zwp_linux_dmabuf_v1_requests, 2, zwp_linux_dmabuf_v1_events,
++};
++
++static const struct wl_message zwp_linux_buffer_params_v1_requests[] = {
++    {"destroy", "", types + 0},
++    {"add", "huuuuu", types + 0},
++    {"create", "iiuu", types + 0},
++    {"create_immed", "2niiuu", types + 7},
++};
++
++static const struct wl_message zwp_linux_buffer_params_v1_events[] = {
++    {"created", "n", types + 12},
++    {"failed", "", types + 0},
++};
++
++const struct wl_interface zwp_linux_buffer_params_v1_interface = {
++    "zwp_linux_buffer_params_v1",        3, 4,
++    zwp_linux_buffer_params_v1_requests, 2, zwp_linux_buffer_params_v1_events,
++};
+diff -up firefox-67.0/widget/gtk/wayland/moz.build.mozilla-1552590 firefox-67.0/widget/gtk/wayland/moz.build
+--- firefox-67.0/widget/gtk/wayland/moz.build.mozilla-1552590	2019-05-17 02:35:08.000000000 +0200
++++ firefox-67.0/widget/gtk/wayland/moz.build	2019-05-27 12:15:32.033414339 +0200
+@@ -9,6 +9,12 @@ with Files("**"):
+ 
+ SOURCES += [
+     'gtk-primary-selection-protocol.c',
++    'linux-dmabuf-unstable-v1-protocol.c'
++]
++
++EXPORTS.mozilla.widget += [
++    'gtk-primary-selection-client-protocol.h',
++    'linux-dmabuf-unstable-v1-client-protocol.h',
+ ]
+ 
+ include('/ipc/chromium/chromium-config.mozbuild')
+diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1552590 firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1552590	2019-05-27 12:15:32.028414340 +0200
++++ firefox-67.0/widget/gtk/WindowSurfaceWayland.cpp	2019-05-27 12:15:32.033414339 +0200
+@@ -35,6 +35,9 @@ extern mozilla::LazyLogModule gWidgetWay
+ namespace mozilla {
+ namespace widget {
+ 
++bool WindowSurfaceWayland::mUseDMABuf = false;
++bool WindowSurfaceWayland::mUseDMABufInitialized = false;
++
+ /*
+   Wayland multi-thread rendering scheme
+ 
+@@ -258,7 +261,7 @@ static void buffer_release(void* data, w
+ 
+ static const struct wl_buffer_listener buffer_listener = {buffer_release};
+ 
+-void WindowBackBuffer::Create(int aWidth, int aHeight) {
++void WindowBackBufferShm::Create(int aWidth, int aHeight) {
+   MOZ_ASSERT(!IsAttached(), "We can't resize attached buffers.");
+ 
+   int newBufferSize = aWidth * aHeight * BUFFER_BPP;
+@@ -268,7 +271,7 @@ void WindowBackBuffer::Create(int aWidth
+       wl_shm_pool_create_buffer(mShmPool.GetShmPool(), 0, aWidth, aHeight,
+                                 aWidth * BUFFER_BPP, WL_SHM_FORMAT_ARGB8888);
+   wl_proxy_set_queue((struct wl_proxy*)mWaylandBuffer,
+-                     mWaylandDisplay->GetEventQueue());
++                     GetWaylandDisplay()->GetEventQueue());
+   wl_buffer_add_listener(mWaylandBuffer, &buffer_listener, this);
+ 
+   mWidth = aWidth;
+@@ -280,31 +283,31 @@ void WindowBackBuffer::Create(int aWidth
+       mWaylandBuffer ? wl_proxy_get_id((struct wl_proxy*)mWaylandBuffer) : -1));
+ }
+ 
+-void WindowBackBuffer::Release() {
++void WindowBackBufferShm::Release() {
+   LOGWAYLAND(("%s [%p]\n", __PRETTY_FUNCTION__, (void*)this));
+ 
+   wl_buffer_destroy(mWaylandBuffer);
+   mWidth = mHeight = 0;
+ }
+ 
+-void WindowBackBuffer::Clear() {
++void WindowBackBufferShm::Clear() {
+   memset(mShmPool.GetImageData(), 0, mHeight * mWidth * BUFFER_BPP);
+ }
+ 
+-WindowBackBuffer::WindowBackBuffer(nsWaylandDisplay* aWaylandDisplay,
+-                                   int aWidth, int aHeight)
+-    : mShmPool(aWaylandDisplay, aWidth * aHeight * BUFFER_BPP),
++WindowBackBufferShm::WindowBackBufferShm(nsWaylandDisplay* aWaylandDisplay,
++                                         int aWidth, int aHeight)
++    : WindowBackBuffer(aWaylandDisplay),
++      mShmPool(aWaylandDisplay, aWidth * aHeight * BUFFER_BPP),
+       mWaylandBuffer(nullptr),
+       mWidth(aWidth),
+       mHeight(aHeight),
+-      mAttached(false),
+-      mWaylandDisplay(aWaylandDisplay) {
++      mAttached(false) {
+   Create(aWidth, aHeight);
+ }
+ 
+-WindowBackBuffer::~WindowBackBuffer() { Release(); }
++WindowBackBufferShm::~WindowBackBufferShm() { Release(); }
+ 
+-bool WindowBackBuffer::Resize(int aWidth, int aHeight) {
++bool WindowBackBufferShm::Resize(int aWidth, int aHeight) {
+   if (aWidth == mWidth && aHeight == mHeight) return true;
+ 
+   LOGWAYLAND(
+@@ -317,20 +320,20 @@ bool WindowBackBuffer::Resize(int aWidth
+ }
+ 
+ void WindowBackBuffer::Attach(wl_surface* aSurface) {
+-  LOGWAYLAND((
+-      "%s [%p] wl_surface %p ID %d wl_buffer %p ID %d\n", __PRETTY_FUNCTION__,
+-      (void*)this, (void*)aSurface,
+-      aSurface ? wl_proxy_get_id((struct wl_proxy*)aSurface) : -1,
+-      (void*)mWaylandBuffer,
+-      mWaylandBuffer ? wl_proxy_get_id((struct wl_proxy*)mWaylandBuffer) : -1));
++  LOGWAYLAND(
++      ("%s [%p] wl_surface %p ID %d wl_buffer %p ID %d\n", __PRETTY_FUNCTION__,
++       (void*)this, (void*)aSurface,
++       aSurface ? wl_proxy_get_id((struct wl_proxy*)aSurface) : -1,
++       (void*)GetWlBuffer(),
++       GetWlBuffer() ? wl_proxy_get_id((struct wl_proxy*)GetWlBuffer()) : -1));
+ 
+-  wl_surface_attach(aSurface, mWaylandBuffer, 0, 0);
++  wl_surface_attach(aSurface, GetWlBuffer(), 0, 0);
+   wl_surface_commit(aSurface);
+-  wl_display_flush(mWaylandDisplay->GetDisplay());
+-  mAttached = true;
++  wl_display_flush(GetWaylandDisplay()->GetDisplay());
++  SetAttached();
+ }
+ 
+-void WindowBackBuffer::Detach(wl_buffer* aBuffer) {
++void WindowBackBufferShm::Detach(wl_buffer* aBuffer) {
+   LOGWAYLAND(("%s [%p] wl_buffer %p ID %d\n", __PRETTY_FUNCTION__, (void*)this,
+               (void*)aBuffer,
+               aBuffer ? wl_proxy_get_id((struct wl_proxy*)aBuffer) : -1));
+@@ -338,19 +341,20 @@ void WindowBackBuffer::Detach(wl_buffer*
+   mAttached = false;
+ }
+ 
+-bool WindowBackBuffer::SetImageDataFromBuffer(
++bool WindowBackBufferShm::SetImageDataFromBuffer(
+     class WindowBackBuffer* aSourceBuffer) {
+-  if (!IsMatchingSize(aSourceBuffer)) {
+-    Resize(aSourceBuffer->mWidth, aSourceBuffer->mHeight);
++  auto sourceBuffer = static_cast<class WindowBackBufferShm*>(aSourceBuffer);
++  if (!IsMatchingSize(sourceBuffer)) {
++    Resize(sourceBuffer->mWidth, sourceBuffer->mHeight);
+   }
+ 
+   mShmPool.SetImageDataFromPool(
+-      &aSourceBuffer->mShmPool,
+-      aSourceBuffer->mWidth * aSourceBuffer->mHeight * BUFFER_BPP);
++      &sourceBuffer->mShmPool,
++      sourceBuffer->mWidth * sourceBuffer->mHeight * BUFFER_BPP);
+   return true;
+ }
+ 
+-already_AddRefed<gfx::DrawTarget> WindowBackBuffer::Lock() {
++already_AddRefed<gfx::DrawTarget> WindowBackBufferShm::Lock() {
+   LOGWAYLAND((
+       "%s [%p] [%d x %d] wl_buffer %p ID %d\n", __PRETTY_FUNCTION__,
+       (void*)this, mWidth, mHeight, (void*)mWaylandBuffer,
+@@ -359,9 +363,71 @@ already_AddRefed<gfx::DrawTarget> Window
+   gfx::IntSize lockSize(mWidth, mHeight);
+   return gfxPlatform::CreateDrawTargetForData(
+       static_cast<unsigned char*>(mShmPool.GetImageData()), lockSize,
+-      BUFFER_BPP * mWidth, mFormat);
++      BUFFER_BPP * mWidth, GetSurfaceFormat());
++}
++
++#ifdef HAVE_LIBDRM
++WindowBackBufferDMABuf::WindowBackBufferDMABuf(
++    nsWaylandDisplay* aWaylandDisplay, int aWidth, int aHeight)
++    : WindowBackBuffer(aWaylandDisplay) {
++  mDMAbufSurface.Create(aWidth, aHeight);
+ }
+ 
++WindowBackBufferDMABuf::~WindowBackBufferDMABuf() { mDMAbufSurface.Release(); }
++
++already_AddRefed<gfx::DrawTarget> WindowBackBufferDMABuf::Lock() {
++  LOGWAYLAND(
++      ("%s [%p] [%d x %d] wl_buffer %p ID %d\n", __PRETTY_FUNCTION__,
++       (void*)this, GetWidth(), GetHeight(), (void*)GetWlBuffer(),
++       GetWlBuffer() ? wl_proxy_get_id((struct wl_proxy*)GetWlBuffer()) : -1));
++
++  uint32_t stride;
++  void* pixels = mDMAbufSurface.Map(&stride);
++  gfx::IntSize lockSize(GetWidth(), GetHeight());
++  return gfxPlatform::CreateDrawTargetForData(
++      static_cast<unsigned char*>(pixels), lockSize, stride,
++      GetSurfaceFormat());
++}
++
++void WindowBackBufferDMABuf::Unlock() { mDMAbufSurface.Unmap(); }
++
++bool WindowBackBufferDMABuf::IsAttached() {
++  return mDMAbufSurface.WLBufferIsAttached();
++}
++
++void WindowBackBufferDMABuf::SetAttached() {
++  return mDMAbufSurface.WLBufferSetAttached();
++}
++
++int WindowBackBufferDMABuf::GetWidth() { return mDMAbufSurface.GetWidth(); }
++
++int WindowBackBufferDMABuf::GetHeight() { return mDMAbufSurface.GetHeight(); }
++
++wl_buffer* WindowBackBufferDMABuf::GetWlBuffer() {
++  return mDMAbufSurface.GetWLBuffer();
++}
++
++bool WindowBackBufferDMABuf::IsLocked() { return mDMAbufSurface.IsMapped(); }
++
++bool WindowBackBufferDMABuf::Resize(int aWidth, int aHeight) {
++  return mDMAbufSurface.Resize(aWidth, aHeight);
++}
++
++bool WindowBackBufferDMABuf::SetImageDataFromBuffer(
++    class WindowBackBuffer* aSourceBuffer) {
++  WindowBackBufferDMABuf* source =
++      static_cast<WindowBackBufferDMABuf*>(aSourceBuffer);
++  mDMAbufSurface.CopyFrom(&source->mDMAbufSurface);
++  return true;
++}
++
++void WindowBackBufferDMABuf::Detach(wl_buffer* aBuffer) {
++  mDMAbufSurface.WLBufferDetach();
++}
++
++void WindowBackBufferDMABuf::Clear() { mDMAbufSurface.Clear(); }
++#endif
++
+ static void frame_callback_handler(void* data, struct wl_callback* callback,
+                                    uint32_t time) {
+   auto surface = reinterpret_cast<WindowSurfaceWayland*>(data);
+@@ -415,13 +481,50 @@ WindowSurfaceWayland::~WindowSurfaceWayl
+   }
+ }
+ 
+-WindowBackBuffer* WindowSurfaceWayland::GetWaylandBufferToDraw(int aWidth,
+-                                                               int aHeight) {
++bool WindowSurfaceWayland::UseDMABufBackend() {
++  if (!mUseDMABufInitialized) {
++#ifdef HAVE_LIBDRM
++    if (WaylandDMABufSurface::IsAvailable()) {
++      mUseDMABuf =
++          Preferences::GetBool("gfx.wayland_dmabuf_backend.enabled", false);
++    }
++#endif
++    mUseDMABufInitialized = true;
++  }
++  return mUseDMABuf;
++}
++
++WindowBackBuffer* WindowSurfaceWayland::CreateWaylandBuffer(int aWidth,
++                                                            int aHeight) {
++  if (UseDMABufBackend()) {
++    static bool sDMABufBufferCreated = false;
++    WindowBackBuffer* buffer =
++        new WindowBackBufferDMABuf(mWaylandDisplay, aWidth, aHeight);
++    if (buffer) {
++      sDMABufBufferCreated = true;
++      return buffer;
++    }
++    // If this is the first failure and there's no dmabuf already active
++    // we can safely fallback to Shm. Otherwise we can't mix DMAbuf and
++    // SHM buffers so just fails now.
++    if (sDMABufBufferCreated) {
++      NS_WARNING("Failed to allocate DMABuf buffer!");
++      return nullptr;
++    } else {
++      NS_WARNING("Wayland DMABuf failed, switched back to Shm backend!");
++      mUseDMABuf = false;
++    }
++  }
++  return new WindowBackBufferShm(mWaylandDisplay, aWidth, aHeight);
++}
++
++WindowBackBuffer* WindowSurfaceWayland::GetWaylandBufferToDraw(
++    int aWidth, int aHeight, bool aFullScreenUpdate, bool aNoBackBufferCopy) {
+   if (!mWaylandBuffer) {
+     LOGWAYLAND(("%s [%p] Create [%d x %d]\n", __PRETTY_FUNCTION__, (void*)this,
+                 aWidth, aHeight));
+ 
+-    mWaylandBuffer = new WindowBackBuffer(mWaylandDisplay, aWidth, aHeight);
++    mWaylandBuffer = CreateWaylandBuffer(aWidth, aHeight);
+     mWaitToFullScreenUpdate = true;
+     return mWaylandBuffer;
+   }
+@@ -447,8 +550,7 @@ WindowBackBuffer* WindowSurfaceWayland::
+   for (availableBuffer = 0; availableBuffer < BACK_BUFFER_NUM;
+        availableBuffer++) {
+     if (!mBackupBuffer[availableBuffer]) {
+-      mBackupBuffer[availableBuffer] =
+-          new WindowBackBuffer(mWaylandDisplay, aWidth, aHeight);
++      mBackupBuffer[availableBuffer] = CreateWaylandBuffer(aWidth, aHeight);
+       break;
+     }
+ 
+@@ -464,17 +566,26 @@ WindowBackBuffer* WindowSurfaceWayland::
+     return nullptr;
+   }
+ 
++  bool bufferFlip = mWaylandBuffer->IsMatchingSize(aWidth, aHeight);
++  if (bufferFlip && aNoBackBufferCopy && !aFullScreenUpdate) {
++    LOGWAYLAND(("%s [%p] Delayed hard copy from old buffer [%d x %d]\n",
++                __PRETTY_FUNCTION__, (void*)this, aWidth, aHeight));
++    return nullptr;
++  }
++
+   WindowBackBuffer* lastWaylandBuffer = mWaylandBuffer;
+   mWaylandBuffer = mBackupBuffer[availableBuffer];
+   mBackupBuffer[availableBuffer] = lastWaylandBuffer;
+ 
+-  if (lastWaylandBuffer->IsMatchingSize(aWidth, aHeight)) {
+-    LOGWAYLAND(("%s [%p] Copy from old buffer [%d x %d]\n", __PRETTY_FUNCTION__,
+-                (void*)this, aWidth, aHeight));
++  if (bufferFlip) {
+     // Former front buffer has the same size as a requested one.
+     // Gecko may expect a content already drawn on screen so copy
+-    // existing data to the new buffer.
+-    mWaylandBuffer->SetImageDataFromBuffer(lastWaylandBuffer);
++    // existing data to the new buffer if we don't do fullscreen redraw.
++    if (!aFullScreenUpdate) {
++      LOGWAYLAND(("%s [%p] Copy from old buffer [%d x %d]\n",
++                  __PRETTY_FUNCTION__, (void*)this, aWidth, aHeight));
++      mWaylandBuffer->SetImageDataFromBuffer(lastWaylandBuffer);
++    }
+     // When buffer switches we need to damage whole screen
+     // (https://bugzilla.redhat.com/show_bug.cgi?id=1418260)
+     mWaylandBufferFullScreenDamage = true;
+@@ -491,11 +602,15 @@ WindowBackBuffer* WindowSurfaceWayland::
+ }
+ 
+ already_AddRefed<gfx::DrawTarget> WindowSurfaceWayland::LockWaylandBuffer(
+-    int aWidth, int aHeight, bool aClearBuffer) {
+-  WindowBackBuffer* buffer = GetWaylandBufferToDraw(aWidth, aHeight);
++    int aWidth, int aHeight, bool aClearBuffer, bool aFullScreenUpdate,
++    bool aNoBackBufferCopy) {
++  WindowBackBuffer* buffer = GetWaylandBufferToDraw(
++      aWidth, aHeight, aFullScreenUpdate, aNoBackBufferCopy);
+   if (!buffer) {
+-    NS_WARNING(
+-        "WindowSurfaceWayland::LockWaylandBuffer(): No buffer available");
++    if (!aNoBackBufferCopy) {
++      NS_WARNING(
++          "WindowSurfaceWayland::LockWaylandBuffer(): No buffer available");
++    }
+     return nullptr;
+   }
+ 
+@@ -506,6 +621,8 @@ already_AddRefed<gfx::DrawTarget> Window
+   return buffer->Lock();
+ }
+ 
++void WindowSurfaceWayland::UnlockWaylandBuffer() { mWaylandBuffer->Unlock(); }
++
+ already_AddRefed<gfx::DrawTarget> WindowSurfaceWayland::LockImageSurface(
+     const gfx::IntSize& aLockSize) {
+   if (!mImageSurface || mImageSurface->CairoStatus() ||
+@@ -555,10 +672,18 @@ already_AddRefed<gfx::DrawTarget> Window
+        lockSize.height == screenRect.height);
+ 
+   if (mDrawToWaylandBufferDirectly) {
+-    RefPtr<gfx::DrawTarget> dt =
+-        LockWaylandBuffer(screenRect.width, screenRect.height,
+-                          mWindow->WaylandSurfaceNeedsClear());
++    // If there's any pending image commit scratch them as we're going
++    // to redraw the whole sceen anyway.
++    mDelayedImageCommits.Clear();
++
++    bool needsClear = mWindow->WaylandSurfaceNeedsClear();
++    RefPtr<gfx::DrawTarget> dt = LockWaylandBuffer(
++        screenRect.width, screenRect.height, needsClear,
++        /* aFullScreenUpdate */ true, /* aNoBackBufferCopy */ true);
+     if (dt) {
++      if (needsClear) {
++        mWindow->WaylandSurfaceCleared();
++      }
+       // When we have a request to update whole screen at once
+       // (surface was created, resized or changed somehow)
+       // we also need update scale factor of the screen.
+@@ -577,8 +702,49 @@ already_AddRefed<gfx::DrawTarget> Window
+   return LockImageSurface(lockSize);
+ }
+ 
++void WindowImageSurface::Draw(gfx::SourceSurface* aSurface,
++                              gfx::DrawTarget* aDest,
++                              const LayoutDeviceIntRegion& aRegion) {
++  uint32_t numRects = aRegion.GetNumRects();
++  if (numRects != 1) {
++    AutoTArray<IntRect, 32> rects;
++    rects.SetCapacity(numRects);
++    for (auto iter = aRegion.RectIter(); !iter.Done(); iter.Next()) {
++      rects.AppendElement(iter.Get().ToUnknownRect());
++    }
++    aDest->PushDeviceSpaceClipRects(rects.Elements(), rects.Length());
++  }
++
++  gfx::IntRect bounds = aRegion.GetBounds().ToUnknownRect();
++  gfx::Rect rect(bounds);
++  aDest->DrawSurface(aSurface, rect, rect);
++
++  if (numRects != 1) {
++    aDest->PopClip();
++  }
++}
++
++void WindowImageSurface::Draw(gfx::DrawTarget* aDest,
++                              LayoutDeviceIntRegion& aWaylandBufferDamage) {
++  Draw(mSurface.get(), aDest, mUpdateRegion);
++  aWaylandBufferDamage.OrWith(mUpdateRegion);
++}
++
++WindowImageSurface::WindowImageSurface(
++    gfx::SourceSurface* aSurface, const LayoutDeviceIntRegion& aUpdateRegion)
++    : mSurface(aSurface), mUpdateRegion(aUpdateRegion){};
++
++void WindowSurfaceWayland::DrawDelayedImageCommits(
++    gfx::DrawTarget* aDrawTarget, LayoutDeviceIntRegion& aWaylandBufferDamage) {
++  for (unsigned int i = 0; i < mDelayedImageCommits.Length(); i++) {
++    mDelayedImageCommits[i].Draw(aDrawTarget, aWaylandBufferDamage);
++  }
++  mDelayedImageCommits.Clear();
++}
++
+ bool WindowSurfaceWayland::CommitImageSurfaceToWaylandBuffer(
+-    const LayoutDeviceIntRegion& aRegion) {
++    const LayoutDeviceIntRegion& aRegion,
++    LayoutDeviceIntRegion& aWaylandBufferDamage) {
+   MOZ_ASSERT(!mDrawToWaylandBufferDirectly);
+ 
+   LayoutDeviceIntRect screenRect = mWindow->GetBounds();
+@@ -589,30 +755,31 @@ bool WindowSurfaceWayland::CommitImageSu
+     return false;
+   }
+ 
+-  RefPtr<gfx::DrawTarget> dt = LockWaylandBuffer(
+-      screenRect.width, screenRect.height, mWindow->WaylandSurfaceNeedsClear());
+   RefPtr<gfx::SourceSurface> surf =
+       gfx::Factory::CreateSourceSurfaceForCairoSurface(
+           mImageSurface->CairoSurface(), mImageSurface->GetSize(),
+           mImageSurface->Format());
+-  if (!dt || !surf) {
++  if (!surf) {
+     return false;
+   }
+ 
+-  uint32_t numRects = aRegion.GetNumRects();
+-  if (numRects != 1) {
+-    AutoTArray<IntRect, 32> rects;
+-    rects.SetCapacity(numRects);
+-    for (auto iter = aRegion.RectIter(); !iter.Done(); iter.Next()) {
+-      rects.AppendElement(iter.Get().ToUnknownRect());
+-    }
+-    dt->PushDeviceSpaceClipRects(rects.Elements(), rects.Length());
+-  }
+-
+-  dt->DrawSurface(surf, rect, rect);
+-
+-  if (numRects != 1) {
+-    dt->PopClip();
++  bool needsClear = mWindow->WaylandSurfaceNeedsClear();
++  RefPtr<gfx::DrawTarget> dt = LockWaylandBuffer(
++      screenRect.width, screenRect.height, needsClear,
++      /* fullscreenDrawing */ false, /* aNoBackBufferCopy */ true);
++  if (dt) {
++    if (needsClear) {
++      mWindow->WaylandSurfaceCleared();
++    }
++    // Draw any delayed image commits first
++    DrawDelayedImageCommits(dt, aWaylandBufferDamage);
++    WindowImageSurface::Draw(surf, dt, aRegion);
++    // Submit all drawing to final Wayland buffer upload
++    aWaylandBufferDamage.OrWith(aRegion);
++    UnlockWaylandBuffer();
++  } else {
++    mDelayedImageCommits.AppendElement(WindowImageSurface(surf, aRegion));
++    return false;
+   }
+ 
+   return true;
+@@ -653,6 +820,24 @@ void WindowSurfaceWayland::CommitWayland
+     return;
+   }
+ 
++  if (!mDrawToWaylandBufferDirectly) {
++    // There's some cached drawings - try to flush them now.
++    LayoutDeviceIntRect screenRect = mWindow->GetBounds();
++    bool needsClear = mWindow->WaylandSurfaceNeedsClear();
++    RefPtr<gfx::DrawTarget> dt =
++        LockWaylandBuffer(screenRect.width, screenRect.height, needsClear,
++                          /* fullscreenInvalidate */ false,
++                          /* aNoBackBufferCopy */ true);
++    if (dt) {
++      if (needsClear) {
++        mWindow->WaylandSurfaceCleared();
++      }
++      DrawDelayedImageCommits(dt, mWaylandBufferDamage);
++      UnlockWaylandBuffer();
++      mDrawToWaylandBufferDirectly = true;
++    }
++  }
++
+   wl_surface* waylandSurface = mWindow->GetWaylandSurface();
+   if (!waylandSurface) {
+     // Target window is not created yet - delay the commit. This can happen only
+@@ -745,14 +930,21 @@ void WindowSurfaceWayland::Commit(const
+   }
+ #endif
+ 
+-  // We have new content at mImageSurface - copy data to mWaylandBuffer first.
+-  if (!mDrawToWaylandBufferDirectly) {
+-    CommitImageSurfaceToWaylandBuffer(aInvalidRegion);
+-  }
+-
+-  // If we're not at fullscreen damage add drawing area from aInvalidRegion
+-  if (!mWaylandBufferFullScreenDamage) {
+-    mWaylandBufferDamage.OrWith(aInvalidRegion);
++  if (mDrawToWaylandBufferDirectly) {
++    MOZ_ASSERT(mWaylandBuffer->IsLocked());
++    // If we're not at fullscreen damage add drawing area from aInvalidRegion
++    if (!mWaylandBufferFullScreenDamage) {
++      mWaylandBufferDamage.OrWith(aInvalidRegion);
++    }
++    UnlockWaylandBuffer();
++  } else {
++    MOZ_ASSERT(!mWaylandBuffer->IsLocked(),
++               "Drawing to already locked buffer?");
++    if (CommitImageSurfaceToWaylandBuffer(aInvalidRegion,
++                                          mWaylandBufferDamage)) {
++      // Our cached drawing is flushed, we can draw fullscreen again.
++      mDrawToWaylandBufferDirectly = true;
++    }
+   }
+ 
+   // We're ready to commit.
+diff -up firefox-67.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1552590 firefox-67.0/widget/gtk/WindowSurfaceWayland.h
+--- firefox-67.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1552590	2019-05-27 12:15:32.028414340 +0200
++++ firefox-67.0/widget/gtk/WindowSurfaceWayland.h	2019-05-27 12:15:32.034414339 +0200
+@@ -10,6 +10,9 @@
+ #include <prthread.h>
+ #include "mozilla/gfx/Types.h"
+ #include "nsWaylandDisplay.h"
++#ifdef HAVE_LIBDRM
++#  include "mozilla/gfx/WaylandDMABufSurface.h"
++#endif
+ 
+ #define BACK_BUFFER_NUM 2
+ 
+@@ -40,12 +43,53 @@ class WaylandShmPool {
+ // Holds actual graphics data for wl_surface
+ class WindowBackBuffer {
+  public:
+-  WindowBackBuffer(nsWaylandDisplay* aDisplay, int aWidth, int aHeight);
+-  ~WindowBackBuffer();
++  virtual already_AddRefed<gfx::DrawTarget> Lock() = 0;
++  virtual void Unlock(){};
++  virtual bool IsLocked() { return false; };
++
++  void Attach(wl_surface* aSurface);
++  virtual void Detach(wl_buffer* aBuffer) = 0;
++  virtual bool IsAttached() = 0;
++
++  virtual void Clear() = 0;
++  virtual bool Resize(int aWidth, int aHeight) = 0;
++
++  virtual int GetWidth() = 0;
++  virtual int GetHeight() = 0;
++  virtual wl_buffer* GetWlBuffer() = 0;
++  virtual void SetAttached() = 0;
++
++  virtual bool SetImageDataFromBuffer(
++      class WindowBackBuffer* aSourceBuffer) = 0;
++
++  bool IsMatchingSize(int aWidth, int aHeight) {
++    return aWidth == GetWidth() && aHeight == GetHeight();
++  }
++  bool IsMatchingSize(class WindowBackBuffer* aBuffer) {
++    return aBuffer->IsMatchingSize(GetWidth(), GetHeight());
++  }
++
++  static gfx::SurfaceFormat GetSurfaceFormat() { return mFormat; }
++
++  nsWaylandDisplay* GetWaylandDisplay() { return mWaylandDisplay; };
++
++  WindowBackBuffer(nsWaylandDisplay* aWaylandDisplay)
++      : mWaylandDisplay(aWaylandDisplay){};
++  virtual ~WindowBackBuffer(){};
++
++ private:
++  static gfx::SurfaceFormat mFormat;
++  nsWaylandDisplay* mWaylandDisplay;
++};
++
++class WindowBackBufferShm : public WindowBackBuffer {
++ public:
++  WindowBackBufferShm(nsWaylandDisplay* aWaylandDisplay, int aWidth,
++                      int aHeight);
++  ~WindowBackBufferShm();
+ 
+   already_AddRefed<gfx::DrawTarget> Lock();
+ 
+-  void Attach(wl_surface* aSurface);
+   void Detach(wl_buffer* aBuffer);
+   bool IsAttached() { return mAttached; }
+ 
+@@ -53,14 +97,11 @@ class WindowBackBuffer {
+   bool Resize(int aWidth, int aHeight);
+   bool SetImageDataFromBuffer(class WindowBackBuffer* aSourceBuffer);
+ 
+-  bool IsMatchingSize(int aWidth, int aHeight) {
+-    return aWidth == mWidth && aHeight == mHeight;
+-  }
+-  bool IsMatchingSize(class WindowBackBuffer* aBuffer) {
+-    return aBuffer->mWidth == mWidth && aBuffer->mHeight == mHeight;
+-  }
++  int GetWidth() { return mWidth; };
++  int GetHeight() { return mHeight; };
+ 
+-  static gfx::SurfaceFormat GetSurfaceFormat() { return mFormat; }
++  wl_buffer* GetWlBuffer() { return mWaylandBuffer; };
++  void SetAttached() { mAttached = true; };
+ 
+  private:
+   void Create(int aWidth, int aHeight);
+@@ -75,8 +116,51 @@ class WindowBackBuffer {
+   int mWidth;
+   int mHeight;
+   bool mAttached;
+-  nsWaylandDisplay* mWaylandDisplay;
+-  static gfx::SurfaceFormat mFormat;
++};
++
++#ifdef HAVE_LIBDRM
++class WindowBackBufferDMABuf : public WindowBackBuffer {
++ public:
++  WindowBackBufferDMABuf(nsWaylandDisplay* aWaylandDisplay, int aWidth,
++                         int aHeight);
++  ~WindowBackBufferDMABuf();
++
++  bool IsAttached();
++  void SetAttached();
++
++  int GetWidth();
++  int GetHeight();
++  wl_buffer* GetWlBuffer();
++
++  bool SetImageDataFromBuffer(class WindowBackBuffer* aSourceBuffer);
++
++  already_AddRefed<gfx::DrawTarget> Lock();
++  bool IsLocked();
++  void Unlock();
++
++  void Clear();
++  void Detach(wl_buffer* aBuffer);
++  bool Resize(int aWidth, int aHeight);
++
++ private:
++  WaylandDMABufSurface mDMAbufSurface;
++};
++#endif
++
++class WindowImageSurface {
++ public:
++  static void Draw(gfx::SourceSurface* aSurface, gfx::DrawTarget* aDest,
++                   const LayoutDeviceIntRegion& aRegion);
++
++  void Draw(gfx::DrawTarget* aDest,
++            LayoutDeviceIntRegion& aWaylandBufferDamage);
++
++  WindowImageSurface(gfx::SourceSurface* aSurface,
++                     const LayoutDeviceIntRegion& aUpdateRegion);
++
++ private:
++  RefPtr<gfx::SourceSurface> mSurface;
++  const LayoutDeviceIntRegion mUpdateRegion;
+ };
+ 
+ // WindowSurfaceWayland is an abstraction for wl_surface
+@@ -93,33 +177,50 @@ class WindowSurfaceWayland : public Wind
+   void DelayedCommitHandler();
+ 
+  private:
+-  WindowBackBuffer* GetWaylandBufferToDraw(int aWidth, int aHeight);
++  WindowBackBuffer* CreateWaylandBuffer(int aWidth, int aHeight);
++  WindowBackBuffer* GetWaylandBufferToDraw(int aWidth, int aHeight,
++                                           bool aFullScreenUpdate,
++                                           bool aNoBackBufferCopy);
+ 
+   already_AddRefed<gfx::DrawTarget> LockWaylandBuffer(int aWidth, int aHeight,
+-                                                      bool aClearBuffer);
++                                                      bool aClearBuffer,
++                                                      bool aFullScreenUpdate,
++                                                      bool aNoBackBufferCopy);
++  void UnlockWaylandBuffer();
++
+   already_AddRefed<gfx::DrawTarget> LockImageSurface(
+       const gfx::IntSize& aLockSize);
+-  bool CommitImageSurfaceToWaylandBuffer(const LayoutDeviceIntRegion& aRegion);
++  bool CommitImageSurfaceToWaylandBuffer(
++      const LayoutDeviceIntRegion& aRegion,
++      LayoutDeviceIntRegion& aWaylandBufferDamage);
+   void CommitWaylandBuffer();
+   void CalcRectScale(LayoutDeviceIntRect& aRect, int scale);
+ 
++  void DrawDelayedImageCommits(gfx::DrawTarget* aDrawTarget,
++                               LayoutDeviceIntRegion& aWaylandBufferDamage);
++
+   // TODO: Do we need to hold a reference to nsWindow object?
+   nsWindow* mWindow;
+   nsWaylandDisplay* mWaylandDisplay;
+   WindowBackBuffer* mWaylandBuffer;
+   LayoutDeviceIntRegion mWaylandBufferDamage;
+   WindowBackBuffer* mBackupBuffer[BACK_BUFFER_NUM];
+-  RefPtr<gfxImageSurface> mImageSurface;
+   wl_callback* mFrameCallback;
+   wl_surface* mLastCommittedSurface;
+   MessageLoop* mDisplayThreadMessageLoop;
+   WindowSurfaceWayland** mDelayedCommitHandle;
++  RefPtr<gfxImageSurface> mImageSurface;
++  AutoTArray<WindowImageSurface, 30> mDelayedImageCommits;
+   bool mDrawToWaylandBufferDirectly;
+   bool mPendingCommit;
+   bool mWaylandBufferFullScreenDamage;
+   bool mIsMainThread;
+   bool mNeedScaleFactorUpdate;
+   bool mWaitToFullScreenUpdate;
++
++  static bool UseDMABufBackend();
++  static bool mUseDMABufInitialized;
++  static bool mUseDMABuf;
+ };
+ 
+ }  // namespace widget
