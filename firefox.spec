@@ -667,6 +667,13 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
          -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
+
+%if 0%{?flatpak}
+sed -i -e 's|%FLATPAK_ENV_VARS%|export TMPDIR=$XDG_CACHE_HOME/tmp"|' %{buildroot}%{_bindir}/firefox
+%else
+sed -i -e 's|%FLATPAK_ENV_VARS%||' %{buildroot}%{_bindir}/firefox
+%endif
+
 %if 0%{?wayland_backend_default}
 %{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
