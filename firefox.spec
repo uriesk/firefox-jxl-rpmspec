@@ -669,7 +669,7 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 
 
 %if 0%{?flatpak}
-sed -i -e 's|%FLATPAK_ENV_VARS%|export TMPDIR=$XDG_CACHE_HOME/tmp"|' %{buildroot}%{_bindir}/firefox
+sed -i -e 's|%FLATPAK_ENV_VARS%|export TMPDIR="$XDG_CACHE_HOME/tmp"|' %{buildroot}%{_bindir}/firefox
 %else
 sed -i -e 's|%FLATPAK_ENV_VARS%||' %{buildroot}%{_bindir}/firefox
 %endif
