@@ -40,7 +40,6 @@ ExcludeArch: s390x
 %endif
 %bcond_without debug_build
 %if %{with debug_build}
-%else
 %global debug_build       1
 %else
 %global debug_build       0
