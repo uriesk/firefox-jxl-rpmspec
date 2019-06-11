@@ -98,13 +98,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        67.0
-Release:        4%{?pre_tag}%{?dist}
+Version:        67.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190517.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190611.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -945,6 +945,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jun 11 2019 Martin Stransky <stransky@redhat.com> - 67.0.2-1
+- Updated to 67.0.2 Build 2
+
 * Thu May 23 2019 Martin Stransky <stransky@redhat.com> - 67.0-4
 - Added wayland buffer optimization (mozilla#1553747).
 
