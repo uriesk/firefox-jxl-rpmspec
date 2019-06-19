@@ -542,6 +542,11 @@ MOZ_LINK_FLAGS="-Wl,--no-keep-memory"
 echo "ac_add_options --enable-linker=gold" >> .mozconfig
 %endif
 %endif
+%if 0%{?flatpak}
+# Make sure the linker can find libraries in /app/lib64 as we don't use
+# __global_ldflags that normally sets this.
+MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -L%{_libdir}"
+%endif
 %ifarch %{arm} %{ix86}
 export RUSTFLAGS="-Cdebuginfo=0"
 %endif
