@@ -38,8 +38,8 @@ ExcludeArch: s390x
 %ifarch ppc64 s390x
 %global big_endian        1
 %endif
-%bcond_without debug_build
-%if %{with debug_build}
+%bcond_without debug
+%if %{with debug}
 %global debug_build       1
 %else
 %global debug_build       0
