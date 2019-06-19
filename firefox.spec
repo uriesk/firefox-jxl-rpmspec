@@ -20,7 +20,7 @@ ExcludeArch: s390x
 %global disable_elfhack   1
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
-%ifnarch %{ix86} ppc64 s390x
+%ifnarch %{ix86} ppc64 s390 ppc64le
 %if %{release_build}
 %global build_with_pgo    1
 %else
