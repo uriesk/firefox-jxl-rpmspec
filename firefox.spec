@@ -92,13 +92,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        67.0.3
+Version:        67.0.4
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190618.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190620.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -944,6 +944,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jun 20 2019 Martin Stransky <stransky@redhat.com> - 67.0.4-1
+- Updated to 67.0.4
+
 * Tue Jun 18 2019 Martin Stransky <stransky@redhat.com> - 67.0.3-1
 - Updated to 67.0.3
 
