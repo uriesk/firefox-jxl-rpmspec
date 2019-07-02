@@ -76,15 +76,8 @@ ExcludeArch: s390x
 
 %bcond_without langpacks
 
+# Disable crashreporter as we want to collect Wayland crashes.
 %global enable_mozilla_crashreporter       0
-%if !%{debug_build}
-%ifarch %{ix86} x86_64
-# Disable crashreporter sa we want to collect Wayland crashes.
-%if 0%{?fedora} < 28
-%global enable_mozilla_crashreporter       1
-%endif
-%endif
-%endif
 
 %if !%{release_build}
 %global pre_tag .test
@@ -92,13 +85,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        67.0.4
+Version:        68.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190620.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190702.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -142,23 +135,12 @@ Patch227:        firefox-locale-debug.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch412:        mozilla-1337988.patch
-Patch413:        mozilla-1353817.patch
+#Patch413:        mozilla-1353817.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
-Patch418:        mozilla-1526243.patch
-Patch419:        mozilla-1540145.patch
 
 # Wayland specific upstream patches
-Patch574:        firefox-pipewire.patch
-Patch575:        mozilla-1423598-popup.patch
-Patch576:        mozilla-1532643-popup.patch
-Patch577:        mozilla-1535567.patch
-Patch579:        mozilla-1468911.patch
-Patch580:        mozilla-1539471.patch
-Patch581:        mozilla-1517205.patch
-Patch582:        mozilla-1508378.patch
-Patch583:        mozilla-1467127.patch
-Patch584:        mozilla-1552590.patch
+#Patch574:        firefox-pipewire.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -204,9 +186,7 @@ BuildRequires:  clang-libs
 %if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
-%if 0%{?fedora} > 28
 BuildRequires:  pipewire-devel
-%endif
 %if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
 %endif
@@ -351,7 +331,7 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 
 %patch402 -p1 -b .1196777
-%patch413 -p1 -b .1353817
+#%patch413 -p1 -b .1353817
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
@@ -359,22 +339,9 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
-%patch418 -p1 -b .mozilla-1526243
-%patch419 -p1 -b .mozilla-1540145
 
 # Wayland specific upstream patches
-%if 0%{?fedora} > 28
-%patch574 -p1 -b .firefox-pipewire
-%endif
-%patch575 -p1 -b .mozilla-1423598-popup
-%patch576 -p1 -b .mozilla-1532643-popup
-%patch577 -p1 -b .mozilla-1535567
-%patch579 -p1 -b .mozilla-1468911
-%patch580 -p1 -b .mozilla-1539471
-%patch581 -p1 -b .mozilla-1517205
-%patch582 -p1 -b .mozilla-1508378
-#%patch583 -p1 -b .mozilla-1467127
-#%patch584 -p1 -b .mozilla-1552590
+#%patch574 -p1 -b .firefox-pipewire
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -944,6 +911,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul 2 2019 Martin Stransky <stransky@redhat.com> - 68.0-1
+- Updated to 68.0
+
 * Thu Jun 20 2019 Martin Stransky <stransky@redhat.com> - 67.0.4-1
 - Updated to 67.0.4
 
