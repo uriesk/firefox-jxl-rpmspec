@@ -86,7 +86,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        68.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -140,7 +140,7 @@ Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 
 # Wayland specific upstream patches
-#Patch574:        firefox-pipewire.patch
+Patch574:        firefox-pipewire.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -341,7 +341,7 @@ This package contains results of tests executed during build.
 %endif
 
 # Wayland specific upstream patches
-#%patch574 -p1 -b .firefox-pipewire
+%patch574 -p1 -b .firefox-pipewire
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -911,6 +911,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jul  8 2019 Jan Horak <jhorak@redhat.com> - 68.0-2
+- Update pipewire patch
+
 * Tue Jul 2 2019 Martin Stransky <stransky@redhat.com> - 68.0-1
 - Updated to 68.0
 
