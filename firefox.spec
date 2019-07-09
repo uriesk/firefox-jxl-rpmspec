@@ -86,7 +86,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        68.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -138,6 +138,7 @@ Patch412:        mozilla-1337988.patch
 #Patch413:        mozilla-1353817.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
+Patch418:        mozilla-1512162.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -335,6 +336,7 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
+%patch418 -p1 -b .1512162
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
@@ -911,6 +913,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul  9 2019 Dan Horák <dan[at]danny.cz> - 68.0-3
+- Fix crash on ppc64le (mozilla#1512162)
+
 * Mon Jul  8 2019 Jan Horak <jhorak@redhat.com> - 68.0-2
 - Update pipewire patch
 
