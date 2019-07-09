@@ -10,3 +10,24 @@ diff -up firefox-61.0/gfx/skia/skia/src/jumper/SkJumper_stages.cpp.aarch64-skia 
      return vcvt_f16_f32(f);
  
  #elif defined(JUMPER_IS_HSW) || defined(JUMPER_IS_AVX512)
+diff -up firefox-68.0/gfx/skia/skia/include/private/SkHalf.h.old firefox-68.0/gfx/skia/skia/include/private/SkHalf.h
+--- firefox-68.0/gfx/skia/skia/include/private/SkHalf.h.old	2019-07-09 14:20:12.527441789 +0200
++++ firefox-68.0/gfx/skia/skia/include/private/SkHalf.h	2019-07-09 14:20:31.744366018 +0200
+@@ -40,7 +40,7 @@ static inline Sk4h SkFloatToHalf_finite_
+ 
+ static inline Sk4f SkHalfToFloat_finite_ftz(uint64_t rgba) {
+     Sk4h hs = Sk4h::Load(&rgba);
+-#if !defined(SKNX_NO_SIMD) && defined(SK_CPU_ARM64)
++#if 0 // !defined(SKNX_NO_SIMD) && defined(SK_CPU_ARM64)
+     float32x4_t fs;
+     asm ("fcvtl %[fs].4s, %[hs].4h   \n"   // vcvt_f32_f16(...)
+         : [fs] "=w" (fs)                   // =w: write-only NEON register
+@@ -62,7 +62,7 @@ static inline Sk4f SkHalfToFloat_finite_
+ }
+ 
+ static inline Sk4h SkFloatToHalf_finite_ftz(const Sk4f& fs) {
+-#if !defined(SKNX_NO_SIMD) && defined(SK_CPU_ARM64)
++#if 0 //!defined(SKNX_NO_SIMD) && defined(SK_CPU_ARM64)
+     float32x4_t vec = fs.fVec;
+     asm ("fcvtn %[vec].4h, %[vec].4s  \n"   // vcvt_f16_f32(vec)
+         : [vec] "+w" (vec));                // +w: read-write NEON register
