@@ -86,7 +86,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        68.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -913,6 +913,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jul 10 2019 Martin Stransky <stransky@redhat.com> - 68.0-4
+- Added fixes for aarch64 builds.
+
 * Tue Jul  9 2019 Dan Horák <dan[at]danny.cz> - 68.0-3
 - Fix crash on ppc64le (mozilla#1512162)
 
