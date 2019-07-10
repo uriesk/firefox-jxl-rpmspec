@@ -6,6 +6,10 @@ ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 
+# Temporary disabled
+ExcludeArch: aarch64
+ExcludeArch: ppc64le
+
 %global system_nss        1
 %global system_ffi        1
 # libvpx is too new for Firefox 65
