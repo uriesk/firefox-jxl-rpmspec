@@ -135,6 +135,7 @@ Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
+Patch228:        firefox-SIOCGSTAMP.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -334,6 +335,7 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
+%patch228 -p1 -b .SIOCGSTAMP
 
 %patch402 -p1 -b .1196777
 #%patch413 -p1 -b .1353817
