@@ -313,8 +313,7 @@ This package contains results of tests executed during build.
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
 #%patch37 -p1 -b .jit-atomic-lucky
-# TODO Fix later
-#%patch40 -p1 -b .aarch64-skia
+%patch40 -p1 -b .aarch64-skia
 %if 0%{?disable_elfhack}
 %patch41 -p1 -b .disable-elfhack
 %endif
