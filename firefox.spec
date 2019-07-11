@@ -6,10 +6,6 @@ ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 
-# Temporary disabled
-ExcludeArch: aarch64
-ExcludeArch: ppc64le
-
 %global system_nss        1
 %global system_ffi        1
 # libvpx is too new for Firefox 65
@@ -90,7 +86,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        68.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -919,6 +915,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jul 11 2019 Martin Stransky <stransky@redhat.com> - 68.0-5
+- Enabled aarch64 and ppc64le
+
 * Wed Jul 10 2019 Martin Stransky <stransky@redhat.com> - 68.0-4
 - Added fixes for aarch64 builds.
 
