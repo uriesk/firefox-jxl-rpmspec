@@ -85,13 +85,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        68.0
-Release:        5%{?pre_tag}%{?dist}
+Version:        68.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190708.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190722.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -914,6 +914,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jul 22 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-1
+- Updated to 68.0.1
+
 * Thu Jul 11 2019 Martin Stransky <stransky@redhat.com> - 68.0-5
 - Enabled aarch64 and ppc64le
 
