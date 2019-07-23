@@ -20,7 +20,9 @@ ExcludeArch: s390x
 %global disable_elfhack   1
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
-%ifnarch %{ix86} ppc64 s390 ppc64le
+# Build PGO+LTO on x86_64 and aarch64 only due to build issues
+# on other arches.
+%ifarch x86_64 aarch64
 %if %{release_build}
 %global build_with_pgo    1
 %else
@@ -403,7 +405,7 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
-%ifnarch %{ix86} x86_64
+%ifnarch %{ix86} x86_64 ppc64le
 echo "ac_add_options --disable-webrtc" >> .mozconfig
 %endif
 
