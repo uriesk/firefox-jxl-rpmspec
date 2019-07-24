@@ -88,7 +88,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        68.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -919,6 +919,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jul 24 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-2
+- Added fix for rhbz#1709840
+
 * Mon Jul 22 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-1
 - Updated to 68.0.1
 - Enabled WebRTC on ppc64le (rhbz#1732069)
