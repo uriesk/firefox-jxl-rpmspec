@@ -405,7 +405,7 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
-%ifnarch %{ix86} x86_64
+%ifnarch %{ix86} x86_64 ppc64le
 echo "ac_add_options --disable-webrtc" >> .mozconfig
 %endif
 
@@ -918,6 +918,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Mon Jul 22 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-1
 - Updated to 68.0.1
+- Enabled WebRTC on ppc64le (rhbz#1732069)
 
 * Thu Jul 11 2019 Martin Stransky <stransky@redhat.com> - 68.0-5
 - Enabled aarch64 and ppc64le
