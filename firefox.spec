@@ -142,6 +142,7 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch418:        mozilla-1512162.patch
+Patch419:        mozilla-1568569.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -321,6 +322,10 @@ This package contains results of tests executed during build.
 %endif
 %patch3  -p1 -b .arm
 %patch44 -p1 -b .build-arm-libopus
+# Patch for big endian platforms only
+%if 0%{?big_endian}
+%patch26 -p1 -b .icu
+%endif
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -340,10 +345,7 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1238661
 %endif
 %patch418 -p1 -b .1512162
-# Patch for big endian platforms only
-%if 0%{?big_endian}
-%patch26 -p1 -b .icu
-%endif
+%patch419 -p1 -b .1568569
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
