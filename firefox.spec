@@ -345,7 +345,9 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
+%ifarch ppc64 ppc64le
 %patch418 -p1 -b .1512162
+%endif
 %patch419 -p1 -b .1568569
 
 # Wayland specific upstream patches
@@ -929,6 +931,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 - Added fix for rhbz#1709840
 - Added node js wrapper to fix koji freezes
   (https://pagure.io/fedora-infrastructure/issue/8026)
+- Updated mozbz#1512162 for ppc64le
 
 * Mon Jul 22 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-1
 - Updated to 68.0.1
