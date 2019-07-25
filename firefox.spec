@@ -109,6 +109,7 @@ Source28:       firefox-wayland.sh.in
 Source29:       firefox-wayland.desktop
 Source30:       firefox-x11.sh.in
 Source31:       firefox-x11.desktop
+Source32:       node-stdout-nonblocking-wrapper
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -435,6 +436,8 @@ echo "ac_add_options --without-system-libvpx" >> .mozconfig
 echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
 
+echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
+
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
 
@@ -466,6 +469,9 @@ echo "Generate big endian version of config/external/icu/data/icud58l.dat"
   ls -l config/external/icu/data
   rm -f config/external/icu/data/icudt*l.dat
 %endif
+
+mkdir %{_buildrootdir}/bin || :
+cp %{SOURCE32} %{_buildrootdir}/bin || :
 
 # Update the various config.guess to upstream release for aarch64 support
 find ./ -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
@@ -921,6 +927,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Wed Jul 24 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-2
 - Added fix for rhbz#1709840
+- Added node js wrapper to fix koji freezes
+  (https://pagure.io/fedora-infrastructure/issue/8026)
 
 * Mon Jul 22 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-1
 - Updated to 68.0.1
