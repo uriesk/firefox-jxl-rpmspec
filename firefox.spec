@@ -572,9 +572,9 @@ export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
 export MOZ_SERVICES_SYNC="1"
 export STRIP=/bin/true
 %if 0%{?build_with_pgo}
-GDK_BACKEND=x11 xvfb-run ./mach build
+GDK_BACKEND=x11 xvfb-run ./mach build 2>&1 | cat -
 %else
-./mach build
+./mach build 2>&1 | cat -
 %endif
 
 # create debuginfo for crash-stats.mozilla.com
