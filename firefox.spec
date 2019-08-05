@@ -88,7 +88,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        68.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -144,6 +144,7 @@ Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch418:        mozilla-1512162.patch
 Patch419:        mozilla-1568569.patch
+Patch420:        mozilla-1566876-webrtc-ind.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -349,6 +350,7 @@ This package contains results of tests executed during build.
 %patch418 -p1 -b .1512162
 %endif
 %patch419 -p1 -b .1568569
+%patch420 -p1 -b .1566876-webrtc-ind
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
@@ -926,6 +928,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Aug  5 2019 Jan Horak <jhorak@redhat.com> - 68.0.1-3
+- Added workaround fix for webrtc indicator
+
 * Wed Jul 24 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-2
 - Added fix for rhbz#1709840
 - Added node js wrapper to fix koji freezes
