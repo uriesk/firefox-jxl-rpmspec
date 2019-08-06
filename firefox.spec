@@ -24,7 +24,7 @@ ExcludeArch: s390x
 # on other arches.
 %ifarch x86_64 aarch64
 %if %{release_build}
-%global build_with_pgo    1
+%global build_with_pgo    0
 %else
 %global build_with_pgo    0
 %endif
@@ -576,7 +576,7 @@ export STRIP=/bin/true
 %if 0%{?build_with_pgo}
 GDK_BACKEND=x11 xvfb-run ./mach build 2>&1 | cat -
 %else
-./mach build 2>&1 | cat -
+env RUST_LOG=debug strace -y -f ./mach build 2>&1 | cat -
 %endif
 
 # create debuginfo for crash-stats.mozilla.com
