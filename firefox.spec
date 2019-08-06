@@ -199,6 +199,7 @@ BuildRequires:  cbindgen
 %endif
 BuildRequires:  nodejs
 BuildRequires:  nasm >= 1.13
+BuildRequires:  strace
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
