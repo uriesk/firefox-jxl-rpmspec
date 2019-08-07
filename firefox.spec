@@ -561,23 +561,23 @@ MOZ_SMP_FLAGS=-j1
 %ifarch %{ix86}
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
-[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
+#[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
 %endif
 %ifarch x86_64 ppc ppc64 ppc64le aarch64
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
-[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
-[ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
-[ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
+#[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
+#[ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
+#[ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 %endif
 
 export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
 export MOZ_SERVICES_SYNC="1"
 export STRIP=/bin/true
 %if 0%{?build_with_pgo}
-GDK_BACKEND=x11 xvfb-run ./mach build 2>&1 | cat -
+GDK_BACKEND=x11 xvfb-run ./mach build  2>&1 | cat -
 %else
-env RUST_LOG=debug strace -y -f ./mach build 2>&1 | cat -
+env RUST_LOG=debug strace -y -f ./mach build -v 2>&1 | cat -
 %endif
 
 # create debuginfo for crash-stats.mozilla.com
