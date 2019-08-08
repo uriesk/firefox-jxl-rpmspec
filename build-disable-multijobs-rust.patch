@@ -1,0 +1,14 @@
+diff --git a/config/makefiles/rust.mk b/config/makefiles/rust.mk
+--- a/config/makefiles/rust.mk
++++ b/config/makefiles/rust.mk
+@@ -10,6 +10,10 @@
+ # commands can be executed directly by make, without doing a round-trip
+ # through a shell.
+ 
++MOZ_MAKE_FLAGS := $(filter-out -j%,$(MAKEFLAGS))
++MAKEFLAGS += -j1
++
++
+ cargo_host_flag := --target=$(RUST_HOST_TARGET)
+ cargo_target_flag := --target=$(RUST_TARGET)
+ 
