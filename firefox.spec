@@ -88,7 +88,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        68.0.1
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -125,6 +125,7 @@ Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
 Patch44:        build-arm-libopus.patch
+Patch45:        build-disable-multijobs-rust.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -199,7 +200,6 @@ BuildRequires:  cbindgen
 %endif
 BuildRequires:  nodejs
 BuildRequires:  nasm >= 1.13
-BuildRequires:  strace
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
@@ -325,6 +325,7 @@ This package contains results of tests executed during build.
 %endif
 %patch3  -p1 -b .arm
 %patch44 -p1 -b .build-arm-libopus
+%patch45 -p1 -b .build-disable-multijobs-rust
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
@@ -561,14 +562,14 @@ MOZ_SMP_FLAGS=-j1
 %ifarch %{ix86}
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
-#[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
+[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
 %endif
 %ifarch x86_64 ppc ppc64 ppc64le aarch64
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
-#[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
-#[ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
-#[ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
+[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
+[ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
+[ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 %endif
 
 export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
@@ -577,7 +578,7 @@ export STRIP=/bin/true
 %if 0%{?build_with_pgo}
 GDK_BACKEND=x11 xvfb-run ./mach build  2>&1 | cat -
 %else
-env RUST_LOG=debug strace -y -f ./mach build -v 2>&1 | cat -
+./mach build -v 2>&1 | cat -
 %endif
 
 # create debuginfo for crash-stats.mozilla.com
@@ -929,8 +930,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Aug  5 2019 Jan Horak <jhorak@redhat.com> - 68.0.1-3
+* Mon Aug  5 2019 Jan Horak <jhorak@redhat.com> - 68.0.1-4
 - Added workaround fix for webrtc indicator
+- Added rust build workaround
 
 * Wed Jul 24 2019 Martin Stransky <stransky@redhat.com> - 68.0.1-2
 - Added fix for rhbz#1709840
