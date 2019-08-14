@@ -20,11 +20,11 @@ ExcludeArch: s390x
 %global disable_elfhack   1
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
+# FIXME disable PGO because of -j1 build would take ages
+%global disable_multiprocess_compilation 1
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
 %ifarch x86_64 aarch64
-# FIXME disable PGO because of -j1 build would take ages
-%global disable_multiprocess_compilation 1
 %if %{release_build}
 %global build_with_pgo    0
 %else
@@ -558,7 +558,7 @@ echo "ac_add_options --enable-lto" >> .mozconfig
 MOZ_SMP_FLAGS=-j1
 # On x86_64 architectures, Mozilla can build up to 4 jobs at once in parallel,
 # however builds tend to fail on other arches when building in parallel.
-%if !%{?disable_multiprocess_compilation}
+%if !0%{?disable_multiprocess_compilation}
 %ifarch %{ix86}
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
