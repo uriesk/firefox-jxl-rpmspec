@@ -23,6 +23,8 @@ ExcludeArch: s390x
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
 %ifarch x86_64 aarch64
+# FIXME disable PGO because of -j1 build would take ages
+%global disable_multiprocess_compilation 1
 %if %{release_build}
 %global build_with_pgo    0
 %else
@@ -87,13 +89,18 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
+<<<<<<< HEAD
 Version:        68.0.1
 Release:        4%{?pre_tag}%{?dist}
+=======
+Version:        68.0.2
+Release:        1%{?pre_tag}%{?dist}
+>>>>>>> master
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190722.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190814.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -135,7 +142,6 @@ Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
-Patch228:        firefox-SIOCGSTAMP.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -341,7 +347,6 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
-%patch228 -p1 -b .SIOCGSTAMP
 
 %patch402 -p1 -b .1196777
 #%patch413 -p1 -b .1353817
@@ -559,6 +564,7 @@ echo "ac_add_options --enable-lto" >> .mozconfig
 MOZ_SMP_FLAGS=-j1
 # On x86_64 architectures, Mozilla can build up to 4 jobs at once in parallel,
 # however builds tend to fail on other arches when building in parallel.
+%if !%{?disable_multiprocess_compilation}
 %ifarch %{ix86}
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
@@ -570,6 +576,7 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
 [ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
+%endif
 %endif
 
 export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
@@ -930,7 +937,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Aug  5 2019 Jan Horak <jhorak@redhat.com> - 68.0.1-4
+* Wed Aug 14 2019 Jan Horak <jhorak@redhat.com> - 68.0.2-1
+- Update to 68.0.2
+
+* Mon Aug  5 2019 Jan Horak <jhorak@redhat.com> - 68.0.1-3
 - Added workaround fix for webrtc indicator
 - Added rust build workaround
 
