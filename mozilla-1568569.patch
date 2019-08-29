@@ -1,12 +1,7 @@
-diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
---- a/widget/gtk/nsWindow.cpp
-+++ b/widget/gtk/nsWindow.cpp
-@@ -3238,16 +3238,18 @@ void nsWindow::OnWindowStateEvent(GtkWid
-   // We don't care about anything but changes in the maximized/icon/fullscreen
-   // states
-   if ((aEvent->changed_mask &
-        (GDK_WINDOW_STATE_ICONIFIED | GDK_WINDOW_STATE_MAXIMIZED |
-         GDK_WINDOW_STATE_FULLSCREEN)) == 0) {
+diff -up firefox-69.0/widget/gtk/nsWindow.cpp.1568569 firefox-69.0/widget/gtk/nsWindow.cpp
+--- firefox-69.0/widget/gtk/nsWindow.cpp.1568569	2019-08-29 09:42:10.484631750 +0200
++++ firefox-69.0/widget/gtk/nsWindow.cpp	2019-08-29 09:49:35.371121273 +0200
+@@ -3252,6 +3252,8 @@ void nsWindow::OnWindowStateEvent(GtkWid
      return;
    }
  
@@ -15,17 +10,7 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
    if (aEvent->new_window_state & GDK_WINDOW_STATE_ICONIFIED) {
      LOG(("\tIconified\n"));
      mSizeState = nsSizeMode_Minimized;
- #ifdef ACCESSIBILITY
-     DispatchMinimizeEventAccessible();
- #endif  // ACCESSIBILITY
-   } else if (aEvent->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) {
-     LOG(("\tFullscreen\n"));
-@@ -3261,16 +3263,28 @@ void nsWindow::OnWindowStateEvent(GtkWid
-   } else {
-     LOG(("\tNormal\n"));
-     mSizeState = nsSizeMode_Normal;
- #ifdef ACCESSIBILITY
-     DispatchRestoreEventAccessible();
+@@ -3275,6 +3277,18 @@ void nsWindow::OnWindowStateEvent(GtkWid
  #endif  // ACCESSIBILITY
    }
  
@@ -44,17 +29,7 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
    if (mWidgetListener) {
      mWidgetListener->SizeModeChanged(mSizeState);
      if (aEvent->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) {
-       mWidgetListener->FullscreenChanged(aEvent->new_window_state &
-                                          GDK_WINDOW_STATE_FULLSCREEN);
-     }
-   }
- 
-@@ -3787,16 +3801,21 @@ nsresult nsWindow::Create(nsIWidget* aPa
-       eventWidget = (drawToContainer) ? container : mShell;
- 
-       // Prevent GtkWindow from painting a background to avoid flickering.
-       gtk_widget_set_app_paintable(eventWidget, TRUE);
- 
+@@ -3800,6 +3814,11 @@ nsresult nsWindow::Create(nsIWidget* aPa
        gtk_widget_add_events(eventWidget, kEvents);
        if (drawToContainer) {
          gtk_widget_add_events(mShell, GDK_PROPERTY_CHANGE_MASK);
@@ -66,8 +41,3 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
          gtk_widget_set_app_paintable(mShell, TRUE);
        }
        if (mTransparencyBitmapForTitlebar) {
-         moz_container_force_default_visual(mContainer);
-       }
- 
-       // If we draw to mContainer window then configure it now because
-       // gtk_container_add() realizes the child widget.

@@ -1,7 +1,7 @@
-diff -up firefox-65.0/build/moz.configure/toolchain.configure.1516081 firefox-65.0/build/moz.configure/toolchain.configure
---- firefox-65.0/build/moz.configure/toolchain.configure.1516081	2019-01-24 19:48:38.000000000 +0100
-+++ firefox-65.0/build/moz.configure/toolchain.configure	2019-01-28 14:09:00.813320242 +0100
-@@ -1364,7 +1364,7 @@ def pgo_flags(compiler, build_env, targe
+diff -up firefox-69.0/build/moz.configure/toolchain.configure.1516081 firefox-69.0/build/moz.configure/toolchain.configure
+--- firefox-69.0/build/moz.configure/toolchain.configure.1516081	2019-08-27 03:31:51.000000000 +0200
++++ firefox-69.0/build/moz.configure/toolchain.configure	2019-08-29 10:42:45.872919255 +0200
+@@ -1411,7 +1411,7 @@ def pgo_flags(compiler, build_env, targe
  
      if compiler.type == 'gcc':
          return namespace(
@@ -10,19 +10,19 @@ diff -up firefox-65.0/build/moz.configure/toolchain.configure.1516081 firefox-65
              gen_ldflags=['-fprofile-generate'],
              use_cflags=['-fprofile-use', '-fprofile-correction',
                          '-Wcoverage-mismatch'],
-@@ -1385,7 +1385,8 @@ def pgo_flags(compiler, build_env, targe
+@@ -1434,7 +1434,8 @@ def pgo_flags(compiler, build_env, targe
  
          if gen_ldflags:
              return namespace(
--                gen_cflags=['-fprofile-instr-generate'],
-+                gen_cflags=['-fprofile-instr-generate',
+-                gen_cflags=[prefix + '-fprofile-generate'],
++                gen_cflags=[prefix + '-fprofile-generate',
 +			    '-DMOZ_PROFILE_INSTRUMENTATION'],
                  gen_ldflags=gen_ldflags,
-                 use_cflags=['-fprofile-instr-use=%s' % profdata,
-                             '-Wno-error=profile-instr-out-of-date',
-diff -up firefox-65.0/toolkit/components/terminator/nsTerminator.cpp.1516081 firefox-65.0/toolkit/components/terminator/nsTerminator.cpp
---- firefox-65.0/toolkit/components/terminator/nsTerminator.cpp.1516081	2019-01-28 14:09:00.813320242 +0100
-+++ firefox-65.0/toolkit/components/terminator/nsTerminator.cpp	2019-01-28 14:11:56.745577302 +0100
+                 use_cflags=[prefix + '-fprofile-use=%s' % profdata,
+                             # Some error messages about mismatched profile data
+diff -up firefox-69.0/toolkit/components/terminator/nsTerminator.cpp.1516081 firefox-69.0/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-69.0/toolkit/components/terminator/nsTerminator.cpp.1516081	2019-08-27 03:32:05.000000000 +0200
++++ firefox-69.0/toolkit/components/terminator/nsTerminator.cpp	2019-08-29 09:51:08.513440687 +0200
 @@ -419,6 +419,12 @@ void nsTerminator::StartWatchdog() {
      }
    }
