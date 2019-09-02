@@ -21,7 +21,7 @@ ExcludeArch: s390x
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
 # FIXME disable PGO because of -j1 build would take ages
-%global disable_multiprocess_compilation 1
+%global disable_multiprocess_compilation 0
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
 %ifarch x86_64 aarch64
@@ -90,7 +90,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -127,7 +127,7 @@ Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
 Patch44:        build-arm-libopus.patch
-Patch45:        build-disable-multijobs-rust.patch
+#Patch45:        build-disable-multijobs-rust.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -150,6 +150,13 @@ Patch420:        mozilla-1566876-webrtc-ind.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
+Patch575:        mozilla-1548475.patch
+Patch576:        mozilla-1562827.patch
+Patch578:        mozilla-1567434-1.patch
+Patch579:        mozilla-1567434-2.patch
+Patch580:        mozilla-1573813.patch
+Patch581:        mozilla-1574036.patch
+Patch582:        mozilla-1576268.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -326,7 +333,7 @@ This package contains results of tests executed during build.
 %endif
 %patch3  -p1 -b .arm
 %patch44 -p1 -b .build-arm-libopus
-%patch45 -p1 -b .build-disable-multijobs-rust
+#%patch45 -p1 -b .build-disable-multijobs-rust
 # Patch for big endian platforms only
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
@@ -356,6 +363,13 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
+%patch575 -p1 -b .mozilla-1548475
+%patch576 -p1 -b .mozilla-1562827
+%patch578 -p1 -b .mozilla-1567434-1
+%patch579 -p1 -b .mozilla-1567434-2
+%patch580 -p1 -b .mozilla-1573813
+%patch581 -p1 -b .mozilla-1574036
+%patch582 -p1 -b .mozilla-1576268
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -932,6 +946,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 2 2019 Martin Stransky <stransky@redhat.com> - 69.0-1
+- Added upstream Wayland patches (mozilla-1548475, mozilla-1562827,
+  mozilla-1567434, mozilla-1573813, mozilla-1574036,
+  mozilla-1576268).
+- Enable multiprocess compilation.
+
 * Thu Aug 29 2019 Jan Horak <jhorak@redhat.com> - 69.0-1
 - Update to 69.0
 
