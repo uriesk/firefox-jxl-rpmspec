@@ -356,7 +356,7 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1238661
 %endif
 %ifarch ppc64 ppc64le
-%patch418 -p1 -b .1512162
+#%patch418 -p1 -b .1512162 FIXME no longer needed?
 %endif
 %patch419 -p1 -b .1568569
 %patch420 -p1 -b .1566876-webrtc-ind

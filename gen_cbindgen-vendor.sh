@@ -12,7 +12,7 @@ to be used with 'cargo vendor' commmand.
 """
 
 [dependencies]
-cbindgen = "0.8.2"
+cbindgen = "0.9.0"
 
 [[bin]]
 name = "dummy"
