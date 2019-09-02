@@ -946,7 +946,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Sep 2 2019 Martin Stransky <stransky@redhat.com> - 69.0-1
+* Mon Sep 2 2019 Martin Stransky <stransky@redhat.com> - 69.0-2
 - Added upstream Wayland patches (mozilla-1548475, mozilla-1562827,
   mozilla-1567434, mozilla-1573813, mozilla-1574036,
   mozilla-1576268).
