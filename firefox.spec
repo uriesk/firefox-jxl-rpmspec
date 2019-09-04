@@ -26,7 +26,7 @@ ExcludeArch: s390x
 # on other arches.
 %ifarch x86_64 aarch64
 %if %{release_build}
-%global build_with_pgo    0
+%global build_with_pgo    1
 %else
 %global build_with_pgo    0
 %endif
@@ -65,9 +65,9 @@ ExcludeArch: s390x
 %endif
 
 %if %{?system_nss}
-%global nspr_version 4.19
+%global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.40.1
+%global nss_version 3.45
 %global nss_build_version %{nss_version}
 %endif
 
