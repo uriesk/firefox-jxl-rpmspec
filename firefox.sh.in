@@ -251,6 +251,9 @@ done
 # Flatpak specific environment variables
 %FLATPAK_ENV_VARS%
 
+# Don't throw "old profile" dialog box.
+export MOZ_ALLOW_DOWNGRADE=1
+
 # Run the browser
 debugging=0
 if [ $debugging = 1 ]

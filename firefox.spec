@@ -951,6 +951,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
   mozilla-1567434, mozilla-1573813, mozilla-1574036,
   mozilla-1576268).
 - Enable multiprocess compilation.
+- Enable profile downgrade.
 
 * Thu Aug 29 2019 Jan Horak <jhorak@redhat.com> - 69.0-1
 - Update to 69.0
