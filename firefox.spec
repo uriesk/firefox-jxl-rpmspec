@@ -5,6 +5,10 @@
 ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
+# Disabled due to build error rhbz#1749729
+%if 0%{?fedora} < 30
+ExcludeArch: ppc64le
+%endif
 
 %global system_nss        1
 %global system_ffi        1
@@ -952,6 +956,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
   mozilla-1576268).
 - Enable multiprocess compilation.
 - Enable profile downgrade.
+- Disabled ppc64le on Fedora 29 (rhbz#1749729)
 
 * Thu Aug 29 2019 Jan Horak <jhorak@redhat.com> - 69.0-1
 - Update to 69.0
