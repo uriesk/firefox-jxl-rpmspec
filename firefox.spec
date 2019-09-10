@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -151,6 +151,7 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch418:        mozilla-1512162.patch
 Patch419:        mozilla-1568569.patch
 Patch420:        mozilla-1566876-webrtc-ind.patch
+Patch421:        mozilla-1579023.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -364,6 +365,7 @@ This package contains results of tests executed during build.
 %endif
 %patch419 -p1 -b .1568569
 %patch420 -p1 -b .1566876-webrtc-ind
+%patch421 -p1 -b .1579023
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
@@ -950,6 +952,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 9 2019 Martin Stransky <stransky@redhat.com> - 69.0-3
+- Added fix for mozbz#1579023
+
 * Mon Sep 2 2019 Martin Stransky <stransky@redhat.com> - 69.0-2
 - Added upstream Wayland patches (mozilla-1548475, mozilla-1562827,
   mozilla-1567434, mozilla-1573813, mozilla-1574036,
