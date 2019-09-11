@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -164,6 +164,7 @@ Patch581:        mozilla-1574036.patch
 Patch582:        mozilla-1576268.patch
 Patch583:        mozilla-1579794-1.patch
 Patch584:        mozilla-1579794-2.patch
+Patch585:        mozilla-1579849.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -380,6 +381,7 @@ This package contains results of tests executed during build.
 %patch582 -p1 -b .mozilla-1576268
 %patch583 -p1 -b .mozilla-1579794-1
 %patch584 -p1 -b .mozilla-1579794-2
+%patch585 -p1 -b .mozilla-1579849
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -956,6 +958,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Sep 11 2019 Martin Stransky <stransky@redhat.com> - 69.0-5
+- Added fix for mozbz#1579849 - partial screen update when
+  page switches.
+
 * Wed Sep 11 2019 Martin Stransky <stransky@redhat.com> - 69.0-4
 - Added fix for mozbz#1579794 - Flickering on video playback on
   4k/HiDPI displays.
