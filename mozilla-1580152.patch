@@ -1,6 +1,6 @@
 diff -up firefox-69.0/widget/gtk/mozwayland/mozwayland.h.mozilla-1580152 firefox-69.0/widget/gtk/mozwayland/mozwayland.h
---- firefox-69.0/widget/gtk/mozwayland/mozwayland.h.mozilla-1580152	2019-09-16 10:43:50.214742949 +0200
-+++ firefox-69.0/widget/gtk/mozwayland/mozwayland.h	2019-09-16 10:43:50.222742921 +0200
+--- firefox-69.0/widget/gtk/mozwayland/mozwayland.h.mozilla-1580152	2019-09-16 11:11:30.081299217 +0200
++++ firefox-69.0/widget/gtk/mozwayland/mozwayland.h	2019-09-16 11:11:30.089299191 +0200
 @@ -27,6 +27,9 @@ MOZ_EXPORT struct wl_proxy* wl_proxy_mar
      struct wl_proxy* proxy, uint32_t opcode,
      const struct wl_interface* interface, ...);
@@ -12,8 +12,8 @@ diff -up firefox-69.0/widget/gtk/mozwayland/mozwayland.h.mozilla-1580152 firefox
   */
  #ifndef WL_DATA_DEVICE_MANAGER_DND_ACTION_ENUM
 diff -up firefox-69.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1580152 firefox-69.0/widget/gtk/nsWaylandDisplay.cpp
---- firefox-69.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1580152	2019-09-16 10:43:50.215742946 +0200
-+++ firefox-69.0/widget/gtk/nsWaylandDisplay.cpp	2019-09-16 10:50:58.647224684 +0200
+--- firefox-69.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1580152	2019-09-16 11:11:30.081299217 +0200
++++ firefox-69.0/widget/gtk/nsWaylandDisplay.cpp	2019-09-16 11:11:30.089299191 +0200
 @@ -243,6 +243,61 @@ bool nsWaylandDisplay::DispatchEventQueu
    return true;
  }
@@ -85,8 +85,8 @@ diff -up firefox-69.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1580152 firefox-69
        mRegistry(nullptr),
        mGbmDevice(nullptr),
 diff -up firefox-69.0/widget/gtk/nsWaylandDisplay.h.mozilla-1580152 firefox-69.0/widget/gtk/nsWaylandDisplay.h
---- firefox-69.0/widget/gtk/nsWaylandDisplay.h.mozilla-1580152	2019-09-16 10:43:50.215742946 +0200
-+++ firefox-69.0/widget/gtk/nsWaylandDisplay.h	2019-09-16 10:43:50.222742921 +0200
+--- firefox-69.0/widget/gtk/nsWaylandDisplay.h.mozilla-1580152	2019-09-16 11:11:30.081299217 +0200
++++ firefox-69.0/widget/gtk/nsWaylandDisplay.h	2019-09-16 11:11:30.089299191 +0200
 @@ -41,6 +41,11 @@ class nsWaylandDisplay {
    virtual ~nsWaylandDisplay();
  
@@ -108,8 +108,8 @@ diff -up firefox-69.0/widget/gtk/nsWaylandDisplay.h.mozilla-1580152 firefox-69.0
    wl_registry* mRegistry;
    zwp_linux_dmabuf_v1* mDmabuf;
 diff -up firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1580152 firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp
---- firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1580152	2019-09-16 10:43:50.220742928 +0200
-+++ firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp	2019-09-16 11:08:00.079998054 +0200
+--- firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1580152	2019-09-16 11:11:30.086299200 +0200
++++ firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp	2019-09-16 11:57:35.462193492 +0200
 @@ -32,6 +32,9 @@ extern mozilla::LazyLogModule gWidgetWay
  #  define LOGWAYLAND(args)
  #endif /* MOZ_LOGGING */
@@ -349,9 +349,8 @@ diff -up firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1580152 firefo
 -bool WindowSurfaceWayland::CommitImageSurfaceToWaylandBuffer(
 -    const LayoutDeviceIntRegion& aRegion,
 -    LayoutDeviceIntRegion& aWaylandBufferDamage) {
-+bool WindowSurfaceWayland::CommitImageCacheToWaylandBuffer() {
-   MOZ_ASSERT(!mDrawToWaylandBufferDirectly);
- 
+-  MOZ_ASSERT(!mDrawToWaylandBufferDirectly);
+-
 -#ifdef DEBUG
 -  gfx::IntRect bounds = aRegion.GetBounds().ToUnknownRect();
 -  gfx::Rect rect(bounds);
@@ -362,14 +361,16 @@ diff -up firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1580152 firefo
 -      ("WindowSurfaceWayland::CommitImageSurfaceToWaylandBuffer [%p] "
 -       "screenSize [%d x %d]\n",
 -       (void*)this, mBufferScreenRect.width, mBufferScreenRect.height));
--
++bool WindowSurfaceWayland::CommitImageCacheToWaylandBuffer() {
++  if (!mDelayedImageCommits.Length()) {
++    return false;
++  }
+ 
 -  mDelayedImageCommits.AppendElement(
 -      WindowImageSurface(mImageSurface, aRegion));
 -  // mImageSurface is owned by mDelayedImageCommits
 -  mImageSurface = nullptr;
-+  if (!mDelayedImageCommits.Length()) {
-+    return false;
-+  }
++  MOZ_ASSERT(!mDrawToWaylandBufferDirectly);
  
    RefPtr<gfx::DrawTarget> dt = LockWaylandBuffer(
        /* aCanSwitchBuffer */ mWholeWindowBufferDamage);
@@ -525,8 +526,8 @@ diff -up firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1580152 firefo
  
  }  // namespace widget
 diff -up firefox-69.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1580152 firefox-69.0/widget/gtk/WindowSurfaceWayland.h
---- firefox-69.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1580152	2019-09-16 10:43:50.214742949 +0200
-+++ firefox-69.0/widget/gtk/WindowSurfaceWayland.h	2019-09-16 11:09:05.651780592 +0200
+--- firefox-69.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1580152	2019-09-16 11:11:30.080299221 +0200
++++ firefox-69.0/widget/gtk/WindowSurfaceWayland.h	2019-09-16 11:11:30.090299187 +0200
 @@ -17,6 +17,8 @@
  namespace mozilla {
  namespace widget {
