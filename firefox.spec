@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -166,6 +166,8 @@ Patch582:        mozilla-1576268.patch
 Patch583:        mozilla-1579794-1.patch
 Patch584:        mozilla-1579794-2.patch
 Patch585:        mozilla-1579849.patch
+Patch586:        mozilla-1579823.patch
+Patch587:        mozilla-1580152.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -384,6 +386,8 @@ This package contains results of tests executed during build.
 %patch584 -p1 -b .mozilla-1579794-2
 %patch585 -p1 -b .mozilla-1579849
 %patch422 -p1 -b .1580174-webrtc-popup
+%patch586 -p1 -b .mozilla-1579823
+%patch587 -p1 -b .mozilla-1580152
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -960,6 +964,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 16 2019 Martin Stransky <stransky@redhat.com> - 69.0-6
+- Added fixes for mozbz#1579823, mozbz#1580152
+
 * Wed Sep 11 2019 Martin Stransky <stransky@redhat.com> - 69.0-5
 - Added fix for mozbz#1579849 - partial screen update when
   page switches.
