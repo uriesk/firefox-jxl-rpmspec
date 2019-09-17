@@ -1,0 +1,85 @@
+diff -up firefox-69.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1577024 firefox-69.0/widget/gtk/nsWaylandDisplay.cpp
+--- firefox-69.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1577024	2019-09-17 21:09:15.817764591 +0200
++++ firefox-69.0/widget/gtk/nsWaylandDisplay.cpp	2019-09-17 21:09:15.822764568 +0200
+@@ -13,10 +13,15 @@ namespace widget {
+ #define GBMLIB_NAME "libgbm.so.1"
+ #define DRMLIB_NAME "libdrm.so.2"
+ 
++#define DMABUF_PREF "widget.wayland_dmabuf_backend.enabled"
++// See WindowSurfaceWayland::RenderingCacheMode for details.
++#define CACHE_MODE_PREF "widget.wayland_cache_mode"
++
+ bool nsWaylandDisplay::mIsDMABufEnabled = false;
+ // -1 mean the pref was not loaded yet
+ int nsWaylandDisplay::mIsDMABufPrefState = -1;
+ bool nsWaylandDisplay::mIsDMABufConfigured = false;
++int nsWaylandDisplay::mRenderingCacheModePref = -1;
+ 
+ wl_display* WaylandDisplayGetWLDisplay(GdkDisplay* aGdkDisplay) {
+   if (!aGdkDisplay) {
+@@ -373,14 +378,15 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+   wl_registry_add_listener(mRegistry, &registry_listener, this);
+ 
+   if (NS_IsMainThread()) {
+-    // We can't load the preference from compositor/render thread,
+-    // only from main one. So we can't call it directly from
+-    // nsWaylandDisplay::IsDMABufEnabled() as it can be called from various
+-    // threads.
++    // We can't load the preference from compositor/render thread
++    // so load all Wayland prefs here.
+     if (mIsDMABufPrefState == -1) {
+-      mIsDMABufPrefState =
+-          Preferences::GetBool("widget.wayland_dmabuf_backend.enabled", false);
++      mIsDMABufPrefState = Preferences::GetBool(DMABUF_PREF, false);
++    }
++    if (mRenderingCacheModePref == -1) {
++      mRenderingCacheModePref = Preferences::GetInt(CACHE_MODE_PREF, 0);
+     }
++
+     // Use default event queue in main thread operated by Gtk+.
+     mEventQueue = nullptr;
+     wl_display_roundtrip(mDisplay);
+diff -up firefox-69.0/widget/gtk/nsWaylandDisplay.h.mozilla-1577024 firefox-69.0/widget/gtk/nsWaylandDisplay.h
+--- firefox-69.0/widget/gtk/nsWaylandDisplay.h.mozilla-1577024	2019-09-17 21:09:15.818764586 +0200
++++ firefox-69.0/widget/gtk/nsWaylandDisplay.h	2019-09-17 21:09:15.822764568 +0200
+@@ -83,6 +83,9 @@ class nsWaylandDisplay {
+                          uint32_t mModifierLo);
+   static bool IsDMABufEnabled();
+ 
++  // See WindowSurfaceWayland::CacheMode for details.
++  int GetRenderingCacheModePref() { return mRenderingCacheModePref; };
++
+  private:
+   bool ConfigureGbm();
+ 
+@@ -108,6 +111,7 @@ class nsWaylandDisplay {
+   static bool mIsDMABufEnabled;
+   static int mIsDMABufPrefState;
+   static bool mIsDMABufConfigured;
++  static int mRenderingCacheModePref;
+ };
+ 
+ void WaylandDispatchDisplays();
+diff -up firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1577024 firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1577024	2019-09-17 21:09:15.820764577 +0200
++++ firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp	2019-09-17 21:09:15.822764568 +0200
+@@ -192,7 +192,7 @@ It owns wl_buffer object, owns WaylandDM
+ (which provides the DMA Buffer) and ties them together.
+ 
+ WindowBackBufferDMABuf backend is used only when WaylandDMABufSurface is
+-available and gfx.wayland_dmabuf_backend.enabled preference is set.
++available and widget.wayland_dmabuf_backend.enabled preference is set.
+ 
+ */
+ 
+diff -up firefox-69.0/modules/libpref/init/all.js.old firefox-69.0/modules/libpref/init/all.js
+--- firefox-69.0/modules/libpref/init/all.js.old	2019-09-17 21:14:06.794677172 +0200
++++ firefox-69.0/modules/libpref/init/all.js	2019-09-17 21:14:33.030571836 +0200
+@@ -4807,6 +4807,7 @@ pref("widget.content.allow-gtk-dark-them
+ #endif
+ #ifdef MOZ_WAYLAND
+ pref("widget.wayland_dmabuf_backend.enabled", false);
++pref("widget.wayland_cache_mode", 0);
+ #endif
+ 
+ pref("widget.window-transforms.disabled", false);

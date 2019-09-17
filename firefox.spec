@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -169,6 +169,7 @@ Patch585:        mozilla-1579849.patch
 Patch586:        mozilla-1579823.patch
 Patch587:        mozilla-1580152.patch
 Patch588:        mozilla-1581748.patch
+Patch589:        mozilla-1577024.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -390,6 +391,7 @@ This package contains results of tests executed during build.
 %patch586 -p1 -b .mozilla-1579823
 %patch587 -p1 -b .mozilla-1580152
 %patch588 -p1 -b .mozilla-1581748
+%patch589 -p1 -b .mozilla-1577024
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -966,6 +968,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Sep 17 2019 Martin Stransky <stransky@redhat.com> - 69.0-8
+- Enable Wayland cache mode control (mozbz#1577024)
+
 * Tue Sep 17 2019 Martin Stransky <stransky@redhat.com> - 69.0-7
 - Added fixes for mozbz#1581748
 
