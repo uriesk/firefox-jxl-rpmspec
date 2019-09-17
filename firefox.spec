@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -168,6 +168,7 @@ Patch584:        mozilla-1579794-2.patch
 Patch585:        mozilla-1579849.patch
 Patch586:        mozilla-1579823.patch
 Patch587:        mozilla-1580152.patch
+Patch588:        mozilla-1581748.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -388,6 +389,7 @@ This package contains results of tests executed during build.
 %patch422 -p1 -b .1580174-webrtc-popup
 %patch586 -p1 -b .mozilla-1579823
 %patch587 -p1 -b .mozilla-1580152
+%patch588 -p1 -b .mozilla-1581748
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -964,6 +966,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Sep 17 2019 Martin Stransky <stransky@redhat.com> - 69.0-7
+- Added fixes for mozbz#1581748
+
 * Mon Sep 16 2019 Martin Stransky <stransky@redhat.com> - 69.0-6
 - Added fixes for mozbz#1579823, mozbz#1580152
 
