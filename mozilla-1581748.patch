@@ -22,7 +22,7 @@ diff -up firefox-69.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1581748 firefo
        mIsMainThread(NS_IsMainThread()),
        mNeedScaleFactorUpdate(true) {
    for (int i = 0; i < BACK_BUFFER_NUM; i++) mBackupBuffer[i] = nullptr;
-+  mRenderingCacheMode = 0;
++  mRenderingCacheMode = CACHE_ALL;
 +
  }
  
