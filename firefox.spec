@@ -93,13 +93,13 @@ ExcludeArch: ppc64le
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        69.0
-Release:        11%{?pre_tag}%{?dist}
+Version:        69.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20190829.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20190918.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -975,6 +975,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-1
+- Updated to 69.0.1
+
 * Wed Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0-11
 - Do PGO builds with Wayland backend.
 
