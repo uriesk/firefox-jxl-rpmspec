@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        9%{?pre_tag}%{?dist}
+Release:        10%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -968,6 +968,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0-10
+- Disabled DoH by default (rhbz#1751410),
+  patch by Eduardo Mínguez Pérez (eminguez).
+
 * Tue Sep 17 2019 Martin Stransky <stransky@redhat.com> - 69.0-9
 - Enable Wayland cache mode control (mozbz#1577024)
 
