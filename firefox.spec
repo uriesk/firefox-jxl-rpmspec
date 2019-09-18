@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0
-Release:        10%{?pre_tag}%{?dist}
+Release:        11%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -264,6 +264,7 @@ BuildRequires:  pkgconfig(libffi)
 
 %if 0%{?use_xvfb}
 BuildRequires:  xorg-x11-server-Xvfb
+BuildRequires:  mutter
 %endif
 BuildRequires:  rust
 BuildRequires:  cargo
@@ -614,7 +615,13 @@ export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
 export MOZ_SERVICES_SYNC="1"
 export STRIP=/bin/true
 %if 0%{?build_with_pgo}
-GDK_BACKEND=x11 xvfb-run ./mach build  2>&1 | cat -
+xvfb-run mutter --wayland --nested &
+if [ -z "$WAYLAND_DISPLAY" ]; then
+  export WAYLAND_DISPLAY=wayland-0
+else
+  export WAYLAND_DISPLAY=wayland-1
+fi
+GDK_BACKEND=wayland MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
 %else
 ./mach build -v 2>&1 | cat -
 %endif
@@ -968,6 +975,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0-11
+- Do PGO builds with Wayland backend.
+
 * Wed Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0-10
 - Disabled DoH by default (rhbz#1751410),
   patch by Eduardo Mínguez Pérez (eminguez).
