@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -170,6 +170,7 @@ Patch586:        mozilla-1579823.patch
 Patch587:        mozilla-1580152.patch
 Patch588:        mozilla-1581748.patch
 Patch589:        mozilla-1577024.patch
+Patch590:        firefox-wayland-cache-missing.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -395,6 +396,7 @@ This package contains results of tests executed during build.
 %patch587 -p1 -b .mozilla-1580152
 %patch588 -p1 -b .mozilla-1581748
 %patch589 -p1 -b .mozilla-1577024
+%patch590 -p1 -b .cache-missing
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -979,7 +981,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-2
+* Thu Sep 19 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-3
+- Updated cache-missing strategy for Wayland image cache.
+
+* Thu Sep 19 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-2
 - Do PGO builds with X11 backend.
 
 * Wed Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-1
