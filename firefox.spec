@@ -24,8 +24,6 @@ ExcludeArch: ppc64le
 %global disable_elfhack   1
 %global build_with_clang  0
 %global use_bundled_cbindgen  1
-# FIXME disable PGO because of -j1 build would take ages
-%global disable_multiprocess_compilation 0
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
 %ifarch x86_64 aarch64
@@ -34,6 +32,8 @@ ExcludeArch: ppc64le
 %else
 %global build_with_pgo    0
 %endif
+# Build PGO builds on Wayland backend
+%global pgo_wayland       0
 %endif
 %if 0%{?fedora} > 30
 %global wayland_backend_default 1
@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -264,6 +264,8 @@ BuildRequires:  pkgconfig(libffi)
 
 %if 0%{?use_xvfb}
 BuildRequires:  xorg-x11-server-Xvfb
+%endif
+%if 0%{?pgo_wayland}
 BuildRequires:  mutter
 %endif
 BuildRequires:  rust
@@ -596,7 +598,6 @@ echo "ac_add_options --enable-lto" >> .mozconfig
 MOZ_SMP_FLAGS=-j1
 # On x86_64 architectures, Mozilla can build up to 4 jobs at once in parallel,
 # however builds tend to fail on other arches when building in parallel.
-%if !0%{?disable_multiprocess_compilation}
 %ifarch %{ix86}
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
@@ -609,19 +610,22 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 %endif
-%endif
 
 export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
 export MOZ_SERVICES_SYNC="1"
 export STRIP=/bin/true
 %if 0%{?build_with_pgo}
+%if 0%{?pgo_wayland}
 xvfb-run mutter --wayland --nested &
 if [ -z "$WAYLAND_DISPLAY" ]; then
   export WAYLAND_DISPLAY=wayland-0
 else
   export WAYLAND_DISPLAY=wayland-1
 fi
-GDK_BACKEND=wayland MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
+MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
+%else
+GDK_BACKEND=x11 xvfb-run ./mach build  2>&1 | cat -
+%endif
 %else
 ./mach build -v 2>&1 | cat -
 %endif
@@ -975,6 +979,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-2
+- Do PGO builds with X11 backend.
+
 * Wed Sep 18 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-1
 - Updated to 69.0.1
 
