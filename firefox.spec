@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0.1
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -141,7 +141,7 @@ Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
-Patch228:        rhbz-1754460.patch
+Patch228:        mozilla-1583466.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -367,7 +367,7 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
-%patch228 -p1 -b .rhbz-1754460
+%patch228 -p1 -b .mozilla-1583466
 
 %patch402 -p1 -b .1196777
 #%patch413 -p1 -b .1353817
@@ -983,6 +983,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 30 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-5
+- Updated rhbz#1754460/mzbz#1583466 - per user policy dir.
+
 * Tue Sep 24 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-4
 - Added fix for rhbz#1754460
 
