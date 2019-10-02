@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -142,6 +142,7 @@ Patch224:        mozilla-1170092.patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        mozilla-1583466.patch
+Patch229:        rh-old-version-check.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -368,6 +369,7 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .mozilla-1583466
+%patch229 -p1 -b .rh-old-version-check
 
 %patch402 -p1 -b .1196777
 #%patch413 -p1 -b .1353817
@@ -983,6 +985,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Oct  2 2019 Jan Horak <jhorak@redhat.com> - 69.0.1-6
+- Do not compare buildID because the build time of package in
+  newer distro can be older.
+
 * Mon Sep 30 2019 Martin Stransky <stransky@redhat.com> - 69.0.1-5
 - Updated rhbz#1754460/mzbz#1583466 - per user policy dir.
 
