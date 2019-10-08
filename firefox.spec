@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -172,6 +172,7 @@ Patch587:        mozilla-1580152.patch
 Patch588:        mozilla-1581748.patch
 Patch589:        mozilla-1577024.patch
 Patch590:        firefox-wayland-cache-missing.patch
+Patch591:        mozilla-1587008.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -399,6 +400,7 @@ This package contains results of tests executed during build.
 %patch588 -p1 -b .mozilla-1581748
 %patch589 -p1 -b .mozilla-1577024
 %patch590 -p1 -b .cache-missing
+%patch591 -p1 -b .mozilla-1587008
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -983,6 +985,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 3 2019 Martin Stransky <stransky@redhat.com> - 69.0.2-2
+- Added fix for mozilla#1587008 - flickering during GL resize.
+
 * Thu Oct 3 2019 Martin Stransky <stransky@redhat.com> - 69.0.2-1
 - Updated to 69.0.2
 
