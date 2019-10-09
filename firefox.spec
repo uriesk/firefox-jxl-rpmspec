@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -278,6 +278,10 @@ BuildRequires:  clang-devel
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
 
+%if 0%{?wayland_backend_default}
+Obsoletes: firefox-wayland
+%endif
+
 %description
 Mozilla Firefox is an open-source web browser, designed for standards
 compliance, performance and portability.
@@ -320,7 +324,6 @@ to run Firefox natively on Wayland.
 %{_bindir}/firefox-wayland
 %{_datadir}/applications/firefox-wayland.desktop
 %endif
-
 
 %if %{run_tests}
 %global testsuite_pkg_name mozilla-%{name}-testresults
@@ -985,6 +988,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Oct 9 2019 Martin Stransky <stransky@redhat.com> - 69.0.2-3
+- Obsolete firefox-wayland when we're on wayland by default.
+
 * Thu Oct 3 2019 Martin Stransky <stransky@redhat.com> - 69.0.2-2
 - Added fix for mozilla#1587008 - flickering during GL resize.
 
