@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        69.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -278,10 +278,6 @@ BuildRequires:  clang-devel
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
 
-%if 0%{?wayland_backend_default}
-Obsoletes: firefox-wayland
-%endif
-
 %description
 Mozilla Firefox is an open-source web browser, designed for standards
 compliance, performance and portability.
@@ -309,21 +305,21 @@ Summary: Firefox X11 launcher.
 Requires: %{name}
 %description x11
 The firefox-x11 package contains launcher and desktop file
-to run Firefox natively on X11.
+to run Firefox explicitly on X11.
 %files x11
 %{_bindir}/firefox-x11
 %{_datadir}/applications/firefox-x11.desktop
-%else
+%endif
+
 %package wayland
 Summary: Firefox Wayland launcher.
 Requires: %{name}
 %description wayland
 The firefox-wayland package contains launcher and desktop file
-to run Firefox natively on Wayland.
+to run Firefox explicitly on Wayland.
 %files wayland
 %{_bindir}/firefox-wayland
 %{_datadir}/applications/firefox-wayland.desktop
-%endif
 
 %if %{run_tests}
 %global testsuite_pkg_name mozilla-%{name}-testresults
@@ -988,6 +984,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Oct 14 2019 Martin Stransky <stransky@redhat.com> - 69.0.3-2
+- Build firefox-wayland again (rhbz#1761578).
+
 * Thu Oct 10 2019 Martin Stransky <stransky@redhat.com> - 69.0.3-1
 - Updated to 69.0.3
 
