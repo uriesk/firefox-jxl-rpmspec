@@ -691,9 +691,8 @@ DESTDIR=%{buildroot} make -C objdir install
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 %if 0%{?wayland_backend_default}
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE31}
-%else
-desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %endif
+desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 
 # set up the firefox start script
 %if 0%{?wayland_backend_default}
@@ -716,10 +715,9 @@ sed -i -e 's|%FLATPAK_ENV_VARS%||' %{buildroot}%{_bindir}/firefox
 %if 0%{?wayland_backend_default}
 %{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
-%else
+%endif
 %{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
-%endif
 
 %{__install} -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
