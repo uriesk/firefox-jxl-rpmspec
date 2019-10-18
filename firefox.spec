@@ -93,13 +93,13 @@ ExcludeArch: ppc64le
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        69.0.3
-Release:        2%{?pre_tag}%{?dist}
+Version:        70.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20191010.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20191018.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -146,31 +146,15 @@ Patch228:        mozilla-1583466.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch412:        mozilla-1337988.patch
-#Patch413:        mozilla-1353817.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
-Patch418:        mozilla-1512162.patch
 Patch419:        mozilla-1568569.patch
-Patch420:        mozilla-1566876-webrtc-ind.patch
 Patch421:        mozilla-1579023.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
 Patch575:        mozilla-1548475.patch
-Patch576:        mozilla-1562827.patch
-Patch578:        mozilla-1567434-1.patch
-Patch579:        mozilla-1567434-2.patch
-Patch580:        mozilla-1573813.patch
-Patch581:        mozilla-1574036.patch
-Patch582:        mozilla-1576268.patch
-Patch583:        mozilla-1579794-1.patch
-Patch584:        mozilla-1579794-2.patch
-Patch585:        mozilla-1579849.patch
-Patch586:        mozilla-1579823.patch
-Patch587:        mozilla-1580152.patch
-Patch588:        mozilla-1581748.patch
-Patch589:        mozilla-1577024.patch
 Patch590:        firefox-wayland-cache-missing.patch
 Patch591:        mozilla-1587008.patch
 
@@ -370,34 +354,15 @@ This package contains results of tests executed during build.
 %patch228 -p1 -b .mozilla-1583466
 
 %patch402 -p1 -b .1196777
-#%patch413 -p1 -b .1353817
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
-%ifarch ppc64 ppc64le
-#%patch418 -p1 -b .1512162 FIXME no longer needed?
-%endif
 %patch419 -p1 -b .1568569
-%patch420 -p1 -b .1566876-webrtc-ind
 %patch421 -p1 -b .1579023
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
 %patch575 -p1 -b .mozilla-1548475
-%patch576 -p1 -b .mozilla-1562827
-%patch578 -p1 -b .mozilla-1567434-1
-%patch579 -p1 -b .mozilla-1567434-2
-%patch580 -p1 -b .mozilla-1573813
-%patch581 -p1 -b .mozilla-1574036
-%patch582 -p1 -b .mozilla-1576268
-%patch583 -p1 -b .mozilla-1579794-1
-%patch584 -p1 -b .mozilla-1579794-2
-%patch585 -p1 -b .mozilla-1579849
-%patch422 -p1 -b .1580174-webrtc-popup
-%patch586 -p1 -b .mozilla-1579823
-%patch587 -p1 -b .mozilla-1580152
-%patch588 -p1 -b .mozilla-1581748
-%patch589 -p1 -b .mozilla-1577024
 %patch590 -p1 -b .cache-missing
 %patch591 -p1 -b .mozilla-1587008
 
@@ -982,6 +947,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Oct 15 2019 Martin Stransky <stransky@redhat.com> - 70.0-1
+- Updated to 70.0
+
 * Mon Oct 14 2019 Martin Stransky <stransky@redhat.com> - 69.0.3-2
 - Build firefox-wayland again (rhbz#1761578).
 
