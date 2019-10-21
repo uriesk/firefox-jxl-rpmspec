@@ -132,6 +132,7 @@ Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
 Patch44:        build-arm-libopus.patch
 #Patch45:        build-disable-multijobs-rust.patch
+Patch46:        firefox-nss-version.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -340,6 +341,7 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
+%patch46 -p1 -b .nss-version
 
 # Fedora patches
 %patch215 -p1 -b .addons
