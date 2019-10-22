@@ -466,19 +466,19 @@ chmod -x third_party/rust/itertools/src/lib.rs
 mkdir -p my_rust_vendor
 cd my_rust_vendor
 %{__tar} xf %{SOURCE2}
-cd -
 mkdir -p .cargo
 cat > .cargo/config <<EOL
 [source.crates-io]
 replace-with = "vendored-sources"
 
 [source.vendored-sources]
-directory = "`pwd`/my_rust_vendor"
+directory = "`pwd`"
 EOL
 
 env CARGO_HOME=.cargo cargo install cbindgen
 export PATH=`pwd`/.cargo/bin:$PATH
 %endif
+cd -
 
 echo "Generate big endian version of config/external/icu/data/icud58l.dat"
 %if 0%{?big_endian}
