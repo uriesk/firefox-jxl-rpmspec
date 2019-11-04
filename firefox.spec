@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        70.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -152,6 +152,7 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        mozilla-1568569.patch
 Patch421:        mozilla-1579023.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
+Patch423:        D49289-wayland-monitor-size.diff
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -361,6 +362,7 @@ This package contains results of tests executed during build.
 %endif
 %patch419 -p1 -b .1568569
 %patch421 -p1 -b .1579023
+%patch423 -p1 -b .D49289
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
@@ -949,6 +951,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Nov 04 2019 Jan Horak <jhorak@redhat.com> - 70.0.1-2
+- Added fix for non-scrollable popups
+
 * Fri Nov 1 2019 Martin Stransky <stransky@redhat.com> - 70.0.1-1
 - Updated to 70.0.1
 - Built with system-nss (reverted 70.0-2 change).
