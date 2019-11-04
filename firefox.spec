@@ -152,6 +152,7 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        mozilla-1568569.patch
 Patch421:        mozilla-1579023.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
+Patch423:        D49289-wayland-monitor-size.diff
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -361,6 +362,7 @@ This package contains results of tests executed during build.
 %endif
 %patch419 -p1 -b .1568569
 %patch421 -p1 -b .1579023
+%patch423 -p1 -b .D49289
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
