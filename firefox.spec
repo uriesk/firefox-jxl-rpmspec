@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        70.0.1
-Release:        3.nss%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -951,9 +951,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Nov 7 2019 Martin Stransky <stransky@redhat.com> - 70.0-3.nss
-- Test build with in-tree nss (rhbz#1752303)
-
 * Mon Nov 04 2019 Jan Horak <jhorak@redhat.com> - 70.0.1-2
 - Added fix for non-scrollable popups
 
