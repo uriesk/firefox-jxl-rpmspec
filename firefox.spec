@@ -257,7 +257,7 @@ BuildRequires:  xorg-x11-server-Xvfb
 %if 0%{?pgo_wayland}
 BuildRequires:  mutter
 %endif
-BuildRequires:  rust
+BuildRequires:  rust = 1.38
 BuildRequires:  cargo
 BuildRequires:  clang-devel
 
