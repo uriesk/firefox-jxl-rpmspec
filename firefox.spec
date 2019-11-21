@@ -153,6 +153,8 @@ Patch419:        mozilla-1568569.patch
 Patch421:        mozilla-1579023.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 Patch423:        D49289-wayland-monitor-size.diff
+Patch424:        D53011-remote-content-disappear-fix.diff
+Patch425:        D53965-dropdown-missing-on-multimonitor.diff
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -363,6 +365,10 @@ This package contains results of tests executed during build.
 %patch419 -p1 -b .1568569
 %patch421 -p1 -b .1579023
 %patch423 -p1 -b .D49289
+# overflow widgets broken
+%patch424 -p1 -b .D53011
+# dropdown missing on multimonitor
+%patch425 -p1 -b .D53965
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
