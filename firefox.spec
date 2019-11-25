@@ -100,7 +100,8 @@ License:        MPLv1.1 or GPLv2+ or LGPLv2+
 #Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 Source0:        firefox-71.0b12.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20191101.tar.xz
+#Source1:        firefox-langpacks-%{version}%{?pre_version}-20191101.tar.xz
+Source1:        firefox-langpacks-70.0.1-20191101.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
