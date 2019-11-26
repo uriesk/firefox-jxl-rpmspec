@@ -116,6 +116,8 @@ Source29:       firefox-wayland.desktop
 Source30:       firefox-x11.sh.in
 Source31:       firefox-x11.desktop
 Source32:       node-stdout-nonblocking-wrapper
+Source33:       firefox.metainfo.appdata.xml
+Source34:       firefox-search-provider.ini
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -143,6 +145,7 @@ Patch224:        mozilla-1170092.patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        mozilla-1583466.patch
+Patch239:        mozilla-gnome-shell-search-provider.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -353,6 +356,8 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .mozilla-1583466
+%patch239 -p1 -b .gnome-shell-search-provider
+
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
@@ -836,6 +841,12 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %{__mkdir_p} %{buildroot}%{mozappdir}/distribution
 %{__cp} %{SOURCE26} %{buildroot}%{mozappdir}/distribution
 
+# Install Gnome search provider files
+mkdir -p %{buildroot}%{_datadir}/metainfo
+%{__cp} %{SOURCE33} %{buildroot}%{_datadir}/metainfo
+mkdir -p %{buildroot}%{_datadir}/gnome-shell/search-providers
+%{__cp} %{SOURCE34} %{buildroot}%{_datadir}/gnome-shell/search-providers
+
 # Remove copied libraries to speed up build
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozjs.so
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozalloc.so
@@ -896,6 +907,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{_libdir}/mozilla/extensions/*
 %{_datadir}/appdata/*.appdata.xml
 %{_datadir}/applications/%{name}.desktop
+%{_datadir}/metainfo/*.appdata.xml
+%{_datadir}/gnome-shell/search-providers/*.ini
 %dir %{mozappdir}
 %license %{mozappdir}/LICENSE
 %{mozappdir}/browser/chrome
