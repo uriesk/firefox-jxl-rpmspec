@@ -1,8 +1,8 @@
-diff -up firefox-70.0/build/moz.configure/lto-pgo.configure.old firefox-70.0/build/moz.configure/lto-pgo.configure
---- firefox-70.0/build/moz.configure/lto-pgo.configure.old	2019-10-18 20:33:54.240107068 +0200
-+++ firefox-70.0/build/moz.configure/lto-pgo.configure	2019-10-18 20:34:44.202009678 +0200
-@@ -16,7 +16,7 @@ def pgo_flags(compiler, build_env, targe
- 
+diff -up firefox-71.0/build/moz.configure/lto-pgo.configure.1516081 firefox-71.0/build/moz.configure/lto-pgo.configure
+--- firefox-71.0/build/moz.configure/lto-pgo.configure.1516081	2019-11-26 01:02:19.000000000 +0100
++++ firefox-71.0/build/moz.configure/lto-pgo.configure	2019-11-26 11:04:10.993077232 +0100
+@@ -71,7 +71,7 @@ set_config('PGO_PROFILE_PATH', pgo_profi
+ def pgo_flags(compiler, target, profdata):
      if compiler.type == 'gcc':
          return namespace(
 -            gen_cflags=['-fprofile-generate'],
@@ -10,7 +10,7 @@ diff -up firefox-70.0/build/moz.configure/lto-pgo.configure.old firefox-70.0/bui
              gen_ldflags=['-fprofile-generate'],
              use_cflags=['-fprofile-use', '-fprofile-correction',
                          '-Wcoverage-mismatch'],
-@@ -38,7 +38,7 @@ def pgo_flags(compiler, build_env, targe
+@@ -92,7 +92,7 @@ def pgo_flags(compiler, target, profdata
              gen_ldflags = ['-fprofile-generate']
  
          return namespace(

@@ -1,7 +1,7 @@
-diff -up firefox-69.0/widget/gtk/nsWindow.cpp.1568569 firefox-69.0/widget/gtk/nsWindow.cpp
---- firefox-69.0/widget/gtk/nsWindow.cpp.1568569	2019-08-29 09:42:10.484631750 +0200
-+++ firefox-69.0/widget/gtk/nsWindow.cpp	2019-08-29 09:49:35.371121273 +0200
-@@ -3252,6 +3252,8 @@ void nsWindow::OnWindowStateEvent(GtkWid
+diff -up firefox-71.0/widget/gtk/nsWindow.cpp.1568569 firefox-71.0/widget/gtk/nsWindow.cpp
+--- firefox-71.0/widget/gtk/nsWindow.cpp.1568569	2019-11-26 10:51:08.303063138 +0100
++++ firefox-71.0/widget/gtk/nsWindow.cpp	2019-11-26 10:54:28.428994823 +0100
+@@ -3348,6 +3348,8 @@ void nsWindow::OnWindowStateEvent(GtkWid
      return;
    }
  
@@ -10,8 +10,8 @@ diff -up firefox-69.0/widget/gtk/nsWindow.cpp.1568569 firefox-69.0/widget/gtk/ns
    if (aEvent->new_window_state & GDK_WINDOW_STATE_ICONIFIED) {
      LOG(("\tIconified\n"));
      mSizeState = nsSizeMode_Minimized;
-@@ -3275,6 +3277,18 @@ void nsWindow::OnWindowStateEvent(GtkWid
- #endif  // ACCESSIBILITY
+@@ -3379,6 +3381,18 @@ void nsWindow::OnWindowStateEvent(GtkWid
+     mIsTiled = false;
    }
  
 +  // Fullscreen video playback may generate bogus alpha values which blends
@@ -29,7 +29,7 @@ diff -up firefox-69.0/widget/gtk/nsWindow.cpp.1568569 firefox-69.0/widget/gtk/ns
    if (mWidgetListener) {
      mWidgetListener->SizeModeChanged(mSizeState);
      if (aEvent->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) {
-@@ -3800,6 +3814,11 @@ nsresult nsWindow::Create(nsIWidget* aPa
+@@ -3930,6 +3944,11 @@ nsresult nsWindow::Create(nsIWidget* aPa
        gtk_widget_add_events(eventWidget, kEvents);
        if (drawToContainer) {
          gtk_widget_add_events(mShell, GDK_PROPERTY_CHANGE_MASK);
