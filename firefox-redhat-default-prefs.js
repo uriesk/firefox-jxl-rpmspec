@@ -34,3 +34,4 @@ pref("spellchecker.dictionary_path","/usr/share/myspell");
 pref("network.trr.mode",                    5);
 /* Enable per-user policy dir, see mozbz#1583466 */
 pref("browser.policies.perUserDir",         true);
+pref("widget.gnome-search-provider.enabled",true);
