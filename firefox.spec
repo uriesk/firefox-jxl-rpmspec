@@ -94,14 +94,12 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        0.1%{?pre_tag}%{?dist}
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
-#Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
-Source0:        firefox-71.0b12.source.tar.xz
+Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-#Source1:        firefox-langpacks-%{version}%{?pre_version}-20191101.tar.xz
-Source1:        firefox-langpacks-70.0.1-20191101.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20191126.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -152,17 +150,13 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        mozilla-1568569.patch
-#Patch421:        mozilla-1579023.patch - 71
 Patch422:        mozilla-1580174-webrtc-popup.patch
-Patch423:        D49289-wayland-monitor-size.diff
 Patch424:        D53011-remote-content-disappear-fix.diff
 Patch425:        D53965-dropdown-missing-on-multimonitor.diff
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
-#Patch575:        mozilla-1548475.patch - 71
 Patch590:        firefox-wayland-cache-missing.patch
-#Patch591:        mozilla-1587008.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -352,21 +346,19 @@ This package contains results of tests executed during build.
 %patch215 -p1 -b .addons
 %patch219 -p1 -b .rhbz-1173156
 %patch221 -p1 -b .fedora-ua
-#%patch224 -p1 -b .1170092
+%patch224 -p1 -b .1170092
 #ARM run-time patch
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .mozilla-1583466
-
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
-#%patch419 -p1 -b .1568569
-#%patch421 -p1 -b .1579023 - 71
-#%patch423 -p1 -b .D49289
+%patch419 -p1 -b .1568569
+
 # overflow widgets broken
 %patch424 -p1 -b .D53011
 # dropdown missing on multimonitor
@@ -374,13 +366,11 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
-#%patch575 -p1 -b .mozilla-1548475 - 71
 %patch590 -p1 -b .cache-missing
-#%patch591 -p1 -b .mozilla-1587008
 
 # PGO patches
 %patch600 -p1 -b .pgo
-#%patch601 -p1 -b .1516081
+%patch601 -p1 -b .1516081
 %patch602 -p1 -b .1516803
 
 %{__rm} -f .mozconfig
@@ -959,6 +949,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Nov 26 2019 Martin Stransky <stransky@redhat.com> - 71.0-1
+- Updated to 71.0 Build 2
+
 * Tue Nov 19 2019 Jan Horak <jhorak@redhat.com> - 70.0.1-5
 - Added fixes for missing popup and overflow widget glitches
 
