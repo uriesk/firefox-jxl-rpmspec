@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -10,7 +10,7 @@ ExcludeArch: s390x
 ExcludeArch: ppc64le
 %endif
 
-%global system_nss        0
+%global system_nss        1
 %global system_ffi        1
 # libvpx is too new for Firefox 65
 %if 0%{?fedora} < 30
@@ -93,13 +93,13 @@ ExcludeArch: ppc64le
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        70.0.1
-Release:        5.nss%{?pre_tag}%{?dist}
+Version:        71.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20191101.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20191126.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -150,15 +150,13 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        mozilla-1568569.patch
-Patch421:        mozilla-1579023.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
-Patch423:        D49289-wayland-monitor-size.diff
+Patch424:        D53011-remote-content-disappear-fix.diff
+Patch425:        D53965-dropdown-missing-on-multimonitor.diff
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
-Patch575:        mozilla-1548475.patch
 Patch590:        firefox-wayland-cache-missing.patch
-Patch591:        mozilla-1587008.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -257,7 +255,7 @@ BuildRequires:  xorg-x11-server-Xvfb
 %if 0%{?pgo_wayland}
 BuildRequires:  mutter
 %endif
-BuildRequires:  rust = 1.38
+BuildRequires:  rust
 BuildRequires:  cargo
 BuildRequires:  clang-devel
 
@@ -355,20 +353,20 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .mozilla-1583466
-
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
 %patch419 -p1 -b .1568569
-%patch421 -p1 -b .1579023
-%patch423 -p1 -b .D49289
+
+# overflow widgets broken
+%patch424 -p1 -b .D53011
+# dropdown missing on multimonitor
+%patch425 -p1 -b .D53965
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
-%patch575 -p1 -b .mozilla-1548475
 %patch590 -p1 -b .cache-missing
-%patch591 -p1 -b .mozilla-1587008
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -951,8 +949,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Nov 19 2019 Martin Stransky <stransky@redhat.com> - 70.0.1-5.nss
-- Built with in-tree nss (rhbz#1752303).
+* Tue Nov 26 2019 Martin Stransky <stransky@redhat.com> - 71.0-1
+- Updated to 71.0 Build 2
+
+* Tue Nov 19 2019 Jan Horak <jhorak@redhat.com> - 70.0.1-5
+- Added fixes for missing popup and overflow widget glitches
 
 * Mon Nov 04 2019 Jan Horak <jhorak@redhat.com> - 70.0.1-4
 - Added fix for non-scrollable popups
