@@ -356,7 +356,7 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .mozilla-1583466
-%patch239 -p1 -b .gnome-shell-search-provider
+#%patch239 -p1 -b .gnome-shell-search-provider
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
