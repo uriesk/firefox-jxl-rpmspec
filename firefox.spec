@@ -160,6 +160,7 @@ Patch425:        D53965-dropdown-missing-on-multimonitor.diff
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
 Patch590:        firefox-wayland-cache-missing.patch
+Patch591:        mozilla-1593408.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -372,6 +373,7 @@ This package contains results of tests executed during build.
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
 %patch590 -p1 -b .cache-missing
+%patch591 -p1 -b .mozilla-1593408
 
 # PGO patches
 %patch600 -p1 -b .pgo
