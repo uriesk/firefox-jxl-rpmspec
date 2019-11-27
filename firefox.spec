@@ -88,13 +88,13 @@ ExcludeArch: ppc64le
 %global enable_mozilla_crashreporter       0
 
 %if !%{release_build}
-%global pre_tag .test
+%global pre_tag .npgo
 %endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -964,8 +964,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Nov 27 2019 Martin Stransky <stransky@redhat.com> - 71.0-3
-- Build as release
+* Wed Nov 27 2019 Martin Stransky <stransky@redhat.com> - 71.0-5
+- Added fix for mozbz#1593408
+- Temporary disable Gnome search provider
 
 * Tue Nov 26 2019 Martin Stransky <stransky@redhat.com> - 71.0-2
 - Enable Gnome search provider
