@@ -1,6 +1,6 @@
 diff -up firefox-71.0/browser/components/shell/moz.build.gnome-shell-search-provider firefox-71.0/browser/components/shell/moz.build
 --- firefox-71.0/browser/components/shell/moz.build.gnome-shell-search-provider	2019-11-26 01:02:19.000000000 +0100
-+++ firefox-71.0/browser/components/shell/moz.build	2019-11-26 12:35:50.033210214 +0100
++++ firefox-71.0/browser/components/shell/moz.build	2019-11-27 21:37:02.754148375 +0100
 @@ -34,6 +34,11 @@ elif CONFIG['MOZ_WIDGET_TOOLKIT'] == 'gt
      SOURCES += [
          'nsGNOMEShellService.cpp',
@@ -23,9 +23,9 @@ diff -up firefox-71.0/browser/components/shell/moz.build.gnome-shell-search-prov
  with Files('**'):
      BUG_COMPONENT = ('Firefox', 'Shell Integration')
 diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp
---- firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-provider	2019-11-26 12:35:50.033210214 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp	2019-11-26 12:35:50.033210214 +0100
-@@ -0,0 +1,607 @@
+--- firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-provider	2019-11-27 21:37:02.754148375 +0100
++++ firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp	2019-11-27 21:37:02.754148375 +0100
+@@ -0,0 +1,621 @@
 +/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* vim:expandtab:shiftwidth=2:tabstop=2:
 + */
@@ -137,7 +137,7 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +      nsINavHistoryQueryOptions::SORT_BY_VISITCOUNT_DESCENDING);
 +  NS_ENSURE_SUCCESS(rv, rv);
 +
-+  rv = histQueryOpts->SetMaxResults(10);
++  rv = histQueryOpts->SetMaxResults(MAX_SEARCH_RESULTS_NUM);
 +  NS_ENSURE_SUCCESS(rv, rv);
 +
 +  // We only search history, because searching both bookmarks and history
@@ -184,6 +184,20 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +  return NS_SUCCEEDED(rv) && !title.IsEmpty();
 +}
 +
++void nsGNOMEShellSearchProvider::GetIDKeyForURI(int aIndex, nsAutoCString& aUri,
++                                                nsAutoCString& aIDKey) {
++  // Compose ID as NN:URL where NN is index to our current history
++  // result container.
++  aIDKey = nsPrintfCString("%.2d:%s", aIndex, aUri.get());
++}
++
++int nsGNOMEShellSearchProvider::GetIndexFromIDKey(const char* aIDKey) {
++  // ID is NN:URL where NN is index to our current history
++  // result container.
++  char tmp[] = {aIDKey[0], aIDKey[1], '\0'};
++  return atoi(tmp);
++}
++
 +void nsGNOMEShellSearchProvider::ComposeSearchResultReply(
 +    DBusMessage* reply, const char* aSearchTerm) {
 +  uint32_t childCount = 0;
@@ -214,8 +228,10 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +    nsAutoCString uri;
 +    child->GetUri(uri);
 +
-+    nsPrintfCString idString("%d", i);
-+    const char* id = idString.get();
++    nsAutoCString idKey;
++    GetIDKeyForURI(i, uri, idKey);
++
++    const char* id = idKey.get();
 +    dbus_message_iter_append_basic(&iterArray, DBUS_TYPE_STRING, &id);
 +  }
 +
@@ -309,10 +325,8 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +*/
 +void nsGNOMEShellSearchProvider::AppendResultID(DBusMessageIter* aIter,
 +                                                const char* aID) {
-+  int keyIndex = atoi(aID);
 +  nsCOMPtr<nsINavHistoryResultNode> child;
-+  mHistResultContainer->GetChild(keyIndex, getter_AddRefs(child));
-+
++  mHistResultContainer->GetChild(GetIndexFromIDKey(aID), getter_AddRefs(child));
 +  nsAutoCString title;
 +  if (NS_FAILED(child->GetTitle(title))) {
 +    return;
@@ -386,16 +400,6 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +
 +void nsGNOMEShellSearchProvider::LaunchWithID(const char* aID,
 +                                              uint32_t aTimeStamp) {
-+  int keyIndex = atoi(aID);
-+  nsCOMPtr<nsINavHistoryResultNode> child;
-+  mHistResultContainer->GetChild(keyIndex, getter_AddRefs(child));
-+
-+  nsAutoCString uri;
-+  nsresult rv = child->GetUri(uri);
-+  if (NS_FAILED(rv)) {
-+    return;
-+  }
-+
 +  char* commandLine = nullptr;
 +  int tmp;
 +
@@ -404,6 +408,16 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +    const char* urlList[2] = {"unused", searchString.get()};
 +    commandLine = ConstructCommandLine(2, (char**)urlList, 0, &tmp);
 +  } else {
++    int keyIndex = atoi(aID);
++    nsCOMPtr<nsINavHistoryResultNode> child;
++    mHistResultContainer->GetChild(keyIndex, getter_AddRefs(child));
++
++    nsAutoCString uri;
++    nsresult rv = child->GetUri(uri);
++    if (NS_FAILED(rv)) {
++      return;
++    }
++
 +    const char* urlList[2] = {"unused", uri.get()};
 +    commandLine = ConstructCommandLine(2, (char**)urlList, 0, &tmp);
 +  }
@@ -634,9 +648,9 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +  mConnection = nullptr;
 +}
 diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h
---- firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-provider	2019-11-26 12:35:50.033210214 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h	2019-11-26 12:35:50.033210214 +0100
-@@ -0,0 +1,53 @@
+--- firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-provider	2019-11-27 21:37:02.754148375 +0100
++++ firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h	2019-11-27 21:37:02.754148375 +0100
+@@ -0,0 +1,55 @@
 +/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* vim:expandtab:shiftwidth=2:tabstop=2:
 + */
@@ -674,6 +688,8 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnom
 +  DBusHandlerResult LaunchSearch(DBusMessage* msg);
 +
 +  nsresult QueryHistory(const char* aSearchTerm);
++  void GetIDKeyForURI(int aIndex, nsAutoCString& aUri, nsAutoCString& aIDKey);
++  int GetIndexFromIDKey(const char* aIDKey);
 +  bool IsHistoryResultNodeURI(nsINavHistoryResultNode* aHistoryNode);
 +  void AppendResultID(DBusMessageIter* aIter, const char* aID);
 +  void AppendSearchID(DBusMessageIter* aIter, const char* aID);
@@ -692,13 +708,13 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnom
 +#endif  // __nsGNOMEShellSearchProvider_h__
 diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp
 --- firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp.gnome-shell-search-provider	2019-11-26 01:02:19.000000000 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp	2019-11-27 08:44:18.204710354 +0100
++++ firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp	2019-11-27 21:37:02.754148375 +0100
 @@ -92,6 +92,12 @@ nsresult nsGNOMEShellService::Init() {
  
    if (!giovfs && !gsettings) return NS_ERROR_NOT_AVAILABLE;
  
 +#ifdef MOZ_ENABLE_DBUS
-+  if (Preferences::GetBool("widget.gnome-search-provider.enabled", false)) {
++  if (Preferences::GetBool("browser.gnome-search-provider.enabled", false)) {
 +    mSearchProvider.Startup();
 +  }
 +#endif
@@ -706,21 +722,9 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp.gnome-she
    // Check G_BROKEN_FILENAMES.  If it's set, then filenames in glib use
    // the locale encoding.  If it's not set, they use UTF-8.
    mUseLocaleFilenames = PR_GetEnv("G_BROKEN_FILENAMES") != nullptr;
-@@ -107,7 +113,10 @@ nsresult nsGNOMEShellService::Init() {
-                    getter_AddRefs(appPath));
-   NS_ENSURE_SUCCESS(rv, rv);
- 
--  return appPath->GetNativePath(mAppPath);
-+  rv = appPath->GetNativePath(mAppPath);
-+  NS_ENSURE_SUCCESS(rv, rv);
-+
-+  return NS_OK;
- }
- 
- NS_IMPL_ISUPPORTS(nsGNOMEShellService, nsIGNOMEShellService, nsIShellService,
 diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.h.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellService.h
 --- firefox-71.0/browser/components/shell/nsGNOMEShellService.h.gnome-shell-search-provider	2019-11-26 01:02:19.000000000 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellService.h	2019-11-26 12:35:50.033210214 +0100
++++ firefox-71.0/browser/components/shell/nsGNOMEShellService.h	2019-11-27 21:37:02.754148375 +0100
 @@ -10,6 +10,9 @@
  #include "nsToolkitShellService.h"
  #include "nsString.h"
@@ -742,8 +746,8 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.h.gnome-shell
    bool mUseLocaleFilenames;
    nsCString mAppPath;
 diff -up firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties.gnome-shell-search-provider firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties
---- firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties.gnome-shell-search-provider	2019-11-26 01:02:19.000000000 +0100
-+++ firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties	2019-11-26 12:35:50.034210214 +0100
+--- firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties.gnome-shell-search-provider	2019-11-27 21:37:02.755148375 +0100
++++ firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties	2019-11-27 21:39:11.796094294 +0100
 @@ -1025,3 +1025,7 @@ confirmationHint.passwordSaved.label = P
  # Used by the export of user's live bookmarks to an OPML file as a title for the file.
  # %S will be replaced with brandShortName
@@ -754,7 +758,7 @@ diff -up firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties.gn
 +gnomeSearchProviderSearch=Search the web for “%s”
 diff -up firefox-71.0/toolkit/components/remote/moz.build.gnome-shell-search-provider firefox-71.0/toolkit/components/remote/moz.build
 --- firefox-71.0/toolkit/components/remote/moz.build.gnome-shell-search-provider	2019-11-26 01:02:29.000000000 +0100
-+++ firefox-71.0/toolkit/components/remote/moz.build	2019-11-26 12:35:50.034210214 +0100
++++ firefox-71.0/toolkit/components/remote/moz.build	2019-11-27 21:37:02.755148375 +0100
 @@ -25,6 +25,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'gtk'
              'nsDBusRemoteServer.cpp',
          ]
@@ -768,7 +772,7 @@ diff -up firefox-71.0/toolkit/components/remote/moz.build.gnome-shell-search-pro
  if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'windows':
 diff -up firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp.gnome-shell-search-provider firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp
 --- firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp.gnome-shell-search-provider	2019-11-26 01:02:29.000000000 +0100
-+++ firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp	2019-11-26 12:35:50.034210214 +0100
++++ firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp	2019-11-27 21:37:02.755148375 +0100
 @@ -27,7 +27,7 @@
  
  #include <dlfcn.h>

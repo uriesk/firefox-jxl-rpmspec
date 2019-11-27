@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -357,7 +357,7 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .mozilla-1583466
-#%patch239 -p1 -b .gnome-shell-search-provider
+%patch239 -p1 -b .gnome-shell-search-provider
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -964,6 +964,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Nov 27 2019 Martin Stransky <stransky@redhat.com> - 71.0-6
+- Enable Gnome search provider
+
 * Wed Nov 27 2019 Martin Stransky <stransky@redhat.com> - 71.0-5
 - Added fix for mozbz#1593408
 - Temporary disable Gnome search provider
