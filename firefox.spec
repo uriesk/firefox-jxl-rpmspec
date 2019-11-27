@@ -800,8 +800,7 @@ create_default_langpack "pa-IN" "pa"
 create_default_langpack "pt-PT" "pt"
 create_default_langpack "sv-SE" "sv"
 create_default_langpack "zh-TW" "zh"
-%endif # with langpacks
-
+%endif
 
 %{__mkdir_p} %{buildroot}/%{mozappdir}/browser/defaults/preferences
 
