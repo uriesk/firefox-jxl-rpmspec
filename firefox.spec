@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -94,12 +94,12 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20191126.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20191202.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -146,6 +146,7 @@ Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        mozilla-1583466.patch
 Patch239:        mozilla-gnome-shell-search-provider.patch
+Patch240:        mozilla-gnome-shell-search-provider-icons.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -358,6 +359,7 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .mozilla-1583466
 %patch239 -p1 -b .gnome-shell-search-provider
+%patch240 -p1 -b .gnome-shell-search-provider-icons
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -963,6 +965,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Dec 2 2019 Martin Stransky <stransky@redhat.com> - 71.0-7
+- Updated to 71.0 Build 5
+- Updated Gnome search provider
+
 * Wed Nov 27 2019 Martin Stransky <stransky@redhat.com> - 71.0-6
 - Enable Gnome search provider
 

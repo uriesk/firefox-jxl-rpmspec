@@ -1,7 +1,27 @@
-diff -up firefox-71.0/browser/components/shell/moz.build.gnome-shell-search-provider firefox-71.0/browser/components/shell/moz.build
---- firefox-71.0/browser/components/shell/moz.build.gnome-shell-search-provider	2019-11-26 01:02:19.000000000 +0100
-+++ firefox-71.0/browser/components/shell/moz.build	2019-11-27 21:37:02.754148375 +0100
-@@ -34,6 +34,11 @@ elif CONFIG['MOZ_WIDGET_TOOLKIT'] == 'gt
+changeset:   504674:5a55ac856fc4
+parent:      504609:66531295716a
+user:        Martin Stransky <stransky@redhat.com>
+date:        Thu Nov 21 10:32:29 2019 +0100
+files:       browser/components/shell/moz.build browser/components/shell/nsGNOMEShellSearchProvider.cpp browser/components/shell/nsGNOMEShellSearchProvider.h browser/components/shell/nsGNOMEShellService.cpp browser/components/shell/nsGNOMEShellService.h browser/locales/en-US/chrome/browser/browser.properties toolkit/components/remote/moz.build toolkit/components/remote/nsDBusRemoteServer.cpp
+description:
+Bug 1239694 Implemenet Gnome search provider, r?jhorak
+
+Implement org.gnome.Shell.SearchProvider2 D-Bus interface and enable it when
+widget.gnome-search-provider.enabled pref is set, so this feature is disabled
+by default.
+
+Differential Revision: https://phabricator.services.mozilla.com/D54334
+
+
+diff --git a/browser/components/shell/moz.build b/browser/components/shell/moz.build
+--- a/browser/components/shell/moz.build
++++ b/browser/components/shell/moz.build
+@@ -29,16 +29,21 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'coco
+ elif CONFIG['MOZ_WIDGET_TOOLKIT'] == 'gtk':
+     XPIDL_SOURCES += [
+         'nsIGNOMEShellService.idl',
+     ]
+ 
      SOURCES += [
          'nsGNOMEShellService.cpp',
      ]
@@ -13,7 +33,17 @@ diff -up firefox-71.0/browser/components/shell/moz.build.gnome-shell-search-prov
  elif CONFIG['OS_ARCH'] == 'WINNT':
      SOURCES += [
          'nsWindowsShellService.cpp',
-@@ -57,6 +62,8 @@ for var in ('MOZ_APP_NAME', 'MOZ_APP_VER
+     ]
+     LOCAL_INCLUDES += [
+         '../../../other-licenses/nsis/Contrib/CityHash/cityhash',
+     ]
+ 
+@@ -52,11 +57,13 @@ EXTRA_JS_MODULES += [
+     'ScreenshotChild.jsm',
+     'ShellService.jsm',
+ ]
+ 
+ for var in ('MOZ_APP_NAME', 'MOZ_APP_VERSION'):
      DEFINES[var] = '"%s"' % CONFIG[var]
  
  CXXFLAGS += CONFIG['TK_CFLAGS']
@@ -22,9 +52,10 @@ diff -up firefox-71.0/browser/components/shell/moz.build.gnome-shell-search-prov
  
  with Files('**'):
      BUG_COMPONENT = ('Firefox', 'Shell Integration')
-diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp
---- firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-provider	2019-11-27 21:37:02.754148375 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp	2019-11-27 21:37:02.754148375 +0100
+diff --git a/browser/components/shell/nsGNOMEShellSearchProvider.cpp b/browser/components/shell/nsGNOMEShellSearchProvider.cpp
+new file mode 100644
+--- /dev/null
++++ b/browser/components/shell/nsGNOMEShellSearchProvider.cpp
 @@ -0,0 +1,621 @@
 +/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* vim:expandtab:shiftwidth=2:tabstop=2:
@@ -647,9 +678,10 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
 +  // dbus_connection_unref() will be called by RefPtr here.
 +  mConnection = nullptr;
 +}
-diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h
---- firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-provider	2019-11-27 21:37:02.754148375 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h	2019-11-27 21:37:02.754148375 +0100
+diff --git a/browser/components/shell/nsGNOMEShellSearchProvider.h b/browser/components/shell/nsGNOMEShellSearchProvider.h
+new file mode 100644
+--- /dev/null
++++ b/browser/components/shell/nsGNOMEShellSearchProvider.h
 @@ -0,0 +1,55 @@
 +/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* vim:expandtab:shiftwidth=2:tabstop=2:
@@ -706,15 +738,22 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnom
 +};
 +
 +#endif  // __nsGNOMEShellSearchProvider_h__
-diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp
---- firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp.gnome-shell-search-provider	2019-11-26 01:02:19.000000000 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp	2019-11-27 21:37:02.754148375 +0100
-@@ -92,6 +92,12 @@ nsresult nsGNOMEShellService::Init() {
+diff --git a/browser/components/shell/nsGNOMEShellService.cpp b/browser/components/shell/nsGNOMEShellService.cpp
+--- a/browser/components/shell/nsGNOMEShellService.cpp
++++ b/browser/components/shell/nsGNOMEShellService.cpp
+@@ -87,16 +87,24 @@ nsresult nsGNOMEShellService::Init() {
+   // CreateInstance to succeed.
+ 
+   nsCOMPtr<nsIGIOService> giovfs = do_GetService(NS_GIOSERVICE_CONTRACTID);
+   nsCOMPtr<nsIGSettingsService> gsettings =
+       do_GetService(NS_GSETTINGSSERVICE_CONTRACTID);
  
    if (!giovfs && !gsettings) return NS_ERROR_NOT_AVAILABLE;
  
 +#ifdef MOZ_ENABLE_DBUS
-+  if (Preferences::GetBool("browser.gnome-search-provider.enabled", false)) {
++  const char* currentDesktop = getenv("XDG_CURRENT_DESKTOP");
++  if (currentDesktop && strstr(currentDesktop, "GNOME") != nullptr &&
++      Preferences::GetBool("browser.gnome-search-provider.enabled", false)) {
 +    mSearchProvider.Startup();
 +  }
 +#endif
@@ -722,10 +761,20 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.cpp.gnome-she
    // Check G_BROKEN_FILENAMES.  If it's set, then filenames in glib use
    // the locale encoding.  If it's not set, they use UTF-8.
    mUseLocaleFilenames = PR_GetEnv("G_BROKEN_FILENAMES") != nullptr;
-diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.h.gnome-shell-search-provider firefox-71.0/browser/components/shell/nsGNOMEShellService.h
---- firefox-71.0/browser/components/shell/nsGNOMEShellService.h.gnome-shell-search-provider	2019-11-26 01:02:19.000000000 +0100
-+++ firefox-71.0/browser/components/shell/nsGNOMEShellService.h	2019-11-27 21:37:02.754148375 +0100
-@@ -10,6 +10,9 @@
+ 
+   if (GetAppPathFromLauncher()) return NS_OK;
+ 
+   nsCOMPtr<nsIProperties> dirSvc(
+       do_GetService("@mozilla.org/file/directory_service;1"));
+diff --git a/browser/components/shell/nsGNOMEShellService.h b/browser/components/shell/nsGNOMEShellService.h
+--- a/browser/components/shell/nsGNOMEShellService.h
++++ b/browser/components/shell/nsGNOMEShellService.h
+@@ -5,16 +5,19 @@
+ 
+ #ifndef nsgnomeshellservice_h____
+ #define nsgnomeshellservice_h____
+ 
+ #include "nsIGNOMEShellService.h"
  #include "nsToolkitShellService.h"
  #include "nsString.h"
  #include "mozilla/Attributes.h"
@@ -735,7 +784,17 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.h.gnome-shell
  
  class nsGNOMEShellService final : public nsIGNOMEShellService,
                                    public nsToolkitShellService {
-@@ -28,6 +31,9 @@ class nsGNOMEShellService final : public
+  public:
+   nsGNOMEShellService() : mAppIsInPath(false) {}
+ 
+   NS_DECL_ISUPPORTS
+   NS_DECL_NSISHELLSERVICE
+@@ -23,15 +26,18 @@ class nsGNOMEShellService final : public
+   nsresult Init();
+ 
+  private:
+   ~nsGNOMEShellService() {}
+ 
    bool KeyMatchesAppName(const char* aKeyValue) const;
    bool CheckHandlerMatchesAppName(const nsACString& handler) const;
  
@@ -745,10 +804,19 @@ diff -up firefox-71.0/browser/components/shell/nsGNOMEShellService.h.gnome-shell
    bool GetAppPathFromLauncher();
    bool mUseLocaleFilenames;
    nsCString mAppPath;
-diff -up firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties.gnome-shell-search-provider firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties
---- firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties.gnome-shell-search-provider	2019-11-27 21:37:02.755148375 +0100
-+++ firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties	2019-11-27 21:39:11.796094294 +0100
-@@ -1025,3 +1025,7 @@ confirmationHint.passwordSaved.label = P
+   bool mAppIsInPath;
+ };
+ 
+ #endif  // nsgnomeshellservice_h____
+diff --git a/browser/locales/en-US/chrome/browser/browser.properties b/browser/locales/en-US/chrome/browser/browser.properties
+--- a/browser/locales/en-US/chrome/browser/browser.properties
++++ b/browser/locales/en-US/chrome/browser/browser.properties
+@@ -1021,8 +1021,12 @@ confirmationHint.pinTab.label = Pinned!
+ confirmationHint.pinTab.description = Right-click the tab to unpin it.
+ confirmationHint.passwordSaved.label = Password saved!
+ confirmationHint.breakageReport.label = Report sent. Thank you!
+ 
+ # LOCALIZATION NOTE (livebookmarkMigration.title):
  # Used by the export of user's live bookmarks to an OPML file as a title for the file.
  # %S will be replaced with brandShortName
  livebookmarkMigration.title                      = %S Live Bookmarks
@@ -756,10 +824,15 @@ diff -up firefox-71.0/browser/locales/en-US/chrome/browser/browser.properties.gn
 +# LOCALIZATION NOTE (gnomeSearchProviderSearch):
 +# Used for search by Gnome Shell activity screen, %s is a searched string.
 +gnomeSearchProviderSearch=Search the web for “%s”
-diff -up firefox-71.0/toolkit/components/remote/moz.build.gnome-shell-search-provider firefox-71.0/toolkit/components/remote/moz.build
---- firefox-71.0/toolkit/components/remote/moz.build.gnome-shell-search-provider	2019-11-26 01:02:29.000000000 +0100
-+++ firefox-71.0/toolkit/components/remote/moz.build	2019-11-27 21:37:02.755148375 +0100
-@@ -25,6 +25,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'gtk'
+diff --git a/toolkit/components/remote/moz.build b/toolkit/components/remote/moz.build
+--- a/toolkit/components/remote/moz.build
++++ b/toolkit/components/remote/moz.build
+@@ -20,16 +20,20 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'gtk'
+         'RemoteUtils.cpp',
+     ]
+     if CONFIG['MOZ_ENABLE_DBUS']:
+         SOURCES += [
+             'nsDBusRemoteClient.cpp',
              'nsDBusRemoteServer.cpp',
          ]
          CXXFLAGS += CONFIG['MOZ_DBUS_GLIB_CFLAGS']
@@ -770,10 +843,20 @@ diff -up firefox-71.0/toolkit/components/remote/moz.build.gnome-shell-search-pro
      CXXFLAGS += CONFIG['TK_CFLAGS']
  
  if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'windows':
-diff -up firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp.gnome-shell-search-provider firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp
---- firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp.gnome-shell-search-provider	2019-11-26 01:02:29.000000000 +0100
-+++ firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp	2019-11-27 21:37:02.755148375 +0100
-@@ -27,7 +27,7 @@
+     SOURCES += [
+         'nsWinRemoteClient.cpp',
+         'nsWinRemoteServer.cpp',
+     ]
+ 
+diff --git a/toolkit/components/remote/nsDBusRemoteServer.cpp b/toolkit/components/remote/nsDBusRemoteServer.cpp
+--- a/toolkit/components/remote/nsDBusRemoteServer.cpp
++++ b/toolkit/components/remote/nsDBusRemoteServer.cpp
+@@ -22,17 +22,17 @@
+ 
+ #include "nsGTKToolkit.h"
+ 
+ #include <dbus/dbus.h>
+ #include <dbus/dbus-glib-lowlevel.h>
  
  #include <dlfcn.h>
  
@@ -782,3 +865,9 @@ diff -up firefox-71.0/toolkit/components/remote/nsDBusRemoteServer.cpp.gnome-she
      "<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection "
      "1.0//EN\"\n"
      "\"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\";>\n"
+     "<node>\n"
+     " <interface name=\"org.freedesktop.DBus.Introspectable\">\n"
+     "   <method name=\"Introspect\">\n"
+     "     <arg name=\"data\" direction=\"out\" type=\"s\"/>\n"
+     "   </method>\n"
+
