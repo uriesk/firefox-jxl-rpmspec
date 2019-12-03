@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -965,6 +965,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 3 2019 Martin Stransky <stransky@redhat.com> - 71.0-8
+- Disabled PGO due to startup crash
+
 * Mon Dec 2 2019 Martin Stransky <stransky@redhat.com> - 71.0-7
 - Updated to 71.0 Build 5
 - Updated Gnome search provider
