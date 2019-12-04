@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        8%{?pre_tag}%{?dist}
+Release:        9.kiosk%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -147,6 +147,7 @@ Patch227:        firefox-locale-debug.patch
 Patch228:        mozilla-1583466.patch
 Patch239:        mozilla-gnome-shell-search-provider.patch
 Patch240:        mozilla-gnome-shell-search-provider-icons.patch
+Patch241:        kiosk-workaround.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -360,6 +361,7 @@ This package contains results of tests executed during build.
 %patch228 -p1 -b .mozilla-1583466
 %patch239 -p1 -b .gnome-shell-search-provider
 %patch240 -p1 -b .gnome-shell-search-provider-icons
+%patch241 -p1 -b .kiosk-workaround
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -965,6 +967,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 4 2019 Martin Stransky <stransky@redhat.com> - 71.0-9
+- Included kiosk mode workaround (mozbz#1594738)
+
 * Tue Dec 3 2019 Martin Stransky <stransky@redhat.com> - 71.0-8
 - Disabled PGO due to startup crash
 
