@@ -242,6 +242,10 @@ BuildRequires:  mutter
 BuildRequires:  rust
 BuildRequires:  cargo
 BuildRequires:  clang-devel
+%if %{build_with_asan}
+BuildRequires:  libasan
+BuildRequires:  libasan-static
+%endif
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
