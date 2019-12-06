@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2019 Firefox contributors -->
 <component type="desktop">
-  <id>org.mozilla.Firefox.desktop</id>
+  <id>firefox.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
   <name>Firefox</name>
   <summary>Web Browser</summary>
@@ -25,7 +25,13 @@
   <summary xml:lang="sk">=Internetový prehliadač</summary>
   <summary xml:lang="sv">=Webbläsare</summary>
   <description>
-    <p>Browse the Web</p>
+    <p>Browse the Web<br><br>
+      Bringing together all kinds of awesomeness to make browsing better for you.
+      Get to your favorite sites quickly – even if you don’t remember the URLs.
+      Type your term into the location bar (aka the Awesome Bar) and the autocomplete
+      function will include possible matches from your browsing history, bookmarked
+      sites and open tabs.
+    </p>
     <p xml:lang="ca">Navegueu per el web</p>
     <p xml:lang="cs">Prohlížení stránek World Wide Webu</p>
     <p xml:lang="de">Im Internet surfen</p>
@@ -62,6 +68,11 @@
   <provides>
     <id>firefox.desktop</id>
   </provides>
+  <screenshots>
+    <screenshot type="default">https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/a.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/b.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/c.png</screenshot>
+  </screenshots>
   <releases>
     <release date="2019-11-13" version="3.34.0"/>
   </releases>
