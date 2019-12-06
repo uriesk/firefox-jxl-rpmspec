@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        9.kiosk%{?pre_tag}%{?dist}
+Release:        10%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -713,46 +713,6 @@ done
 %{__cp} -p %{SOURCE25} \
            %{buildroot}%{_datadir}/icons/hicolor/symbolic/apps
 
-# Register as an application to be visible in the software center
-#
-# NOTE: It would be *awesome* if this file was maintained by the upstream
-# project, translated and installed into the right place during `make install`.
-#
-# See http://www.freedesktop.org/software/appstream/docs/ for more details.
-#
-mkdir -p %{buildroot}%{_datadir}/appdata
-cat > %{buildroot}%{_datadir}/appdata/%{name}.appdata.xml <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2014 Richard Hughes <richard@hughsie.com> -->
-<!--
-BugReportURL: https://bugzilla.mozilla.org/show_bug.cgi?id=1071061
-SentUpstream: 2014-09-22
--->
-<application>
-  <id type="desktop">firefox.desktop</id>
-  <metadata_license>CC0-1.0</metadata_license>
-  <description>
-    <p>
-      Bringing together all kinds of awesomeness to make browsing better for you.
-      Get to your favorite sites quickly – even if you don’t remember the URLs.
-      Type your term into the location bar (aka the Awesome Bar) and the autocomplete
-      function will include possible matches from your browsing history, bookmarked
-      sites and open tabs.
-    </p>
-    <!-- FIXME: Needs another couple of paragraphs -->
-  </description>
-  <url type="homepage">http://www.mozilla.org/</url>
-  <screenshots>
-    <screenshot type="default">https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/a.png</screenshot>
-    <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/b.png</screenshot>
-    <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/c.png</screenshot>
-  </screenshots>
-  <!-- FIXME: change this to an upstream email address for spec updates
-  <updatecontact>someone_who_cares@upstream_project.org</updatecontact>
-   -->
-</application>
-EOF
-
 echo > %{name}.lang
 %if %{with langpacks}
 # Extract langpacks, make any mods needed, repack the langpack, and install it.
@@ -910,7 +870,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{_sysconfdir}/%{name}/*
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
-%{_datadir}/appdata/*.appdata.xml
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/metainfo/*.appdata.xml
 %{_datadir}/gnome-shell/search-providers/*.ini
@@ -967,6 +926,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Dec 6 2019 Martin Stransky <stransky@redhat.com> - 71.0-10
+- Remove appdata and ship metainfo only
+
 * Wed Dec 4 2019 Martin Stransky <stransky@redhat.com> - 71.0-9
 - Included kiosk mode workaround (mozbz#1594738)
 
