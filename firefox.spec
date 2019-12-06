@@ -1,7 +1,7 @@
 # Set to true if it's going to be submitted as update.
 %global release_build     0
 %global debug_build       0
-%global build_with_clang  1
+%global build_with_clang  0
 %global build_with_asan   0
 
 # Disabled arm due to rhbz#1658940
@@ -449,6 +449,13 @@ echo "ac_add_options --without-system-libvpx" >> .mozconfig
 echo "ac_add_options --disable-ion" >> .mozconfig
 %endif
 
+%if %{build_with_asan}
+echo "ac_add_options --enable-address-sanitizer" >> .mozconfig
+echo "ac_add_options --disable-jemalloc" >> .mozconfig
+echo "ac_add_options --disable-crashreporter" >> .mozconfig
+echo "ac_add_options --disable-elf-hack" >> .mozconfig
+%endif
+
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
 
 # Remove executable bit to make brp-mangle-shebangs happy.
@@ -539,8 +546,8 @@ MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -L%{_libdir}"
 export RUSTFLAGS="-Cdebuginfo=0"
 %endif
 %if %{build_with_asan}
-MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fsanitize=address"
-MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -lasan"
+MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fsanitize=address -Dxmalloc=myxmalloc"
+MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address"
 %endif
 
 %if !%{build_with_clang}
