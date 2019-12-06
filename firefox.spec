@@ -7,19 +7,10 @@
 ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
-# Disabled due to build error rhbz#1749729
-%if 0%{?fedora} < 30
-ExcludeArch: ppc64le
-%endif
 
 %global system_nss        1
 %global system_ffi        1
-# libvpx is too new for Firefox 65
-%if 0%{?fedora} < 30
-%global system_libvpx     1
-%else
 %global system_libvpx     0
-%endif
 %global hardened_build    1
 %global system_jpeg       1
 %global run_tests         0
@@ -230,27 +221,8 @@ BuildRequires:  python2-devel
 %if !0%{?flatpak}
 Requires:       u2f-hidraw-policy
 %endif
-
-%if 0%{?fedora} > 25
-# For early testing of rhbz#1400293 mozbz#1324096 on F26 and Rawhide,
-# temporarily require the specific NSS build with the backports.
-# Can be removed after firefox is changed to require NSS 3.30.
 BuildRequires:  nss-devel >= 3.29.1-2.1
 Requires:       nss >= 3.29.1-2.1
-%endif
-
-%if 0%{?fedora} < 26
-# Using Conflicts for p11-kit, not Requires, because on multi-arch
-# systems p11-kit isn't yet available for secondary arches like
-# p11-kit.i686 (fallback to libnssckbi.so from NSS).
-# This build contains backports from p11-kit 0.23.4
-Conflicts: p11-kit < 0.23.2-3
-# Requires build with CKA_NSS_MOZILLA_CA_POLICY attribute
-Requires: ca-certificates >= 2017.2.11-1.1
-# Requires NSS build with backports from NSS 3.30
-BuildRequires:  nss-devel >= 3.29.3-1.1
-Requires:       nss >= 3.29.3-1.1
-%endif
 
 BuildRequires:  desktop-file-utils
 %if !0%{?flatpak}
