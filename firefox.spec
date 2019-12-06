@@ -94,7 +94,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        10%{?pre_tag}%{?dist}
+Release:        11%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -148,6 +148,7 @@ Patch228:        mozilla-1583466.patch
 Patch239:        mozilla-gnome-shell-search-provider.patch
 Patch240:        mozilla-gnome-shell-search-provider-icons.patch
 Patch241:        kiosk-workaround.patch
+Patch242:        workaround_dom_indexdb_actorsparent_allignment.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -361,7 +362,10 @@ This package contains results of tests executed during build.
 %patch228 -p1 -b .mozilla-1583466
 %patch239 -p1 -b .gnome-shell-search-provider
 %patch240 -p1 -b .gnome-shell-search-provider-icons
-%patch241 -p1 -b .kiosk-workaround
+# Workaround for kiosk mode
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
+#%patch241 -p1 -b .kiosk-workaround
+%patch242 -p1 -b .workaround_dom_indexdb_actorsparent_allignment
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -926,6 +930,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Dec 6 2019 Martin Stransky <stransky@redhat.com> - 71.0-11
+- Added workaround for:
+  https://bugzilla.mozilla.org/show_bug.cgi?id=1601707
+  http://gcc.gnu.org/PR92831
+
 * Fri Dec 6 2019 Martin Stransky <stransky@redhat.com> - 71.0-10
 - Remove appdata and ship metainfo only
 
