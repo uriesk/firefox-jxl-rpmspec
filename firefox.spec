@@ -2,6 +2,7 @@
 %global release_build     0
 %global debug_build       0
 %global build_with_clang  1
+%global build_with_asan   0
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -533,9 +534,16 @@ MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -L%{_libdir}"
 %ifarch %{arm} %{ix86}
 export RUSTFLAGS="-Cdebuginfo=0"
 %endif
+%if %{build_with_asan}
+MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fsanitize=address"
+MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -lasan"
+%endif
+
+%if !%{build_with_clang}
 export CFLAGS=$MOZ_OPT_FLAGS
 export CXXFLAGS=$MOZ_OPT_FLAGS
 export LDFLAGS=$MOZ_LINK_FLAGS
+%endif
 
 export PREFIX='%{_prefix}'
 export LIBDIR='%{_libdir}'
