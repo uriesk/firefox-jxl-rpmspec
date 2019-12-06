@@ -1,5 +1,7 @@
 # Set to true if it's going to be submitted as update.
 %global release_build     0
+%global debug_build       0
+%global build_with_clang  1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -22,7 +24,6 @@ ExcludeArch: ppc64le
 %global system_jpeg       1
 %global run_tests         0
 %global disable_elfhack   1
-%global build_with_clang  0
 %global use_bundled_cbindgen  1
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
@@ -46,7 +47,6 @@ ExcludeArch: ppc64le
 %ifarch ppc64 s390x
 %global big_endian        1
 %endif
-%global debug_build       0
 
 %if 0%{?build_with_pgo}
 %global use_xvfb          1
@@ -90,11 +90,15 @@ ExcludeArch: ppc64le
 %if !%{release_build}
 %global pre_tag .npgo
 %endif
+%if %{build_with_clang}
+%global pre_tag .clang
+%global build_with_pgo    0
+%endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        11%{?pre_tag}%{?dist}
+Release:        12%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -365,7 +369,7 @@ This package contains results of tests executed during build.
 # Workaround for kiosk mode
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
 #%patch241 -p1 -b .kiosk-workaround
-%patch242 -p1 -b .workaround_dom_indexdb_actorsparent_allignment
+%patch242 -p1 -b .gcc-workaround
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -930,6 +934,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Dec 6 2019 Martin Stransky <stransky@redhat.com> - 71.0-12
+- Clang test build, should fix extension breakage
+
 * Fri Dec 6 2019 Martin Stransky <stransky@redhat.com> - 71.0-11
 - Added workaround for:
   https://bugzilla.mozilla.org/show_bug.cgi?id=1601707
