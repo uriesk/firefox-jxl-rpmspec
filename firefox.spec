@@ -45,7 +45,7 @@ ExcludeArch: s390x
 %global build_tests       1
 %endif
 
-%if !0%{?run_tests}
+%if 0%{?run_tests}
 %global use_xvfb          1
 %global build_tests       1
 %endif
