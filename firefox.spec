@@ -90,7 +90,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        12%{?pre_tag}%{?dist}
+Release:        13%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -496,7 +496,7 @@ cp %{SOURCE32} %{_buildrootdir}/bin || :
 # Update the various config.guess to upstream release for aarch64 support
 find ./ -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
 
-MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
+MOZ_OPT_FLAGS=$(echo "%{optflags} -fno-lifetime-dse" | %{__sed} -e 's/-Wall//')
 #rhbz#1037063
 # -Werror=format-security causes build failures when -Wno-format is explicitly given
 # for some sources
@@ -925,6 +925,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Dec 7 2019 Martin Stransky <stransky@redhat.com> - 71.0-13
+- Built with -fno-lifetime-dse
+
 * Fri Dec 6 2019 Martin Stransky <stransky@redhat.com> - 71.0-12
 - Clang test build, should fix extension breakage
 
