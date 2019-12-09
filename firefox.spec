@@ -76,8 +76,7 @@ ExcludeArch: s390x
 
 %bcond_without langpacks
 
-# Disable crashreporter as we want to collect Wayland crashes.
-%global enable_mozilla_crashreporter       0
+%global enable_mozilla_crashreporter 1
 
 %if !%{release_build}
 %global pre_tag .npgo
@@ -94,7 +93,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        14%{?pre_tag}%{?dist}
+Release:        15%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -929,6 +928,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-15
+- Enabled Mozilla crash reporter
+
 * Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-14
 - Updated workaround for mzbz#1601707
 
