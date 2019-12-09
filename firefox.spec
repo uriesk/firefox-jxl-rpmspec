@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
@@ -147,7 +147,7 @@ Patch228:        mozilla-1583466.patch
 Patch239:        mozilla-gnome-shell-search-provider.patch
 Patch240:        mozilla-gnome-shell-search-provider-icons.patch
 Patch241:        kiosk-workaround.patch
-Patch242:        workaround_dom_indexdb_actorsparent_allignment.patch
+Patch242:        mozilla-1601707.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -349,7 +349,7 @@ This package contains results of tests executed during build.
 # Workaround for kiosk mode
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
 #%patch241 -p1 -b .kiosk-workaround
-%patch242 -p1 -b .gcc-workaround
+%patch242 -p1 -b .mozilla-1601707
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -930,6 +930,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-15
 - Enabled Mozilla crash reporter
+- Enabled PGO builds
 
 * Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-14
 - Updated workaround for mzbz#1601707
