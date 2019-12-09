@@ -9,6 +9,12 @@ ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 
+%ifarch x86_64 %{ix86}
+%global enable_mozilla_crashreporter 1
+%else
+%global enable_mozilla_crashreporter 0
+%endif
+
 %global system_nss        1
 %global system_ffi        1
 %global system_libvpx     0
@@ -75,8 +81,6 @@ ExcludeArch: s390x
 %global official_branding       1
 
 %bcond_without langpacks
-
-%global enable_mozilla_crashreporter 1
 
 %if !%{release_build}
 %global pre_tag .npgo
