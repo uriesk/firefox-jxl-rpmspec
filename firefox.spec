@@ -86,11 +86,15 @@ ExcludeArch: s390x
 %global pre_tag .clang
 %global build_with_pgo    0
 %endif
+%if %{build_with_asan}
+%global pre_tag .asan
+%global build_with_pgo    0
+%endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        12%{?pre_tag}%{?dist}
+Release:        13%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -378,6 +382,9 @@ echo "ac_add_options --enable-official-branding" >> .mozconfig
 %{__cp} %{SOURCE24} mozilla-api-key
 %{__cp} %{SOURCE27} google-api-key
 
+echo "ac_add_options --prefix=\"%{_prefix}\"" >> .mozconfig
+echo "ac_add_options --libdir=\"%{_libdir}\"" >> .mozconfig
+
 %if %{?system_nss}
 echo "ac_add_options --with-system-nspr" >> .mozconfig
 echo "ac_add_options --with-system-nss" >> .mozconfig
@@ -547,30 +554,27 @@ export RUSTFLAGS="-Cdebuginfo=0"
 %endif
 %if %{build_with_asan}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fsanitize=address -Dxmalloc=myxmalloc"
-MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address"
+MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address -ldl"
 %endif
 
 %if !%{build_with_clang}
-export CFLAGS=$MOZ_OPT_FLAGS
-export CXXFLAGS=$MOZ_OPT_FLAGS
-export LDFLAGS=$MOZ_LINK_FLAGS
+echo "export CFLAGS=\"$MOZ_OPT_FLAGS\"" >> .mozconfig
+echo "export CXXFLAGS=\"$MOZ_OPT_FLAGS\"" >> .mozconfig
+echo "export LDFLAGS=\"$MOZ_LINK_FLAGS\"" >> .mozconfig
 %endif
 
-export PREFIX='%{_prefix}'
-export LIBDIR='%{_libdir}'
-
 %if 0%{?build_with_clang}
-export LLVM_PROFDATA="llvm-profdata"
-export AR="llvm-ar"
-export NM="llvm-nm"
-export RANLIB="llvm-ranlib"
-echo "ac_add_options --enable-linker=lld" >> .mozconfig
+echo "export LLVM_PROFDATA=\"llvm-profdata\"" >> .mozconfig
+echo "export AR=\"llvm-ar\"" >> .mozconfig
+echo "export NM=\"llvm-nm\"" >> .mozconfig
+echo "export RANLIB=\"llvm-ranlib\"" >> .mozconfig
+echo "export --enable-linker=lld" >> .mozconfig
 %else
-export CC=gcc
-export CXX=g++
-export AR="gcc-ar"
-export NM="gcc-nm"
-export RANLIB="gcc-ranlib"
+echo "export CC=gcc" >> .mozconfig
+echo "export CXX=g++" >> .mozconfig
+echo "export AR=\"gcc-ar\"" >> .mozconfig
+echo "export NM=\"gcc-nm\"" >> .mozconfig
+echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
@@ -593,9 +597,9 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 %endif
 
-export MOZ_MAKE_FLAGS="$MOZ_SMP_FLAGS"
-export MOZ_SERVICES_SYNC="1"
-export STRIP=/bin/true
+echo "export MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
+echo "export MOZ_SERVICES_SYNC=1" >> .mozconfig
+echo "export STRIP=/bin/true" >> .mozconfig
 %if 0%{?build_with_pgo}
 %if 0%{?pgo_wayland}
 xvfb-run mutter --wayland --nested &
@@ -925,6 +929,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-13
+- Updated workaround for mzbz#1601707
+
 * Fri Dec 6 2019 Martin Stransky <stransky@redhat.com> - 71.0-12
 - Clang test build, should fix extension breakage
 
