@@ -463,7 +463,9 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 echo "ac_add_options --enable-address-sanitizer" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 echo "ac_add_options --disable-crashreporter" >> .mozconfig
+%ifarch x86_64 %{ix86}
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
+%endif
 %endif
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
