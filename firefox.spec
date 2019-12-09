@@ -503,7 +503,7 @@ cp %{SOURCE32} %{_buildrootdir}/bin || :
 # Update the various config.guess to upstream release for aarch64 support
 find ./ -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
 
-MOZ_OPT_FLAGS=$(echo "%{optflags} -fno-lifetime-dse" | %{__sed} -e 's/-Wall//')
+MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 #rhbz#1037063
 # -Werror=format-security causes build failures when -Wno-format is explicitly given
 # for some sources
