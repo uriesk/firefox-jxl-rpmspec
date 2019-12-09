@@ -1,8 +1,8 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 %global debug_build       0
 %global build_with_clang  0
-%global build_with_asan   0
+%global build_with_asan   1
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -97,7 +97,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        15%{?pre_tag}%{?dist}
+Release:        16%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -932,6 +932,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-16
+- Build with asan
+
 * Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-15
 - Enabled Mozilla crash reporter
 - Enabled PGO builds
