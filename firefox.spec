@@ -9,9 +9,11 @@ ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 
+%global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
 %global enable_mozilla_crashreporter 1
-%else
+%endif
+%if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
 %endif
 
@@ -462,10 +464,6 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 %if %{build_with_asan}
 echo "ac_add_options --enable-address-sanitizer" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
-echo "ac_add_options --disable-crashreporter" >> .mozconfig
-%ifarch x86_64 %{ix86}
-echo "ac_add_options --disable-elf-hack" >> .mozconfig
-%endif
 %endif
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
