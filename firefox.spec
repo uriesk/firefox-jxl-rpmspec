@@ -928,6 +928,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/libsoftokn3.chk
 %exclude %{mozappdir}/libnssckbi.so
 %endif
+%if %{build_with_asan}
+%{mozappdir}/llvm-symbolizer
+%endif
 
 #---------------------------------------------------------------------
 
