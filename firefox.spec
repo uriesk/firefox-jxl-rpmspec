@@ -99,7 +99,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        71.0
-Release:        16%{?pre_tag}%{?dist}
+Release:        17%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -164,6 +164,7 @@ Patch419:        mozilla-1568569.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 Patch424:        D53011-remote-content-disappear-fix.diff
 Patch425:        D53965-dropdown-missing-on-multimonitor.diff
+Patch426:        mozilla-1603112-accept-lang.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -367,6 +368,8 @@ This package contains results of tests executed during build.
 %patch424 -p1 -b .D53011
 # dropdown missing on multimonitor
 %patch425 -p1 -b .D53965
+# fix for wrong intl.accept_lang when using non en-us langpack
+%patch426 -p1 -b .1603112-accept-lang
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
@@ -935,6 +938,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 18 2019 Jan Horak <jhorak@redhat.com> - 71.0-17.asan
+- Fix for wrong intl.accept_lang when using non en-us langpack
+
 * Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-16
 - Build with asan
 
