@@ -2,7 +2,7 @@
 %global release_build     0
 %global debug_build       0
 %global build_with_clang  0
-%global build_with_asan   1
+%global build_with_asan   0
 
 # Disabled arm due to rhbz#1658940
 ExcludeArch: armv7hl
@@ -938,7 +938,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Dec 18 2019 Jan Horak <jhorak@redhat.com> - 71.0-17.asan
+* Wed Dec 18 2019 Jan Horak <jhorak@redhat.com> - 71.0-17
 - Fix for wrong intl.accept_lang when using non en-us langpack
 
 * Mon Dec 9 2019 Martin Stransky <stransky@redhat.com> - 71.0-16
