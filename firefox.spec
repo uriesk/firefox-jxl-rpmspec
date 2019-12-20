@@ -16,6 +16,9 @@ ExcludeArch: s390x
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
 %endif
+%if 0%{?flatpak}
+%global enable_mozilla_crashreporter 0
+%endif
 
 %global system_nss        1
 %global system_ffi        1
