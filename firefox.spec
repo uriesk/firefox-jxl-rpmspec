@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
