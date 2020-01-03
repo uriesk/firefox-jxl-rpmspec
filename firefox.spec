@@ -101,13 +101,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        71.0
-Release:        17%{?pre_tag}%{?dist}
+Version:        72.0
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20191202.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200103.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -152,7 +152,6 @@ Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
-Patch228:        mozilla-1583466.patch
 Patch239:        mozilla-gnome-shell-search-provider.patch
 Patch240:        mozilla-gnome-shell-search-provider-icons.patch
 Patch241:        kiosk-workaround.patch
@@ -165,14 +164,10 @@ Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        mozilla-1568569.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
-Patch424:        D53011-remote-content-disappear-fix.diff
-Patch425:        D53965-dropdown-missing-on-multimonitor.diff
 Patch426:        mozilla-1603112-accept-lang.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
-Patch590:        firefox-wayland-cache-missing.patch
-Patch591:        mozilla-1593408.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -341,7 +336,7 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
-%patch46 -p1 -b .nss-version
+#%patch46 -p1 -b .nss-version
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -353,13 +348,13 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
-%patch228 -p1 -b .mozilla-1583466
 %patch239 -p1 -b .gnome-shell-search-provider
 %patch240 -p1 -b .gnome-shell-search-provider-icons
 # Workaround for kiosk mode
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
 #%patch241 -p1 -b .kiosk-workaround
-%patch242 -p1 -b .mozilla-1601707
+# Cannot be applied at the moment, lot of hunk failures
+#%patch242 -p1 -b .mozilla-1601707
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -368,16 +363,12 @@ This package contains results of tests executed during build.
 %patch419 -p1 -b .1568569
 
 # overflow widgets broken
-%patch424 -p1 -b .D53011
 # dropdown missing on multimonitor
-%patch425 -p1 -b .D53965
 # fix for wrong intl.accept_lang when using non en-us langpack
 %patch426 -p1 -b .1603112-accept-lang
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
-%patch590 -p1 -b .cache-missing
-%patch591 -p1 -b .mozilla-1593408
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -941,6 +932,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jan 03 2020 Jan Horak <jhorak@redhat.com> - 72.0-1
+- Update to 72.0 build3
+
 * Wed Dec 18 2019 Jan Horak <jhorak@redhat.com> - 71.0-17
 - Fix for wrong intl.accept_lang when using non en-us langpack
 
