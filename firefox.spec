@@ -102,12 +102,12 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        72.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200103.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200106.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -932,6 +932,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 06 2020 Jan Horak <jhorak@redhat.com> - 72.0-2
+- Update to 72.0 build4
+
 * Fri Jan 03 2020 Jan Horak <jhorak@redhat.com> - 72.0-1
 - Update to 72.0 build3
 
