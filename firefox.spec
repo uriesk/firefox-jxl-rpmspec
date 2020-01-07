@@ -501,7 +501,8 @@ mkdir %{_buildrootdir}/bin || :
 cp %{SOURCE32} %{_buildrootdir}/bin || :
 
 # Update the various config.guess to upstream release for aarch64 support
-find ./ -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
+# Do not update config.guess in the ./third_party/rust because that would break checksums
+find ./ -path ./third_party/rust -prune -o -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
 
 MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 #rhbz#1037063
