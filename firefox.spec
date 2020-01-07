@@ -353,8 +353,7 @@ This package contains results of tests executed during build.
 # Workaround for kiosk mode
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
 #%patch241 -p1 -b .kiosk-workaround
-# Cannot be applied at the moment, lot of hunk failures
-#%patch242 -p1 -b .mozilla-1601707
+%patch242 -p1 -b .mozilla-1601707
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
