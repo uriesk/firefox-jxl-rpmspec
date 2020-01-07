@@ -466,6 +466,7 @@ echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .
 
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
+chmod a-x third_party/rust/gfx-backend-vulkan/src/*.rs
 
 #---------------------------------------------------------------------
 
