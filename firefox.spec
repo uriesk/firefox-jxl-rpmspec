@@ -74,7 +74,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.45
+%global nss_version 3.48.0
 %global nss_build_version %{nss_version}
 %endif
 
@@ -102,7 +102,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        72.0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -165,6 +165,7 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch419:        mozilla-1568569.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 Patch426:        mozilla-1603112-accept-lang.patch
+Patch427:        mozilla-1607404-fix-remote-offset.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -231,7 +232,7 @@ BuildRequires:  python2-devel
 Requires:       u2f-hidraw-policy
 %endif
 BuildRequires:  nss-devel >= 3.29.1-2.1
-Requires:       nss >= 3.29.1-2.1
+Requires:       nss >= 3.48.0
 
 BuildRequires:  desktop-file-utils
 %if !0%{?flatpak}
@@ -365,6 +366,7 @@ This package contains results of tests executed during build.
 # dropdown missing on multimonitor
 # fix for wrong intl.accept_lang when using non en-us langpack
 %patch426 -p1 -b .1603112-accept-lang
+%patch427 -p1 -b .1607404-fix-remote-offset
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
@@ -933,6 +935,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 15 2020 Jan Horak <jhorak@redhat.com> - 72.0.1-2
+- Added fix for wrong cursor offset of popup windows and bumped required nss
+  version
+
 * Wed Jan 08 2020 Jan Horak <jhorak@redhat.com> - 72.0.1-1
 - Update to 72.0.1 build1
 
