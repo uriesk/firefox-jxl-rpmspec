@@ -102,7 +102,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        72.0.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -124,7 +124,7 @@ Source29:       firefox-wayland.desktop
 Source30:       firefox-x11.sh.in
 Source31:       firefox-x11.desktop
 Source32:       node-stdout-nonblocking-wrapper
-Source33:       firefox.metainfo.appdata.xml
+Source33:       firefox.appdata.xml
 Source34:       firefox-search-provider.ini
 
 # Build patches
@@ -935,6 +935,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Feb 04 2020 Kalev Lember <klember@redhat.com> - 72.0.2-3
+- Fix various issues with appdata, making the validation pass again
+
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 72.0.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 

@@ -25,45 +25,25 @@
   <summary xml:lang="sk">=Internetový prehliadač</summary>
   <summary xml:lang="sv">=Webbläsare</summary>
   <description>
-    <p>Browse the Web<br><br>
+    <p>
       Bringing together all kinds of awesomeness to make browsing better for you.
       Get to your favorite sites quickly – even if you don’t remember the URLs.
       Type your term into the location bar (aka the Awesome Bar) and the autocomplete
       function will include possible matches from your browsing history, bookmarked
       sites and open tabs.
     </p>
-    <p xml:lang="ca">Navegueu per el web</p>
-    <p xml:lang="cs">Prohlížení stránek World Wide Webu</p>
-    <p xml:lang="de">Im Internet surfen</p>
-    <p xml:lang="es">Navegue por la web</p>
-    <p xml:lang="fa">صفحات شبکه جهانی اینترنت را مرور نمایید</p>
-    <p xml:lang="fi">Selaa Internetin WWW-sivuja</p>
-    <p xml:lang="fr">Navigue sur Internet</p>
-    <p xml:lang="hu">A világháló böngészése</p>
-    <p xml:lang="it">Esplora il web</p>
-    <p xml:lang="ja">ウェブを閲覧します</p>
-    <p xml:lang="ko">웹을 돌아 다닙니다</p>
-    <p xml:lang="nb">Surf på nettet</p>
-    <p xml:lang="nl">Verken het internet</p>
-    <p xml:lang="nn">Surf på nettet</p>
-    <p xml:lang="no">Surf på nettet</p>
-    <p xml:lang="pl">Przeglądanie stron WWW</p>
-    <p xml:lang="pt">Navegue na Internet</p>
-    <p xml:lang="pt_BR">Navegue na Internet</p>
-    <p xml:lang="sk">Prehliadanie internetu</p>
-    <p xml:lang="sv">Surfa på webben</p>
   </description>
   <url type="homepage">https://www.mozilla.org</url>
   <update_contact>stransky@redhat.com</update_contact>
-    <kudos>
+  <kudos>
     <kudo>ModernToolkit</kudo>
     <kudo>SearchProvider</kudo>
   </kudos>
   <project_group>Mozilla</project_group>
   <project_license>GPL-3.0+</project_license>
-  <developer_name> Mozilla Corporation</developer_name>
+  <developer_name>Mozilla Corporation</developer_name>
   <url type="bugtracker">https://bugzilla.mozilla.org/</url>
-  <url type=bu"help">https://support.mozilla.org/</url>
+  <url type="help">https://support.mozilla.org/</url>
   <translation type="gettext">firefox</translation>
   <provides>
     <id>firefox.desktop</id>
