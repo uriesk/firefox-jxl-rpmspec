@@ -124,7 +124,7 @@ Source29:       firefox-wayland.desktop
 Source30:       firefox-x11.sh.in
 Source31:       firefox-x11.desktop
 Source32:       node-stdout-nonblocking-wrapper
-Source33:       firefox.appdata.xml
+Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
 
 # Build patches
@@ -813,9 +813,11 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %{__mkdir_p} %{buildroot}%{mozappdir}/distribution
 %{__cp} %{SOURCE26} %{buildroot}%{mozappdir}/distribution
 
-# Install Gnome search provider files
+# Install appdata file
 mkdir -p %{buildroot}%{_datadir}/metainfo
-%{__cp} %{SOURCE33} %{buildroot}%{_datadir}/metainfo
+%{__sed} -e 's/__VERSION__/%{version}/' %{SOURCE33} > %{buildroot}%{_datadir}/metainfo/firefox.appdata.xml
+
+# Install Gnome search provider files
 mkdir -p %{buildroot}%{_datadir}/gnome-shell/search-providers
 %{__cp} %{SOURCE34} %{buildroot}%{_datadir}/gnome-shell/search-providers
 
@@ -941,6 +943,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Tue Feb 04 2020 Kalev Lember <klember@redhat.com> - 72.0.2-3
 - Fix various issues with appdata, making the validation pass again
 - Validate appdata during the build
+- Make sure the release tag in appdata is in sync with the package version
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 72.0.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
