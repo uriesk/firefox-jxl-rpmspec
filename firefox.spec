@@ -220,6 +220,7 @@ BuildRequires:  cbindgen
 %endif
 BuildRequires:  nodejs
 BuildRequires:  nasm >= 1.13
+BuildRequires:  libappstream-glib
 
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
@@ -843,6 +844,8 @@ if (posix.stat("%{mozappdir}/browser/defaults/preferences", "type") == "link") t
   end
 end
 
+%check
+appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/*.appdata.xml
 
 %preun
 # is it a final removal?
@@ -937,6 +940,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Feb 04 2020 Kalev Lember <klember@redhat.com> - 72.0.2-3
 - Fix various issues with appdata, making the validation pass again
+- Validate appdata during the build
 
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 72.0.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
