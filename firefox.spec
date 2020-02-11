@@ -465,6 +465,11 @@ echo "ac_add_options --enable-address-sanitizer" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
+# api keys full path
+echo "ac_add_options --with-mozilla-api-keyfile=`pwd`/mozilla-api-key" >> .mozconfig
+echo "ac_add_options --with-google-location-service-api-keyfile=`pwd`/google-api-key" >> .mozconfig
+echo "ac_add_options --with-google-safebrowsing-api-keyfile=`pwd`/google-api-key" >> .mozconfig
+
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
 
 # Remove executable bit to make brp-mangle-shebangs happy.
