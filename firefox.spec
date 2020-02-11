@@ -101,13 +101,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        72.0.2
-Release:        3%{?dist}
+Version:        73.0
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200120.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200211.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -155,16 +155,13 @@ Patch227:        firefox-locale-debug.patch
 Patch239:        mozilla-gnome-shell-search-provider.patch
 Patch240:        mozilla-gnome-shell-search-provider-icons.patch
 Patch241:        kiosk-workaround.patch
-Patch242:        mozilla-1601707.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
-Patch419:        mozilla-1568569.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
-Patch426:        mozilla-1603112-accept-lang.patch
 Patch427:        mozilla-1607404-fix-remote-offset.patch
 
 # Wayland specific upstream patches
@@ -355,18 +352,15 @@ This package contains results of tests executed during build.
 # Workaround for kiosk mode
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
 #%patch241 -p1 -b .kiosk-workaround
-%patch242 -p1 -b .mozilla-1601707
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
-%patch419 -p1 -b .1568569
 
 # overflow widgets broken
 # dropdown missing on multimonitor
 # fix for wrong intl.accept_lang when using non en-us langpack
-%patch426 -p1 -b .1603112-accept-lang
 %patch427 -p1 -b .1607404-fix-remote-offset
 
 # Wayland specific upstream patches
@@ -940,6 +934,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Feb 11 2020 Jan Horak <jhorak@redhat.com> - 73.0-1
+- Update to 73.0 build3
+
 * Tue Feb 04 2020 Kalev Lember <klember@redhat.com> - 72.0.2-3
 - Fix various issues with appdata, making the validation pass again
 - Validate appdata during the build
