@@ -163,6 +163,9 @@ Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 Patch427:        mozilla-1607404-fix-remote-offset.patch
+Patch428:        mozilla-1609732-no-full-hide.patch
+Patch429:        mozilla-1609732-pause-renderer.patch
+Patch430:        mozilla-1605795-popup-parent-fix.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -362,6 +365,9 @@ This package contains results of tests executed during build.
 # dropdown missing on multimonitor
 # fix for wrong intl.accept_lang when using non en-us langpack
 %patch427 -p1 -b .1607404-fix-remote-offset
+%patch428 -p1 -b .1609732-no-full-hide
+%patch429 -p1 -b .1609732-pause-renderer
+%patch430 -p1 -b .1605795-popup-parent-fix
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
