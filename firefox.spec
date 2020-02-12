@@ -895,7 +895,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{mozappdir}
 %license %{mozappdir}/LICENSE
 %{mozappdir}/browser/chrome
-%{mozappdir}/browser/chrome.manifest
 %{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
 %{mozappdir}/browser/features/*.xpi
 %{mozappdir}/distribution/distribution.ini
@@ -906,7 +905,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %dir %{langpackdir}
 %endif
 %{mozappdir}/browser/omni.ja
-%{mozappdir}/chrome.manifest
 %{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
 %{mozappdir}/pingsender
