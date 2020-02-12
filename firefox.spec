@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
@@ -143,6 +143,7 @@ Patch41:        build-disable-elfhack.patch
 Patch44:        build-arm-libopus.patch
 #Patch45:        build-disable-multijobs-rust.patch
 Patch46:        firefox-nss-version.patch
+Patch47:        fedora-shebang-build.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -339,6 +340,7 @@ This package contains results of tests executed during build.
 %patch26 -p1 -b .icu
 %endif
 #%patch46 -p1 -b .nss-version
+%patch47 -p1 -b .fedora-shebang
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -475,6 +477,7 @@ echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
 chmod a-x third_party/rust/gfx-backend-vulkan/src/*.rs
+chmod a-x third_party/rust/gfx-hal/src/*.rs
 
 #---------------------------------------------------------------------
 
