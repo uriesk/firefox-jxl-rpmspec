@@ -103,8 +103,8 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        73.0
-Release:        2%{?dist}
+Version:        73.0.1
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -948,6 +948,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Feb 20 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-1
+- Update to 73.0.1
+
 * Tue Feb 11 2020 Jan Horak <jhorak@redhat.com> - 73.0-1
 - Update to 73.0 build3
 
