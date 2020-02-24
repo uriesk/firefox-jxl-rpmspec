@@ -104,7 +104,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        73.0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -948,6 +948,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-2
+- Fixed Bug 1804787 - Some .desktop menu entries unlocalized
+
 * Thu Feb 20 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-1
 - Update to 73.0.1
 
