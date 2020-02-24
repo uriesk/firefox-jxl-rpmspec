@@ -5,7 +5,7 @@
 %global build_with_asan   0
 
 # Disabled arm due to rhbz#1658940
-ExcludeArch: armv7hl
+# ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 # Disabled due to neon build error
@@ -24,7 +24,11 @@ ExcludeArch: aarch64
 
 %global system_nss        1
 %global system_ffi        1
+%ifarch armv7hl
+%global system_libvpx     1
+%else
 %global system_libvpx     0
+%endif
 %global hardened_build    1
 %global system_jpeg       1
 %global run_tests         0
@@ -53,6 +57,11 @@ ExcludeArch: aarch64
 %global big_endian        1
 %endif
 
+%ifarch armv7hl
+%define _unpackaged_files_terminate_build 0
+%global debug_package %{nil}
+%endif
+
 %if 0%{?build_with_pgo}
 %global use_xvfb          1
 %global build_tests       1
@@ -70,7 +79,7 @@ ExcludeArch: aarch64
 %global freetype_version 2.1.9
 %global libnotify_version 0.7.0
 %if %{?system_libvpx}
-%global libvpx_version 1.4.0
+%global libvpx_version 1.8.2
 %endif
 
 %if %{?system_nss}
@@ -104,7 +113,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        73.0.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -146,6 +155,8 @@ Patch44:        build-arm-libopus.patch
 #Patch45:        build-disable-multijobs-rust.patch
 Patch46:        firefox-nss-version.patch
 Patch47:        fedora-shebang-build.patch
+Patch48:        build-arm-wasm.patch
+Patch49:        build-arm-libaom.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -172,6 +183,7 @@ Patch430:        mozilla-1605795-popup-parent-fix.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
+Patch575:        firefox-pipewire-0.3.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -343,6 +355,8 @@ This package contains results of tests executed during build.
 %endif
 #%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
+%patch48 -p1 -b .build-arm-wasm
+%patch49 -p1 -b .build-arm-libaom
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -374,7 +388,11 @@ This package contains results of tests executed during build.
 %patch430 -p1 -b .1605795-popup-parent-fix
 
 # Wayland specific upstream patches
+%if 0%{?fedora} < 32
 %patch574 -p1 -b .firefox-pipewire
+%else
+%patch575 -p1 -b .firefox-pipewire
+%endif
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -418,7 +436,7 @@ echo "ac_add_options --disable-optimize" >> .mozconfig
 # ARMv7 needs that (rhbz#1426850)
 %global optimize_flags "-g -O2 -fno-schedule-insns"
 # Disable libaom due to rhbz#1641623
-echo "ac_add_options --disable-av1" >> .mozconfig
+#echo "ac_add_options --disable-av1" >> .mozconfig
 %endif
 %ifarch ppc64le aarch64
 %global optimize_flags "-g -O2"
@@ -531,6 +549,9 @@ MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-Werror=format-security//
 %endif
 %if 0%{?fedora} > 30
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fpermissive"
+%ifarch armv7hl
+MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -flax-vector-conversions"
+%endif
 %endif
 %if %{?hardened_build}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
@@ -554,7 +575,7 @@ export MOZ_DEBUG_FLAGS=" "
 MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
 %ifarch %{arm}
-MOZ_LINK_FLAGS="-Wl,--no-keep-memory"
+MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--strip-debug"
 echo "ac_add_options --enable-linker=gold" >> .mozconfig
 %endif
 %endif
@@ -603,7 +624,7 @@ MOZ_SMP_FLAGS=-j1
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 [ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
 %endif
-%ifarch x86_64 ppc ppc64 ppc64le aarch64
+%ifarch x86_64 ppc ppc64 ppc64le aarch64 %{arm}
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 [ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
@@ -948,6 +969,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-3
+- Update pipewire patch for Fedora 32
+- Added armv7hl fixes by Gabriel Hojda
+
 * Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-2
 - Fixed Bug 1804787 - Some .desktop menu entries unlocalized
 
