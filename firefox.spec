@@ -9,7 +9,7 @@
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 # Disabled due to neon build error
-ExcludeArch: aarch64
+# ExcludeArch: aarch64
 
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
@@ -113,7 +113,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        73.0.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -157,6 +157,7 @@ Patch46:        firefox-nss-version.patch
 Patch47:        fedora-shebang-build.patch
 Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
+Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -357,6 +358,7 @@ This package contains results of tests executed during build.
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
+%patch50 -p1 -b .build-arm-SwizzleNEON
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -969,7 +971,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-3
+* Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-4
 - Update pipewire patch for Fedora 32
 - Added armv7hl fixes by Gabriel Hojda
 
