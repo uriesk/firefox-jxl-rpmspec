@@ -184,7 +184,6 @@ Patch430:        mozilla-1605795-popup-parent-fix.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
-Patch575:        firefox-pipewire-0.3.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -230,7 +229,13 @@ BuildRequires:  clang-libs
 %if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
+
+%if 0%{?fedora} < 32
 BuildRequires:  pipewire-devel
+%else
+BuildRequires:  pipewire02-devel
+%endif
+
 %if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
 %endif
@@ -390,11 +395,7 @@ This package contains results of tests executed during build.
 %patch430 -p1 -b .1605795-popup-parent-fix
 
 # Wayland specific upstream patches
-%if 0%{?fedora} < 32
 %patch574 -p1 -b .firefox-pipewire
-%else
-%patch575 -p1 -b .firefox-pipewire
-%endif
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -972,7 +973,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-4
-- Update pipewire patch for Fedora 32
+- Using pipewire-0.2 as buildrequire
 - Added armv7hl fixes by Gabriel Hojda
 
 * Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-2
