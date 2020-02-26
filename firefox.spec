@@ -233,7 +233,7 @@ BuildRequires:  lld
 %if 0%{?fedora} < 32
 BuildRequires:  pipewire-devel
 %else
-BuildRequires:  pipewire02-devel
+BuildRequires:  pipewire0.2-devel
 %endif
 
 %if !0%{?use_bundled_cbindgen}
