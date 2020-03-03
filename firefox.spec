@@ -229,7 +229,13 @@ BuildRequires:  clang-libs
 %if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
+
+%if 0%{?fedora} < 32
 BuildRequires:  pipewire-devel
+%else
+BuildRequires:  pipewire02-devel
+%endif
+
 %if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
 %endif
