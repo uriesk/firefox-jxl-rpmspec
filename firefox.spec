@@ -22,7 +22,11 @@ ExcludeArch: s390x
 %global enable_mozilla_crashreporter 0
 %endif
 
+%if 0%{?fedora} > 31
+%global system_nss        0
+%else
 %global system_nss        1
+%endif
 %global system_ffi        1
 %ifarch armv7hl
 %global system_libvpx     1
@@ -112,13 +116,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        73.0.1
-Release:        4%{?dist}
+Version:        74.0
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200220.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200303.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -157,8 +161,7 @@ Patch46:        firefox-nss-version.patch
 Patch47:        fedora-shebang-build.patch
 Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
-Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
-Patch51:        build-missing-size_t.patch
+#Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -178,10 +181,6 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
-Patch427:        mozilla-1607404-fix-remote-offset.patch
-Patch428:        mozilla-1609732-no-full-hide.patch
-Patch429:        mozilla-1609732-pause-renderer.patch
-Patch430:        mozilla-1605795-popup-parent-fix.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -230,13 +229,7 @@ BuildRequires:  clang-libs
 %if 0%{?build_with_clang}
 BuildRequires:  lld
 %endif
-
-%if 0%{?fedora} < 32
 BuildRequires:  pipewire-devel
-%else
-BuildRequires:  pipewire0.2-devel
-%endif
-
 %if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
 %endif
@@ -364,8 +357,7 @@ This package contains results of tests executed during build.
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
-%patch50 -p1 -b .build-arm-SwizzleNEON
-%patch51 -p1 -b .build-missing-size_t
+#%patch50 -p1 -b .build-arm-SwizzleNEON
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -387,14 +379,6 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
-
-# overflow widgets broken
-# dropdown missing on multimonitor
-# fix for wrong intl.accept_lang when using non en-us langpack
-%patch427 -p1 -b .1607404-fix-remote-offset
-%patch428 -p1 -b .1609732-no-full-hide
-%patch429 -p1 -b .1609732-pause-renderer
-%patch430 -p1 -b .1605795-popup-parent-fix
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
@@ -974,6 +958,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 03 2020 Martin Stransky <stransky@redhat.com> - 74.0-1
+- Update to 74.0 Build 1
+
 * Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-4
 - Using pipewire-0.2 as buildrequire
 - Added armv7hl fixes by Gabriel Hojda
