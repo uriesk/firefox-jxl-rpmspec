@@ -5,7 +5,7 @@
 %global build_with_asan   0
 
 # Disabled arm due to rhbz#1658940
-# ExcludeArch: armv7hl
+ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 # Disabled due to neon build error
@@ -22,11 +22,7 @@ ExcludeArch: s390x
 %global enable_mozilla_crashreporter 0
 %endif
 
-%if 0%{?fedora} > 31
 %global system_nss        0
-%else
-%global system_nss        1
-%endif
 %global system_ffi        1
 %ifarch armv7hl
 %global system_libvpx     1
@@ -89,7 +85,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.48.0
+%global nss_version 3.50
 %global nss_build_version %{nss_version}
 %endif
 
@@ -113,11 +109,14 @@ ExcludeArch: s390x
 %global pre_tag .asan
 %global build_with_pgo    0
 %endif
+%if !%{system_nss}
+%global nss_tag .nss
+%endif
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        1%{?dist}
+Release:        1%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
