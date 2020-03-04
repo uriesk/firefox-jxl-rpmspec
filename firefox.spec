@@ -184,6 +184,7 @@ Patch422:        mozilla-1580174-webrtc-popup.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
+Patch575:        mozilla-1609538.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -388,6 +389,7 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
+%patch575 -p1 -b .mozilla-1609538
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -965,6 +967,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Mar 03 2020 Martin Stransky <stransky@redhat.com> - 74.0-1
 - Update to 74.0 Build 1
+- Added mozbz#1609538
 
 * Mon Feb 24 2020 Martin Stransky <stransky@redhat.com> - 73.0.1-4
 - Using pipewire-0.2 as buildrequire
