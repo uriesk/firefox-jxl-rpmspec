@@ -947,7 +947,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/fonts/TwemojiMozilla.ttf
 %if !%{?system_nss}
 %{mozappdir}/libfreeblpriv3.chk
-%{mozappdir}/libnssdbm3.chk
 %{mozappdir}/libsoftokn3.chk
 %exclude %{mozappdir}/libnssckbi.so
 %endif
