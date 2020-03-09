@@ -5,7 +5,7 @@
 %global build_with_asan   0
 
 # Disabled arm due to rhbz#1658940
-ExcludeArch: armv7hl
+# ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 # Disabled due to neon build error
@@ -22,7 +22,7 @@ ExcludeArch: s390x
 %global enable_mozilla_crashreporter 0
 %endif
 
-%global system_nss        0
+%global system_nss        1
 %global system_ffi        1
 %ifarch armv7hl
 %global system_libvpx     1
@@ -116,12 +116,12 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        1%{?nss_tag}%{?dist}
+Release:        2%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200303.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200309.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -428,12 +428,6 @@ echo "ac_add_options --enable-debug" >> .mozconfig
 echo "ac_add_options --disable-optimize" >> .mozconfig
 %else
 %global optimize_flags "none"
-%ifarch armv7hl
-# ARMv7 needs that (rhbz#1426850)
-%global optimize_flags "-g -O2 -fno-schedule-insns"
-# Disable libaom due to rhbz#1641623
-#echo "ac_add_options --disable-av1" >> .mozconfig
-%endif
 %ifarch ppc64le aarch64
 %global optimize_flags "-g -O2"
 %endif
@@ -545,9 +539,6 @@ MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-Werror=format-security//
 %endif
 %if 0%{?fedora} > 30
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fpermissive"
-%ifarch armv7hl
-MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -flax-vector-conversions"
-%endif
 %endif
 %if %{?hardened_build}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
@@ -964,6 +955,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 09 2020 Martin Stransky <stransky@redhat.com> - 74.0-2
+- Update to 74.0 Build 2
+
 * Tue Mar 03 2020 Martin Stransky <stransky@redhat.com> - 74.0-1
 - Update to 74.0 Build 1
 - Added mozbz#1609538
