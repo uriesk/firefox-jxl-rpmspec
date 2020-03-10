@@ -116,7 +116,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        3%{?nss_tag}%{?dist}
+Release:        4%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -202,7 +202,6 @@ BuildRequires:  libjpeg-devel
 BuildRequires:  zip
 BuildRequires:  bzip2-devel
 BuildRequires:  pkgconfig(zlib)
-BuildRequires:  pkgconfig(libIDL-2.0)
 BuildRequires:  pkgconfig(gtk+-3.0)
 BuildRequires:  pkgconfig(gtk+-2.0)
 BuildRequires:  pkgconfig(krb5)
@@ -955,6 +954,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 10 2020 Kalev Lember <klember@redhat.com> - 74.0-4
+- Remove unused libIDL build dep
+
 * Tue Mar 10 2020 Martin Stransky <stransky@redhat.com> - 74.0-3
 - Update to 74.0 Build 3
 
