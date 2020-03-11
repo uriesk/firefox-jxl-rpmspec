@@ -4,8 +4,10 @@
 %global build_with_clang  0
 %global build_with_asan   0
 
-# Disabled arm due to rhbz#1658940
+# disable arm builds with gcc 10 until bug 94050 is backported to Fedora
+%if 0%{?fedora} > 31
 ExcludeArch: armv7hl
+%endif
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 # Disabled due to neon build error
