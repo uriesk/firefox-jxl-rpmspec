@@ -5,7 +5,7 @@
 %global build_with_asan   0
 
 # Disabled arm due to rhbz#1658940
-# ExcludeArch: armv7hl
+ExcludeArch: armv7hl
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 # Disabled due to neon build error
@@ -956,6 +956,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Mar 10 2020 Kalev Lember <klember@redhat.com> - 74.0-4
 - Remove unused libIDL build dep
+- Disabled arm due to build failures
 
 * Tue Mar 10 2020 Martin Stransky <stransky@redhat.com> - 74.0-3
 - Update to 74.0 Build 3
