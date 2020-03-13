@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        5%{?nss_tag}%{?dist}
+Release:        6%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -183,6 +183,7 @@ Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 Patch423:        mozilla-1620973.patch
+Patch424:        mozilla-1615098.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -383,6 +384,7 @@ This package contains results of tests executed during build.
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
 #%patch241 -p1 -b .kiosk-workaround
 %patch423 -p1 -b .1620973
+%patch424 -p1 -b .1615098
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -958,6 +960,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 13 2020 Martin Stransky <stransky@redhat.com> - 74.0-6
+- Added fix for mozbz#1615098
+
 * Thu Mar 12 2020 Martin Stransky <stransky@redhat.com> - 74.0-5
 - Added fix for mozbz#1196777
 
