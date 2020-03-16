@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        6%{?nss_tag}%{?dist}
+Release:        7%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -960,6 +960,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 16 2020 Martin Stransky <stransky@redhat.com> - 74.0-7
+- Use D-Bus remote exclusively for both X11 and Wayland backends
+  when WAYLAND_DISPLAY is present.
+
 * Fri Mar 13 2020 Martin Stransky <stransky@redhat.com> - 74.0-6
 - Added fix for mozbz#1615098
 
