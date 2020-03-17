@@ -184,6 +184,7 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 Patch423:        mozilla-1620973.patch
 Patch424:        mozilla-1615098.patch
+Patch425:        mozilla-1623106.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
@@ -386,6 +387,7 @@ This package contains results of tests executed during build.
 #%patch241 -p1 -b .kiosk-workaround
 %patch423 -p1 -b .1620973
 %patch424 -p1 -b .1615098
+%patch425 -p1 -b .1623106
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
@@ -964,6 +966,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Mar 17 2020 Martin Stransky <stransky@redhat.com> - 74.0-9
 - Added fix for mozbz#1623060
+- Added fix for mozbz#1623106
 
 * Tue Mar 17 2020 Jan Grulich <jgrulich@redhat.com> - 74-0-8
 - Add support for window sharing

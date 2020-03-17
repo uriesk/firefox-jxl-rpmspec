@@ -1,0 +1,32 @@
+changeset:   520675:823e745af09e
+tag:         tip
+user:        Martin Stransky <stransky@redhat.com>
+date:        Tue Mar 17 21:27:52 2020 +0100
+files:       widget/gtk/nsWindow.cpp
+description:
+dd2
+
+
+diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
+--- a/widget/gtk/nsWindow.cpp
++++ b/widget/gtk/nsWindow.cpp
+@@ -2740,16 +2739,18 @@ void nsWindow::OnContainerUnrealize() {
+   }
+ }
+ 
+ void nsWindow::OnSizeAllocate(GtkAllocation* aAllocation) {
+   LOG(("nsWindow::OnSizeAllocate [%p] %d,%d -> %d x %d\n", (void*)this,
+        aAllocation->x, aAllocation->y, aAllocation->width,
+        aAllocation->height));
+ 
++  mBoundsAreValid = true;
++
+   LayoutDeviceIntSize size = GdkRectToDevicePixels(*aAllocation).Size();
+   if (mBounds.Size() == size) {
+     // We were already resized at nsWindow::OnConfigureEvent() so skip it.
+     return;
+   }
+ 
+   // Invalidate the new part of the window now for the pending paint to
+   // minimize background flashes (GDK does not do this for external resizes
+
