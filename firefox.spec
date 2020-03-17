@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        9%{?nss_tag}%{?dist}
+Release:        10%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -964,9 +964,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 17 2020 Martin Stransky <stransky@redhat.com> - 74.0-10
+- Added fix for mozbz#1623106
+
 * Tue Mar 17 2020 Martin Stransky <stransky@redhat.com> - 74.0-9
 - Added fix for mozbz#1623060
-- Added fix for mozbz#1623106
 
 * Tue Mar 17 2020 Jan Grulich <jgrulich@redhat.com> - 74-0-8
 - Add support for window sharing
