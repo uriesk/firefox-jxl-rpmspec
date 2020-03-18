@@ -1,4 +1,4 @@
-changeset:   521153:1bef33e1956a
+changeset:   521156:e856a981e2be
 tag:         tip
 parent:      521144:5bfecf5aff6d
 user:        Martin Stransky <stransky@redhat.com>
@@ -53,7 +53,7 @@ diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
 -        aEvent->changed_mask | GDK_WINDOW_STATE_MAXIMIZED);
 +  //
 +  // This is fixed in Gtk 3.24+
-+  if (gtk_check_version(3, 24) != nullptr) {
++  if (gtk_check_version(3, 24, 0) != nullptr) {
 +    if (!mIsShown) {
 +      aEvent->changed_mask = static_cast<GdkWindowState>(
 +          aEvent->changed_mask & ~GDK_WINDOW_STATE_MAXIMIZED);
