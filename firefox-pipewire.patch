@@ -65,7 +65,7 @@ index 1eb8ead26efa..316468eed1fc 100644
  };
  
 diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-index 379341c833de..7a1ffa204ddf 100644
+index 379341c833de..a51f7851b20f 100644
 --- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 +++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 @@ -18,6 +18,11 @@
@@ -133,23 +133,26 @@ index 379341c833de..7a1ffa204ddf 100644
  }
  
  // static
-@@ -150,15 +181,21 @@ void BaseCapturerPipeWire::OnStreamProcess(void* data) {
+@@ -150,15 +181,25 @@ void BaseCapturerPipeWire::OnStreamProcess(void* data) {
    BaseCapturerPipeWire* that = static_cast<BaseCapturerPipeWire*>(data);
    RTC_DCHECK(that);
  
 -  pw_buffer* buf = nullptr;
 +  struct pw_buffer *next_buffer;
 +  struct pw_buffer *buffer = nullptr;
- 
--  if (!(buf = pw_stream_dequeue_buffer(that->pw_stream_))) {
--    return;
++
 +  next_buffer = pw_stream_dequeue_buffer(that->pw_stream_);
 +  while (next_buffer) {
 +    buffer = next_buffer;
 +    next_buffer = pw_stream_dequeue_buffer(that->pw_stream_);
-+
+ 
+-  if (!(buf = pw_stream_dequeue_buffer(that->pw_stream_))) {
 +    if (next_buffer)
 +      pw_stream_queue_buffer (that->pw_stream_, buffer);
++  }
++
++  if (!buffer) {
+     return;
    }
  
 -  that->HandleBuffer(buf);
@@ -160,7 +163,7 @@ index 379341c833de..7a1ffa204ddf 100644
  }
  
  BaseCapturerPipeWire::BaseCapturerPipeWire(CaptureSourceType source_type)
-@@ -197,10 +234,6 @@ BaseCapturerPipeWire::~BaseCapturerPipeWire() {
+@@ -197,10 +238,6 @@ BaseCapturerPipeWire::~BaseCapturerPipeWire() {
      pw_loop_destroy(pw_loop_);
    }
  
@@ -171,7 +174,7 @@ index 379341c833de..7a1ffa204ddf 100644
    if (start_request_signal_id_) {
      g_dbus_connection_signal_unsubscribe(connection_, start_request_signal_id_);
    }
-@@ -332,8 +365,7 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
+@@ -332,8 +369,7 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
    pw_stream_add_listener(pw_stream_, &spa_stream_listener_, &pw_stream_events_,
                           this);
    pw_stream_flags flags = static_cast<pw_stream_flags>(
@@ -181,7 +184,7 @@ index 379341c833de..7a1ffa204ddf 100644
    if (pw_stream_connect(pw_stream_, PW_DIRECTION_INPUT, /*port_path=*/nullptr,
                          flags, params,
                          /*n_params=*/1) != 0) {
-@@ -344,15 +376,75 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
+@@ -344,15 +380,75 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
  }
  
  void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
@@ -261,7 +264,7 @@ index 379341c833de..7a1ffa204ddf 100644
    if (srcStride != (desktop_size_.width() * kBytesPerPixel)) {
      RTC_LOG(LS_ERROR) << "Got buffer with stride different from screen stride: "
                        << srcStride
-@@ -361,21 +453,39 @@ void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
+@@ -361,21 +457,39 @@ void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
      return;
    }
  
@@ -314,7 +317,7 @@ index 379341c833de..7a1ffa204ddf 100644
    }
  }
  
-@@ -813,10 +923,12 @@ void BaseCapturerPipeWire::CaptureFrame() {
+@@ -813,10 +927,12 @@ void BaseCapturerPipeWire::CaptureFrame() {
      return;
    }
  
@@ -330,7 +333,7 @@ index 379341c833de..7a1ffa204ddf 100644
    if (!result) {
      callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
      return;
-@@ -837,4 +949,22 @@ bool BaseCapturerPipeWire::SelectSource(SourceId id) {
+@@ -837,4 +953,22 @@ bool BaseCapturerPipeWire::SelectSource(SourceId id) {
    return true;
  }
  
