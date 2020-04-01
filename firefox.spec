@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        13%{?nss_tag}%{?dist}
+Release:        14%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -967,8 +967,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Apr 1 2020 Martin Stransky <stransky@redhat.com> - 74.0-13
-- 
+* Wed Apr 1 2020 Martin Stransky <stransky@redhat.com> - 74.0-14
+- Added fixes to gnome shell search provider
+
+* Tue 31 Mar 2020 Jan Horak <jhorak@redhat.com> - 74.0-13
+- Allow addons sideload to fix missing langpacks issues
 
 * Thu Mar 19 2020 Martin Stransky <stransky@redhat.com> - 74.0-12
 - Added fix for rhbz#1814850 by Daniel Rusek
