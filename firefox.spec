@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        74.0
-Release:        12%{?nss_tag}%{?dist}
+Release:        13%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -175,6 +175,7 @@ Patch227:        firefox-locale-debug.patch
 Patch239:        mozilla-gnome-shell-search-provider.patch
 Patch240:        mozilla-gnome-shell-search-provider-icons.patch
 Patch241:        kiosk-workaround.patch
+Patch242:        mozilla-gnome-shell-search-fixes.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -385,6 +386,8 @@ This package contains results of tests executed during build.
 # Workaround for kiosk mode
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
 #%patch241 -p1 -b .kiosk-workaround
+%patch242 -p1 -b .gnome-shell-search-fixes
+
 %patch423 -p1 -b .1620973
 %patch424 -p1 -b .1615098
 %patch425 -p1 -b .1623106
@@ -964,6 +967,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Apr 1 2020 Martin Stransky <stransky@redhat.com> - 74.0-13
+- 
+
 * Thu Mar 19 2020 Martin Stransky <stransky@redhat.com> - 74.0-12
 - Added fix for rhbz#1814850 by Daniel Rusek
 

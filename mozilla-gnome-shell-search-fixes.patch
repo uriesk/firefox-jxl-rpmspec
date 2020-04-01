@@ -1,0 +1,148 @@
+diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-fixes firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp
+--- firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-fixes	2020-04-01 12:45:40.567097335 +0200
++++ firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp	2020-04-01 13:01:05.014591437 +0200
+@@ -289,20 +289,12 @@ AsyncFaviconDataReady::OnComplete(nsIURI
+ }
+ 
+ void nsGNOMEShellSearchProvider::ComposeSearchResultReply(
+-    DBusMessage* reply, const char* aSearchTerm) {
++    DBusMessage* reply, const char* aSearchTerm, bool aSearchOnly) {
+   uint32_t childCount = 0;
+-  nsresult rv = mHistResultContainer->GetChildCount(&childCount);
+-  if (NS_FAILED(rv) || childCount == 0) {
+-    return;
+-  }
+-
+-  // Obtain the favicon service and get the favicon for the specified page
+-  nsCOMPtr<nsIFaviconService> favIconSvc(
+-      do_GetService("@mozilla.org/browser/favicon-service;1"));
+-  nsCOMPtr<nsIIOService> ios(do_GetService(NS_IOSERVICE_CONTRACTID));
++  nsresult rv = NS_OK;
+ 
+-  if (childCount > MAX_SEARCH_RESULTS_NUM) {
+-    childCount = MAX_SEARCH_RESULTS_NUM;
++  if (!aSearchOnly) {
++    nsresult rv = mHistResultContainer->GetChildCount(&childCount);
+   }
+ 
+   DBusMessageIter iter;
+@@ -310,30 +302,41 @@ void nsGNOMEShellSearchProvider::Compose
+   DBusMessageIter iterArray;
+   dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY, "s", &iterArray);
+ 
+-  for (uint32_t i = 0; i < childCount; i++) {
+-    nsCOMPtr<nsINavHistoryResultNode> child;
+-    mHistResultContainer->GetChild(i, getter_AddRefs(child));
+-    if (NS_WARN_IF(NS_FAILED(rv))) {
+-      continue;
+-    }
+-    if (!IsHistoryResultNodeURI(child)) {
+-      continue;
++  if (NS_SUCCEEDED(rv) && childCount > 0) {
++    // Obtain the favicon service and get the favicon for the specified page
++    nsCOMPtr<nsIFaviconService> favIconSvc(
++        do_GetService("@mozilla.org/browser/favicon-service;1"));
++    nsCOMPtr<nsIIOService> ios(do_GetService(NS_IOSERVICE_CONTRACTID));
++
++    if (childCount > MAX_SEARCH_RESULTS_NUM) {
++      childCount = MAX_SEARCH_RESULTS_NUM;
+     }
+ 
+-    nsAutoCString uri;
+-    child->GetUri(uri);
++    for (uint32_t i = 0; i < childCount; i++) {
++      nsCOMPtr<nsINavHistoryResultNode> child;
++      mHistResultContainer->GetChild(i, getter_AddRefs(child));
++      if (NS_WARN_IF(NS_FAILED(rv))) {
++        continue;
++      }
++      if (!child || !IsHistoryResultNodeURI(child)) {
++        continue;
++      }
+ 
+-    nsCOMPtr<nsIURI> iconIri;
+-    ios->NewURI(uri, nullptr, nullptr, getter_AddRefs(iconIri));
+-    nsCOMPtr<nsIFaviconDataCallback> callback =
+-        new AsyncFaviconDataReady(this, i, mSearchSerial);
+-    favIconSvc->GetFaviconDataForPage(iconIri, callback, 0);
++      nsAutoCString uri;
++      child->GetUri(uri);
+ 
+-    nsAutoCString idKey;
+-    GetIDKeyForURI(i, uri, idKey);
++      nsCOMPtr<nsIURI> iconIri;
++      ios->NewURI(uri, nullptr, nullptr, getter_AddRefs(iconIri));
++      nsCOMPtr<nsIFaviconDataCallback> callback =
++          new AsyncFaviconDataReady(this, i, mSearchSerial);
++      favIconSvc->GetFaviconDataForPage(iconIri, callback, 0);
+ 
+-    const char* id = idKey.get();
+-    dbus_message_iter_append_basic(&iterArray, DBUS_TYPE_STRING, &id);
++      nsAutoCString idKey;
++      GetIDKeyForURI(i, uri, idKey);
++
++      const char* id = idKey.get();
++      dbus_message_iter_append_basic(&iterArray, DBUS_TYPE_STRING, &id);
++    }
+   }
+ 
+   nsPrintfCString searchString("%s:%s", KEYWORD_SEARCH_STRING, aSearchTerm);
+@@ -346,7 +349,7 @@ void nsGNOMEShellSearchProvider::Compose
+ DBusHandlerResult nsGNOMEShellSearchProvider::GetInitialResultSet(
+     DBusMessage* aMsg) {
+   DBusMessage* reply;
+-  char** stringArray;
++  char** stringArray = nullptr;
+   int elements;
+ 
+   if (!dbus_message_get_args(aMsg, nullptr, DBUS_TYPE_ARRAY, DBUS_TYPE_STRING,
+@@ -356,9 +359,10 @@ DBusHandlerResult nsGNOMEShellSearchProv
+   } else {
+     reply = dbus_message_new_method_return(aMsg);
+     nsresult rv = NewHistorySearch(stringArray[0]);
+-    if (NS_SUCCEEDED(rv)) {
+-      ComposeSearchResultReply(reply, stringArray[0]);
+-    }
++    ComposeSearchResultReply(reply, stringArray[0],
++                             /* search only */ NS_FAILED(rv));
++  }
++  if (stringArray) {
+     dbus_free_string_array(stringArray);
+   }
+ 
+@@ -384,9 +388,8 @@ DBusHandlerResult nsGNOMEShellSearchProv
+   } else {
+     reply = dbus_message_new_method_return(aMsg);
+     nsresult rv = NewHistorySearch(stringArray[0]);
+-    if (NS_SUCCEEDED(rv)) {
+-      ComposeSearchResultReply(reply, stringArray[0]);
+-    }
++    ComposeSearchResultReply(reply, stringArray[0],
++                             /* search only */ NS_FAILED(rv));
+   }
+ 
+   if (unusedArray) {
+@@ -556,6 +559,10 @@ void nsGNOMEShellSearchProvider::LaunchW
+     nsCOMPtr<nsINavHistoryResultNode> child;
+     mHistResultContainer->GetChild(keyIndex, getter_AddRefs(child));
+ 
++    if (!child) {
++      return;
++    }
++
+     nsAutoCString uri;
+     nsresult rv = child->GetUri(uri);
+     if (NS_FAILED(rv)) {
+diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-fixes firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h
+--- firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-fixes	2020-04-01 12:45:40.569097323 +0200
++++ firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h	2020-04-01 12:52:51.368536263 +0200
+@@ -70,7 +70,8 @@ class nsGNOMEShellSearchProvider : publi
+   bool IsHistoryResultNodeURI(nsINavHistoryResultNode* aHistoryNode);
+   void AppendResultID(DBusMessageIter* aIter, const char* aID);
+   void AppendSearchID(DBusMessageIter* aIter, const char* aID);
+-  void ComposeSearchResultReply(DBusMessage* aReply, const char* aSearchTerm);
++  void ComposeSearchResultReply(DBusMessage* aReply, const char* aSearchTerm,
++                                bool aSearchOnly);
+   void LaunchWithID(const char* aID, uint32_t aTimeStamp);
+   void LaunchWithAllResults(uint32_t aTimeStamp);
+ 
