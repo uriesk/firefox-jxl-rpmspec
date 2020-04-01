@@ -970,7 +970,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Wed Apr 1 2020 Martin Stransky <stransky@redhat.com> - 74.0-14
 - Added fixes to gnome shell search provider
 
-* Tue 31 Mar 2020 Jan Horak <jhorak@redhat.com> - 74.0-13
+* Tue Mar 31 2020 Jan Horak <jhorak@redhat.com> - 74.0-13
 - Allow addons sideload to fix missing langpacks issues
 
 * Thu Mar 19 2020 Martin Stransky <stransky@redhat.com> - 74.0-12
