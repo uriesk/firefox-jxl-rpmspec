@@ -117,13 +117,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        74.0
-Release:        14%{?nss_tag}%{?dist}
+Version:        74.0.1
+Release:        1%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200310.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200404.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -191,6 +191,7 @@ Patch425:        mozilla-1623106.patch
 Patch574:        firefox-pipewire.patch
 Patch575:        mozilla-1609538.patch
 Patch576:        mozilla-1623060.patch
+Patch577:        mozilla-1624745.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -401,6 +402,7 @@ This package contains results of tests executed during build.
 %patch574 -p1 -b .firefox-pipewire
 %patch575 -p1 -b .mozilla-1609538
 %patch576 -p1 -b .mozilla-1623060
+%patch577 -p1 -b .mozilla-1624745
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -967,6 +969,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Apr 4 2020 Martin Stransky <stransky@redhat.com> - 74.0.1-1
+- Updated to latest upstream
+- Added fix for mozbz#1624745
+
 * Wed Apr 1 2020 Martin Stransky <stransky@redhat.com> - 74.0-14
 - Added fixes to gnome shell search provider
 
