@@ -1,57 +1,50 @@
-diff -up firefox-74.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1623060 firefox-74.0/widget/gtk/nsWaylandDisplay.cpp
---- firefox-74.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1623060	2020-03-17 14:19:04.394231493 +0100
-+++ firefox-74.0/widget/gtk/nsWaylandDisplay.cpp	2020-03-17 14:23:47.445480363 +0100
-@@ -26,15 +26,12 @@ namespace widget {
- #define DMABUF_BASIC_PREF "widget.wayland_dmabuf_basic_compositor.enabled"
- // Enable dmabuf for WebGL backend
- #define DMABUF_WEBGL_PREF "widget.wayland_dmabuf_webgl.enabled"
--// See WindowSurfaceWayland::RenderingCacheMode for details.
--#define CACHE_MODE_PREF "widget.wayland_cache_mode"
+diff -up firefox-75.0/modules/libpref/init/StaticPrefList.yaml.mozilla-1623060 firefox-75.0/modules/libpref/init/StaticPrefList.yaml
+--- firefox-75.0/modules/libpref/init/StaticPrefList.yaml.mozilla-1623060	2020-04-03 21:34:57.000000000 +0200
++++ firefox-75.0/modules/libpref/init/StaticPrefList.yaml	2020-04-06 23:03:37.631884410 +0200
+@@ -8600,15 +8600,6 @@
+   type: RelaxedAtomicBool
+   value: false
+   mirror: always
+-
+-# Wayland basic (non-accelerated) compositor cache mode.
+-# 0 = Default (everything is cached).
+-# 1 = Cache only missing drawing.
+-# 2 = No cache
+-- name: widget.wayland-cache-mode
+-  type: RelaxedAtomicInt32
+-  value: 0
+-  mirror: always
+ #endif
  
- bool nsWaylandDisplay::sIsDMABufEnabled = false;
- int nsWaylandDisplay::sIsDMABufPrefTextState = false;
- int nsWaylandDisplay::sIsDMABufPrefBasicCompositorState = false;
- int nsWaylandDisplay::sIsDMABufPrefWebGLState = false;
- bool nsWaylandDisplay::sIsDMABufConfigured = false;
--int nsWaylandDisplay::sRenderingCacheModePref = -1;
- bool nsWaylandDisplay::sIsPrefLoaded = false;
+ #---------------------------------------------------------------------------
+diff -up firefox-75.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1623060 firefox-75.0/widget/gtk/nsWaylandDisplay.cpp
+--- firefox-75.0/widget/gtk/nsWaylandDisplay.cpp.mozilla-1623060	2020-04-03 21:35:43.000000000 +0200
++++ firefox-75.0/widget/gtk/nsWaylandDisplay.cpp	2020-04-06 23:03:37.632884403 +0200
+@@ -523,9 +523,6 @@ bool nsWaylandDisplay::IsDMABufVAAPIEnab
+   return IsDMABufEnabled() &&
+          StaticPrefs::widget_wayland_dmabuf_vaapi_enabled();
+ }
+-int nsWaylandDisplay::GetRenderingCacheModePref() {
+-  return StaticPrefs::widget_wayland_cache_mode();
+-}
  
- wl_display* WaylandDisplayGetWLDisplay(GdkDisplay* aGdkDisplay) {
-@@ -423,7 +420,6 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
-       sIsDMABufPrefBasicCompositorState =
-           Preferences::GetBool(DMABUF_BASIC_PREF, false);
-       sIsDMABufPrefWebGLState = Preferences::GetBool(DMABUF_WEBGL_PREF, false);
--      sRenderingCacheModePref = Preferences::GetInt(CACHE_MODE_PREF, 0);
-       sIsPrefLoaded = true;
-     }
- 
-diff -up firefox-74.0/widget/gtk/nsWaylandDisplay.h.mozilla-1623060 firefox-74.0/widget/gtk/nsWaylandDisplay.h
---- firefox-74.0/widget/gtk/nsWaylandDisplay.h.mozilla-1623060	2020-03-17 14:19:04.394231493 +0100
-+++ firefox-74.0/widget/gtk/nsWaylandDisplay.h	2020-03-17 14:22:49.867838072 +0100
-@@ -91,9 +91,6 @@ class nsWaylandDisplay {
+ void* nsGbmLib::sGbmLibHandle = nullptr;
+ void* nsGbmLib::sXf86DrmLibHandle = nullptr;
+diff -up firefox-75.0/widget/gtk/nsWaylandDisplay.h.mozilla-1623060 firefox-75.0/widget/gtk/nsWaylandDisplay.h
+--- firefox-75.0/widget/gtk/nsWaylandDisplay.h.mozilla-1623060	2020-04-03 21:35:39.000000000 +0200
++++ firefox-75.0/widget/gtk/nsWaylandDisplay.h	2020-04-06 23:03:37.632884403 +0200
+@@ -93,7 +93,6 @@ class nsWaylandDisplay {
    static bool IsDMABufTexturesEnabled();
    static bool IsDMABufWebGLEnabled();
+   static bool IsDMABufVAAPIEnabled();
+-  static int GetRenderingCacheModePref();
  
--  // See WindowSurfaceWayland::CacheMode for details.
--  int GetRenderingCacheModePref() { return sRenderingCacheModePref; };
--
   private:
    bool ConfigureGbm();
- 
-@@ -121,8 +118,7 @@ class nsWaylandDisplay {
-   static int sIsDMABufPrefTextState;
-   static int sIsDMABufPrefBasicCompositorState;
-   static int sIsDMABufPrefWebGLState;
--  static bool sIsDMABufConfigured;
--  static int sRenderingCacheModePref;
-+  static bool sIsDMABufConfigured;  
-   static bool sIsPrefLoaded;
- };
- 
-diff -up firefox-74.0/widget/gtk/nsWindow.cpp.mozilla-1623060 firefox-74.0/widget/gtk/nsWindow.cpp
---- firefox-74.0/widget/gtk/nsWindow.cpp.mozilla-1623060	2020-03-17 14:19:04.393231499 +0100
-+++ firefox-74.0/widget/gtk/nsWindow.cpp	2020-03-17 14:19:04.395231487 +0100
-@@ -7839,3 +7839,15 @@ void nsWindow::SetEGLNativeWindowSize(
+diff -up firefox-75.0/widget/gtk/nsWindow.cpp.mozilla-1623060 firefox-75.0/widget/gtk/nsWindow.cpp
+--- firefox-75.0/widget/gtk/nsWindow.cpp.mozilla-1623060	2020-04-06 23:03:37.627884434 +0200
++++ firefox-75.0/widget/gtk/nsWindow.cpp	2020-04-06 23:03:37.633884397 +0200
+@@ -7925,3 +7925,15 @@ void nsWindow::SetEGLNativeWindowSize(
  
  nsWindow* nsWindow::GetFocusedWindow() { return gFocusWindow; }
  #endif
@@ -67,10 +60,10 @@ diff -up firefox-74.0/widget/gtk/nsWindow.cpp.mozilla-1623060 firefox-74.0/widge
 +  }
 +  return size;
 +}
-diff -up firefox-74.0/widget/gtk/nsWindow.h.mozilla-1623060 firefox-74.0/widget/gtk/nsWindow.h
---- firefox-74.0/widget/gtk/nsWindow.h.mozilla-1623060	2020-03-09 14:10:19.000000000 +0100
-+++ firefox-74.0/widget/gtk/nsWindow.h	2020-03-17 14:19:04.395231487 +0100
-@@ -291,6 +291,7 @@ class nsWindow final : public nsBaseWidg
+diff -up firefox-75.0/widget/gtk/nsWindow.h.mozilla-1623060 firefox-75.0/widget/gtk/nsWindow.h
+--- firefox-75.0/widget/gtk/nsWindow.h.mozilla-1623060	2020-04-03 21:35:39.000000000 +0200
++++ firefox-75.0/widget/gtk/nsWindow.h	2020-04-06 23:03:37.632884403 +0200
+@@ -293,6 +293,7 @@ class nsWindow final : public nsBaseWidg
                                                  int32_t aVertical) override;
  
    MozContainer* GetMozContainer() { return mContainer; }
@@ -78,9 +71,9 @@ diff -up firefox-74.0/widget/gtk/nsWindow.h.mozilla-1623060 firefox-74.0/widget/
    // GetMozContainerWidget returns the MozContainer even for undestroyed
    // descendant windows
    GtkWidget* GetMozContainerWidget();
-diff -up firefox-74.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1623060 firefox-74.0/widget/gtk/WindowSurfaceWayland.cpp
---- firefox-74.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1623060	2020-03-09 14:10:19.000000000 +0100
-+++ firefox-74.0/widget/gtk/WindowSurfaceWayland.cpp	2020-03-17 14:19:04.394231493 +0100
+diff -up firefox-75.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1623060 firefox-75.0/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-75.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1623060	2020-04-03 21:35:43.000000000 +0200
++++ firefox-75.0/widget/gtk/WindowSurfaceWayland.cpp	2020-04-06 23:03:37.632884403 +0200
 @@ -527,9 +527,6 @@ WindowSurfaceWayland::WindowSurfaceWayla
      mShmBackupBuffer[i] = nullptr;
      mDMABackupBuffer[i] = nullptr;
@@ -232,9 +225,9 @@ diff -up firefox-74.0/widget/gtk/WindowSurfaceWayland.cpp.mozilla-1623060 firefo
      LOGWAYLAND(("    mDrawToWaylandBufferDirectly = %d\n",
                  mDrawToWaylandBufferDirectly));
    }
-diff -up firefox-74.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1623060 firefox-74.0/widget/gtk/WindowSurfaceWayland.h
---- firefox-74.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1623060	2020-03-09 14:10:18.000000000 +0100
-+++ firefox-74.0/widget/gtk/WindowSurfaceWayland.h	2020-03-17 14:19:04.394231493 +0100
+diff -up firefox-75.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1623060 firefox-75.0/widget/gtk/WindowSurfaceWayland.h
+--- firefox-75.0/widget/gtk/WindowSurfaceWayland.h.mozilla-1623060	2020-04-03 21:35:39.000000000 +0200
++++ firefox-75.0/widget/gtk/WindowSurfaceWayland.h	2020-04-06 23:03:37.631884410 +0200
 @@ -261,8 +261,14 @@ class WindowSurfaceWayland : public Wind
    nsWindow* mWindow;
    // Buffer screen rects helps us understand if we operate on
