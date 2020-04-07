@@ -363,7 +363,7 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
-#%patch46 -p1 -b .nss-version
+%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom

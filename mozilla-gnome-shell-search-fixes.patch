@@ -1,7 +1,16 @@
-diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-fixes firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp
---- firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-fixes	2020-04-01 12:45:40.567097335 +0200
-+++ firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp	2020-04-01 13:01:05.014591437 +0200
-@@ -289,20 +289,12 @@ AsyncFaviconDataReady::OnComplete(nsIURI
+diff -up firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-fixes firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp
+--- firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gnome-shell-search-fixes	2020-04-07 08:01:50.587124776 +0200
++++ firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp	2020-04-07 10:14:02.530380225 +0200
+@@ -26,6 +26,8 @@
+ #include "nsIStringBundle.h"
+ #include "imgIContainer.h"
+ #include "imgITools.h"
++#include "nsNetCID.h"
++#include "nsIIOService.h"
+ 
+ #include "mozilla/gfx/DataSurfaceHelpers.h"
+ 
+@@ -289,20 +291,12 @@ AsyncFaviconDataReady::OnComplete(nsIURI
  }
  
  void nsGNOMEShellSearchProvider::ComposeSearchResultReply(
@@ -26,7 +35,7 @@ diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
    }
  
    DBusMessageIter iter;
-@@ -310,30 +302,41 @@ void nsGNOMEShellSearchProvider::Compose
+@@ -310,30 +304,41 @@ void nsGNOMEShellSearchProvider::Compose
    DBusMessageIter iterArray;
    dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY, "s", &iterArray);
  
@@ -87,7 +96,7 @@ diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
    }
  
    nsPrintfCString searchString("%s:%s", KEYWORD_SEARCH_STRING, aSearchTerm);
-@@ -346,7 +349,7 @@ void nsGNOMEShellSearchProvider::Compose
+@@ -346,7 +351,7 @@ void nsGNOMEShellSearchProvider::Compose
  DBusHandlerResult nsGNOMEShellSearchProvider::GetInitialResultSet(
      DBusMessage* aMsg) {
    DBusMessage* reply;
@@ -96,7 +105,7 @@ diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
    int elements;
  
    if (!dbus_message_get_args(aMsg, nullptr, DBUS_TYPE_ARRAY, DBUS_TYPE_STRING,
-@@ -356,9 +359,10 @@ DBusHandlerResult nsGNOMEShellSearchProv
+@@ -356,9 +361,10 @@ DBusHandlerResult nsGNOMEShellSearchProv
    } else {
      reply = dbus_message_new_method_return(aMsg);
      nsresult rv = NewHistorySearch(stringArray[0]);
@@ -110,7 +119,7 @@ diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
      dbus_free_string_array(stringArray);
    }
  
-@@ -384,9 +388,8 @@ DBusHandlerResult nsGNOMEShellSearchProv
+@@ -384,9 +390,8 @@ DBusHandlerResult nsGNOMEShellSearchProv
    } else {
      reply = dbus_message_new_method_return(aMsg);
      nsresult rv = NewHistorySearch(stringArray[0]);
@@ -122,7 +131,7 @@ diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
    }
  
    if (unusedArray) {
-@@ -556,6 +559,10 @@ void nsGNOMEShellSearchProvider::LaunchW
+@@ -556,6 +561,10 @@ void nsGNOMEShellSearchProvider::LaunchW
      nsCOMPtr<nsINavHistoryResultNode> child;
      mHistResultContainer->GetChild(keyIndex, getter_AddRefs(child));
  
@@ -133,9 +142,9 @@ diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.cpp.gn
      nsAutoCString uri;
      nsresult rv = child->GetUri(uri);
      if (NS_FAILED(rv)) {
-diff -up firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-fixes firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h
---- firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-fixes	2020-04-01 12:45:40.569097323 +0200
-+++ firefox-74.0/browser/components/shell/nsGNOMEShellSearchProvider.h	2020-04-01 12:52:51.368536263 +0200
+diff -up firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-fixes firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.h
+--- firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.h.gnome-shell-search-fixes	2020-04-07 08:01:50.587124776 +0200
++++ firefox-75.0/browser/components/shell/nsGNOMEShellSearchProvider.h	2020-04-07 09:56:30.857553820 +0200
 @@ -70,7 +70,8 @@ class nsGNOMEShellSearchProvider : publi
    bool IsHistoryResultNodeURI(nsINavHistoryResultNode* aHistoryNode);
    void AppendResultID(DBusMessageIter* aIter, const char* aID);
