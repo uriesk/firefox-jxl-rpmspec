@@ -281,6 +281,8 @@ BuildRequires:  libasan
 BuildRequires:  libasan-static
 %endif
 
+BuildRequires:  perl-interpreter
+
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
 
