@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        75.0
-Release:        1%{?nss_tag}%{?dist}
+Release:        2%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -224,7 +224,6 @@ BuildRequires:  libvpx-devel >= %{libvpx_version}
 %endif
 BuildRequires:  autoconf213
 BuildRequires:  pkgconfig(libpulse)
-BuildRequires:  pkgconfig(gconf-2.0)
 BuildRequires:  yasm
 BuildRequires:  llvm
 BuildRequires:  llvm-devel
@@ -963,6 +962,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Apr 14 2020 Jan Horak <jhorak@redhat.com> - 75.0-2
+- Removed gconf-2.0 build requirement
+
 * Mon Apr 06 2020 Martin Stransky <stransky@redhat.com> - 75.0-1
 - Updated to 75.0
 
