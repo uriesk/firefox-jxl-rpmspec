@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        75.0
-Release:        2%{?nss_tag}%{?dist}
+Release:        3%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -189,6 +189,7 @@ Patch425:        mozilla-1623106.patch
 Patch574:        firefox-pipewire.patch
 Patch576:        mozilla-1623060.patch
 Patch578:        mozilla-1627469.patch
+Patch579:        browser-tabbar-dad-mzbz1527976.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -398,6 +399,7 @@ This package contains results of tests executed during build.
 %patch574 -p1 -b .firefox-pipewire
 %patch576 -p1 -b .mozilla-1623060
 %patch578 -p1 -b .mozilla-1627469
+%patch579 -p1 -b .mozilla-1527976
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -964,6 +966,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 23 2020 Martin Stransky <stransky@redhat.com> - 75.0-3
+- Added fix for mozilla bug #1527976 (browser D&D)
+
 * Tue Apr 14 2020 Jan Horak <jhorak@redhat.com> - 75.0-2
 - Removed gconf-2.0 build requirement
 
