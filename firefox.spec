@@ -913,7 +913,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/distribution/distribution.ini
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
-%attr(644, root, root) %{mozappdir}/browser/blocklist.xml
 %if %{with langpacks}
 %dir %{langpackdir}
 %endif
@@ -947,8 +946,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/gmp-clearkey
 %{mozappdir}/fonts/TwemojiMozilla.ttf
 %if !%{?system_nss}
-%{mozappdir}/libfreeblpriv3.chk
-%{mozappdir}/libsoftokn3.chk
 %exclude %{mozappdir}/libnssckbi.so
 %endif
 %if %{build_with_asan}
