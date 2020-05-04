@@ -24,7 +24,7 @@ ExcludeArch: s390x
 %global enable_mozilla_crashreporter 0
 %endif
 
-%global system_nss        1
+%global system_nss        0
 %global system_ffi        1
 %ifarch armv7hl
 %global system_libvpx     1
