@@ -24,7 +24,7 @@ ExcludeArch: s390x
 %global enable_mozilla_crashreporter 0
 %endif
 
-%global system_nss        0
+%global system_nss        1
 %global system_ffi        1
 %ifarch armv7hl
 %global system_libvpx     1
@@ -87,7 +87,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.50
+%global nss_version 3.51.1
 %global nss_build_version %{nss_version}
 %endif
 
@@ -361,7 +361,7 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
-%patch46 -p1 -b .nss-version
+#%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
