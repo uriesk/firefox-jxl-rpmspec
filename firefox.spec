@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        76.0
-Release:        1%{?nss_tag}%{?dist}
+Release:        2%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -484,7 +484,8 @@ echo "ac_add_options --disable-jemalloc" >> .mozconfig
 
 # api keys full path
 echo "ac_add_options --with-mozilla-api-keyfile=`pwd`/mozilla-api-key" >> .mozconfig
-echo "ac_add_options --with-google-location-service-api-keyfile=`pwd`/google-api-key" >> .mozconfig
+# It seems that the api key we have is for the safe browsing only
+#echo "ac_add_options --with-google-location-service-api-keyfile=`pwd`/google-api-key" >> .mozconfig
 echo "ac_add_options --with-google-safebrowsing-api-keyfile=`pwd`/google-api-key" >> .mozconfig
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
@@ -957,6 +958,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue May 05 2020 Jan Horak <jhorak@redhat.com> - 76.0-2
+- Don't use google safe browsing api key for the geolocation
+
 * Sun May 3 2020 Martin Stransky <stransky@redhat.com> - 76.0-1
 - Updated to 76.0
 
