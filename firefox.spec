@@ -187,6 +187,13 @@ Patch422:        mozilla-1580174-webrtc-popup.patch
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire.patch
 
+#VA-API patches
+Patch579:        mozilla-1625431.patch
+Patch580:        mozilla-1628690.patch
+Patch581:        mozilla-1630754.patch
+Patch582:        mozilla-1619543.patch
+Patch583:        mozilla-1632059.patch
+
 # PGO/LTO patches
 Patch600:        pgo.patch
 Patch601:        mozilla-1516081.patch
@@ -391,6 +398,12 @@ This package contains results of tests executed during build.
 
 # Wayland specific upstream patches
 %patch574 -p1 -b .firefox-pipewire
+
+%patch580 -p1 -b .mozilla-1628690
+%patch582 -p1 -b .mozilla-1619543
+%patch579 -p1 -b .mozilla-1625431
+%patch581 -p1 -b .mozilla-1630754
+%patch583 -p1 -b .mozilla-1632059
 
 # PGO patches
 %patch600 -p1 -b .pgo
