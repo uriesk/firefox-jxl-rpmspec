@@ -457,6 +457,8 @@ echo "ac_add_options --disable-crashreporter" >> .mozconfig
 
 %if 0%{?build_tests}
 echo "ac_add_options --enable-tests" >> .mozconfig
+%else
+echo "ac_add_options --disable-tests" >> .mozconfig
 %endif
 
 %if !%{?system_jpeg}
