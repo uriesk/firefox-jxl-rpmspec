@@ -10,8 +10,8 @@ ExcludeArch: armv7hl
 %endif
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
-# Disabled due to neon build error
-# ExcludeArch: aarch64
+# Disabled due to linker failures
+ExcludeArch: aarch64
 
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
