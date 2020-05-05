@@ -65,7 +65,7 @@ index 1eb8ead26efa..316468eed1fc 100644
  };
  
 diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-index 379341c833de..d156be1c18a0 100644
+index 379341c833de..58ab8279f4b7 100644
 --- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 +++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 @@ -18,6 +18,11 @@
@@ -108,7 +108,13 @@ index 379341c833de..d156be1c18a0 100644
  // static
  void BaseCapturerPipeWire::OnStateChanged(void* data,
                                            pw_remote_state old_state,
-@@ -112,7 +138,7 @@ void BaseCapturerPipeWire::OnStreamFormatChanged(void* data,
+@@ -108,11 +134,13 @@ void BaseCapturerPipeWire::OnStreamFormatChanged(void* data,
+   auto stride = SPA_ROUND_UP_N(width * kBytesPerPixel, 4);
+   auto size = height * stride;
+ 
++  that->desktop_size_ = DesktopSize(width, height);
++
+   uint8_t buffer[1024] = {};
    auto builder = spa_pod_builder{buffer, sizeof(buffer)};
  
    // Setup buffers and meta header for new format.
@@ -117,7 +123,7 @@ index 379341c833de..d156be1c18a0 100644
    params[0] = reinterpret_cast<spa_pod*>(spa_pod_builder_object(
        &builder,
        // id to enumerate buffer requirements
-@@ -141,8 +167,14 @@ void BaseCapturerPipeWire::OnStreamFormatChanged(void* data,
+@@ -141,8 +169,14 @@ void BaseCapturerPipeWire::OnStreamFormatChanged(void* data,
        // Size: size of the metadata, specified as integer (i)
        ":", that->pw_core_type_->param_meta.size, "i",
        sizeof(struct spa_meta_header)));
@@ -134,7 +140,7 @@ index 379341c833de..d156be1c18a0 100644
  }
  
  // static
-@@ -150,15 +182,25 @@ void BaseCapturerPipeWire::OnStreamProcess(void* data) {
+@@ -150,15 +184,25 @@ void BaseCapturerPipeWire::OnStreamProcess(void* data) {
    BaseCapturerPipeWire* that = static_cast<BaseCapturerPipeWire*>(data);
    RTC_DCHECK(that);
  
@@ -164,7 +170,7 @@ index 379341c833de..d156be1c18a0 100644
  }
  
  BaseCapturerPipeWire::BaseCapturerPipeWire(CaptureSourceType source_type)
-@@ -197,10 +239,6 @@ BaseCapturerPipeWire::~BaseCapturerPipeWire() {
+@@ -197,10 +241,6 @@ BaseCapturerPipeWire::~BaseCapturerPipeWire() {
      pw_loop_destroy(pw_loop_);
    }
  
@@ -175,7 +181,45 @@ index 379341c833de..d156be1c18a0 100644
    if (start_request_signal_id_) {
      g_dbus_connection_signal_unsubscribe(connection_, start_request_signal_id_);
    }
-@@ -332,8 +370,7 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
+@@ -290,12 +330,7 @@ void BaseCapturerPipeWire::InitPipeWireTypes() {
+ 
+ void BaseCapturerPipeWire::CreateReceivingStream() {
+   spa_rectangle pwMinScreenBounds = spa_rectangle{1, 1};
+-  spa_rectangle pwScreenBounds =
+-      spa_rectangle{static_cast<uint32_t>(desktop_size_.width()),
+-                    static_cast<uint32_t>(desktop_size_.height())};
+-
+-  spa_fraction pwFrameRateMin = spa_fraction{0, 1};
+-  spa_fraction pwFrameRateMax = spa_fraction{60, 1};
++  spa_rectangle pwMaxScreenBounds = spa_rectangle{INT32_MAX, INT32_MAX};
+ 
+   pw_properties* reuseProps = pw_properties_new("pipewire.client.reuse", "1",
+                                                 /*end of varargs*/ nullptr);
+@@ -313,27 +348,19 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
+       // then allowed formats are enumerated (e) and the format is undecided (u)
+       // to allow negotiation
+       ":", pw_type_->format_video.format, "Ieu", pw_type_->video_format.BGRx,
+-      SPA_POD_PROP_ENUM(2, pw_type_->video_format.RGBx,
+-                        pw_type_->video_format.BGRx),
++      SPA_POD_PROP_ENUM(
++          4, pw_type_->video_format.RGBx, pw_type_->video_format.BGRx,
++          pw_type_->video_format.RGBA, pw_type_->video_format.BGRA),
+       // Video size: specified as rectangle (R), preferred size is specified as
+       // first parameter, then allowed size is defined as range (r) from min and
+       // max values and the format is undecided (u) to allow negotiation
+-      ":", pw_type_->format_video.size, "Rru", &pwScreenBounds, 2,
+-      &pwMinScreenBounds, &pwScreenBounds,
+-      // Frame rate: specified as fraction (F) and set to minimum frame rate
+-      // value
+-      ":", pw_type_->format_video.framerate, "F", &pwFrameRateMin,
+-      // Max frame rate: specified as fraction (F), preferred frame rate is set
+-      // to maximum value, then allowed frame rate is defined as range (r) from
+-      // min and max values and it is undecided (u) to allow negotiation
+-      ":", pw_type_->format_video.max_framerate, "Fru", &pwFrameRateMax, 2,
+-      &pwFrameRateMin, &pwFrameRateMax));
++      ":", pw_type_->format_video.size, "Rru", &pwMinScreenBounds,
++      SPA_POD_PROP_MIN_MAX(&pwMinScreenBounds, &pwMaxScreenBounds)));
+ 
    pw_stream_add_listener(pw_stream_, &spa_stream_listener_, &pw_stream_events_,
                           this);
    pw_stream_flags flags = static_cast<pw_stream_flags>(
@@ -185,7 +229,7 @@ index 379341c833de..d156be1c18a0 100644
    if (pw_stream_connect(pw_stream_, PW_DIRECTION_INPUT, /*port_path=*/nullptr,
                          flags, params,
                          /*n_params=*/1) != 0) {
-@@ -344,15 +381,77 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
+@@ -344,15 +371,81 @@ void BaseCapturerPipeWire::CreateReceivingStream() {
  }
  
  void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
@@ -228,7 +272,10 @@ index 379341c833de..d156be1c18a0 100644
  
 -  uint32_t maxSize = spaBuffer->datas[0].maxsize;
 -  int32_t srcStride = spaBuffer->datas[0].chunk->stride;
-+  DesktopSize prev_crop_size = video_crop_size_.value_or(DesktopSize(0, 0));
++  DesktopSize prev_crop_size = DesktopSize(0, 0);
++  if (video_crop_size_initialized_) {
++    prev_crop_size = video_crop_size_;
++  }  
 +
 +  if ((video_crop = static_cast<struct spa_meta_video_crop*>(
 +           spa_buffer_find_meta(spaBuffer, pw_core_type_->meta.VideoCrop)))) {
@@ -237,37 +284,38 @@ index 379341c833de..d156be1c18a0 100644
 +    if ((video_crop->width != desktop_size_.width() ||
 +        video_crop->height != desktop_size_.height()) && video_crop->width && video_crop->height) {
 +      video_crop_size_ = DesktopSize(video_crop->width, video_crop->height);
++      video_crop_size_initialized_ = true;
 +    } else {
-+      video_crop_size_.reset();
++      video_crop_size_initialized_ = false;
 +    }
 +  } else {
-+    video_crop_size_.reset();
++    video_crop_size_initialized_ = false;
 +  }
 +
 +  size_t frame_size;
-+  if (video_crop_size_) {
++  if (video_crop_size_initialized_) {
 +    frame_size =
-+        video_crop_size_->width() * video_crop_size_->height() * kBytesPerPixel;
++        video_crop_size_.width() * video_crop_size_.height() * kBytesPerPixel;
 +  } else {
 +    frame_size =
 +        desktop_size_.width() * desktop_size_.height() * kBytesPerPixel;
 +  }
 +
 +  if (!current_frame_ ||
-+      (video_crop_size_ && !video_crop_size_->equals(prev_crop_size))) {
++      (video_crop_size_initialized_ && !video_crop_size_.equals(prev_crop_size))) {
 +    current_frame_ = std::make_unique<uint8_t[]>(frame_size);
 +  }
 +  RTC_DCHECK(current_frame_ != nullptr);
 +
-+  const int32_t dstStride = video_crop_size_
-+                                ? video_crop_size_->width() * kBytesPerPixel
++  const int32_t dstStride = video_crop_size_initialized_
++                                ? video_crop_size_.width() * kBytesPerPixel
 +                                : desktop_size_.width() * kBytesPerPixel;
 +  const int32_t srcStride = spaBuffer->datas[0].chunk->stride;
 +
    if (srcStride != (desktop_size_.width() * kBytesPerPixel)) {
      RTC_LOG(LS_ERROR) << "Got buffer with stride different from screen stride: "
                        << srcStride
-@@ -361,21 +460,39 @@ void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
+@@ -361,21 +454,39 @@ void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
      return;
    }
  
@@ -276,18 +324,18 @@ index 379341c833de..d156be1c18a0 100644
 +  dst = current_frame_.get();
 +
 +  // Adjust source content based on crop video position
-+  if (video_crop_size_ &&
-+      (video_crop->y + video_crop_size_->height() <= desktop_size_.height())) {
++  if (video_crop_size_initialized_ &&
++      (video_crop->y + video_crop_size_.height() <= desktop_size_.height())) {
 +    for (int i = 0; i < video_crop->y; ++i) {
 +      src += srcStride;
 +    }
 +  }
 +  const int xOffset =
-+      video_crop_size_ && (video_crop->x + video_crop_size_->width() <=
++      video_crop_size_initialized_ && (video_crop->x + video_crop_size_.width() <=
 +                           desktop_size_.width())
 +          ? video_crop->x * kBytesPerPixel
 +          : 0;
-+  const int height = video_crop_size_ ? video_crop_size_->height() : desktop_size_.height();
++  const int height = video_crop_size_initialized_ ? video_crop_size_.height() : desktop_size_.height();
 +  for (int i = 0; i < height; ++i) {
 +    // Adjust source content based on crop video position if needed
 +    src += xOffset;
@@ -320,13 +368,27 @@ index 379341c833de..d156be1c18a0 100644
    }
  }
  
-@@ -813,10 +930,12 @@ void BaseCapturerPipeWire::CaptureFrame() {
+@@ -725,10 +836,6 @@ void BaseCapturerPipeWire::OnStartRequestResponseSignal(
+       g_variant_get(variant, "(u@a{sv})", &stream_id, &options);
+       RTC_DCHECK(options != nullptr);
+ 
+-      g_variant_lookup(options, "size", "(ii)", &width, &height);
+-
+-      that->desktop_size_.set(width, height);
+-
+       g_variant_unref(options);
+       g_variant_unref(variant);
+     }
+@@ -813,10 +920,15 @@ void BaseCapturerPipeWire::CaptureFrame() {
      return;
    }
  
 -  std::unique_ptr<DesktopFrame> result(new BasicDesktopFrame(desktop_size_));
-+  DesktopSize frame_size = video_crop_size_.value_or(desktop_size_);
-+
++  DesktopSize frame_size = desktop_size_;
++  if (video_crop_size_initialized_) {
++    frame_size = video_crop_size_;
++  }
++  
 +  std::unique_ptr<DesktopFrame> result(new BasicDesktopFrame(frame_size));
    result->CopyPixelsFrom(
 -      current_frame_, (desktop_size_.width() * kBytesPerPixel),
@@ -336,7 +398,7 @@ index 379341c833de..d156be1c18a0 100644
    if (!result) {
      callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
      return;
-@@ -837,4 +956,22 @@ bool BaseCapturerPipeWire::SelectSource(SourceId id) {
+@@ -837,4 +949,22 @@ bool BaseCapturerPipeWire::SelectSource(SourceId id) {
    return true;
  }
  
@@ -360,7 +422,7 @@ index 379341c833de..d156be1c18a0 100644
 +
  }  // namespace webrtc
 diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
-index 56b101acbaa6..56af57891379 100644
+index 56b101acbaa6..ef90a86a5a4b 100644
 --- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
 +++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
 @@ -32,7 +32,11 @@ class PipeWireType {
@@ -398,11 +460,12 @@ index 56b101acbaa6..56af57891379 100644
  
    // <-- end of PipeWire types
  
-@@ -78,10 +88,11 @@ class BaseCapturerPipeWire : public DesktopCapturer {
+@@ -78,10 +88,12 @@ class BaseCapturerPipeWire : public DesktopCapturer {
    guint sources_request_signal_id_ = 0;
    guint start_request_signal_id_ = 0;
  
-+  std::optional<DesktopSize> video_crop_size_ = std::nullopt;
++  bool video_crop_size_initialized_ = false;
++  DesktopSize video_crop_size_;;
    DesktopSize desktop_size_ = {};
    DesktopCaptureOptions options_ = {};
  
@@ -411,7 +474,7 @@ index 56b101acbaa6..56af57891379 100644
    Callback* callback_ = nullptr;
  
    bool portal_init_failed_ = false;
-@@ -95,6 +106,7 @@ class BaseCapturerPipeWire : public DesktopCapturer {
+@@ -95,6 +107,7 @@ class BaseCapturerPipeWire : public DesktopCapturer {
  
    void ConvertRGBxToBGRx(uint8_t* frame, uint32_t size);
  
