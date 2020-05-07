@@ -118,7 +118,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        76.0
-Release:        2%{?nss_tag}%{?dist}
+Release:        3%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -193,6 +193,7 @@ Patch580:        mozilla-1628690.patch
 Patch581:        mozilla-1630754.patch
 Patch582:        mozilla-1619543.patch
 Patch583:        mozilla-1632059.patch
+Patch584:        firefox-disable-ffvpx-with-vapi.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -404,6 +405,7 @@ This package contains results of tests executed during build.
 %patch579 -p1 -b .mozilla-1625431
 %patch581 -p1 -b .mozilla-1630754
 %patch583 -p1 -b .mozilla-1632059
+%patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -978,6 +980,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 7 2020 Martin Stransky <stransky@redhat.com> - 76.0-3
+- Disable ffvpx when va-api is enabled.
+
 * Tue May 05 2020 Jan Horak <jhorak@redhat.com> - 76.0-2
 - Don't use google safe browsing api key for the geolocation
 
