@@ -117,13 +117,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        76.0
-Release:        3%{?nss_tag}%{?dist}
+Version:        76.0.1
+Release:        1%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200502.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200508.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -980,6 +980,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri May 8 2020 Martin Stransky <stransky@redhat.com> - 76.0.1-1
+- Updated to 76.0.1
+
 * Thu May 7 2020 Martin Stransky <stransky@redhat.com> - 76.0-3
 - Disable ffvpx when va-api is enabled.
 
