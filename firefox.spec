@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        76.0.1
-Release:        3%{?nss_tag}%{?dist}
+Release:        4%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -185,7 +185,8 @@ Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 
 # Wayland specific upstream patches
-Patch574:        firefox-pipewire.patch
+Patch574:        firefox-pipewire-0-2.patch
+Patch575:        firefox-pipewire-0-3.patch
 
 #VA-API patches
 Patch579:        mozilla-1625431.patch
@@ -239,11 +240,7 @@ BuildRequires:  clang-libs
 BuildRequires:  lld
 %endif
 
-%if 0%{?fedora} < 32
 BuildRequires:  pipewire-devel
-%else
-BuildRequires:  pipewire0.2-devel
-%endif
 
 %if !0%{?use_bundled_cbindgen}
 BuildRequires:  cbindgen
@@ -399,7 +396,11 @@ This package contains results of tests executed during build.
 %endif
 
 # Wayland specific upstream patches
-%patch574 -p1 -b .firefox-pipewire
+%if 0%{?fedora} < 32
+%patch574 -p1 -b .firefox-pipewire-0-2
+%else
+%patch575 -p1 -b .firefox-pipewire-0-3
+%endif
 
 %patch580 -p1 -b .mozilla-1628690
 %patch582 -p1 -b .mozilla-1619543
@@ -982,6 +983,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 21 2020 Jan Grulich <jgrulich@redhat.com> - 76.0.1-4
+- Add support for PipeWire 0.3
+
 * Wed May 20 2020 Peter Robinson <pbrobinson@fedoraproject.org> - 76.0.1-3
 - Build aarch64 again so aarch64 users get updates
 
