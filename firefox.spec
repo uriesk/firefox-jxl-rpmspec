@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        76.0.1
-Release:        5%{?nss_tag}%{?dist}
+Release:        6%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -199,6 +199,7 @@ Patch585:        firefox-vaapi-extra-frames.patch
 Patch586:        mozilla-1619882-1.patch
 Patch587:        mozilla-1619882-2.patch
 Patch588:        mozilla-1619882-3.patch
+Patch589:        mozilla-1634213.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -415,6 +416,7 @@ This package contains results of tests executed during build.
 %patch586 -p1 -b .mozilla-1619882-1
 %patch587 -p1 -b .mozilla-1619882-2
 %patch588 -p1 -b .mozilla-1619882-3
+%patch589 -p1 -b .mozilla-1634213
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -989,6 +991,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon May 25 2020 Martin Stransky <stransky@redhat.com> - 76.0.1-6
+- Added fix for mozbz#1634213
+
 * Mon May 25 2020 Martin Stransky <stransky@redhat.com> - 76.0.1-5
 - Added fix for mozbz#1619882 - video flickering when va-api is used.
 
