@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        76.0.1
-Release:        4%{?nss_tag}%{?dist}
+Release:        5%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -196,6 +196,9 @@ Patch582:        mozilla-1619543.patch
 Patch583:        mozilla-1632059.patch
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
+Patch586:        mozilla-1619882-1.patch
+Patch587:        mozilla-1619882-2.patch
+Patch588:        mozilla-1619882-3.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -409,6 +412,9 @@ This package contains results of tests executed during build.
 %patch583 -p1 -b .mozilla-1632059
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
+%patch586 -p1 -b .mozilla-1619882-1
+%patch587 -p1 -b .mozilla-1619882-2
+%patch588 -p1 -b .mozilla-1619882-3
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -983,6 +989,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon May 25 2020 Martin Stransky <stransky@redhat.com> - 76.0.1-5
+- Added fix for mozbz#1619882 - video flickering when va-api is used.
+
 * Thu May 21 2020 Jan Grulich <jgrulich@redhat.com> - 76.0.1-4
 - Add support for PipeWire 0.3
 
