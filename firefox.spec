@@ -117,13 +117,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        76.0.1
-Release:        7%{?nss_tag}%{?dist}
+Version:        77.0
+Release:        1%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200508.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200529.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -172,10 +172,6 @@ Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
-Patch239:        mozilla-gnome-shell-search-provider.patch
-Patch240:        mozilla-gnome-shell-search-provider-icons.patch
-Patch241:        kiosk-workaround.patch
-Patch242:        mozilla-gnome-shell-search-fixes.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -183,6 +179,8 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
+Patch500:        mozilla-1634293.patch
+Patch501:        mozilla-1639197.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -190,10 +188,6 @@ Patch575:        firefox-pipewire-0-3.patch
 
 #VA-API patches
 Patch579:        mozilla-1625431.patch
-Patch580:        mozilla-1628690.patch
-Patch581:        mozilla-1630754.patch
-Patch582:        mozilla-1619543.patch
-Patch583:        mozilla-1632059.patch
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
 Patch586:        mozilla-1619882-1.patch
@@ -388,17 +382,14 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
-%patch239 -p1 -b .gnome-shell-search-provider
-%patch240 -p1 -b .gnome-shell-search-provider-icons
-# Workaround for kiosk mode
-# https://bugzilla.mozilla.org/show_bug.cgi?id=1594738
-#%patch241 -p1 -b .kiosk-workaround
-%patch242 -p1 -b .gnome-shell-search-fixes
 
 %patch402 -p1 -b .1196777
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
+
+%patch500 -p1 -b .mozilla-1634293
+%patch501 -p1 -b .mozilla-1639197
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -407,11 +398,7 @@ This package contains results of tests executed during build.
 %patch575 -p1 -b .firefox-pipewire-0-3
 %endif
 
-%patch580 -p1 -b .mozilla-1628690
-%patch582 -p1 -b .mozilla-1619543
 %patch579 -p1 -b .mozilla-1625431
-%patch581 -p1 -b .mozilla-1630754
-%patch583 -p1 -b .mozilla-1632059
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
 %patch586 -p1 -b .mozilla-1619882-1
@@ -993,6 +980,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri May 29 2020 Martin Stransky <stransky@redhat.com> - 77.0-1
+- Updated to Firefox 77.0
+
 * Mon May 25 2020 Martin Stransky <stransky@redhat.com> - 76.0.1-7
 - Added fix for mozbz#1632456
 
