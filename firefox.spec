@@ -514,6 +514,8 @@ echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .
 chmod -x third_party/rust/itertools/src/lib.rs
 chmod a-x third_party/rust/gfx-backend-vulkan/src/*.rs
 chmod a-x third_party/rust/gfx-hal/src/*.rs
+chmod a-x third_party/rust/ash/src/extensions/ext/*.rs
+chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 
 #---------------------------------------------------------------------
 
