@@ -607,6 +607,9 @@ MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fsanitize=address -Dxmalloc=myxmalloc"
 MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address -ldl"
 %endif
 
+# We don't wantfirefox to use CK_GCM_PARAMS_V3 in nss
+MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -DNSS_PKCS11_3_0_STRICT"
+
 %if !%{build_with_clang}
 echo "export CFLAGS=\"$MOZ_OPT_FLAGS\"" >> .mozconfig
 echo "export CXXFLAGS=\"$MOZ_OPT_FLAGS\"" >> .mozconfig
