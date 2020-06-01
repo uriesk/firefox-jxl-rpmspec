@@ -187,7 +187,6 @@ Patch574:        firefox-pipewire-0-2.patch
 Patch575:        firefox-pipewire-0-3.patch
 
 #VA-API patches
-Patch579:        mozilla-1625431.patch
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
 Patch586:        mozilla-1619882-1.patch
@@ -398,7 +397,6 @@ This package contains results of tests executed during build.
 %patch575 -p1 -b .firefox-pipewire-0-3
 %endif
 
-%patch579 -p1 -b .mozilla-1625431
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
 %patch586 -p1 -b .mozilla-1619882-1
