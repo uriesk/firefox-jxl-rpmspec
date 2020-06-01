@@ -87,7 +87,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.51.1
+%global nss_version 3.52
 %global nss_build_version %{nss_version}
 %endif
 
