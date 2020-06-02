@@ -18,6 +18,19 @@ index 2081d0c683a4..641133bf1ea4 100644
      'pixman.h',
      'pk11func.h',
      'pk11pqg.h',
+diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn b/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
+index ba885217b3ba..201d3b755221 100644
+--- a/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
++++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
+@@ -158,7 +158,7 @@ if (rtc_include_tests) {
+ if (is_linux) {
+   if (rtc_use_pipewire) {
+     pkg_config("pipewire") {
+-      packages = [ "libpipewire-0.2" ]
++      packages = [ "libpipewire-0.3" ]
+ 
+       defines = [ "WEBRTC_USE_PIPEWIRE" ]
+     }
 diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build b/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
 index 90b40431c7e4..d844aa79d591 100644
 --- a/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
@@ -67,7 +80,7 @@ index 1eb8ead26efa..316468eed1fc 100644
  };
  
 diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-index 379341c833de..53e2683df2e8 100644
+index 379341c833de..76349f1fbd4d 100644
 --- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 +++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 @@ -15,8 +15,11 @@
@@ -250,13 +263,13 @@ index 379341c833de..53e2683df2e8 100644
 -  pw_buffer* buf = nullptr;
 +  struct pw_buffer *next_buffer;
 +  struct pw_buffer *buffer = nullptr;
- 
--  if (!(buf = pw_stream_dequeue_buffer(that->pw_stream_))) {
++
 +  next_buffer = pw_stream_dequeue_buffer(that->pw_stream_);
 +  while (next_buffer) {
 +    buffer = next_buffer;
 +    next_buffer = pw_stream_dequeue_buffer(that->pw_stream_);
-+
+ 
+-  if (!(buf = pw_stream_dequeue_buffer(that->pw_stream_))) {
 +    if (next_buffer)
 +      pw_stream_queue_buffer (that->pw_stream_, buffer);
 +  }
@@ -365,7 +378,7 @@ index 379341c833de..53e2683df2e8 100644
  
    if (pw_thread_loop_start(pw_main_loop_) < 0) {
      RTC_LOG(LS_ERROR) << "Failed to start main PipeWire loop";
-@@ -278,81 +266,120 @@ void BaseCapturerPipeWire::InitPipeWire() {
+@@ -278,81 +266,132 @@ void BaseCapturerPipeWire::InitPipeWire() {
    }
  }
  
@@ -476,14 +489,27 @@ index 379341c833de..53e2683df2e8 100644
 +    map = static_cast<uint8_t*>(mmap(
 +        nullptr, spaBuffer->datas[0].maxsize + spaBuffer->datas[0].mapoffset,
 +        PROT_READ, MAP_PRIVATE, spaBuffer->datas[0].fd, 0));
++
++    if (map == MAP_FAILED) {
++      RTC_LOG(LS_ERROR) << "Failed to mmap the memory: " << std::strerror(errno);
++      return;
++    }
++
 +    src = SPA_MEMBER(map, spaBuffer->datas[0].mapoffset, uint8_t);
 +  } else if (spaBuffer->datas[0].type == SPA_DATA_DmaBuf) {
 +    int fd;
 +    fd = spaBuffer->datas[0].fd;
-+
+ 
+-  if (!(src = spaBuffer->datas[0].data)) {
 +    map = static_cast<uint8_t*>(mmap(
 +        nullptr, spaBuffer->datas[0].maxsize + spaBuffer->datas[0].mapoffset,
 +        PROT_READ, MAP_PRIVATE, fd, 0));
++
++    if (map == MAP_FAILED) {
++      RTC_LOG(LS_ERROR) << "Failed to mmap the memory: " << std::strerror(errno);
++      return;
++    }
++
 +    SyncDmaBuf(fd, DMA_BUF_SYNC_START);
 +
 +    src = SPA_MEMBER(map, spaBuffer->datas[0].mapoffset, uint8_t);
@@ -491,16 +517,15 @@ index 379341c833de..53e2683df2e8 100644
 +    map = nullptr;
 +    src = static_cast<uint8_t*>(spaBuffer->datas[0].data);
 +  } else {
-+    return;
-+  }
- 
--  if (!(src = spaBuffer->datas[0].data)) {
-+  if (!src) {
      return;
    }
  
 -  uint32_t maxSize = spaBuffer->datas[0].maxsize;
 -  int32_t srcStride = spaBuffer->datas[0].chunk->stride;
++  if (!src) {
++    return;
++  }
++
 +  DesktopSize prev_crop_size = DesktopSize(0, 0);
 +  if (video_crop_size_initialized_) {
 +    prev_crop_size = video_crop_size_;
@@ -544,7 +569,7 @@ index 379341c833de..53e2683df2e8 100644
    if (srcStride != (desktop_size_.width() * kBytesPerPixel)) {
      RTC_LOG(LS_ERROR) << "Got buffer with stride different from screen stride: "
                        << srcStride
-@@ -361,21 +388,40 @@ void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
+@@ -361,21 +400,40 @@ void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
      return;
    }
  
@@ -598,7 +623,7 @@ index 379341c833de..53e2683df2e8 100644
    }
  }
  
-@@ -725,10 +771,7 @@ void BaseCapturerPipeWire::OnStartRequestResponseSignal(
+@@ -725,10 +783,7 @@ void BaseCapturerPipeWire::OnStartRequestResponseSignal(
        g_variant_get(variant, "(u@a{sv})", &stream_id, &options);
        RTC_DCHECK(options != nullptr);
  
@@ -610,7 +635,7 @@ index 379341c833de..53e2683df2e8 100644
        g_variant_unref(options);
        g_variant_unref(variant);
      }
-@@ -813,10 +856,15 @@ void BaseCapturerPipeWire::CaptureFrame() {
+@@ -813,10 +868,15 @@ void BaseCapturerPipeWire::CaptureFrame() {
      return;
    }
  
@@ -629,7 +654,7 @@ index 379341c833de..53e2683df2e8 100644
    if (!result) {
      callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
      return;
-@@ -837,4 +885,22 @@ bool BaseCapturerPipeWire::SelectSource(SourceId id) {
+@@ -837,4 +897,22 @@ bool BaseCapturerPipeWire::SelectSource(SourceId id) {
    return true;
  }
  
