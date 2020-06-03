@@ -118,12 +118,12 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        77.0.1
-Release:        1%{?nss_tag}%{?dist}
+Release:        2%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200602.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200603.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -983,6 +983,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jun 03 2020 Jan Horak <jhorak@redhat.com> - 77.0.1-2
+- Update to 77.0.1 build1
+
 * Wed Jun 03 2020 Jan Horak <jhorak@redhat.com> - 77.0.1-1
 - Fixing pipewire patch
 - New upstream version (77.0.1)
