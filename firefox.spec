@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        77.0.1
-Release:        2%{?nss_tag}%{?dist}
+Release:        3%{?nss_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -983,6 +983,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jun 23 2020 Martin Stransky <stransky@redhat.com> - 77.0.1-3
+- Build with PGO/LTO again.
+
 * Wed Jun 03 2020 Jan Horak <jhorak@redhat.com> - 77.0.1-2
 - Update to 77.0.1 build1
 
