@@ -179,8 +179,6 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
-Patch500:        mozilla-1634293.patch
-Patch501:        mozilla-1639197.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -189,11 +187,7 @@ Patch575:        firefox-pipewire-0-3.patch
 #VA-API patches
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
-Patch586:        mozilla-1619882-1.patch
-Patch587:        mozilla-1619882-2.patch
-Patch588:        mozilla-1619882-3.patch
 Patch589:        mozilla-1634213.patch
-Patch590:        mozilla-1632456.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -365,7 +359,7 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
-%patch46 -p1 -b .nss-version
+#%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
@@ -387,8 +381,6 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1238661
 %endif
 
-%patch500 -p1 -b .mozilla-1634293
-%patch501 -p1 -b .mozilla-1639197
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -399,11 +391,7 @@ This package contains results of tests executed during build.
 
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
-%patch586 -p1 -b .mozilla-1619882-1
-%patch587 -p1 -b .mozilla-1619882-2
-%patch588 -p1 -b .mozilla-1619882-3
 %patch589 -p1 -b .mozilla-1634213
-%patch590 -p1 -b .mozilla-1632456
 
 # PGO patches
 %patch600 -p1 -b .pgo
