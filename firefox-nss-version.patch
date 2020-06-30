@@ -1,12 +1,12 @@
-diff -up firefox-76.0/old-configure.in.nss-version firefox-76.0/old-configure.in
---- firefox-76.0/old-configure.in.nss-version	2020-05-03 19:12:01.771863688 +0200
-+++ firefox-76.0/old-configure.in	2020-05-03 19:17:53.216898766 +0200
-@@ -1506,7 +1506,7 @@ MOZ_ARG_WITH_BOOL(system-nss,
-     _USE_SYSTEM_NSS=1 )
+diff -up firefox-78.0/toolkit/moz.configure.nss-version firefox-78.0/toolkit/moz.configure
+--- firefox-78.0/toolkit/moz.configure.nss-version	2020-06-30 08:47:09.657501414 +0200
++++ firefox-78.0/toolkit/moz.configure	2020-06-30 08:47:12.652510169 +0200
+@@ -2089,7 +2089,7 @@ option('--with-system-nss', help='Use sy
  
- if test -n "$_USE_SYSTEM_NSS"; then
--    AM_PATH_NSS(3.52.1, [MOZ_SYSTEM_NSS=1], [AC_MSG_ERROR([you don't have NSS installed or your version is too old])])
-+    AM_PATH_NSS(3.52, [MOZ_SYSTEM_NSS=1], [AC_MSG_ERROR([you don't have NSS installed or your version is too old])])
- fi
+ imply_option('--with-system-nspr', True, when='--with-system-nss')
  
- NSS_CFLAGS="$NSS_CFLAGS -I${DIST}/include/nss"
+-nss_pkg = pkg_check_modules('NSS', 'nss >= 3.53.1', when='--with-system-nss', config=False)
++nss_pkg = pkg_check_modules('NSS', 'nss >= 3.53.0', when='--with-system-nss', config=False)
+ 
+ set_config('MOZ_SYSTEM_NSS', True, when='--with-system-nss')
+ 
