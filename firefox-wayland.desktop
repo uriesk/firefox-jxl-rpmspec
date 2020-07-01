@@ -228,3 +228,8 @@ Name[xh]=Ifestile yangasese entsha
 Name[zh_CN]=新建隐私浏览窗口
 Name[zh_TW]=新增隱私視窗
 Exec=firefox-wayland --private-window --name firefox-wayland %u
+
+[Desktop Action profile-manager-window]
+Name=Open the Profile Manager
+Name[cs]=Správa profilů
+Exec=firefox-wayland  --name firefox-wayland --ProfileManager
