@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        78.0.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -609,7 +609,7 @@ echo "export LLVM_PROFDATA=\"llvm-profdata\"" >> .mozconfig
 echo "export AR=\"llvm-ar\"" >> .mozconfig
 echo "export NM=\"llvm-nm\"" >> .mozconfig
 echo "export RANLIB=\"llvm-ranlib\"" >> .mozconfig
-echo "export --enable-linker=lld" >> .mozconfig
+echo "ac_add_options --enable-linker=lld" >> .mozconfig
 %else
 echo "export CC=gcc" >> .mozconfig
 echo "export CXX=g++" >> .mozconfig
@@ -971,6 +971,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jul 10 2020 Jan Horak <jhorak@redhat.com> - 78.0.2-2
+- Fixing clang build - linker setup
+
 * Thu Jul 09 2020 Jan Horak <jhorak@redhat.com> - 78.0.2-1
 - Update to 78.0.2 build2
 
