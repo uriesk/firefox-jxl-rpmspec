@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        78.0.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -242,13 +242,17 @@ BuildRequires:  nodejs
 BuildRequires:  nasm >= 1.13
 BuildRequires:  libappstream-glib
 
+%if 0%{?big_endian}
+BuildRequires:  icu
+%endif
+
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
-BuildRequires:  python2-devel
+BuildRequires:  python3-devel
 %if !0%{?flatpak}
 Requires:       u2f-hidraw-policy
 %endif
@@ -529,9 +533,9 @@ export PATH=`pwd`/.cargo/bin:$PATH
 %endif
 cd -
 
-echo "Generate big endian version of config/external/icu/data/icud58l.dat"
+echo "Generate big endian version of config/external/icu/data/icudt67l.dat"
 %if 0%{?big_endian}
-  ./mach python intl/icu_sources_data.py .
+  icupkg -tb config/external/icu/data/icudt67l.dat config/external/icu/data/icudt67b.dat
   ls -l config/external/icu/data
   rm -f config/external/icu/data/icudt*l.dat
 %endif
@@ -973,6 +977,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jul 23 2020 Frantisek Zatloukal <fzatlouk@redhat.com> - 78.0-4
+- Use python3 instead of python2 for build
+
 * Tue Jul 21 2020 Martin Stransky <stransky@redhat.com> - 78.0-3
 - Added fix for mozbz#1651701/rhbz#1855730
 
