@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        78.0.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -179,6 +179,7 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
+Patch423:        mozilla-1651701.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -380,6 +381,7 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
+%patch423 -p1 -b .mozilla-1651701
 
 
 # Wayland specific upstream patches
@@ -971,6 +973,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul 21 2020 Martin Stransky <stransky@redhat.com> - 78.0-3
+- Added fix for mozbz#1651701/rhbz#1855730
+
 * Fri Jul 10 2020 Jan Horak <jhorak@redhat.com> - 78.0.2-2
 - Fixing clang build - linker setup
 
