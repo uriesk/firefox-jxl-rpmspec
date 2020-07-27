@@ -117,13 +117,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        78.0.2
-Release:        3%{?dist}
+Version:        79.0
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200709.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200727.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
