@@ -177,7 +177,6 @@ Patch227:        firefox-locale-debug.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch412:        mozilla-1337988.patch
-Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 
@@ -382,9 +381,6 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 
 %patch402 -p1 -b .1196777
-%ifarch %{arm}
-%patch415 -p1 -b .1238661
-%endif
 
 
 # Wayland specific upstream patches
