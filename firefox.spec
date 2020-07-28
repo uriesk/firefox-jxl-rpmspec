@@ -40,7 +40,7 @@ ExcludeArch: s390x
 # on other arches.
 %ifarch x86_64 aarch64
 %if %{release_build}
-%global build_with_pgo    1
+%global build_with_pgo    0
 %else
 %global build_with_pgo    0
 %endif
