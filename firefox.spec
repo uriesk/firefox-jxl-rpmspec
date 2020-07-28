@@ -448,10 +448,6 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
-%ifnarch %{ix86} x86_64 ppc64le
-echo "ac_add_options --disable-webrtc" >> .mozconfig
-%endif
-
 %if !%{enable_mozilla_crashreporter}
 echo "ac_add_options --disable-crashreporter" >> .mozconfig
 %endif
