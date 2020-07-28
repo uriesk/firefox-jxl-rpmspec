@@ -40,7 +40,7 @@ ExcludeArch: s390x
 # on other arches.
 %ifarch x86_64 aarch64
 %if %{release_build}
-%global build_with_pgo    0
+%global build_with_pgo    1
 %else
 %global build_with_pgo    0
 %endif
@@ -163,6 +163,7 @@ Patch47:        fedora-shebang-build.patch
 Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
 #Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
+Patch51:        mozilla-1640982.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -367,6 +368,7 @@ This package contains results of tests executed during build.
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
 #%patch50 -p1 -b .build-arm-SwizzleNEON
+%patch51 -p1 -b .mozilla-1640982
 
 # Fedora patches
 %patch215 -p1 -b .addons
