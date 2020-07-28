@@ -976,6 +976,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Mon Jul 27 2020 Martin Stransky <stransky@redhat.com> - 79.0-1
 - Update to 79.0
 
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 78.0.2-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Thu Jul 23 2020 Frantisek Zatloukal <fzatlouk@redhat.com> - 78.0-4
 - Use python3 instead of python2 for build
 
