@@ -483,13 +483,6 @@ echo "ac_add_options --enable-address-sanitizer" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
-# We don't have recent nasm on Fedora 30...time to update to Fedora 31.
-%if 0%{?fedora} < 31
-echo "ac_add_options --disable-av1" >> .mozconfig
-%else
-echo "ac_add_options --enable-av1" >> .mozconfig
-%endif
-
 # api keys full path
 echo "ac_add_options --with-mozilla-api-keyfile=`pwd`/mozilla-api-key" >> .mozconfig
 # It seems that the api key we have is for the safe browsing only
