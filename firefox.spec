@@ -87,7 +87,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.52
+%global nss_version 3.54
 %global nss_build_version %{nss_version}
 %endif
 
@@ -179,7 +179,6 @@ Patch412:        mozilla-1337988.patch
 Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
-Patch423:        mozilla-1651701.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -188,7 +187,6 @@ Patch575:        firefox-pipewire-0-3.patch
 #VA-API patches
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
-Patch589:        mozilla-1634213.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -242,13 +240,17 @@ BuildRequires:  nodejs
 BuildRequires:  nasm >= 1.13
 BuildRequires:  libappstream-glib
 
+%if 0%{?big_endian}
+BuildRequires:  icu
+%endif
+
 Requires:       mozilla-filesystem
 Requires:       p11-kit-trust
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
-BuildRequires:  python2-devel
+BuildRequires:  python3-devel
 %if !0%{?flatpak}
 Requires:       u2f-hidraw-policy
 %endif
@@ -360,7 +362,7 @@ This package contains results of tests executed during build.
 %if 0%{?big_endian}
 %patch26 -p1 -b .icu
 %endif
-%patch46 -p1 -b .nss-version
+#%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
@@ -381,7 +383,6 @@ This package contains results of tests executed during build.
 %ifarch %{arm}
 %patch415 -p1 -b .1238661
 %endif
-%patch423 -p1 -b .mozilla-1651701
 
 
 # Wayland specific upstream patches
@@ -393,7 +394,6 @@ This package contains results of tests executed during build.
 
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
-%patch589 -p1 -b .mozilla-1634213
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -529,9 +529,9 @@ export PATH=`pwd`/.cargo/bin:$PATH
 %endif
 cd -
 
-echo "Generate big endian version of config/external/icu/data/icud58l.dat"
+echo "Generate big endian version of config/external/icu/data/icudt67l.dat"
 %if 0%{?big_endian}
-  ./mach python intl/icu_sources_data.py .
+  icupkg -tb config/external/icu/data/icudt67l.dat config/external/icu/data/icudt67b.dat
   ls -l config/external/icu/data
   rm -f config/external/icu/data/icudt*l.dat
 %endif
@@ -973,6 +973,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jul 27 2020 Martin Stransky <stransky@redhat.com> - 79.0-1
+- Update to 79.0
+
+* Thu Jul 23 2020 Frantisek Zatloukal <fzatlouk@redhat.com> - 78.0-4
+- Use python3 instead of python2 for build
+
 * Tue Jul 21 2020 Martin Stransky <stransky@redhat.com> - 78.0-3
 - Added fix for mozbz#1651701/rhbz#1855730
 

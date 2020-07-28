@@ -1,7 +1,6 @@
-diff --git a/config/system-headers.mozbuild b/config/system-headers.mozbuild
-index 2081d0c683a4..641133bf1ea4 100644
---- a/config/system-headers.mozbuild
-+++ b/config/system-headers.mozbuild
+diff -up firefox-79.0/config/system-headers.mozbuild.firefox-pipewire-0-3 firefox-79.0/config/system-headers.mozbuild
+--- firefox-79.0/config/system-headers.mozbuild.firefox-pipewire-0-3	2020-07-21 00:49:36.000000000 +0200
++++ firefox-79.0/config/system-headers.mozbuild	2020-07-28 10:06:59.485481599 +0200
 @@ -314,6 +314,7 @@ system_headers = [
      'Gestalt.h',
      'getopt.h',
@@ -18,10 +17,9 @@ index 2081d0c683a4..641133bf1ea4 100644
      'pixman.h',
      'pk11func.h',
      'pk11pqg.h',
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn b/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
-index ba885217b3ba..201d3b755221 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn.firefox-pipewire-0-3	2020-07-20 22:53:33.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/BUILD.gn	2020-07-28 10:06:59.485481599 +0200
 @@ -158,7 +158,7 @@ if (rtc_include_tests) {
  if (is_linux) {
    if (rtc_use_pipewire) {
@@ -31,17 +29,15 @@ index ba885217b3ba..201d3b755221 100644
  
        defines = [ "WEBRTC_USE_PIPEWIRE" ]
      }
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build b/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
-index 90b40431c7e4..d844aa79d591 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
-@@ -194,6 +194,30 @@ if CONFIG["OS_TARGET"] == "Linux":
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build.firefox-pipewire-0-3	2020-07-28 10:06:59.486481593 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build	2020-07-28 10:11:51.231907101 +0200
+@@ -174,6 +174,28 @@ if CONFIG["OS_TARGET"] == "Linux":
          "/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc"
      ]
  
 +# PipeWire specific files
 +if CONFIG["OS_TARGET"] == "Linux":
-+
 +    DEFINES["WEBRTC_USE_PIPEWIRE"] = "1"
 +
 +    OS_LIBS += [
@@ -62,14 +58,12 @@ index 90b40431c7e4..d844aa79d591 100644
 +        "/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc"
 +    ]
 +
-+
- if CONFIG["OS_TARGET"] == "NetBSD":
+ if CONFIG["OS_TARGET"] == "Darwin":
  
-     DEFINES["USE_X11"] = "1"
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h b/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h
-index 1eb8ead26efa..316468eed1fc 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h
+     DEFINES["CR_XCODE_VERSION"] = "0920"
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h.firefox-pipewire-0-3	2020-07-20 22:54:16.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/desktop_capture_options.h	2020-07-28 10:06:59.486481593 +0200
 @@ -141,7 +141,7 @@ class DesktopCaptureOptions {
    bool disable_effects_ = true;
    bool detect_updated_region_ = false;
@@ -79,10 +73,9 @@ index 1eb8ead26efa..316468eed1fc 100644
  #endif
  };
  
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-index 379341c833de..76349f1fbd4d 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc.firefox-pipewire-0-3	2020-07-20 22:54:27.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc	2020-07-28 10:06:59.500481514 +0200
 @@ -15,8 +15,11 @@
  
  #include <spa/param/format-utils.h>
@@ -97,17 +90,20 @@ index 379341c833de..76349f1fbd4d 100644
  
  #include <memory>
  #include <utility>
-@@ -36,31 +39,36 @@ const char kSessionInterfaceName[] = "org.freedesktop.portal.Session";
+@@ -36,32 +39,37 @@ const char kSessionInterfaceName[] = "or
  const char kRequestInterfaceName[] = "org.freedesktop.portal.Request";
  const char kScreenCastInterfaceName[] = "org.freedesktop.portal.ScreenCast";
  
--// static
++
+ // static
 -void BaseCapturerPipeWire::OnStateChanged(void* data,
 -                                          pw_remote_state old_state,
 -                                          pw_remote_state state,
 -                                          const char* error_message) {
 -  BaseCapturerPipeWire* that = static_cast<BaseCapturerPipeWire*>(data);
 -  RTC_DCHECK(that);
++void BaseCapturerPipeWire::SyncDmaBuf(int fd, uint64_t start_or_end) {
++  struct dma_buf_sync sync = { 0 };
  
 -  switch (state) {
 -    case PW_REMOTE_STATE_ERROR:
@@ -119,10 +115,6 @@ index 379341c833de..76349f1fbd4d 100644
 -      break;
 -    case PW_REMOTE_STATE_CONNECTING:
 -      RTC_LOG(LS_INFO) << "PipeWire remote state: connecting.";
-+// static
-+void BaseCapturerPipeWire::SyncDmaBuf(int fd, uint64_t start_or_end) {
-+  struct dma_buf_sync sync = { 0 };
-+
 +  sync.flags = start_or_end | DMA_BUF_SYNC_READ;
 +
 +  while(true) {
@@ -141,7 +133,7 @@ index 379341c833de..76349f1fbd4d 100644
    }
  }
  
-+// static
+ // static
 +void BaseCapturerPipeWire::OnCoreError(void *data,
 +                                       uint32_t id,
 +                                       int seq,
@@ -150,10 +142,11 @@ index 379341c833de..76349f1fbd4d 100644
 +  RTC_LOG(LS_ERROR) << "core error: " << message;
 +}
 +
- // static
++// static
  void BaseCapturerPipeWire::OnStreamStateChanged(void* data,
                                                  pw_stream_state old_state,
-@@ -73,76 +81,54 @@ void BaseCapturerPipeWire::OnStreamStateChanged(void* data,
+                                                 pw_stream_state state,
+@@ -73,76 +81,54 @@ void BaseCapturerPipeWire::OnStreamState
      case PW_STREAM_STATE_ERROR:
        RTC_LOG(LS_ERROR) << "PipeWire stream state error: " << error_message;
        break;
@@ -256,7 +249,7 @@ index 379341c833de..76349f1fbd4d 100644
  }
  
  // static
-@@ -150,15 +136,25 @@ void BaseCapturerPipeWire::OnStreamProcess(void* data) {
+@@ -150,15 +136,25 @@ void BaseCapturerPipeWire::OnStreamProce
    BaseCapturerPipeWire* that = static_cast<BaseCapturerPipeWire*>(data);
    RTC_DCHECK(that);
  
@@ -268,12 +261,12 @@ index 379341c833de..76349f1fbd4d 100644
 +  while (next_buffer) {
 +    buffer = next_buffer;
 +    next_buffer = pw_stream_dequeue_buffer(that->pw_stream_);
- 
--  if (!(buf = pw_stream_dequeue_buffer(that->pw_stream_))) {
++
 +    if (next_buffer)
 +      pw_stream_queue_buffer (that->pw_stream_, buffer);
 +  }
-+
+ 
+-  if (!(buf = pw_stream_dequeue_buffer(that->pw_stream_))) {
 +  if (!buffer) {
      return;
    }
@@ -286,7 +279,7 @@ index 379341c833de..76349f1fbd4d 100644
  }
  
  BaseCapturerPipeWire::BaseCapturerPipeWire(CaptureSourceType source_type)
-@@ -169,38 +165,22 @@ BaseCapturerPipeWire::~BaseCapturerPipeWire() {
+@@ -169,38 +165,22 @@ BaseCapturerPipeWire::~BaseCapturerPipeW
      pw_thread_loop_stop(pw_main_loop_);
    }
  
@@ -329,7 +322,7 @@ index 379341c833de..76349f1fbd4d 100644
    if (start_request_signal_id_) {
      g_dbus_connection_signal_unsubscribe(connection_, start_request_signal_id_);
    }
-@@ -250,27 +230,35 @@ void BaseCapturerPipeWire::InitPortal() {
+@@ -250,27 +230,35 @@ void BaseCapturerPipeWire::InitPortal()
  void BaseCapturerPipeWire::InitPipeWire() {
    pw_init(/*argc=*/nullptr, /*argc=*/nullptr);
  
@@ -378,32 +371,33 @@ index 379341c833de..76349f1fbd4d 100644
  
    if (pw_thread_loop_start(pw_main_loop_) < 0) {
      RTC_LOG(LS_ERROR) << "Failed to start main PipeWire loop";
-@@ -278,81 +266,132 @@ void BaseCapturerPipeWire::InitPipeWire() {
+@@ -278,81 +266,132 @@ void BaseCapturerPipeWire::InitPipeWire(
    }
  }
  
 -void BaseCapturerPipeWire::InitPipeWireTypes() {
 -  spa_type_map* map = pw_core_type_->map;
 -  pw_type_ = new PipeWireType();
--
++pw_stream* BaseCapturerPipeWire::CreateReceivingStream() {
++  spa_rectangle pwMinScreenBounds = spa_rectangle{1, 1};
++  spa_rectangle pwMaxScreenBounds = spa_rectangle{INT32_MAX, INT32_MAX};
+ 
 -  spa_type_media_type_map(map, &pw_type_->media_type);
 -  spa_type_media_subtype_map(map, &pw_type_->media_subtype);
 -  spa_type_format_video_map(map, &pw_type_->format_video);
 -  spa_type_video_format_map(map, &pw_type_->video_format);
 -}
--
++  auto stream = pw_stream_new(pw_core_, "webrtc-pipewire-stream", nullptr);
+ 
 -void BaseCapturerPipeWire::CreateReceivingStream() {
-+pw_stream* BaseCapturerPipeWire::CreateReceivingStream() {
-   spa_rectangle pwMinScreenBounds = spa_rectangle{1, 1};
+-  spa_rectangle pwMinScreenBounds = spa_rectangle{1, 1};
 -  spa_rectangle pwScreenBounds =
 -      spa_rectangle{static_cast<uint32_t>(desktop_size_.width()),
 -                    static_cast<uint32_t>(desktop_size_.height())};
-+  spa_rectangle pwMaxScreenBounds = spa_rectangle{INT32_MAX, INT32_MAX};
- 
+-
 -  spa_fraction pwFrameRateMin = spa_fraction{0, 1};
 -  spa_fraction pwFrameRateMax = spa_fraction{60, 1};
-+  auto stream = pw_stream_new(pw_core_, "webrtc-pipewire-stream", nullptr);
- 
+-
 -  pw_properties* reuseProps = pw_properties_new("pipewire.client.reuse", "1",
 -                                                /*end of varargs*/ nullptr);
 -  pw_stream_ = pw_stream_new(pw_remote_, "webrtc-consume-stream", reuseProps);
@@ -439,9 +433,6 @@ index 379341c833de..76349f1fbd4d 100644
 -      // min and max values and it is undecided (u) to allow negotiation
 -      ":", pw_type_->format_video.max_framerate, "Fru", &pwFrameRateMax, 2,
 -      &pwFrameRateMin, &pwFrameRateMax));
--
--  pw_stream_add_listener(pw_stream_, &spa_stream_listener_, &pw_stream_events_,
--                         this);
 +  const spa_pod* params[2];
 +  spa_pod_builder builder = SPA_POD_BUILDER_INIT(buffer, sizeof (buffer));
 +
@@ -456,7 +447,9 @@ index 379341c833de..76349f1fbd4d 100644
 +                                                                    &pwMaxScreenBounds),
 +              0));
 +  pw_stream_add_listener(stream, &spa_stream_listener_, &pw_stream_events_, this);
-+
+ 
+-  pw_stream_add_listener(pw_stream_, &spa_stream_listener_, &pw_stream_events_,
+-                         this);
    pw_stream_flags flags = static_cast<pw_stream_flags>(
 -      PW_STREAM_FLAG_AUTOCONNECT | PW_STREAM_FLAG_INACTIVE |
 -      PW_STREAM_FLAG_MAP_BUFFERS);
@@ -499,8 +492,7 @@ index 379341c833de..76349f1fbd4d 100644
 +  } else if (spaBuffer->datas[0].type == SPA_DATA_DmaBuf) {
 +    int fd;
 +    fd = spaBuffer->datas[0].fd;
- 
--  if (!(src = spaBuffer->datas[0].data)) {
++
 +    map = static_cast<uint8_t*>(mmap(
 +        nullptr, spaBuffer->datas[0].maxsize + spaBuffer->datas[0].mapoffset,
 +        PROT_READ, MAP_PRIVATE, fd, 0));
@@ -509,7 +501,8 @@ index 379341c833de..76349f1fbd4d 100644
 +      RTC_LOG(LS_ERROR) << "Failed to mmap the memory: " << std::strerror(errno);
 +      return;
 +    }
-+
+ 
+-  if (!(src = spaBuffer->datas[0].data)) {
 +    SyncDmaBuf(fd, DMA_BUF_SYNC_START);
 +
 +    src = SPA_MEMBER(map, spaBuffer->datas[0].mapoffset, uint8_t);
@@ -569,7 +562,7 @@ index 379341c833de..76349f1fbd4d 100644
    if (srcStride != (desktop_size_.width() * kBytesPerPixel)) {
      RTC_LOG(LS_ERROR) << "Got buffer with stride different from screen stride: "
                        << srcStride
-@@ -361,21 +400,40 @@ void BaseCapturerPipeWire::HandleBuffer(pw_buffer* buffer) {
+@@ -361,21 +400,40 @@ void BaseCapturerPipeWire::HandleBuffer(
      return;
    }
  
@@ -623,7 +616,7 @@ index 379341c833de..76349f1fbd4d 100644
    }
  }
  
-@@ -725,10 +783,7 @@ void BaseCapturerPipeWire::OnStartRequestResponseSignal(
+@@ -725,10 +783,7 @@ void BaseCapturerPipeWire::OnStartReques
        g_variant_get(variant, "(u@a{sv})", &stream_id, &options);
        RTC_DCHECK(options != nullptr);
  
@@ -635,7 +628,7 @@ index 379341c833de..76349f1fbd4d 100644
        g_variant_unref(options);
        g_variant_unref(variant);
      }
-@@ -813,10 +868,15 @@ void BaseCapturerPipeWire::CaptureFrame() {
+@@ -813,10 +868,15 @@ void BaseCapturerPipeWire::CaptureFrame(
      return;
    }
  
@@ -654,7 +647,7 @@ index 379341c833de..76349f1fbd4d 100644
    if (!result) {
      callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
      return;
-@@ -837,4 +897,22 @@ bool BaseCapturerPipeWire::SelectSource(SourceId id) {
+@@ -837,4 +897,22 @@ bool BaseCapturerPipeWire::SelectSource(
    return true;
  }
  
@@ -677,10 +670,9 @@ index 379341c833de..76349f1fbd4d 100644
 +}
 +
  }  // namespace webrtc
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
-index 56b101acbaa6..de54157d1a2a 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h.firefox-pipewire-0-3	2020-07-20 22:54:40.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.h	2020-07-28 10:06:59.501481508 +0200
 @@ -22,17 +22,13 @@
  
  namespace webrtc {
@@ -704,7 +696,7 @@ index 56b101acbaa6..de54157d1a2a 100644
  
    explicit BaseCapturerPipeWire(CaptureSourceType source_type);
    ~BaseCapturerPipeWire() override;
-@@ -43,28 +39,32 @@ class BaseCapturerPipeWire : public DesktopCapturer {
+@@ -43,28 +39,32 @@ class BaseCapturerPipeWire : public Desk
    bool GetSourceList(SourceList* sources) override;
    bool SelectSource(SourceId id) override;
  
@@ -745,7 +737,7 @@ index 56b101acbaa6..de54157d1a2a 100644
  
    // <-- end of PipeWire types
  
-@@ -78,33 +78,37 @@ class BaseCapturerPipeWire : public DesktopCapturer {
+@@ -78,33 +78,37 @@ class BaseCapturerPipeWire : public Desk
    guint sources_request_signal_id_ = 0;
    guint start_request_signal_id_ = 0;
  
@@ -792,10 +784,9 @@ index 56b101acbaa6..de54157d1a2a 100644
    static void OnStreamProcess(void* data);
    static void OnNewBuffer(void* data, uint32_t id);
  
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc
-index 26956fc67dc8..3813d697bb38 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc.firefox-pipewire-0-3	2020-07-20 22:53:57.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc	2020-07-28 10:06:59.501481508 +0200
 @@ -15,7 +15,7 @@
  namespace webrtc {
  
@@ -805,10 +796,9 @@ index 26956fc67dc8..3813d697bb38 100644
  ScreenCapturerPipeWire::~ScreenCapturerPipeWire() {}
  
  // static
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc
-index 35436475cb4d..c43a1f1a0c4e 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc.firefox-pipewire-0-3	2020-07-20 22:54:18.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc	2020-07-28 10:06:59.501481508 +0200
 @@ -15,7 +15,7 @@
  namespace webrtc {
  
@@ -818,11 +808,10 @@ index 35436475cb4d..c43a1f1a0c4e 100644
  WindowCapturerPipeWire::~WindowCapturerPipeWire() {}
  
  // static
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc
-index cf8a9dd0e0db..d27fab8d28d9 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc
-@@ -26,7 +26,7 @@ std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawScreenCapturer(
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc.firefox-pipewire-0-3	2020-07-20 22:54:40.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/screen_capturer_linux.cc	2020-07-28 10:06:59.501481508 +0200
+@@ -26,7 +26,7 @@ std::unique_ptr<DesktopCapturer> Desktop
      const DesktopCaptureOptions& options) {
  #if defined(WEBRTC_USE_PIPEWIRE)
    if (options.allow_pipewire() && DesktopCapturer::IsRunningUnderWayland()) {
@@ -831,11 +820,10 @@ index cf8a9dd0e0db..d27fab8d28d9 100644
    }
  #endif  // defined(WEBRTC_USE_PIPEWIRE)
  
-diff --git a/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc b/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc
-index 82359e50c2db..bb9724cf7cc2 100644
---- a/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc
-+++ b/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc
-@@ -26,7 +26,7 @@ std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawWindowCapturer(
+diff -up firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc.firefox-pipewire-0-3 firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc
+--- firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc.firefox-pipewire-0-3	2020-07-20 22:53:32.000000000 +0200
++++ firefox-79.0/media/webrtc/trunk/webrtc/modules/desktop_capture/window_capturer_linux.cc	2020-07-28 10:06:59.501481508 +0200
+@@ -26,7 +26,7 @@ std::unique_ptr<DesktopCapturer> Desktop
      const DesktopCaptureOptions& options) {
  #if defined(WEBRTC_USE_PIPEWIRE)
    if (options.allow_pipewire() && DesktopCapturer::IsRunningUnderWayland()) {
