@@ -177,7 +177,6 @@ Patch227:        firefox-locale-debug.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch412:        mozilla-1337988.patch
-Patch415:        Bug-1238661---fix-mozillaSignalTrampoline-to-work-.patch
 Patch417:        bug1375074-save-restore-x28.patch
 Patch422:        mozilla-1580174-webrtc-popup.patch
 
@@ -382,9 +381,6 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 
 %patch402 -p1 -b .1196777
-%ifarch %{arm}
-%patch415 -p1 -b .1238661
-%endif
 
 
 # Wayland specific upstream patches
@@ -452,10 +448,6 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
-%ifnarch %{ix86} x86_64 ppc64le
-echo "ac_add_options --disable-webrtc" >> .mozconfig
-%endif
-
 %if !%{enable_mozilla_crashreporter}
 echo "ac_add_options --disable-crashreporter" >> .mozconfig
 %endif
@@ -485,13 +477,6 @@ echo "ac_add_options --disable-ion" >> .mozconfig
 %if %{build_with_asan}
 echo "ac_add_options --enable-address-sanitizer" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
-%endif
-
-# We don't have recent nasm on Fedora 30...time to update to Fedora 31.
-%if 0%{?fedora} < 31
-echo "ac_add_options --disable-av1" >> .mozconfig
-%else
-echo "ac_add_options --enable-av1" >> .mozconfig
 %endif
 
 # api keys full path
