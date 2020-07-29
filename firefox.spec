@@ -5,9 +5,9 @@
 %global build_with_asan   0
 
 # disable arm builds with gcc 10 until bug 94050 is backported to Fedora
-%if 0%{?fedora} > 31
-ExcludeArch: armv7hl
-%endif
+#%if 0%{?fedora} > 31
+#ExcludeArch: armv7hl
+#%endif
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 # Disabled due to neon build error
@@ -118,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        79.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -960,6 +960,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jul 29 2020 Martin Stransky <stransky@redhat.com> - 79.0-2
+- Try to enable armv7hl again.
+
 * Mon Jul 27 2020 Martin Stransky <stransky@redhat.com> - 79.0-1
 - Update to 79.0
 - Disabled PGO due to rhbz#1849165 (gcc internal error).
