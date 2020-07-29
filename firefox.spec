@@ -40,7 +40,7 @@ ExcludeArch: s390x
 # on other arches.
 %ifarch x86_64 aarch64
 %if %{release_build}
-%global build_with_pgo    1
+%global build_with_pgo    0
 %else
 %global build_with_pgo    0
 %endif
@@ -977,6 +977,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Mon Jul 27 2020 Martin Stransky <stransky@redhat.com> - 79.0-1
 - Update to 79.0
+- Disabled PGO due to rhbz#1849165 (gcc internal error).
 
 * Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 78.0.2-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
