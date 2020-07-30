@@ -4,14 +4,10 @@
 %global build_with_clang  0
 %global build_with_asan   0
 
-# disable arm builds with gcc 10 until bug 94050 is backported to Fedora
-#%if 0%{?fedora} > 31
-#ExcludeArch: armv7hl
-#%endif
+# Temporary disabled, filed as rhbz#1862012
+ExcludeArch: ppc64le
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
-# Disabled due to neon build error
-# ExcludeArch: aarch64
 
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
@@ -962,6 +958,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Wed Jul 29 2020 Martin Stransky <stransky@redhat.com> - 79.0-2
 - Try to enable armv7hl again.
+- Disabled ppc64le due to cargo crash (rhbz#1862012).
 
 * Mon Jul 27 2020 Martin Stransky <stransky@redhat.com> - 79.0-1
 - Update to 79.0
