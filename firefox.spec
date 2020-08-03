@@ -961,7 +961,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Mon Aug 1 2020 Martin Stransky <stransky@redhat.com> - 79.0-4
 - Updated fix for mozbz#1645671
 
-* Thu Jul 30 2020 Martin Stransky <stransky@redhat.com> - 79.0-3
+* Tue Jul 30 2020 Martin Stransky <stransky@redhat.com> - 79.0-3
 - Added VA-API fix for mozbz#1645671
 
 * Wed Jul 29 2020 Martin Stransky <stransky@redhat.com> - 79.0-2
