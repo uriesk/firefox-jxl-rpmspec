@@ -114,7 +114,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        79.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -184,6 +184,7 @@ Patch575:        firefox-pipewire-0-3.patch
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
 Patch586:        mozilla-1645671.patch
+Patch589:        mozilla-1656436.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -390,6 +391,7 @@ This package contains results of tests executed during build.
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
 %patch586 -p1 -b .mozilla-1645671
+%patch589 -p1 -b .mozilla-1656436
 
 # PGO patches
 %patch600 -p1 -b .pgo
@@ -958,6 +960,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Aug 4 2020 Martin Stransky <stransky@redhat.com> - 79.0-5
+- Added upstream fix for mozbz#1656436.
+
 * Mon Aug 3 2020 Martin Stransky <stransky@redhat.com> - 79.0-4
 - Updated fix for mozbz#1645671
 
