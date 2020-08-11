@@ -131,6 +131,7 @@ Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
 Source27:       google-api-key
+Source25:       google-api-key
 Source28:       firefox-wayland.sh.in
 Source29:       firefox-wayland.desktop
 Source30:       firefox-x11.sh.in
@@ -407,6 +408,7 @@ echo "ac_add_options --enable-official-branding" >> .mozconfig
 %endif
 %{__cp} %{SOURCE24} mozilla-api-key
 %{__cp} %{SOURCE27} google-api-key
+%{__cp} %{SOURCE35} google-loc-api-key
 
 echo "ac_add_options --prefix=\"%{_prefix}\"" >> .mozconfig
 echo "ac_add_options --libdir=\"%{_libdir}\"" >> .mozconfig
@@ -482,7 +484,7 @@ echo "ac_add_options --disable-jemalloc" >> .mozconfig
 # api keys full path
 echo "ac_add_options --with-mozilla-api-keyfile=`pwd`/mozilla-api-key" >> .mozconfig
 # It seems that the api key we have is for the safe browsing only
-#echo "ac_add_options --with-google-location-service-api-keyfile=`pwd`/google-api-key" >> .mozconfig
+echo "ac_add_options --with-google-location-service-api-keyfile=`pwd`/google-loc-api-key" >> .mozconfig
 echo "ac_add_options --with-google-safebrowsing-api-keyfile=`pwd`/google-api-key" >> .mozconfig
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
