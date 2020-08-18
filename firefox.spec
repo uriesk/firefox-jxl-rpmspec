@@ -34,11 +34,10 @@ ExcludeArch: s390x
 %global use_bundled_cbindgen  1
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
+%global build_with_pgo    0
 %ifarch x86_64 aarch64
 %if %{release_build}
 %global build_with_pgo    1
-%else
-%global build_with_pgo    0
 %endif
 # Build PGO builds on Wayland backend
 %global pgo_wayland       0
@@ -130,7 +129,6 @@ Source24:       mozilla-api-key
 Source25:       firefox-symbolic.svg
 Source26:       distribution.ini
 Source27:       google-api-key
-Source25:       google-api-key
 Source28:       firefox-wayland.sh.in
 Source29:       firefox-wayland.desktop
 Source30:       firefox-x11.sh.in
