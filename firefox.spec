@@ -1,7 +1,7 @@
 # Set to true if it's going to be submitted as update.
 %global release_build     1
 %global debug_build       0
-%global build_with_clang  0
+%global build_with_clang  1
 %global build_with_asan   0
 
 # Temporary disabled, filed as rhbz#1862012
@@ -36,7 +36,7 @@ ExcludeArch: s390x
 # on other arches.
 %ifarch x86_64 aarch64
 %if %{release_build}
-%global build_with_pgo    0
+%global build_with_pgo    1
 %else
 %global build_with_pgo    0
 %endif
@@ -101,7 +101,6 @@ ExcludeArch: s390x
 %endif
 %if %{build_with_clang}
 %global pre_tag .clang
-%global build_with_pgo    0
 %endif
 %if %{build_with_asan}
 %global pre_tag .asan
@@ -114,7 +113,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        79.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -226,7 +225,7 @@ BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
-%if 0%{?build_with_clang}
+%if %{build_with_clang}
 BuildRequires:  lld
 %endif
 
@@ -395,10 +394,14 @@ This package contains results of tests executed during build.
 %patch589 -p1 -b .mozilla-1656436
 
 # PGO patches
+%if %{build_with_pgo}
+%if !%{build_with_clang}
 %patch600 -p1 -b .pgo
 #fix
 #%patch601 -p1 -b .1516081
 %patch602 -p1 -b .1516803
+%endif
+%endif
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -564,7 +567,7 @@ export MOZ_DEBUG_FLAGS=" "
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g0/')
 export MOZ_DEBUG_FLAGS=" "
 %endif
-%if !0%{?build_with_clang}
+%if !%{build_with_clang}
 %ifarch s390 ppc aarch64 %{ix86}
 MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
@@ -595,7 +598,7 @@ echo "export CXXFLAGS=\"$MOZ_OPT_FLAGS\"" >> .mozconfig
 echo "export LDFLAGS=\"$MOZ_LINK_FLAGS\"" >> .mozconfig
 %endif
 
-%if 0%{?build_with_clang}
+%if %{build_with_clang}
 echo "export LLVM_PROFDATA=\"llvm-profdata\"" >> .mozconfig
 echo "export AR=\"llvm-ar\"" >> .mozconfig
 echo "export NM=\"llvm-nm\"" >> .mozconfig
@@ -629,11 +632,11 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 %endif
 
-echo "export MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
-echo "export MOZ_SERVICES_SYNC=1" >> .mozconfig
-echo "export STRIP=/bin/true" >> .mozconfig
-%if 0%{?build_with_pgo}
-%if 0%{?pgo_wayland}
+echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
+echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
+echo "mk_add_options STRIP=/bin/true" >> .mozconfig
+%if %{build_with_pgo}
+%if %{pgo_wayland}
 xvfb-run mutter --wayland --nested &
 if [ -z "$WAYLAND_DISPLAY" ]; then
   export WAYLAND_DISPLAY=wayland-0
@@ -962,6 +965,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Aug 18 2020 Martin Stransky <stransky@redhat.com> - 79.0-6
+- Enabled pgo
+- Build with clang
+
 * Tue Aug 4 2020 Martin Stransky <stransky@redhat.com> - 79.0-5
 - Added upstream fix for mozbz#1656436.
 
