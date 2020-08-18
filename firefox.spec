@@ -82,7 +82,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.54
+%global nss_version 3.55
 %global nss_build_version %{nss_version}
 %endif
 
@@ -628,7 +628,7 @@ MOZ_SMP_FLAGS=-j1
 
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
 echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
-echo "mk_add_options STRIP=/bin/true" >> .mozconfig
+echo "export STRIP=/bin/true" >> .mozconfig
 %if %{build_with_pgo}
 %if %{pgo_wayland}
 xvfb-run mutter --wayland --nested &

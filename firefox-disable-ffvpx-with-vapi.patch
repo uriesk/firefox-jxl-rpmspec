@@ -30,7 +30,7 @@ diff --git a/dom/media/platforms/PDMFactory.cpp b/dom/media/platforms/PDMFactory
  #ifdef MOZ_FFVPX
 -  if (StaticPrefs::media_ffvpx_enabled()) {
 +  if (StaticPrefs::media_ffvpx_enabled() &&
-+      !gfxPlatformGtk::GetPlatform()->UseWaylandHardwareVideoDecoding()) {
++      !gfxPlatformGtk::GetPlatform()->UseHardwareVideoDecoding()) {
      m = FFVPXRuntimeLinker::CreateDecoderModule();
      StartupPDM(m);
    }
