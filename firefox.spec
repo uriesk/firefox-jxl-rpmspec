@@ -409,7 +409,7 @@ echo "ac_add_options --enable-official-branding" >> .mozconfig
 %endif
 %{__cp} %{SOURCE24} mozilla-api-key
 %{__cp} %{SOURCE27} google-api-key
-%{__cp} %{SOURCE35} google-loc-api-key
+%{__cp} %{SOURCE27} google-loc-api-key
 
 echo "ac_add_options --prefix=\"%{_prefix}\"" >> .mozconfig
 echo "ac_add_options --libdir=\"%{_libdir}\"" >> .mozconfig
