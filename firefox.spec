@@ -136,6 +136,7 @@ Source31:       firefox-x11.desktop
 Source32:       node-stdout-nonblocking-wrapper
 Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
+Source35:       google-loc-api-key
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -409,7 +410,7 @@ echo "ac_add_options --enable-official-branding" >> .mozconfig
 %endif
 %{__cp} %{SOURCE24} mozilla-api-key
 %{__cp} %{SOURCE27} google-api-key
-%{__cp} %{SOURCE27} google-loc-api-key
+%{__cp} %{SOURCE35} google-loc-api-key
 
 echo "ac_add_options --prefix=\"%{_prefix}\"" >> .mozconfig
 echo "ac_add_options --libdir=\"%{_libdir}\"" >> .mozconfig
