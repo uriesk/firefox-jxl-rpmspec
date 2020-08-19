@@ -959,6 +959,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Aug 18 2020 Martin Stransky <stransky@redhat.com> - 80.0-1
 - Updated to 80.0 Build 1
+- Go back to gcc
 
 * Tue Aug 18 2020 Martin Stransky <stransky@redhat.com> - 79.0-6
 - Enabled pgo
