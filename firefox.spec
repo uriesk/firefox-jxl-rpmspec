@@ -1,7 +1,7 @@
 # Set to true if it's going to be submitted as update.
 %global release_build     1
 %global debug_build       0
-%global build_with_clang  1
+%global build_with_clang  0
 %global build_with_asan   0
 
 # Temporary disabled, filed as rhbz#1862012
@@ -586,11 +586,9 @@ MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address -ldl"
 # We don't wantfirefox to use CK_GCM_PARAMS_V3 in nss
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -DNSS_PKCS11_3_0_STRICT"
 
-%if !%{build_with_clang}
 echo "export CFLAGS=\"$MOZ_OPT_FLAGS\"" >> .mozconfig
 echo "export CXXFLAGS=\"$MOZ_OPT_FLAGS\"" >> .mozconfig
 echo "export LDFLAGS=\"$MOZ_LINK_FLAGS\"" >> .mozconfig
-%endif
 
 %if %{build_with_clang}
 echo "export LLVM_PROFDATA=\"llvm-profdata\"" >> .mozconfig
@@ -607,7 +605,7 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-echo "ac_add_options --enable-lto" >> .mozconfig
+#echo "ac_add_options --enable-lto" >> .mozconfig
 %endif
 
 MOZ_SMP_FLAGS=-j1
