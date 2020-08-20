@@ -117,7 +117,7 @@ URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200818.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200820.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -960,7 +960,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Aug 18 2020 Martin Stransky <stransky@redhat.com> - 80.0-1
-- Updated to 80.0 Build 1
+- Updated to 80.0 Build 2
 - Go back to gcc
 
 * Tue Aug 18 2020 Martin Stransky <stransky@redhat.com> - 79.0-6
