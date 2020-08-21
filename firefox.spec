@@ -171,9 +171,6 @@ Patch227:        firefox-locale-debug.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
-Patch412:        mozilla-1337988.patch
-Patch417:        bug1375074-save-restore-x28.patch
-Patch422:        mozilla-1580174-webrtc-popup.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
