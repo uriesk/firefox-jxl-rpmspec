@@ -35,3 +35,5 @@ pref("network.trr.mode",                    5);
 /* Enable per-user policy dir, see mozbz#1583466 */
 pref("browser.policies.perUserDir",         true);
 pref("browser.gnome-search-provider.enabled",true);
+/* We're not ready yet */
+pref("widget.dmabuf-webgl.enabled", false);
