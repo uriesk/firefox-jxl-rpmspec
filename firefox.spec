@@ -35,7 +35,7 @@ ExcludeArch: s390x
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
 %global build_with_pgo    0
-%ifarch x86_64 aarch64
+%ifarch x86_64
 %if %{release_build}
 %global build_with_pgo    1
 %endif
