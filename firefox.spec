@@ -44,6 +44,9 @@ ExcludeArch: aarch64
 # Build PGO builds on Wayland backend
 %global pgo_wayland       0
 %endif
+%if 0%{?fedora} >= 33
+%global build_with_pgo    0
+%endif
 %if 0%{?fedora} > 30
 %global wayland_backend_default 1
 %endif
@@ -114,7 +117,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        80.0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -161,6 +164,7 @@ Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
 #Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
 Patch51:        build-nspr.patch
+Patch52:        mozilla-1875469.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -363,6 +367,7 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 #%patch50 -p1 -b .build-arm-SwizzleNEON
 %patch51 -p1 -b .build-nspr
+%patch52 -p1 -b .mozilla-1875469
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -962,6 +967,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Sep 4 2020 Martin Stransky <stransky@redhat.com> - 80.0.1-2
+- Added patch for mozbz#1875469
+
 * Tue Sep 1 2020 Martin Stransky <stransky@redhat.com> - 80.0.1-1
 - Updated to 80.0.1
 
