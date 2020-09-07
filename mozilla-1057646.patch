@@ -1,0 +1,1213 @@
+diff -up firefox-80.0.1/dom/media/platforms/ffmpeg/FFmpegDecoderModule.h.1057646 firefox-80.0.1/dom/media/platforms/ffmpeg/FFmpegDecoderModule.h
+--- firefox-80.0.1/dom/media/platforms/ffmpeg/FFmpegDecoderModule.h.1057646	2020-08-31 16:04:08.000000000 +0200
++++ firefox-80.0.1/dom/media/platforms/ffmpeg/FFmpegDecoderModule.h	2020-09-07 10:11:53.203882781 +0200
+@@ -12,6 +12,7 @@
+ #include "FFmpegVideoDecoder.h"
+ #include "PlatformDecoderModule.h"
+ #include "VPXDecoder.h"
++#include "MP4Decoder.h"
+ #include "mozilla/StaticPrefs_media.h"
+ 
+ namespace mozilla {
+@@ -26,7 +27,11 @@ class FFmpegDecoderModule : public Platf
+     return pdm.forget();
+   }
+ 
+-  explicit FFmpegDecoderModule(FFmpegLibWrapper* aLib) : mLib(aLib) {}
++  explicit FFmpegDecoderModule(FFmpegLibWrapper* aLib) : mLib(aLib) {
++#ifdef FFVPX_VERSION
++    mIsOpenH264Enabled = false;
++#endif
++  }
+   virtual ~FFmpegDecoderModule() = default;
+ 
+   already_AddRefed<MediaDataDecoder> CreateVideoDecoder(
+@@ -46,6 +51,12 @@ class FFmpegDecoderModule : public Platf
+       // We do allow it for h264.
+       return nullptr;
+     }
++#ifdef FFVPX_VERSION
++    if (MP4Decoder::IsH264(aParams.mConfig.mMimeType) && !mIsOpenH264Enabled) {
++      // H.264 may be disabled for ffvpx as it can be implemented by OpenH264.
++      return nullptr;
++    }
++#endif
+     RefPtr<MediaDataDecoder> decoder = new FFmpegVideoDecoder<V>(
+         mLib, aParams.mTaskQueue, aParams.VideoConfig(),
+         aParams.mKnowsCompositor, aParams.mImageContainer,
+@@ -73,6 +84,12 @@ class FFmpegDecoderModule : public Platf
+     return !!FFmpegDataDecoder<V>::FindAVCodec(mLib, codec);
+   }
+ 
++  void EnableOpenH264Decoder() {
++#ifdef FFVPX_VERSION
++    mIsOpenH264Enabled = true;
++#endif
++  }
++
+  protected:
+   bool SupportsColorDepth(
+       gfx::ColorDepth aColorDepth,
+@@ -85,6 +102,9 @@ class FFmpegDecoderModule : public Platf
+ 
+  private:
+   FFmpegLibWrapper* mLib;
++#ifdef FFVPX_VERSION
++  bool mIsOpenH264Enabled;
++#endif
+ };
+ 
+ }  // namespace mozilla
+diff -up firefox-80.0.1/dom/media/platforms/PDMFactory.cpp.1057646 firefox-80.0.1/dom/media/platforms/PDMFactory.cpp
+--- firefox-80.0.1/dom/media/platforms/PDMFactory.cpp.1057646	2020-08-31 16:04:09.000000000 +0200
++++ firefox-80.0.1/dom/media/platforms/PDMFactory.cpp	2020-09-07 10:07:23.185946904 +0200
+@@ -391,7 +391,13 @@ void PDMFactory::CreatePDMs() {
+     StartupPDM(m, StaticPrefs::media_android_media_codec_preferred());
+   }
+ #endif
+-
++#if defined(MOZ_FFVPX) && defined(MOZ_OPENH264)
++  if (StaticPrefs::media_ffvpx_openh264_enabled() && mFFmpegFailedToLoad) {
++    m = FFVPXRuntimeLinker::CreateDecoderModule();
++    m->EnableOpenH264Decoder();
++    StartupPDM(m);
++  }
++#endif
+   m = new AgnosticDecoderModule();
+   StartupPDM(m);
+ 
+diff -up firefox-80.0.1/dom/media/platforms/PlatformDecoderModule.h.1057646 firefox-80.0.1/dom/media/platforms/PlatformDecoderModule.h
+--- firefox-80.0.1/dom/media/platforms/PlatformDecoderModule.h.1057646	2020-08-31 16:04:09.000000000 +0200
++++ firefox-80.0.1/dom/media/platforms/PlatformDecoderModule.h	2020-09-07 10:07:23.185946904 +0200
+@@ -195,6 +195,10 @@ class PlatformDecoderModule {
+            SupportsColorDepth(videoInfo->mColorDepth, aDiagnostics);
+   }
+ 
++  // When system ffmpeg is missing we create a fallback ffvpx decoder
++  // with OpenH264 decoder for H.264.
++  virtual void EnableOpenH264Decoder(){};
++
+  protected:
+   PlatformDecoderModule() = default;
+   virtual ~PlatformDecoderModule() = default;
+diff -up firefox-80.0.1/media/ffvpx/config_unix64.h.1057646 firefox-80.0.1/media/ffvpx/config_unix64.h
+--- firefox-80.0.1/media/ffvpx/config_unix64.h.1057646	2020-08-31 16:04:13.000000000 +0200
++++ firefox-80.0.1/media/ffvpx/config_unix64.h	2020-09-07 10:07:23.185946904 +0200
+@@ -456,7 +456,11 @@
+ #define CONFIG_LIBMP3LAME 0
+ #define CONFIG_LIBMYSOFA 0
+ #define CONFIG_LIBOPENCV 0
++#ifdef MOZ_OPENH264
++#define CONFIG_LIBOPENH264 1
++#else
+ #define CONFIG_LIBOPENH264 0
++#endif
+ #define CONFIG_LIBOPENJPEG 0
+ #define CONFIG_LIBOPENMPT 0
+ #define CONFIG_LIBOPUS 0
+diff -up firefox-80.0.1/media/ffvpx/libavcodec/bsf_list.c.1057646 firefox-80.0.1/media/ffvpx/libavcodec/bsf_list.c
+--- firefox-80.0.1/media/ffvpx/libavcodec/bsf_list.c.1057646	2020-08-31 16:04:13.000000000 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/bsf_list.c	2020-09-07 10:07:23.185946904 +0200
+@@ -3,4 +3,7 @@ static const AVBitStreamFilter * const b
+ #if CONFIG_VP9_SUPERFRAME_SPLIT_BSF
+     &ff_vp9_superframe_split_bsf,
+ #endif
++#ifdef CONFIG_LIBOPENH264
++    &ff_h264_mp4toannexb_bsf,
++#endif
+     NULL };
+diff -up firefox-80.0.1/media/ffvpx/libavcodec/codec_list.c.1057646 firefox-80.0.1/media/ffvpx/libavcodec/codec_list.c
+--- firefox-80.0.1/media/ffvpx/libavcodec/codec_list.c.1057646	2020-08-31 16:04:12.000000000 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/codec_list.c	2020-09-07 10:07:23.185946904 +0200
+@@ -11,4 +11,11 @@ static const AVCodec * const codec_list[
+ #if CONFIG_MP3_DECODER
+     &ff_mp3_decoder,
+ #endif
++#ifdef CONFIG_LIBOPENH264
++    &ff_libopenh264_decoder,
++#endif
++#ifdef CONFIG_LIBFDK_AAC
++    &ff_libfdk_aac_decoder,
++#endif
++
+     NULL };
+diff -up firefox-80.0.1/media/ffvpx/libavcodec/h264_mp4toannexb_bsf.c.1057646 firefox-80.0.1/media/ffvpx/libavcodec/h264_mp4toannexb_bsf.c
+--- firefox-80.0.1/media/ffvpx/libavcodec/h264_mp4toannexb_bsf.c.1057646	2020-09-07 10:07:23.185946904 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/h264_mp4toannexb_bsf.c	2020-09-07 10:07:23.185946904 +0200
+@@ -0,0 +1,307 @@
++/*
++ * H.264 MP4 to Annex B byte stream format filter
++ * Copyright (c) 2007 Benoit Fouet <benoit.fouet@free.fr>
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include <string.h>
++
++#include "libavutil/intreadwrite.h"
++#include "libavutil/mem.h"
++
++#include "avcodec.h"
++#include "bsf.h"
++
++#define MOZ_H264_NAL_SLICE 1
++#define MOZ_H264_NAL_IDR_SLICE 5
++#define MOZ_H264_NAL_SPS 7
++#define MOZ_H264_NAL_PPS 8
++
++typedef struct H264BSFContext {
++    int32_t  sps_offset;
++    int32_t  pps_offset;
++    uint8_t  length_size;
++    uint8_t  new_idr;
++    uint8_t  idr_sps_seen;
++    uint8_t  idr_pps_seen;
++    int      extradata_parsed;
++} H264BSFContext;
++
++static int alloc_and_copy(AVPacket *out,
++                          const uint8_t *sps_pps, uint32_t sps_pps_size,
++                          const uint8_t *in, uint32_t in_size, int ps)
++{
++    uint32_t offset         = out->size;
++    uint8_t start_code_size = offset == 0 || ps ? 4 : 3;
++    int err;
++
++    err = av_grow_packet(out, sps_pps_size + in_size + start_code_size);
++    if (err < 0)
++        return err;
++
++    if (sps_pps)
++        memcpy(out->data + offset, sps_pps, sps_pps_size);
++    memcpy(out->data + sps_pps_size + start_code_size + offset, in, in_size);
++    if (start_code_size == 4) {
++        AV_WB32(out->data + offset + sps_pps_size, 1);
++    } else {
++        (out->data + offset + sps_pps_size)[0] =
++        (out->data + offset + sps_pps_size)[1] = 0;
++        (out->data + offset + sps_pps_size)[2] = 1;
++    }
++
++    return 0;
++}
++
++static int h264_extradata_to_annexb(AVBSFContext *ctx, const int padding)
++{
++    H264BSFContext *s = ctx->priv_data;
++    uint16_t unit_size;
++    uint64_t total_size                 = 0;
++    uint8_t *out                        = NULL, unit_nb, sps_done = 0,
++             sps_seen                   = 0, pps_seen = 0;
++    const uint8_t *extradata            = ctx->par_in->extradata + 4;
++    static const uint8_t nalu_header[4] = { 0, 0, 0, 1 };
++    int length_size = (*extradata++ & 0x3) + 1; // retrieve length coded size
++
++    s->sps_offset = s->pps_offset = -1;
++
++    /* retrieve sps and pps unit(s) */
++    unit_nb = *extradata++ & 0x1f; /* number of sps unit(s) */
++    if (!unit_nb) {
++        goto pps;
++    } else {
++        s->sps_offset = 0;
++        sps_seen = 1;
++    }
++
++    while (unit_nb--) {
++        int err;
++
++        unit_size   = AV_RB16(extradata);
++        total_size += unit_size + 4;
++        if (total_size > INT_MAX - padding) {
++            av_log(ctx, AV_LOG_ERROR,
++                   "Too big extradata size, corrupted stream or invalid MP4/AVCC bitstream\n");
++            av_free(out);
++            return AVERROR(EINVAL);
++        }
++        if (extradata + 2 + unit_size > ctx->par_in->extradata + ctx->par_in->extradata_size) {
++            av_log(ctx, AV_LOG_ERROR, "Packet header is not contained in global extradata, "
++                   "corrupted stream or invalid MP4/AVCC bitstream\n");
++            av_free(out);
++            return AVERROR(EINVAL);
++        }
++        if ((err = av_reallocp(&out, total_size + padding)) < 0)
++            return err;
++        memcpy(out + total_size - unit_size - 4, nalu_header, 4);
++        memcpy(out + total_size - unit_size, extradata + 2, unit_size);
++        extradata += 2 + unit_size;
++pps:
++        if (!unit_nb && !sps_done++) {
++            unit_nb = *extradata++; /* number of pps unit(s) */
++            if (unit_nb) {
++                s->pps_offset = total_size;
++                pps_seen = 1;
++            }
++        }
++    }
++
++    if (out)
++        memset(out + total_size, 0, padding);
++
++    if (!sps_seen)
++        av_log(ctx, AV_LOG_WARNING,
++               "Warning: SPS NALU missing or invalid. "
++               "The resulting stream may not play.\n");
++
++    if (!pps_seen)
++        av_log(ctx, AV_LOG_WARNING,
++               "Warning: PPS NALU missing or invalid. "
++               "The resulting stream may not play.\n");
++
++    av_freep(&ctx->par_out->extradata);
++    ctx->par_out->extradata      = out;
++    ctx->par_out->extradata_size = total_size;
++
++    return length_size;
++}
++
++static int h264_mp4toannexb_init(AVBSFContext *ctx)
++{
++    H264BSFContext *s = ctx->priv_data;
++    int extra_size = ctx->par_in->extradata_size;
++    int ret;
++
++    /* retrieve sps and pps NAL units from extradata */
++    if (!extra_size                                               ||
++        (extra_size >= 3 && AV_RB24(ctx->par_in->extradata) == 1) ||
++        (extra_size >= 4 && AV_RB32(ctx->par_in->extradata) == 1)) {
++        av_log(ctx, AV_LOG_VERBOSE,
++               "The input looks like it is Annex B already\n");
++    } else if (extra_size >= 6) {
++        ret = h264_extradata_to_annexb(ctx, AV_INPUT_BUFFER_PADDING_SIZE);
++        if (ret < 0)
++            return ret;
++
++        s->length_size      = ret;
++        s->new_idr          = 1;
++        s->idr_sps_seen     = 0;
++        s->idr_pps_seen     = 0;
++        s->extradata_parsed = 1;
++    } else {
++        av_log(ctx, AV_LOG_ERROR, "Invalid extradata size: %d\n", extra_size);
++        return AVERROR_INVALIDDATA;
++    }
++
++    return 0;
++}
++
++static int h264_mp4toannexb_filter(AVBSFContext *ctx, AVPacket *out)
++{
++    H264BSFContext *s = ctx->priv_data;
++
++    AVPacket *in;
++    uint8_t unit_type;
++    int32_t nal_size;
++    uint32_t cumul_size    = 0;
++    const uint8_t *buf;
++    const uint8_t *buf_end;
++    int            buf_size;
++    int ret = 0, i;
++
++    ret = ff_bsf_get_packet(ctx, &in);
++    if (ret < 0)
++        return ret;
++
++    /* nothing to filter */
++    if (!s->extradata_parsed) {
++        av_packet_move_ref(out, in);
++        av_packet_free(&in);
++        return 0;
++    }
++
++    buf      = in->data;
++    buf_size = in->size;
++    buf_end  = in->data + in->size;
++
++    do {
++        ret= AVERROR(EINVAL);
++        if (buf + s->length_size > buf_end)
++            goto fail;
++
++        for (nal_size = 0, i = 0; i<s->length_size; i++)
++            nal_size = (nal_size << 8) | buf[i];
++
++        buf += s->length_size;
++        unit_type = *buf & 0x1f;
++
++        if (nal_size > buf_end - buf || nal_size < 0)
++            goto fail;
++
++        if (unit_type == MOZ_H264_NAL_SPS)
++            s->idr_sps_seen = s->new_idr = 1;
++        else if (unit_type == MOZ_H264_NAL_PPS) {
++            s->idr_pps_seen = s->new_idr = 1;
++            /* if SPS has not been seen yet, prepend the AVCC one to PPS */
++            if (!s->idr_sps_seen) {
++                if (s->sps_offset == -1)
++                    av_log(ctx, AV_LOG_WARNING, "SPS not present in the stream, nor in AVCC, stream may be unreadable\n");
++                else {
++                    if ((ret = alloc_and_copy(out,
++                                         ctx->par_out->extradata + s->sps_offset,
++                                         s->pps_offset != -1 ? s->pps_offset : ctx->par_out->extradata_size - s->sps_offset,
++                                         buf, nal_size, 1)) < 0)
++                        goto fail;
++                    s->idr_sps_seen = 1;
++                    goto next_nal;
++                }
++            }
++        }
++
++        /* if this is a new IDR picture following an IDR picture, reset the idr flag.
++         * Just check first_mb_in_slice to be 0 as this is the simplest solution.
++         * This could be checking idr_pic_id instead, but would complexify the parsing. */
++        if (!s->new_idr && unit_type == MOZ_H264_NAL_IDR_SLICE && (buf[1] & 0x80))
++            s->new_idr = 1;
++
++        /* prepend only to the first type 5 NAL unit of an IDR picture, if no sps/pps are already present */
++        if (s->new_idr && unit_type == MOZ_H264_NAL_IDR_SLICE && !s->idr_sps_seen && !s->idr_pps_seen) {
++            if ((ret=alloc_and_copy(out,
++                               ctx->par_out->extradata, ctx->par_out->extradata_size,
++                               buf, nal_size, 1)) < 0)
++                goto fail;
++            s->new_idr = 0;
++        /* if only SPS has been seen, also insert PPS */
++      } else if (s->new_idr && unit_type == MOZ_H264_NAL_IDR_SLICE && s->idr_sps_seen && !s->idr_pps_seen) {
++            if (s->pps_offset == -1) {
++                av_log(ctx, AV_LOG_WARNING, "PPS not present in the stream, nor in AVCC, stream may be unreadable\n");
++                if ((ret = alloc_and_copy(out, NULL, 0, buf, nal_size, 0)) < 0)
++                    goto fail;
++            } else if ((ret = alloc_and_copy(out,
++                                        ctx->par_out->extradata + s->pps_offset, ctx->par_out->extradata_size - s->pps_offset,
++                                        buf, nal_size, 1)) < 0)
++                goto fail;
++        } else {
++            if ((ret=alloc_and_copy(out, NULL, 0, buf, nal_size, unit_type == MOZ_H264_NAL_SPS || unit_type == MOZ_H264_NAL_PPS)) < 0)
++                goto fail;
++            if (!s->new_idr && unit_type == MOZ_H264_NAL_SLICE) {
++                s->new_idr = 1;
++                s->idr_sps_seen = 0;
++                s->idr_pps_seen = 0;
++            }
++        }
++
++next_nal:
++        buf        += nal_size;
++        cumul_size += nal_size + s->length_size;
++    } while (cumul_size < buf_size);
++
++    ret = av_packet_copy_props(out, in);
++    if (ret < 0)
++        goto fail;
++
++fail:
++    if (ret < 0)
++        av_packet_unref(out);
++    av_packet_free(&in);
++
++    return ret;
++}
++
++static void h264_mp4toannexb_flush(AVBSFContext *ctx)
++{
++    H264BSFContext *s = ctx->priv_data;
++
++    s->idr_sps_seen = 0;
++    s->idr_pps_seen = 0;
++    s->new_idr      = s->extradata_parsed;
++}
++
++static const enum AVCodecID codec_ids[] = {
++    AV_CODEC_ID_H264, AV_CODEC_ID_NONE,
++};
++
++const AVBitStreamFilter ff_h264_mp4toannexb_bsf = {
++    .name           = "h264_mp4toannexb",
++    .priv_data_size = sizeof(H264BSFContext),
++    .init           = h264_mp4toannexb_init,
++    .filter         = h264_mp4toannexb_filter,
++    .close          = h264_mp4toannexb_flush,
++    .codec_ids      = codec_ids,
++};
+diff -up firefox-80.0.1/media/ffvpx/libavcodec/libfdk-aacdec.c.1057646 firefox-80.0.1/media/ffvpx/libavcodec/libfdk-aacdec.c
+--- firefox-80.0.1/media/ffvpx/libavcodec/libfdk-aacdec.c.1057646	2020-09-07 10:07:23.186946908 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/libfdk-aacdec.c	2020-09-07 10:07:23.186946908 +0200
+@@ -0,0 +1,409 @@
++/*
++ * AAC decoder wrapper
++ * Copyright (c) 2012 Martin Storsjo
++ *
++ * This file is part of FFmpeg.
++ *
++ * Permission to use, copy, modify, and/or distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++#include <fdk-aac/aacdecoder_lib.h>
++
++#include "libavutil/channel_layout.h"
++#include "libavutil/common.h"
++#include "libavutil/opt.h"
++#include "avcodec.h"
++#include "internal.h"
++
++#ifdef AACDECODER_LIB_VL0
++#define FDKDEC_VER_AT_LEAST(vl0, vl1) \
++    ((AACDECODER_LIB_VL0 > vl0) || \
++     (AACDECODER_LIB_VL0 == vl0 && AACDECODER_LIB_VL1 >= vl1))
++#else
++#define FDKDEC_VER_AT_LEAST(vl0, vl1) 0
++#endif
++
++#if !FDKDEC_VER_AT_LEAST(2, 5) // < 2.5.10
++#define AAC_PCM_MAX_OUTPUT_CHANNELS AAC_PCM_OUTPUT_CHANNELS
++#endif
++
++enum ConcealMethod {
++    CONCEAL_METHOD_SPECTRAL_MUTING      =  0,
++    CONCEAL_METHOD_NOISE_SUBSTITUTION   =  1,
++    CONCEAL_METHOD_ENERGY_INTERPOLATION =  2,
++    CONCEAL_METHOD_NB,
++};
++
++typedef struct FDKAACDecContext {
++    const AVClass *class;
++    HANDLE_AACDECODER handle;
++    uint8_t *decoder_buffer;
++    int decoder_buffer_size;
++    uint8_t *anc_buffer;
++    int conceal_method;
++    int drc_level;
++    int drc_boost;
++    int drc_heavy;
++    int drc_effect;
++    int drc_cut;
++    int level_limit;
++} FDKAACDecContext;
++
++
++#define DMX_ANC_BUFFSIZE       128
++#define DECODER_MAX_CHANNELS     8
++#define DECODER_BUFFSIZE      2048 * sizeof(INT_PCM)
++
++#define OFFSET(x) offsetof(FDKAACDecContext, x)
++#define AD AV_OPT_FLAG_AUDIO_PARAM | AV_OPT_FLAG_DECODING_PARAM
++static const AVOption fdk_aac_dec_options[] = {
++    { "conceal", "Error concealment method", OFFSET(conceal_method), AV_OPT_TYPE_INT, { .i64 = CONCEAL_METHOD_NOISE_SUBSTITUTION }, CONCEAL_METHOD_SPECTRAL_MUTING, CONCEAL_METHOD_NB - 1, AD, "conceal" },
++    { "spectral", "Spectral muting",      0, AV_OPT_TYPE_CONST, { .i64 = CONCEAL_METHOD_SPECTRAL_MUTING },      INT_MIN, INT_MAX, AD, "conceal" },
++    { "noise",    "Noise Substitution",   0, AV_OPT_TYPE_CONST, { .i64 = CONCEAL_METHOD_NOISE_SUBSTITUTION },   INT_MIN, INT_MAX, AD, "conceal" },
++    { "energy",   "Energy Interpolation", 0, AV_OPT_TYPE_CONST, { .i64 = CONCEAL_METHOD_ENERGY_INTERPOLATION }, INT_MIN, INT_MAX, AD, "conceal" },
++    { "drc_boost", "Dynamic Range Control: boost, where [0] is none and [127] is max boost",
++                     OFFSET(drc_boost),      AV_OPT_TYPE_INT,   { .i64 = -1 }, -1, 127, AD, NULL    },
++    { "drc_cut",   "Dynamic Range Control: attenuation factor, where [0] is none and [127] is max compression",
++                     OFFSET(drc_cut),        AV_OPT_TYPE_INT,   { .i64 = -1 }, -1, 127, AD, NULL    },
++    { "drc_level", "Dynamic Range Control: reference level, quantized to 0.25dB steps where [0] is 0dB and [127] is -31.75dB",
++                     OFFSET(drc_level),      AV_OPT_TYPE_INT,   { .i64 = -1},  -1, 127, AD, NULL    },
++    { "drc_heavy", "Dynamic Range Control: heavy compression, where [1] is on (RF mode) and [0] is off",
++                     OFFSET(drc_heavy),      AV_OPT_TYPE_INT,   { .i64 = -1},  -1, 1,   AD, NULL    },
++#if FDKDEC_VER_AT_LEAST(2, 5) // 2.5.10
++    { "level_limit", "Signal level limiting", OFFSET(level_limit), AV_OPT_TYPE_INT, { .i64 = 0 }, -1, 1, AD },
++#endif
++#if FDKDEC_VER_AT_LEAST(3, 0) // 3.0.0
++    { "drc_effect","Dynamic Range Control: effect type, where e.g. [0] is none and [6] is general",
++                     OFFSET(drc_effect),     AV_OPT_TYPE_INT,   { .i64 = -1},  -1, 8,   AD, NULL    },
++#endif
++    { NULL }
++};
++
++static const AVClass fdk_aac_dec_class = {
++    .class_name = "libfdk-aac decoder",
++    .item_name  = av_default_item_name,
++    .option     = fdk_aac_dec_options,
++    .version    = LIBAVUTIL_VERSION_INT,
++};
++
++static int get_stream_info(AVCodecContext *avctx)
++{
++    FDKAACDecContext *s   = avctx->priv_data;
++    CStreamInfo *info     = aacDecoder_GetStreamInfo(s->handle);
++    int channel_counts[0x24] = { 0 };
++    int i, ch_error       = 0;
++    uint64_t ch_layout    = 0;
++
++    if (!info) {
++        av_log(avctx, AV_LOG_ERROR, "Unable to get stream info\n");
++        return AVERROR_UNKNOWN;
++    }
++
++    if (info->sampleRate <= 0) {
++        av_log(avctx, AV_LOG_ERROR, "Stream info not initialized\n");
++        return AVERROR_UNKNOWN;
++    }
++    avctx->sample_rate = info->sampleRate;
++    avctx->frame_size  = info->frameSize;
++
++    for (i = 0; i < info->numChannels; i++) {
++        AUDIO_CHANNEL_TYPE ctype = info->pChannelType[i];
++        if (ctype <= ACT_NONE || ctype >= FF_ARRAY_ELEMS(channel_counts)) {
++            av_log(avctx, AV_LOG_WARNING, "unknown channel type\n");
++            break;
++        }
++        channel_counts[ctype]++;
++    }
++    av_log(avctx, AV_LOG_DEBUG,
++           "%d channels - front:%d side:%d back:%d lfe:%d top:%d\n",
++           info->numChannels,
++           channel_counts[ACT_FRONT], channel_counts[ACT_SIDE],
++           channel_counts[ACT_BACK],  channel_counts[ACT_LFE],
++           channel_counts[ACT_FRONT_TOP] + channel_counts[ACT_SIDE_TOP] +
++           channel_counts[ACT_BACK_TOP]  + channel_counts[ACT_TOP]);
++
++    switch (channel_counts[ACT_FRONT]) {
++    case 4:
++        ch_layout |= AV_CH_LAYOUT_STEREO | AV_CH_FRONT_LEFT_OF_CENTER |
++                     AV_CH_FRONT_RIGHT_OF_CENTER;
++        break;
++    case 3:
++        ch_layout |= AV_CH_LAYOUT_STEREO | AV_CH_FRONT_CENTER;
++        break;
++    case 2:
++        ch_layout |= AV_CH_LAYOUT_STEREO;
++        break;
++    case 1:
++        ch_layout |= AV_CH_FRONT_CENTER;
++        break;
++    default:
++        av_log(avctx, AV_LOG_WARNING,
++               "unsupported number of front channels: %d\n",
++               channel_counts[ACT_FRONT]);
++        ch_error = 1;
++        break;
++    }
++    if (channel_counts[ACT_SIDE] > 0) {
++        if (channel_counts[ACT_SIDE] == 2) {
++            ch_layout |= AV_CH_SIDE_LEFT | AV_CH_SIDE_RIGHT;
++        } else {
++            av_log(avctx, AV_LOG_WARNING,
++                   "unsupported number of side channels: %d\n",
++                   channel_counts[ACT_SIDE]);
++            ch_error = 1;
++        }
++    }
++    if (channel_counts[ACT_BACK] > 0) {
++        switch (channel_counts[ACT_BACK]) {
++        case 3:
++            ch_layout |= AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT | AV_CH_BACK_CENTER;
++            break;
++        case 2:
++            ch_layout |= AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT;
++            break;
++        case 1:
++            ch_layout |= AV_CH_BACK_CENTER;
++            break;
++        default:
++            av_log(avctx, AV_LOG_WARNING,
++                   "unsupported number of back channels: %d\n",
++                   channel_counts[ACT_BACK]);
++            ch_error = 1;
++            break;
++        }
++    }
++    if (channel_counts[ACT_LFE] > 0) {
++        if (channel_counts[ACT_LFE] == 1) {
++            ch_layout |= AV_CH_LOW_FREQUENCY;
++        } else {
++            av_log(avctx, AV_LOG_WARNING,
++                   "unsupported number of LFE channels: %d\n",
++                   channel_counts[ACT_LFE]);
++            ch_error = 1;
++        }
++    }
++    if (!ch_error &&
++        av_get_channel_layout_nb_channels(ch_layout) != info->numChannels) {
++        av_log(avctx, AV_LOG_WARNING, "unsupported channel configuration\n");
++        ch_error = 1;
++    }
++    if (ch_error)
++        avctx->channel_layout = 0;
++    else
++        avctx->channel_layout = ch_layout;
++
++    avctx->channels = info->numChannels;
++
++    return 0;
++}
++
++static av_cold int fdk_aac_decode_close(AVCodecContext *avctx)
++{
++    FDKAACDecContext *s = avctx->priv_data;
++
++    if (s->handle)
++        aacDecoder_Close(s->handle);
++    av_freep(&s->decoder_buffer);
++    av_freep(&s->anc_buffer);
++
++    return 0;
++}
++
++static av_cold int fdk_aac_decode_init(AVCodecContext *avctx)
++{
++    FDKAACDecContext *s = avctx->priv_data;
++    AAC_DECODER_ERROR err;
++
++    s->handle = aacDecoder_Open(avctx->extradata_size ? TT_MP4_RAW : TT_MP4_ADTS, 1);
++    if (!s->handle) {
++        av_log(avctx, AV_LOG_ERROR, "Error opening decoder\n");
++        return AVERROR_UNKNOWN;
++    }
++
++    if (avctx->extradata_size) {
++        if ((err = aacDecoder_ConfigRaw(s->handle, &avctx->extradata,
++                                        &avctx->extradata_size)) != AAC_DEC_OK) {
++            av_log(avctx, AV_LOG_ERROR, "Unable to set extradata\n");
++            return AVERROR_INVALIDDATA;
++        }
++    }
++
++    if ((err = aacDecoder_SetParam(s->handle, AAC_CONCEAL_METHOD,
++                                   s->conceal_method)) != AAC_DEC_OK) {
++        av_log(avctx, AV_LOG_ERROR, "Unable to set error concealment method\n");
++        return AVERROR_UNKNOWN;
++    }
++
++    if (avctx->request_channel_layout > 0 &&
++        avctx->request_channel_layout != AV_CH_LAYOUT_NATIVE) {
++        int downmix_channels = -1;
++
++        switch (avctx->request_channel_layout) {
++        case AV_CH_LAYOUT_STEREO:
++        case AV_CH_LAYOUT_STEREO_DOWNMIX:
++            downmix_channels = 2;
++            break;
++        case AV_CH_LAYOUT_MONO:
++            downmix_channels = 1;
++            break;
++        default:
++            av_log(avctx, AV_LOG_WARNING, "Invalid request_channel_layout\n");
++            break;
++        }
++
++        if (downmix_channels != -1) {
++            if (aacDecoder_SetParam(s->handle, AAC_PCM_MAX_OUTPUT_CHANNELS,
++                                    downmix_channels) != AAC_DEC_OK) {
++               av_log(avctx, AV_LOG_WARNING, "Unable to set output channels in the decoder\n");
++            } else {
++               s->anc_buffer = av_malloc(DMX_ANC_BUFFSIZE);
++               if (!s->anc_buffer) {
++                   av_log(avctx, AV_LOG_ERROR, "Unable to allocate ancillary buffer for the decoder\n");
++                   return AVERROR(ENOMEM);
++               }
++               if (aacDecoder_AncDataInit(s->handle, s->anc_buffer, DMX_ANC_BUFFSIZE)) {
++                   av_log(avctx, AV_LOG_ERROR, "Unable to register downmix ancillary buffer in the decoder\n");
++                   return AVERROR_UNKNOWN;
++               }
++            }
++        }
++    }
++
++    if (s->drc_boost != -1) {
++        if (aacDecoder_SetParam(s->handle, AAC_DRC_BOOST_FACTOR, s->drc_boost) != AAC_DEC_OK) {
++            av_log(avctx, AV_LOG_ERROR, "Unable to set DRC boost factor in the decoder\n");
++            return AVERROR_UNKNOWN;
++        }
++    }
++
++    if (s->drc_cut != -1) {
++        if (aacDecoder_SetParam(s->handle, AAC_DRC_ATTENUATION_FACTOR, s->drc_cut) != AAC_DEC_OK) {
++            av_log(avctx, AV_LOG_ERROR, "Unable to set DRC attenuation factor in the decoder\n");
++            return AVERROR_UNKNOWN;
++        }
++    }
++
++    if (s->drc_level != -1) {
++        if (aacDecoder_SetParam(s->handle, AAC_DRC_REFERENCE_LEVEL, s->drc_level) != AAC_DEC_OK) {
++            av_log(avctx, AV_LOG_ERROR, "Unable to set DRC reference level in the decoder\n");
++            return AVERROR_UNKNOWN;
++        }
++    }
++
++    if (s->drc_heavy != -1) {
++        if (aacDecoder_SetParam(s->handle, AAC_DRC_HEAVY_COMPRESSION, s->drc_heavy) != AAC_DEC_OK) {
++            av_log(avctx, AV_LOG_ERROR, "Unable to set DRC heavy compression in the decoder\n");
++            return AVERROR_UNKNOWN;
++        }
++    }
++
++#if FDKDEC_VER_AT_LEAST(2, 5) // 2.5.10
++    if (aacDecoder_SetParam(s->handle, AAC_PCM_LIMITER_ENABLE, s->level_limit) != AAC_DEC_OK) {
++        av_log(avctx, AV_LOG_ERROR, "Unable to set in signal level limiting in the decoder\n");
++        return AVERROR_UNKNOWN;
++    }
++#endif
++
++#if FDKDEC_VER_AT_LEAST(3, 0) // 3.0.0
++    if (s->drc_effect != -1) {
++        if (aacDecoder_SetParam(s->handle, AAC_UNIDRC_SET_EFFECT, s->drc_effect) != AAC_DEC_OK) {
++            av_log(avctx, AV_LOG_ERROR, "Unable to set DRC effect type in the decoder\n");
++            return AVERROR_UNKNOWN;
++        }
++    }
++#endif
++
++    avctx->sample_fmt = AV_SAMPLE_FMT_S16;
++
++    s->decoder_buffer_size = DECODER_BUFFSIZE * DECODER_MAX_CHANNELS;
++    s->decoder_buffer = av_malloc(s->decoder_buffer_size);
++    if (!s->decoder_buffer)
++        return AVERROR(ENOMEM);
++
++    return 0;
++}
++
++static int fdk_aac_decode_frame(AVCodecContext *avctx, void *data,
++                                int *got_frame_ptr, AVPacket *avpkt)
++{
++    FDKAACDecContext *s = avctx->priv_data;
++    AVFrame *frame = data;
++    int ret;
++    AAC_DECODER_ERROR err;
++    UINT valid = avpkt->size;
++
++    err = aacDecoder_Fill(s->handle, &avpkt->data, &avpkt->size, &valid);
++    if (err != AAC_DEC_OK) {
++        av_log(avctx, AV_LOG_ERROR, "aacDecoder_Fill() failed: %x\n", err);
++        return AVERROR_INVALIDDATA;
++    }
++
++    err = aacDecoder_DecodeFrame(s->handle, (INT_PCM *) s->decoder_buffer, s->decoder_buffer_size / sizeof(INT_PCM), 0);
++    if (err == AAC_DEC_NOT_ENOUGH_BITS) {
++        ret = avpkt->size - valid;
++        goto end;
++    }
++    if (err != AAC_DEC_OK) {
++        av_log(avctx, AV_LOG_ERROR,
++               "aacDecoder_DecodeFrame() failed: %x\n", err);
++        ret = AVERROR_UNKNOWN;
++        goto end;
++    }
++
++    if ((ret = get_stream_info(avctx)) < 0)
++        goto end;
++    frame->nb_samples = avctx->frame_size;
++
++    if ((ret = ff_get_buffer(avctx, frame, 0)) < 0)
++        goto end;
++
++    memcpy(frame->extended_data[0], s->decoder_buffer,
++           avctx->channels * avctx->frame_size *
++           av_get_bytes_per_sample(avctx->sample_fmt));
++
++    *got_frame_ptr = 1;
++    ret = avpkt->size - valid;
++
++end:
++    return ret;
++}
++
++static av_cold void fdk_aac_decode_flush(AVCodecContext *avctx)
++{
++    FDKAACDecContext *s = avctx->priv_data;
++    AAC_DECODER_ERROR err;
++
++    if (!s->handle)
++        return;
++
++    if ((err = aacDecoder_SetParam(s->handle,
++                                   AAC_TPDEC_CLEAR_BUFFER, 1)) != AAC_DEC_OK)
++        av_log(avctx, AV_LOG_WARNING, "failed to clear buffer when flushing\n");
++}
++
++AVCodec ff_libfdk_aac_decoder = {
++    .name           = "libfdk_aac",
++    .long_name      = NULL_IF_CONFIG_SMALL("Fraunhofer FDK AAC"),
++    .type           = AVMEDIA_TYPE_AUDIO,
++    .id             = AV_CODEC_ID_AAC,
++    .priv_data_size = sizeof(FDKAACDecContext),
++    .init           = fdk_aac_decode_init,
++    .decode         = fdk_aac_decode_frame,
++    .close          = fdk_aac_decode_close,
++    .flush          = fdk_aac_decode_flush,
++    .capabilities   = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_CHANNEL_CONF,
++    .priv_class     = &fdk_aac_dec_class,
++    .caps_internal  = FF_CODEC_CAP_INIT_THREADSAFE |
++                      FF_CODEC_CAP_INIT_CLEANUP,
++    .wrapper_name   = "libfdk",
++};
+diff -up firefox-80.0.1/media/ffvpx/libavcodec/libopenh264.c.1057646 firefox-80.0.1/media/ffvpx/libavcodec/libopenh264.c
+--- firefox-80.0.1/media/ffvpx/libavcodec/libopenh264.c.1057646	2020-09-07 10:07:23.186946908 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/libopenh264.c	2020-09-07 10:07:23.186946908 +0200
+@@ -0,0 +1,62 @@
++/*
++ * OpenH264 shared utils
++ * Copyright (C) 2014 Martin Storsjo
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include <string.h>
++#include <wels/codec_api.h>
++#include <wels/codec_ver.h>
++
++#include "libavutil/log.h"
++
++#include "libopenh264.h"
++
++// Convert libopenh264 log level to equivalent ffmpeg log level.
++static int libopenh264_to_ffmpeg_log_level(int libopenh264_log_level)
++{
++    if      (libopenh264_log_level >= WELS_LOG_DETAIL)  return AV_LOG_TRACE;
++    else if (libopenh264_log_level >= WELS_LOG_DEBUG)   return AV_LOG_DEBUG;
++    else if (libopenh264_log_level >= WELS_LOG_INFO)    return AV_LOG_VERBOSE;
++    else if (libopenh264_log_level >= WELS_LOG_WARNING) return AV_LOG_WARNING;
++    else if (libopenh264_log_level >= WELS_LOG_ERROR)   return AV_LOG_ERROR;
++    else                                                return AV_LOG_QUIET;
++}
++
++void ff_libopenh264_trace_callback(void *ctx, int level, const char *msg)
++{
++    // The message will be logged only if the requested EQUIVALENT ffmpeg log level is
++    // less than or equal to the current ffmpeg log level.
++    int equiv_ffmpeg_log_level = libopenh264_to_ffmpeg_log_level(level);
++    av_log(ctx, equiv_ffmpeg_log_level, "%s\n", msg);
++}
++
++int ff_libopenh264_check_version(void *logctx)
++{
++    // Mingw GCC < 4.7 on x86_32 uses an incorrect/buggy ABI for the WelsGetCodecVersion
++    // function (for functions returning larger structs), thus skip the check in those
++    // configurations.
++#if !defined(_WIN32) || !defined(__GNUC__) || !ARCH_X86_32 || AV_GCC_VERSION_AT_LEAST(4, 7)
++    OpenH264Version libver = WelsGetCodecVersion();
++    if (memcmp(&libver, &g_stCodecVersion, sizeof(libver))) {
++        av_log(logctx, AV_LOG_ERROR, "Incorrect library version loaded\n");
++        return AVERROR(EINVAL);
++    }
++#endif
++    return 0;
++}
+diff -up firefox-80.0.1/media/ffvpx/libavcodec/libopenh264dec.c.1057646 firefox-80.0.1/media/ffvpx/libavcodec/libopenh264dec.c
+--- firefox-80.0.1/media/ffvpx/libavcodec/libopenh264dec.c.1057646	2020-09-07 10:07:23.186946908 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/libopenh264dec.c	2020-09-07 10:07:23.186946908 +0200
+@@ -0,0 +1,177 @@
++/*
++ * OpenH264 video decoder
++ * Copyright (C) 2016 Martin Storsjo
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include <wels/codec_api.h>
++#include <wels/codec_ver.h>
++
++#include "libavutil/common.h"
++#include "libavutil/fifo.h"
++#include "libavutil/imgutils.h"
++#include "libavutil/intreadwrite.h"
++#include "libavutil/mathematics.h"
++#include "libavutil/opt.h"
++
++#include "avcodec.h"
++#include "internal.h"
++#include "libopenh264.h"
++
++typedef struct SVCContext {
++    ISVCDecoder *decoder;
++} SVCContext;
++
++static av_cold int svc_decode_close(AVCodecContext *avctx)
++{
++    SVCContext *s = avctx->priv_data;
++
++    if (s->decoder)
++        WelsDestroyDecoder(s->decoder);
++
++    return 0;
++}
++
++static av_cold int svc_decode_init(AVCodecContext *avctx)
++{
++    SVCContext *s = avctx->priv_data;
++    SDecodingParam param = { 0 };
++    int err;
++    int log_level;
++    WelsTraceCallback callback_function;
++
++    if ((err = ff_libopenh264_check_version(avctx)) < 0)
++        return err;
++
++    if (WelsCreateDecoder(&s->decoder)) {
++        av_log(avctx, AV_LOG_ERROR, "Unable to create decoder\n");
++        return AVERROR_UNKNOWN;
++    }
++
++    // Pass all libopenh264 messages to our callback, to allow ourselves to filter them.
++    log_level = WELS_LOG_DETAIL;
++    callback_function = ff_libopenh264_trace_callback;
++    (*s->decoder)->SetOption(s->decoder, DECODER_OPTION_TRACE_LEVEL, &log_level);
++    (*s->decoder)->SetOption(s->decoder, DECODER_OPTION_TRACE_CALLBACK, (void *)&callback_function);
++    (*s->decoder)->SetOption(s->decoder, DECODER_OPTION_TRACE_CALLBACK_CONTEXT, (void *)&avctx);
++
++#if !OPENH264_VER_AT_LEAST(1, 6)
++    param.eOutputColorFormat = videoFormatI420;
++#endif
++    param.eEcActiveIdc       = ERROR_CON_DISABLE;
++    param.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
++
++    if ((*s->decoder)->Initialize(s->decoder, &param) != cmResultSuccess) {
++        av_log(avctx, AV_LOG_ERROR, "Initialize failed\n");
++        return AVERROR_UNKNOWN;
++    }
++
++    avctx->pix_fmt = AV_PIX_FMT_YUV420P;
++
++    return 0;
++}
++
++static int svc_decode_frame(AVCodecContext *avctx, void *data,
++                            int *got_frame, AVPacket *avpkt)
++{
++    SVCContext *s = avctx->priv_data;
++    SBufferInfo info = { 0 };
++    uint8_t* ptrs[3];
++    int ret, linesize[3];
++    AVFrame *avframe = data;
++    DECODING_STATE state;
++#if OPENH264_VER_AT_LEAST(1, 7)
++    int opt;
++#endif
++
++    if (!avpkt->data) {
++#if OPENH264_VER_AT_LEAST(1, 9)
++        int end_of_stream = 1;
++        (*s->decoder)->SetOption(s->decoder, DECODER_OPTION_END_OF_STREAM, &end_of_stream);
++        state = (*s->decoder)->FlushFrame(s->decoder, ptrs, &info);
++#else
++        return 0;
++#endif
++    } else {
++        info.uiInBsTimeStamp = avpkt->pts;
++#if OPENH264_VER_AT_LEAST(1, 4)
++        // Contrary to the name, DecodeFrameNoDelay actually does buffering
++        // and reordering of frames, and is the recommended decoding entry
++        // point since 1.4. This is essential for successfully decoding
++        // B-frames.
++        state = (*s->decoder)->DecodeFrameNoDelay(s->decoder, avpkt->data, avpkt->size, ptrs, &info);
++#else
++        state = (*s->decoder)->DecodeFrame2(s->decoder, avpkt->data, avpkt->size, ptrs, &info);
++#endif
++    }
++    if (state != dsErrorFree) {
++        av_log(avctx, AV_LOG_ERROR, "DecodeFrame failed\n");
++        return AVERROR_UNKNOWN;
++    }
++    if (info.iBufferStatus != 1) {
++        av_log(avctx, AV_LOG_DEBUG, "No frame produced\n");
++        return avpkt->size;
++    }
++
++    ret = ff_set_dimensions(avctx, info.UsrData.sSystemBuffer.iWidth, info.UsrData.sSystemBuffer.iHeight);
++    if (ret < 0)
++        return ret;
++    // The decoder doesn't (currently) support decoding into a user
++    // provided buffer, so do a copy instead.
++    if (ff_get_buffer(avctx, avframe, 0) < 0) {
++        av_log(avctx, AV_LOG_ERROR, "Unable to allocate buffer\n");
++        return AVERROR(ENOMEM);
++    }
++
++    linesize[0] = info.UsrData.sSystemBuffer.iStride[0];
++    linesize[1] = linesize[2] = info.UsrData.sSystemBuffer.iStride[1];
++    av_image_copy(avframe->data, avframe->linesize, (const uint8_t **) ptrs, linesize, avctx->pix_fmt, avctx->width, avctx->height);
++
++    avframe->pts     = info.uiOutYuvTimeStamp;
++    avframe->pkt_dts = AV_NOPTS_VALUE;
++#if FF_API_PKT_PTS
++FF_DISABLE_DEPRECATION_WARNINGS
++    avframe->pkt_pts = avpkt->pts;
++FF_ENABLE_DEPRECATION_WARNINGS
++#endif
++#if OPENH264_VER_AT_LEAST(1, 7)
++    (*s->decoder)->GetOption(s->decoder, DECODER_OPTION_PROFILE, &opt);
++    avctx->profile = opt;
++    (*s->decoder)->GetOption(s->decoder, DECODER_OPTION_LEVEL, &opt);
++    avctx->level = opt;
++#endif
++
++    *got_frame = 1;
++    return avpkt->size;
++}
++
++AVCodec ff_libopenh264_decoder = {
++    .name           = "libopenh264",
++    .long_name      = NULL_IF_CONFIG_SMALL("OpenH264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"),
++    .type           = AVMEDIA_TYPE_VIDEO,
++    .id             = AV_CODEC_ID_H264,
++    .priv_data_size = sizeof(SVCContext),
++    .init           = svc_decode_init,
++    .decode         = svc_decode_frame,
++    .close          = svc_decode_close,
++    .capabilities   = AV_CODEC_CAP_DELAY | AV_CODEC_CAP_DR1,
++    .caps_internal  = FF_CODEC_CAP_SETS_PKT_DTS | FF_CODEC_CAP_INIT_THREADSAFE |
++                      FF_CODEC_CAP_INIT_CLEANUP,
++    .bsfs           = "h264_mp4toannexb",
++    .wrapper_name   = "libopenh264",
++};
+diff -up firefox-80.0.1/media/ffvpx/libavcodec/moz.build.1057646 firefox-80.0.1/media/ffvpx/libavcodec/moz.build
+--- firefox-80.0.1/media/ffvpx/libavcodec/moz.build.1057646	2020-08-31 16:04:13.000000000 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/moz.build	2020-09-07 10:07:23.186946908 +0200
+@@ -97,6 +97,20 @@ if not CONFIG['MOZ_FFVPX_AUDIOONLY']:
+         'vp9recon.c'
+     ]
+ 
++if CONFIG['MOZ_OPENH264']:
++    SOURCES += [
++        'h264_mp4toannexb_bsf.c',
++        'libopenh264.c',
++        'libopenh264dec.c',
++    ]
++    OS_LIBS += CONFIG['MOZ_OPENH264_LIBS']
++
++if CONFIG['MOZ_FDK_AAC']:
++    SOURCES += [
++        'libfdk-aacdec.c',
++    ]
++    OS_LIBS += CONFIG['MOZ_FDK_AAC_LIBS']
++
+ if CONFIG['MOZ_LIBAV_FFT']:
+     SOURCES += [
+         'avfft.c',
+diff -up firefox-80.0.1/modules/libpref/init/StaticPrefList.yaml.1057646 firefox-80.0.1/modules/libpref/init/StaticPrefList.yaml
+--- firefox-80.0.1/modules/libpref/init/StaticPrefList.yaml.1057646	2020-08-31 16:04:13.000000000 +0200
++++ firefox-80.0.1/modules/libpref/init/StaticPrefList.yaml	2020-09-07 10:07:23.186946908 +0200
+@@ -7003,6 +7003,11 @@
+     type: RelaxedAtomicBool
+     value: true
+     mirror: always
++
++-   name: media.ffvpx.openh264.enabled
++    type: RelaxedAtomicBool
++    value: true
++    mirror: always
+ #endif
+ 
+ #if defined(MOZ_FFMPEG) || defined(MOZ_FFVPX)
+diff -up firefox-80.0.1/toolkit/moz.configure.1057646 firefox-80.0.1/toolkit/moz.configure
+--- firefox-80.0.1/toolkit/moz.configure.1057646	2020-09-07 10:07:23.170946852 +0200
++++ firefox-80.0.1/toolkit/moz.configure	2020-09-07 10:07:23.186946908 +0200
+@@ -1589,6 +1589,24 @@ with only_when(compile_environment):
+     set_define('MOZ_LIBAV_FFT', depends(when=libav_fft)(lambda: True))
+     set_config('LIBAV_FFT_ASFLAGS', libav_fft.flags)
+ 
++# openh264 Support
++option('--with-system-openh264',
++       help='Use system libopenh264 (located with pkgconfig)')
++
++system_openh264 = pkg_check_modules('MOZ_OPENH264', 'openh264',
++                                    when='--with-system-openh264')
++
++set_config('MOZ_OPENH264', depends(when=system_openh264)(lambda: True))
++set_define('MOZ_OPENH264', depends(when=system_openh264)(lambda: True))
++
++# fdk aac support
++option('--with-system-fdk-aac',
++       help='Use system libfdk-aac (located with pkgconfig)')
++
++system_fdk_aac = pkg_check_modules('MOZ_FDK_AAC', 'fdk-aac',
++                                   when='--with-system-fdk-aac')
++
++set_config('MOZ_FDK_AAC', depends(when=system_fdk_aac)(lambda: True))
+ 
+ # FFmpeg's ffvpx configuration
+ # ==============================================================
+--- firefox-80.0.1/media/ffvpx/libavcodec/libopenh264.h.old	2020-09-07 10:48:27.154613314 +0200
++++ firefox-80.0.1/media/ffvpx/libavcodec/libopenh264.h	2020-09-07 10:48:27.154613314 +0200
+@@ -0,0 +1,39 @@
++/*
++ * OpenH264 shared utils
++ * Copyright (C) 2014 Martin Storsjo
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#ifndef AVCODEC_LIBOPENH264_H
++#define AVCODEC_LIBOPENH264_H
++
++#define OPENH264_VER_AT_LEAST(maj, min) \
++    ((OPENH264_MAJOR  > (maj)) || \
++     (OPENH264_MAJOR == (maj) && OPENH264_MINOR >= (min)))
++
++// This function will be provided to the libopenh264 library.  The function will be called
++// when libopenh264 wants to log a message (error, warning, info, etc.).  The signature for
++// this function (defined in .../codec/api/svc/codec_api.h) is:
++//
++//        typedef void (*WelsTraceCallback) (void* ctx, int level, const char* string);
++
++void ff_libopenh264_trace_callback(void *ctx, int level, const char *msg);
++
++int ff_libopenh264_check_version(void *logctx);
++
++#endif /* AVCODEC_LIBOPENH264_H */
