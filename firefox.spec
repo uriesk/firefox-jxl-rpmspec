@@ -117,7 +117,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        80.0.1
-Release:        3%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -177,7 +177,6 @@ Patch227:        firefox-locale-debug.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
-Patch403:        mozilla-1057646.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -384,7 +383,6 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 
 %patch402 -p1 -b .1196777
-%patch403 -p1 -b .1057646
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -971,9 +969,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Sep 7 2020 Martin Stransky <stransky@redhat.com> - 80.0.1-3
-- Build with Openh264 support (mozbz#1057646)
-
 * Fri Sep 4 2020 Martin Stransky <stransky@redhat.com> - 80.0.1-2
 - Added patch for mozbz#1875469
 
