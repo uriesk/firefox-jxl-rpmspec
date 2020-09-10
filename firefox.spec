@@ -5,11 +5,11 @@
 %global build_with_asan   0
 
 # Temporary disabled, filed as rhbz#1862012
-ExcludeArch: ppc64le
+# ExcludeArch: ppc64le
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
-ExcludeArch: s390x
+# ExcludeArch: s390x
 # Temporary disabled, filed as rhbz#1872111
-ExcludeArch: aarch64
+# ExcludeArch: aarch64
 
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
@@ -43,9 +43,6 @@ ExcludeArch: aarch64
 %endif
 # Build PGO builds on Wayland backend
 %global pgo_wayland       0
-%endif
-%if 0%{?fedora} >= 33
-%global build_with_pgo    0
 %endif
 %if 0%{?fedora} > 30
 %global wayland_backend_default 1
@@ -117,7 +114,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        80.0.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -610,8 +607,8 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-#echo "ac_add_options --enable-lto" >> .mozconfig
-# PGO build does not work with ccache
+echo "ac_add_options --enable-lto" >> .mozconfig
+# PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
 
@@ -966,6 +963,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Sep 10 2020 Martin Stransky <stransky@redhat.com> - 80.0.1-3
+- Test build for all arches.
+
 * Fri Sep 4 2020 Martin Stransky <stransky@redhat.com> - 80.0.1-2
 - Added patch for mozbz#1875469
 
