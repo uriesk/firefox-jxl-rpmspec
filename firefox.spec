@@ -277,10 +277,7 @@ BuildRequires:  clang-devel
 BuildRequires:  libasan
 BuildRequires:  libasan-static
 %endif
-
 BuildRequires:  perl-interpreter
-BuildRequires:  openh264-devel
-BuildRequires:  fdk-aac-free-devel
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
