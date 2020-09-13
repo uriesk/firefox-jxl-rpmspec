@@ -355,7 +355,7 @@ This package contains results of tests executed during build.
 #%patch45 -p1 -b .build-disable-multijobs-rust
 # Patch for big endian platforms only
 %if 0%{?big_endian}
-%patch26 -p1 -b .icu
+#%patch26 -p1 -b .icu
 %endif
 #%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
@@ -517,12 +517,12 @@ export PATH=`pwd`/.cargo/bin:$PATH
 %endif
 cd -
 
-echo "Generate big endian version of config/external/icu/data/icudt67l.dat"
-%if 0%{?big_endian}
-  icupkg -tb config/external/icu/data/icudt67l.dat config/external/icu/data/icudt67b.dat
-  ls -l config/external/icu/data
-  rm -f config/external/icu/data/icudt*l.dat
-%endif
+#echo "Generate big endian version of config/external/icu/data/icudt67l.dat"
+#%if 0%{?big_endian}
+#  icupkg -tb config/external/icu/data/icudt67l.dat config/external/icu/data/icudt67b.dat
+#  ls -l config/external/icu/data
+#  rm -f config/external/icu/data/icudt*l.dat
+#%endif
 
 mkdir %{_buildrootdir}/bin || :
 cp %{SOURCE32} %{_buildrootdir}/bin || :
