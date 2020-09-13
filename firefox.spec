@@ -168,6 +168,7 @@ Patch49:        build-arm-libaom.patch
 #Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
 Patch51:        build-nspr.patch
 Patch52:        mozilla-1875469.patch
+Patch53:        firefox-gcc-build.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -370,6 +371,7 @@ This package contains results of tests executed during build.
 #%patch50 -p1 -b .build-arm-SwizzleNEON
 %patch51 -p1 -b .build-nspr
 %patch52 -p1 -b .mozilla-1875469
+%patch53 -p1 -b .firefox-gcc-build
 
 # Fedora patches
 %patch215 -p1 -b .addons
