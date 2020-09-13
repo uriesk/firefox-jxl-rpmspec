@@ -5,11 +5,17 @@
 %global build_with_asan   0
 
 # Temporary disabled, filed as rhbz#1862012
-# ExcludeArch: ppc64le
+%if 0%{?fedora} == 33
+ExcludeArch: ppc64le
+%endif
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 # ExcludeArch: s390x
 # Temporary disabled, filed as rhbz#1872111
 # ExcludeArch: aarch64
+# Temporary disabled, filed as rhbz#1878519
+%if 0%{?fedora} > 32
+ExcludeArch: armv7hl
+%endif
 
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
@@ -472,7 +478,7 @@ echo "ac_add_options --without-system-libvpx" >> .mozconfig
 %endif
 
 %ifarch s390 s390x
-echo "ac_add_options --disable-ion" >> .mozconfig
+echo "ac_add_options --disable-jit" >> .mozconfig
 %endif
 
 %if %{build_with_asan}
