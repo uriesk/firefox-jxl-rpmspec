@@ -179,6 +179,8 @@ Patch227:        firefox-locale-debug.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
+Patch403:        mozilla-1656505-1.patch
+Patch404:        mozilla-1656505-2.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -380,6 +382,8 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 
 %patch402 -p1 -b .1196777
+%patch403 -p1 -b .1656505-1
+%patch404 -p1 -b .1656505-2
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
