@@ -119,13 +119,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        80.0.1
-Release:        3%{?dist}
+Version:        81.0
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200901.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200915.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -166,8 +166,6 @@ Patch47:        fedora-shebang-build.patch
 Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
 #Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
-Patch51:        build-nspr.patch
-Patch52:        mozilla-1875469.patch
 Patch53:        firefox-gcc-build.patch
 
 # Fedora specific patches
@@ -189,7 +187,6 @@ Patch575:        firefox-pipewire-0-3.patch
 #VA-API patches
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
-Patch589:        mozilla-1656436.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -369,8 +366,6 @@ This package contains results of tests executed during build.
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
 #%patch50 -p1 -b .build-arm-SwizzleNEON
-%patch51 -p1 -b .build-nspr
-%patch52 -p1 -b .mozilla-1875469
 %patch53 -p1 -b .firefox-gcc-build
 
 # Fedora patches
@@ -395,7 +390,6 @@ This package contains results of tests executed during build.
 
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
-%patch589 -p1 -b .mozilla-1656436
 
 # PGO patches
 %if %{build_with_pgo}
@@ -615,7 +609,8 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-echo "ac_add_options --enable-lto" >> .mozconfig
+# TODO - Enable when new gcc hits build roots
+#echo "ac_add_options --enable-lto" >> .mozconfig
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
@@ -971,6 +966,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Sep 15 2020 Martin Stransky <stransky@redhat.com> - 81.0-1
+- Updated to 81.0
+
 * Thu Sep 10 2020 Martin Stransky <stransky@redhat.com> - 80.0.1-3
 - Test build for all arches.
 
