@@ -640,6 +640,7 @@ MOZ_SMP_FLAGS=-j1
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
 echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
 echo "export STRIP=/bin/true" >> .mozconfig
+export MACH_USE_SYSTEM_PYTHON=1
 %if %{build_with_pgo}
 %if %{pgo_wayland}
 xvfb-run mutter --wayland --nested &
