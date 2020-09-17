@@ -9,9 +9,9 @@
 ExcludeArch: ppc64le
 %endif
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
-# ExcludeArch: s390x
+ExcludeArch: s390x
 # Temporary disabled, filed as rhbz#1872111
-# ExcludeArch: aarch64
+ExcludeArch: aarch64
 # Temporary disabled, filed as rhbz#1878519
 %if 0%{?fedora} > 32
 ExcludeArch: armv7hl
@@ -181,6 +181,8 @@ Patch227:        firefox-locale-debug.patch
 Patch402:        mozilla-1196777.patch
 Patch403:        mozilla-1656505-1.patch
 Patch404:        mozilla-1656505-2.patch
+Patch405:        mozilla-1665324.patch
+Patch406:        mozilla-1665329.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -384,6 +386,8 @@ This package contains results of tests executed during build.
 %patch402 -p1 -b .1196777
 %patch403 -p1 -b .1656505-1
 %patch404 -p1 -b .1656505-2
+%patch405 -p1 -b .1665324
+%patch406 -p1 -b .1665329
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
