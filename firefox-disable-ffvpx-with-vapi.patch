@@ -1,41 +1,29 @@
-diff --git a/dom/media/platforms/PDMFactory.cpp b/dom/media/platforms/PDMFactory.cpp
---- a/dom/media/platforms/PDMFactory.cpp
-+++ b/dom/media/platforms/PDMFactory.cpp
-@@ -21,16 +21,17 @@
- #include "mozilla/GpuDecoderModule.h"
- #include "mozilla/RemoteDecoderModule.h"
- #include "mozilla/SharedThreadPool.h"
- #include "mozilla/StaticPrefs_media.h"
- #include "mozilla/StaticPtr.h"
- #include "mozilla/SyncRunnable.h"
- #include "mozilla/TaskQueue.h"
- #include "mozilla/gfx/gfxVars.h"
-+#include "gfxPlatformGtk.h"
- 
- #ifdef XP_WIN
- #  include "WMFDecoderModule.h"
- #  include "mozilla/WindowsVersion.h"
- #endif
- #ifdef MOZ_FFVPX
- #  include "FFVPXRuntimeLinker.h"
- #endif
-@@ -362,17 +363,18 @@ void PDMFactory::CreatePDMs() {
- #endif
- #ifdef MOZ_OMX
-   if (StaticPrefs::media_omx_enabled()) {
-     m = OmxDecoderModule::Create();
+diff -up firefox-81.0/dom/media/platforms/PDMFactory.cpp.firefox-disable-ffvpx-with-vapi firefox-81.0/dom/media/platforms/PDMFactory.cpp
+--- firefox-81.0/dom/media/platforms/PDMFactory.cpp.firefox-disable-ffvpx-with-vapi	2020-09-17 02:32:43.000000000 +0200
++++ firefox-81.0/dom/media/platforms/PDMFactory.cpp	2020-09-21 10:30:29.393903183 +0200
+@@ -371,12 +371,6 @@ void PDMFactory::CreatePDMs() {
      StartupPDM(m);
    }
  #endif
- #ifdef MOZ_FFVPX
+-#ifdef MOZ_FFVPX
 -  if (StaticPrefs::media_ffvpx_enabled()) {
-+  if (StaticPrefs::media_ffvpx_enabled() &&
-+      !gfxPlatformGtk::GetPlatform()->UseHardwareVideoDecoding()) {
-     m = FFVPXRuntimeLinker::CreateDecoderModule();
-     StartupPDM(m);
-   }
- #endif
+-    m = FFVPXRuntimeLinker::CreateDecoderModule();
+-    StartupPDM(m);
+-  }
+-#endif
  #ifdef MOZ_FFMPEG
    if (StaticPrefs::media_ffmpeg_enabled()) {
      m = FFmpegRuntimeLinker::CreateDecoderModule();
-     mFFmpegFailedToLoad = !StartupPDM(m);
+@@ -385,6 +379,12 @@ void PDMFactory::CreatePDMs() {
+     mFFmpegFailedToLoad = false;
+   }
+ #endif
++#ifdef MOZ_FFVPX
++  if (StaticPrefs::media_ffvpx_enabled()) {
++    m = FFVPXRuntimeLinker::CreateDecoderModule();
++    StartupPDM(m);
++  }
++#endif
+ #ifdef MOZ_WIDGET_ANDROID
+   if (StaticPrefs::media_android_media_codec_enabled()) {
+     m = new AndroidDecoderModule();
