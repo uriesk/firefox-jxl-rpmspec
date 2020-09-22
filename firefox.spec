@@ -120,7 +120,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -508,6 +508,9 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 #---------------------------------------------------------------------
 
 %build
+# Disable LTO to work around firefox build failing in F33+
+%define _lto_cflags %{nil}
+
 %if 0%{?use_bundled_cbindgen}
 
 mkdir -p my_rust_vendor
@@ -975,6 +978,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Sep 22 2020 Kalev Lember <klember@redhat.com> - 81.0-4
+- Disable LTO to work around firefox build failing in F33+
+
 * Mon Sep 21 2020 Martin Stransky <stransky@redhat.com> - 81.0-3
 - Updated to 81.0 Build 2
 - Updated firefox-disable-ffvpx-with-vapi patch
