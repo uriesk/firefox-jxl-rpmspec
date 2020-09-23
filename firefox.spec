@@ -116,7 +116,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -974,6 +974,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Sep 23 2020 Martin Stransky <stransky@redhat.com> - 81.0-6
+- Added fix for rhbz#1731371
+
 * Tue Sep 22 2020 Kalev Lember <klember@redhat.com> - 81.0-5
 - Re-enable builds for armv7hl and aarch64 architectures
 

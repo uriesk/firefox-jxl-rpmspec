@@ -174,9 +174,17 @@ MOZILLA_DOWN=0
 if ! [ $MOZ_DISABLE_LANGPACKS ] || [ $MOZ_DISABLE_LANGPACKS -eq 0 ]; then
     if [ -x $MOZ_DIST_BIN/$MOZ_FIREFOX_FILE ]; then
         # Is firefox running?
-        /__PREFIX__/bin/pidof firefox > /dev/null 2>&1
+        /__PREFIX__/bin/pidof $MOZ_PROGRAM > /dev/null 2>&1
         MOZILLA_DOWN=$?
     fi
+fi
+
+# When Firefox is not running, restore SELinux labels for profile files
+# (rhbz#1731371)
+if [ $MOZILLA_DOWN -ne 0 ]; then
+  if [ `getenforce` != "Disabled" ]; then
+    restorecon -vr ~/.mozilla/firefox/* &
+  fi
 fi
 
 # Modify language pack configuration only when firefox is not running

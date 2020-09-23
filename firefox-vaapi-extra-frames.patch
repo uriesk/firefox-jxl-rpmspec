@@ -10,5 +10,3 @@ diff -up firefox-76.0.1/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.old fi
  
  typedef mozilla::layers::Image Image;
  typedef mozilla::layers::PlanarYCbCrImage PlanarYCbCrImage;
-diff -up firefox-76.0.1/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium.old firefox-76.0.1/media/libyuv/libyuv/tools_libyuv/autoroller/unittests/testdata/DEPS.chromium
-diff -up firefox-76.0.1/media/webrtc/trunk/Makefile.old firefox-76.0.1/media/webrtc/trunk/Makefile
