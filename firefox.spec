@@ -116,7 +116,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -172,6 +172,7 @@ Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
+Patch228:        disable-openh264-download.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -179,6 +180,8 @@ Patch403:        mozilla-1656505-1.patch
 Patch404:        mozilla-1656505-2.patch
 Patch405:        mozilla-1665324.patch
 Patch406:        mozilla-1665329.patch
+Patch407:        mozilla-1667096.patch
+Patch408:        mozilla-1663844.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -279,6 +282,8 @@ BuildRequires:  libasan
 BuildRequires:  libasan-static
 %endif
 BuildRequires:  perl-interpreter
+Requires:       fdk-aac-free
+BuildRequires:  fdk-aac-free-devel
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
@@ -378,12 +383,15 @@ This package contains results of tests executed during build.
 %patch226 -p1 -b .1354671
 %endif
 %patch227 -p1 -b .locale-debug
+%patch228 -p1 -b .disable-openh264-download
 
 %patch402 -p1 -b .1196777
 %patch403 -p1 -b .1656505-1
 %patch404 -p1 -b .1656505-2
 %patch405 -p1 -b .1665324
 %patch406 -p1 -b .1665329
+%patch407 -p1 -b .1667096
+%patch408 -p1 -b .1663844
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -504,9 +512,6 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 #---------------------------------------------------------------------
 
 %build
-# Disable LTO to work around firefox build failing in F33+
-%define _lto_cflags %{nil}
-
 %if 0%{?use_bundled_cbindgen}
 
 mkdir -p my_rust_vendor
@@ -974,6 +979,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Sep 25 2020 Martin Stransky <stransky@redhat.com> - 81.0-7
+- Added openh264 fixes
+
 * Wed Sep 23 2020 Martin Stransky <stransky@redhat.com> - 81.0-6
 - Added fix for rhbz#1731371
 

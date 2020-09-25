@@ -22,7 +22,7 @@ pref("geo.wifi.uri", "https://location.services.mozilla.com/v1/geolocate?key=%MO
 pref("media.gmp-gmpopenh264.provider.enabled",false);
 pref("media.gmp-gmpopenh264.autoupdate",false);
 pref("media.gmp-gmpopenh264.enabled",false);
-pref("media.gmp-gmpopenh264.enabled",false);
+pref("media.gmp.decoder.enabled", true);
 pref("plugins.notifyMissingFlash", false);
 /* See https://bugzilla.redhat.com/show_bug.cgi?id=1226489 */
 pref("browser.display.use_system_colors", false);
