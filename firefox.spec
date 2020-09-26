@@ -4,10 +4,6 @@
 %global build_with_clang  0
 %global build_with_asan   0
 
-# Temporary disabled, filed as rhbz#1862012
-%if 0%{?fedora} == 33
-ExcludeArch: ppc64le
-%endif
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 
@@ -116,7 +112,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -979,6 +975,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Sep 26 2020 Dan Horák <dan[at]danny.cz> - 81.0-8
+- Re-enable builds for ppc64le
+
 * Fri Sep 25 2020 Martin Stransky <stransky@redhat.com> - 81.0-7
 - Added openh264 fixes
 
