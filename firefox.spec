@@ -115,13 +115,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        81.0
-Release:        9%{?dist}
+Version:        81.0.1
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20200921.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20200930.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -511,6 +511,9 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 #---------------------------------------------------------------------
 
 %build
+# Disable LTO to work around rhbz#1883904
+%define _lto_cflags %{nil}
+
 %if 0%{?use_bundled_cbindgen}
 
 mkdir -p my_rust_vendor
@@ -977,6 +980,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Sep 30 2020 Martin Stransky <stransky@redhat.com> - 81.0-10
+- Updated to 81.0.1
+
 * Wed Sep 30 2020 Martin Stransky <stransky@redhat.com> - 81.0-9
 - Disabled openh264 download
 - Removed fdk-aac-free dependency (rhbz#1883672)
