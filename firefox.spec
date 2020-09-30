@@ -282,7 +282,6 @@ BuildRequires:  libasan
 BuildRequires:  libasan-static
 %endif
 BuildRequires:  perl-interpreter
-Requires:       fdk-aac-free
 BuildRequires:  fdk-aac-free-devel
 
 Obsoletes:      mozilla <= 37:1.7.13
@@ -621,8 +620,7 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-# TODO - Enable when new gcc hits build roots
-#echo "ac_add_options --enable-lto" >> .mozconfig
+echo "ac_add_options --enable-lto" >> .mozconfig
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
@@ -981,6 +979,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Wed Sep 30 2020 Martin Stransky <stransky@redhat.com> - 81.0-9
 - Disabled openh264 download
+- Removed fdk-aac-free dependency (rhbz#1883672)
+- Enabled LTO
 
 * Sat Sep 26 2020 Dan Horák <dan[at]danny.cz> - 81.0-8
 - Re-enable builds for ppc64le
