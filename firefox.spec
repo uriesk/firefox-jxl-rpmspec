@@ -110,7 +110,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -177,6 +177,7 @@ Patch406:        mozilla-1665329.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch409:        mozilla-1640567.patch
+Patch410:        mozilla-1661192.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -387,6 +388,7 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch409 -p1 -b .1640567
+%patch410 -p1 -b .1661192
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -976,12 +978,14 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 1 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-3
+- Added fix for mozbz#1661192
 
-* Thu Oct 1 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-1
+* Thu Oct 1 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-2
 - Added fix for mozbz#1640567
 - Enable PGO
 
-* Wed Sep 30 2020 Martin Stransky <stransky@redhat.com> - 81.0-10
+* Wed Sep 30 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-1
 - Updated to 81.0.1
 
 * Wed Sep 30 2020 Martin Stransky <stransky@redhat.com> - 81.0-9
