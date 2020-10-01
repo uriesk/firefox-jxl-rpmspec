@@ -4,10 +4,6 @@
 %global build_with_clang  0
 %global build_with_asan   0
 
-# Temporary disabled, filed as rhbz#1862012
-#%if 0%{?fedora} == 33
-#ExcludeArch: ppc64le
-#%endif
 # Disabled due to https://pagure.io/fedora-infrastructure/issue/7581
 ExcludeArch: s390x
 
@@ -39,9 +35,7 @@ ExcludeArch: s390x
 %global build_with_pgo    0
 %ifarch x86_64
 %if %{release_build}
-%if 0%{?fedora} < 33
-%global build_with_pgo    0
-%endif
+%global build_with_pgo    1
 %endif
 # Build PGO builds on Wayland backend
 %global pgo_wayland       0
@@ -116,7 +110,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -182,6 +176,7 @@ Patch405:        mozilla-1665324.patch
 Patch406:        mozilla-1665329.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
+Patch409:        mozilla-1640567.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -391,6 +386,7 @@ This package contains results of tests executed during build.
 %patch406 -p1 -b .1665329
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
+%patch409 -p1 -b .1640567
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -980,6 +976,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+
+* Thu Oct 1 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-1
+- Added fix for mozbz#1640567
+- Enable PGO
+
 * Wed Sep 30 2020 Martin Stransky <stransky@redhat.com> - 81.0-10
 - Updated to 81.0.1
 
