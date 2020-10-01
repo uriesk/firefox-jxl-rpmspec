@@ -621,7 +621,7 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-echo "ac_add_options --enable-lto" >> .mozconfig
+#echo "ac_add_options --enable-lto" >> .mozconfig
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif

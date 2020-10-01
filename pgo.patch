@@ -1,6 +1,6 @@
-diff -up firefox-77.0.1/build/moz.configure/lto-pgo.configure.pgo firefox-77.0.1/build/moz.configure/lto-pgo.configure
---- firefox-77.0.1/build/moz.configure/lto-pgo.configure.pgo	2020-06-03 01:35:41.000000000 +0200
-+++ firefox-77.0.1/build/moz.configure/lto-pgo.configure	2020-06-23 14:39:38.716560329 +0200
+diff -up firefox-81.0.1/build/moz.configure/lto-pgo.configure.pgo firefox-81.0.1/build/moz.configure/lto-pgo.configure
+--- firefox-81.0.1/build/moz.configure/lto-pgo.configure.pgo	2020-09-30 19:41:10.000000000 +0200
++++ firefox-81.0.1/build/moz.configure/lto-pgo.configure	2020-10-01 14:48:15.459225300 +0200
 @@ -69,12 +69,14 @@ set_config('PGO_PROFILE_PATH', pgo_profi
  @imports(_from='__builtin__', _import='min')
  def pgo_flags(compiler, profdata, target_is_windows):
@@ -18,9 +18,35 @@ diff -up firefox-77.0.1/build/moz.configure/lto-pgo.configure.pgo firefox-77.0.1
          )
  
      if compiler.type in ('clang-cl', 'clang'):
-diff -up firefox-77.0.1/build/pgo/profileserver.py.pgo firefox-77.0.1/build/pgo/profileserver.py
---- firefox-77.0.1/build/pgo/profileserver.py.pgo	2020-06-03 03:04:50.000000000 +0200
-+++ firefox-77.0.1/build/pgo/profileserver.py	2020-06-23 14:53:56.877736235 +0200
+@@ -192,13 +194,13 @@ def lto(value, c_compiler, ld64_known_go
+                 cflags.append("-flto")
+                 ldflags.append("-flto")
+             else:
+-                cflags.append("-flto=thin")
+-                ldflags.append("-flto=thin")
++                cflags.append("-flto")
++                ldflags.append("-flto")
+         elif c_compiler.type == 'clang-cl':
+             if len(value) and value[0].lower() == 'full':
+                 cflags.append("-flto")
+             else:
+-                cflags.append("-flto=thin")
++                cflags.append("-flto")
+             # With clang-cl, -flto can only be used with -c or -fuse-ld=lld.
+             # AC_TRY_LINKs during configure don't have -c, so pass -fuse-ld=lld.
+             cflags.append("-fuse-ld=lld");
+@@ -232,7 +234,7 @@ def lto(value, c_compiler, ld64_known_go
+             if len(value) and value[0].lower() == 'full':
+                 cflags.append("-flto")
+             else:
+-                cflags.append("-flto=thin")
++                cflags.append("-flto")
+             cflags.append("-flifetime-dse=1")
+ 
+             ldflags.append("-flto=%s" % num_cores)
+diff -up firefox-81.0.1/build/pgo/profileserver.py.pgo firefox-81.0.1/build/pgo/profileserver.py
+--- firefox-81.0.1/build/pgo/profileserver.py.pgo	2020-09-30 19:41:10.000000000 +0200
++++ firefox-81.0.1/build/pgo/profileserver.py	2020-10-01 13:54:58.535312905 +0200
 @@ -11,7 +11,7 @@ import glob
  import subprocess
  
@@ -68,9 +94,9 @@ diff -up firefox-77.0.1/build/pgo/profileserver.py.pgo firefox-77.0.1/build/pgo/
          llvm_profdata = env.get('LLVM_PROFDATA')
          if llvm_profdata:
              profraw_files = glob.glob('*.profraw')
-diff -up firefox-77.0.1/build/unix/mozconfig.unix.pgo firefox-77.0.1/build/unix/mozconfig.unix
---- firefox-77.0.1/build/unix/mozconfig.unix.pgo	2020-06-03 01:35:41.000000000 +0200
-+++ firefox-77.0.1/build/unix/mozconfig.unix	2020-06-23 14:39:38.716560329 +0200
+diff -up firefox-81.0.1/build/unix/mozconfig.unix.pgo firefox-81.0.1/build/unix/mozconfig.unix
+--- firefox-81.0.1/build/unix/mozconfig.unix.pgo	2020-09-30 19:41:10.000000000 +0200
++++ firefox-81.0.1/build/unix/mozconfig.unix	2020-10-01 13:54:58.535312905 +0200
 @@ -6,6 +6,15 @@ if [ -n "$FORCE_GCC" ]; then
      CC="$MOZ_FETCHES_DIR/gcc/bin/gcc"
      CXX="$MOZ_FETCHES_DIR/gcc/bin/g++"
@@ -87,10 +113,9 @@ diff -up firefox-77.0.1/build/unix/mozconfig.unix.pgo firefox-77.0.1/build/unix/
      # We want to make sure we use binutils and other binaries in the tooltool
      # package.
      mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$PATH"
-diff -up firefox-77.0.1/config/config.mk.pgo firefox-77.0.1/config/config.mk
-diff -up firefox-77.0.1/extensions/spellcheck/src/moz.build.pgo firefox-77.0.1/extensions/spellcheck/src/moz.build
---- firefox-77.0.1/extensions/spellcheck/src/moz.build.pgo	2020-06-03 01:35:48.000000000 +0200
-+++ firefox-77.0.1/extensions/spellcheck/src/moz.build	2020-06-23 14:39:38.717560324 +0200
+diff -up firefox-81.0.1/extensions/spellcheck/src/moz.build.pgo firefox-81.0.1/extensions/spellcheck/src/moz.build
+--- firefox-81.0.1/extensions/spellcheck/src/moz.build.pgo	2020-09-30 19:41:17.000000000 +0200
++++ firefox-81.0.1/extensions/spellcheck/src/moz.build	2020-10-01 13:54:58.535312905 +0200
 @@ -31,3 +31,5 @@ EXPORTS.mozilla += [
  
  if CONFIG['CC_TYPE'] in ('clang', 'gcc'):
@@ -98,10 +123,10 @@ diff -up firefox-77.0.1/extensions/spellcheck/src/moz.build.pgo firefox-77.0.1/e
 +
 +CXXFLAGS += ['-fno-devirtualize']
 \ No newline at end of file
-diff -up firefox-77.0.1/python/mozbuild/mozbuild/build_commands.py.pgo firefox-77.0.1/python/mozbuild/mozbuild/build_commands.py
---- firefox-77.0.1/python/mozbuild/mozbuild/build_commands.py.pgo	2020-06-03 01:36:46.000000000 +0200
-+++ firefox-77.0.1/python/mozbuild/mozbuild/build_commands.py	2020-06-23 14:39:38.717560324 +0200
-@@ -114,7 +114,8 @@ class Build(MachCommandBase):
+diff -up firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py.pgo firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py
+--- firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py.pgo	2020-09-30 19:41:46.000000000 +0200
++++ firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py	2020-10-01 13:54:58.535312905 +0200
+@@ -108,7 +108,8 @@ class Build(MachCommandBase):
                  return status
  
              pgo_env = os.environ.copy()
