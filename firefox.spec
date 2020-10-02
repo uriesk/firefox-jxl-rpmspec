@@ -110,7 +110,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -178,6 +178,7 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch409:        mozilla-1640567.patch
 Patch410:        mozilla-1661192.patch
+Patch411:        mozilla-1668771.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -389,6 +390,7 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch409 -p1 -b .1640567
 %patch410 -p1 -b .1661192
+%patch411 -p1 -b .1668771
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -978,6 +980,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 2 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-4
+- Added fix for mozbz#1668771
+
 * Thu Oct 1 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-3
 - Added fix for mozbz#1661192
 
