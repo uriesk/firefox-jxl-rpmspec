@@ -110,7 +110,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0.1
-Release:        4%{?dist}
+Release:        5%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -179,6 +179,7 @@ Patch408:        mozilla-1663844.patch
 Patch409:        mozilla-1640567.patch
 Patch410:        mozilla-1661192.patch
 Patch411:        mozilla-1668771.patch
+Patch412:        mozilla-1656727.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -391,6 +392,7 @@ This package contains results of tests executed during build.
 %patch409 -p1 -b .1640567
 %patch410 -p1 -b .1661192
 %patch411 -p1 -b .1668771
+%patch412 -p1 -b .1656727
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -623,7 +625,8 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-#echo "ac_add_options --enable-lto" >> .mozconfig
+# Temporary disabled due to https://bugzilla.mozilla.org/show_bug.cgi?id=1669442
+# echo "ac_add_options --enable-lto" >> .mozconfig
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
@@ -980,6 +983,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Oct 5 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-5
+- Added fix for mozbz#1656727
+
 * Fri Oct 2 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-4
 - Added fix for mozbz#1668771
 

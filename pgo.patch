@@ -136,3 +136,4 @@ diff -up firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py.pgo firefox-8
              pgo_env['JARLOG_FILE'] = mozpath.join(orig_topobjdir, 'jarlog/en-US.log')
              pgo_cmd = [
                  instr.virtualenv_manager.python_path,
+
