@@ -157,6 +157,7 @@ Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
 #Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
 Patch53:        firefox-gcc-build.patch
+Patch54:        pgo-build-python.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -369,6 +370,7 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 #%patch50 -p1 -b .build-arm-SwizzleNEON
 %patch53 -p1 -b .firefox-gcc-build
+%patch54 -p1 -b .pgo-build-python
 
 # Fedora patches
 %patch215 -p1 -b .addons
