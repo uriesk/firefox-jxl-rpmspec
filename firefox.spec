@@ -643,6 +643,9 @@ echo "export STRIP=/bin/true" >> .mozconfig
 export MACH_USE_SYSTEM_PYTHON=1
 %if %{build_with_pgo}
 %if %{pgo_wayland}
+if [ -z "$XDG_RUNTIME_DIR" ]; then
+  export XDG_RUNTIME_DIR=$HOME
+fi
 xvfb-run mutter --wayland --nested &
 if [ -z "$WAYLAND_DISPLAY" ]; then
   export WAYLAND_DISPLAY=wayland-0
