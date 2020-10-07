@@ -262,6 +262,7 @@ BuildRequires:  xorg-x11-server-Xvfb
 %if 0%{?pgo_wayland}
 BuildRequires:  mutter
 BuildRequires:  gsettings-desktop-schemas
+BuildRequires:  gnome-settings-daemon
 %endif
 BuildRequires:  rust
 BuildRequires:  cargo
