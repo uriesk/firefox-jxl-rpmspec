@@ -1,6 +1,6 @@
 diff -up firefox-81.0.1/build/moz.configure/lto-pgo.configure.pgo firefox-81.0.1/build/moz.configure/lto-pgo.configure
 --- firefox-81.0.1/build/moz.configure/lto-pgo.configure.pgo	2020-09-30 19:41:10.000000000 +0200
-+++ firefox-81.0.1/build/moz.configure/lto-pgo.configure	2020-10-01 14:48:15.459225300 +0200
++++ firefox-81.0.1/build/moz.configure/lto-pgo.configure	2020-10-07 09:16:44.071786956 +0200
 @@ -69,12 +69,14 @@ set_config('PGO_PROFILE_PATH', pgo_profi
  @imports(_from='__builtin__', _import='min')
  def pgo_flags(compiler, profdata, target_is_windows):
@@ -46,7 +46,7 @@ diff -up firefox-81.0.1/build/moz.configure/lto-pgo.configure.pgo firefox-81.0.1
              ldflags.append("-flto=%s" % num_cores)
 diff -up firefox-81.0.1/build/pgo/profileserver.py.pgo firefox-81.0.1/build/pgo/profileserver.py
 --- firefox-81.0.1/build/pgo/profileserver.py.pgo	2020-09-30 19:41:10.000000000 +0200
-+++ firefox-81.0.1/build/pgo/profileserver.py	2020-10-01 13:54:58.535312905 +0200
++++ firefox-81.0.1/build/pgo/profileserver.py	2020-10-07 09:16:44.071786956 +0200
 @@ -11,7 +11,7 @@ import glob
  import subprocess
  
@@ -96,7 +96,7 @@ diff -up firefox-81.0.1/build/pgo/profileserver.py.pgo firefox-81.0.1/build/pgo/
              profraw_files = glob.glob('*.profraw')
 diff -up firefox-81.0.1/build/unix/mozconfig.unix.pgo firefox-81.0.1/build/unix/mozconfig.unix
 --- firefox-81.0.1/build/unix/mozconfig.unix.pgo	2020-09-30 19:41:10.000000000 +0200
-+++ firefox-81.0.1/build/unix/mozconfig.unix	2020-10-01 13:54:58.535312905 +0200
++++ firefox-81.0.1/build/unix/mozconfig.unix	2020-10-07 09:16:44.071786956 +0200
 @@ -6,6 +6,15 @@ if [ -n "$FORCE_GCC" ]; then
      CC="$MOZ_FETCHES_DIR/gcc/bin/gcc"
      CXX="$MOZ_FETCHES_DIR/gcc/bin/g++"
@@ -115,7 +115,7 @@ diff -up firefox-81.0.1/build/unix/mozconfig.unix.pgo firefox-81.0.1/build/unix/
      mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$PATH"
 diff -up firefox-81.0.1/extensions/spellcheck/src/moz.build.pgo firefox-81.0.1/extensions/spellcheck/src/moz.build
 --- firefox-81.0.1/extensions/spellcheck/src/moz.build.pgo	2020-09-30 19:41:17.000000000 +0200
-+++ firefox-81.0.1/extensions/spellcheck/src/moz.build	2020-10-01 13:54:58.535312905 +0200
++++ firefox-81.0.1/extensions/spellcheck/src/moz.build	2020-10-07 09:16:44.071786956 +0200
 @@ -31,3 +31,5 @@ EXPORTS.mozilla += [
  
  if CONFIG['CC_TYPE'] in ('clang', 'gcc'):
@@ -125,7 +125,7 @@ diff -up firefox-81.0.1/extensions/spellcheck/src/moz.build.pgo firefox-81.0.1/e
 \ No newline at end of file
 diff -up firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py.pgo firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py
 --- firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py.pgo	2020-09-30 19:41:46.000000000 +0200
-+++ firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py	2020-10-01 13:54:58.535312905 +0200
++++ firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py	2020-10-07 09:16:44.071786956 +0200
 @@ -108,7 +108,8 @@ class Build(MachCommandBase):
                  return status
  
@@ -136,4 +136,18 @@ diff -up firefox-81.0.1/python/mozbuild/mozbuild/build_commands.py.pgo firefox-8
              pgo_env['JARLOG_FILE'] = mozpath.join(orig_topobjdir, 'jarlog/en-US.log')
              pgo_cmd = [
                  instr.virtualenv_manager.python_path,
-
+diff -up firefox-81.0.1/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-81.0.1/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-81.0.1/toolkit/components/terminator/nsTerminator.cpp.pgo	2020-10-07 09:22:26.698243673 +0200
++++ firefox-81.0.1/toolkit/components/terminator/nsTerminator.cpp	2020-10-07 09:22:43.026312999 +0200
+@@ -418,6 +418,11 @@ void nsTerminator::StartWatchdog() {
+   }
+ #endif
+ 
++  // Disable watchdog for PGO train builds - writting profile information at
++  // exit may take time and it is better to make build hang rather than
++  // silently produce poorly performing binary.
++  crashAfterMS = INT32_MAX;
++
+   UniquePtr<Options> options(new Options());
+   const PRIntervalTime ticksDuration = PR_MillisecondsToInterval(1000);
+   options->crashAfterTicks = crashAfterMS / ticksDuration;

@@ -38,7 +38,7 @@ ExcludeArch: s390x
 %global build_with_pgo    1
 %endif
 # Build PGO builds on Wayland backend
-%global pgo_wayland       0
+%global pgo_wayland       1
 %endif
 %if 0%{?fedora} > 30
 %global wayland_backend_default 1
@@ -110,7 +110,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0.1
-Release:        5%{?dist}
+Release:        6%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -139,25 +139,21 @@ Source35:       google-loc-api-key
 # Build patches
 Patch3:         mozilla-build-arm.patch
 Patch25:        rhbz-1219542-s390-build.patch
-Patch26:        build-icu-big-endian.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
-# Always feel lucky for unsupported platforms:
-# https://bugzilla.mozilla.org/show_bug.cgi?id=1347128
-Patch37:        build-jit-atomic-always-lucky.patch
 # Fixing missing cacheFlush when JS_CODEGEN_NONE is used (s390x)
 Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch41:        build-disable-elfhack.patch
 Patch44:        build-arm-libopus.patch
-#Patch45:        build-disable-multijobs-rust.patch
 Patch46:        firefox-nss-version.patch
 Patch47:        fedora-shebang-build.patch
 Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
-#Patch50:        Bug-1610814-Fix-NEON-compile-error-with-gcc-and-RGB-.patch
 Patch53:        firefox-gcc-build.patch
-Patch54:        pgo-build-python.patch
+# This should be fixed in Firefox 83
+Patch54:        mozilla-1669639.patch
+Patch55:        mozilla-1669442.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -192,7 +188,6 @@ Patch585:        firefox-vaapi-extra-frames.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
-Patch601:        mozilla-1516081.patch
 Patch602:        mozilla-1516803.patch
 
 %if %{?system_nss}
@@ -348,29 +343,22 @@ This package contains results of tests executed during build.
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
 
-
 %ifarch s390
 %patch25 -p1 -b .rhbz-1219542-s390
 %endif
-#%patch37 -p1 -b .jit-atomic-lucky
 %patch40 -p1 -b .aarch64-skia
 %if 0%{?disable_elfhack}
 %patch41 -p1 -b .disable-elfhack
 %endif
 %patch3  -p1 -b .arm
 %patch44 -p1 -b .build-arm-libopus
-#%patch45 -p1 -b .build-disable-multijobs-rust
-# Patch for big endian platforms only
-%if 0%{?big_endian}
-#%patch26 -p1 -b .icu
-%endif
 #%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
-#%patch50 -p1 -b .build-arm-SwizzleNEON
 %patch53 -p1 -b .firefox-gcc-build
-%patch54 -p1 -b .pgo-build-python
+%patch54 -p1 -b .1669639
+%patch55 -p1 -b .1669442
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -403,6 +391,7 @@ This package contains results of tests executed during build.
 %patch575 -p1 -b .firefox-pipewire-0-3
 %endif
 
+# VA-API fixes
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
 
@@ -410,8 +399,6 @@ This package contains results of tests executed during build.
 %if %{build_with_pgo}
 %if !%{build_with_clang}
 %patch600 -p1 -b .pgo
-#fix
-#%patch601 -p1 -b .1516081
 %patch602 -p1 -b .1516803
 %endif
 %endif
@@ -627,8 +614,7 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-# Temporary disabled due to https://bugzilla.mozilla.org/show_bug.cgi?id=1669442
-# echo "ac_add_options --enable-lto" >> .mozconfig
+echo "ac_add_options --enable-lto" >> .mozconfig
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
@@ -647,8 +633,8 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
 [ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
-#[ "$RPM_BUILD_NCPUS" -ge 16 ] && MOZ_SMP_FLAGS=-j16
-#[ "$RPM_BUILD_NCPUS" -ge 24 ] && MOZ_SMP_FLAGS=-j24
+[ "$RPM_BUILD_NCPUS" -ge 16 ] && MOZ_SMP_FLAGS=-j16
+[ "$RPM_BUILD_NCPUS" -ge 24 ] && MOZ_SMP_FLAGS=-j24
 %endif
 
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
@@ -985,6 +971,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Oct 7 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-6
+- PGO patch update
+- Added fix for mzbz#1669442 (LTO builds)
+
 * Mon Oct 5 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-5
 - Added fix for mozbz#1656727
 
