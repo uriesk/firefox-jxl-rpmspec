@@ -37,11 +37,8 @@
 # Build PGO builds on Wayland backend
 %global pgo_wayland       1
 %endif
-%if 0%{?fedora} > 30
 %global wayland_backend_default 1
-%endif
 %if 0%{?flatpak}
-%global wayland_backend_default 1
 %global build_with_pgo    0
 %endif
 # Big endian platforms
@@ -611,7 +608,10 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
+# Temporary disabled due to GCC bug
+%if 0%{?fedora} > 32
 echo "ac_add_options --enable-lto" >> .mozconfig
+%endif
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
