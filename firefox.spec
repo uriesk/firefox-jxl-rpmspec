@@ -263,6 +263,7 @@ BuildRequires:  xorg-x11-server-Xvfb
 BuildRequires:  mutter
 BuildRequires:  gsettings-desktop-schemas
 BuildRequires:  gnome-settings-daemon
+BuildRequires:  mesa-dri-drivers
 %endif
 BuildRequires:  rust
 BuildRequires:  cargo
