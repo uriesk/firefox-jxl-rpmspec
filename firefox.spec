@@ -104,7 +104,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0.1
-Release:        7%{?dist}
+Release:        9%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -170,6 +170,9 @@ Patch408:        mozilla-1663844.patch
 Patch409:        mozilla-1640567.patch
 Patch410:        mozilla-1661192.patch
 Patch411:        mozilla-1668771.patch
+Patch412:        mozilla-1634404.patch
+Patch413:        mozilla-1669495.patch
+Patch414:        mozilla-1656727.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -378,6 +381,9 @@ This package contains results of tests executed during build.
 %patch409 -p1 -b .1640567
 %patch410 -p1 -b .1661192
 %patch411 -p1 -b .1668771
+%patch412 -p1 -b .1634404
+%patch413 -p1 -b .1669495
+%patch414 -p1 -b .1656727
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -972,6 +978,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 8 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-9
+- Added an updated fix for mozbz#1656727
+
+* Thu Oct 8 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-8
+- Added fixes for mozbz#1634404, mozbz#1669495
+
 * Thu Oct 8 2020 Martin Stransky <stransky@redhat.com> - 81.0.1-7
 - Removed mozbz#1656727 as it causes a regression rhbz#1886243
 
