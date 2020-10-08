@@ -1,22 +1,7 @@
-changeset:   553676:ca48ea0dfb91
-tag:         tip
-parent:      553673:a42aa9514794
-user:        stransky <stransky@redhat.com>
-date:        Mon Oct 05 15:06:55 2020 +0200
-files:       widget/gtk/WindowSurfaceWayland.cpp widget/gtk/WindowSurfaceWayland.h
-description:
-Bug 1656727 [Wayland] Track delayed commits globally, r?jhorak
-
-Track delayed commits in a global list and don't store them in actual wayland surfaces.
-When a delayed commit is called, check that the associated wayland surface is still valid.
-
-Differential Revision: https://phabricator.services.mozilla.com/D92432
-
-
-diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayland.cpp
---- a/widget/gtk/WindowSurfaceWayland.cpp
-+++ b/widget/gtk/WindowSurfaceWayland.cpp
-@@ -159,7 +159,6 @@ We allocate shared memory (shm) by mmap(
+diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727	2020-10-08 11:35:41.921508799 +0200
++++ firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp	2020-10-08 11:37:05.036686876 +0200
+@@ -158,7 +158,6 @@ We allocate shared memory (shm) by mmap(
  between us and wayland compositor. We draw our graphics data to the shm and
  handle to wayland compositor by WindowBackBuffer/WindowSurfaceWayland
  (wl_buffer/wl_surface).
@@ -24,7 +9,7 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
  */
  
  #define EVENT_LOOP_DELAY (1000 / 240)
-@@ -167,6 +166,44 @@ handle to wayland compositor by WindowBa
+@@ -166,6 +165,44 @@ handle to wayland compositor by WindowBa
  #define BUFFER_BPP 4
  gfx::SurfaceFormat WindowBackBuffer::mFormat = gfx::SurfaceFormat::B8G8R8A8;
  
@@ -66,10 +51,10 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
 +  }
 +}
 +
- RefPtr<nsWaylandDisplay> WindowBackBuffer::GetWaylandDisplay() {
+ nsWaylandDisplay* WindowBackBuffer::GetWaylandDisplay() {
    return mWindowSurfaceWayland->GetWaylandDisplay();
  }
-@@ -400,7 +437,6 @@ WindowSurfaceWayland::WindowSurfaceWayla
+@@ -398,7 +435,6 @@ WindowSurfaceWayland::WindowSurfaceWayla
        mWaylandFullscreenDamage(false),
        mFrameCallback(nullptr),
        mLastCommittedSurface(nullptr),
@@ -77,7 +62,7 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
        mLastCommitTime(0),
        mDrawToWaylandBufferDirectly(true),
        mCanSwitchWaylandBuffer(true),
-@@ -412,6 +448,7 @@ WindowSurfaceWayland::WindowSurfaceWayla
+@@ -410,6 +446,7 @@ WindowSurfaceWayland::WindowSurfaceWayla
    for (int i = 0; i < BACK_BUFFER_NUM; i++) {
      mShmBackupBuffer[i] = nullptr;
    }
@@ -85,7 +70,7 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
  }
  
  WindowSurfaceWayland::~WindowSurfaceWayland() {
-@@ -419,12 +456,9 @@ WindowSurfaceWayland::~WindowSurfaceWayl
+@@ -417,12 +454,9 @@ WindowSurfaceWayland::~WindowSurfaceWayl
      NS_WARNING("Deleted WindowSurfaceWayland with a pending commit!");
    }
  
@@ -101,7 +86,7 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
  
    if (mFrameCallback) {
      wl_callback_destroy(mFrameCallback);
-@@ -865,23 +899,11 @@ bool WindowSurfaceWayland::CommitImageCa
+@@ -863,23 +897,11 @@ bool WindowSurfaceWayland::CommitImageCa
    return true;
  }
  
@@ -125,7 +110,7 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
    LOGWAYLAND(("   mFrameCallback = %p\n", mFrameCallback));
    LOGWAYLAND(("   mLastCommittedSurface = %p\n", mLastCommittedSurface));
    LOGWAYLAND(("   mBufferPendingCommit = %d\n", mBufferPendingCommit));
-@@ -917,16 +939,10 @@ void WindowSurfaceWayland::CommitWayland
+@@ -915,16 +937,10 @@ void WindowSurfaceWayland::CommitWayland
      MOZ_ASSERT(!mFrameCallback || waylandSurface != mLastCommittedSurface,
                 "Missing wayland surface at frame callback!");
  
@@ -144,10 +129,11 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
            EVENT_LOOP_DELAY);
      }
      return;
-@@ -1039,24 +1055,5 @@ void WindowSurfaceWayland::FrameCallback
+@@ -1036,25 +1052,6 @@ void WindowSurfaceWayland::FrameCallback
+ 
    CommitWaylandBuffer();
  }
- 
+-
 -void WindowSurfaceWayland::DelayedCommitHandler() {
 -  MOZ_ASSERT(mIsMainThread == NS_IsMainThread());
 -  MOZ_ASSERT(mDelayedCommitHandle != nullptr, "Missing mDelayedCommitHandle!");
@@ -166,12 +152,12 @@ diff --git a/widget/gtk/WindowSurfaceWayland.cpp b/widget/gtk/WindowSurfaceWayla
 -
 -  CommitWaylandBuffer();
 -}
--
+ 
  }  // namespace widget
  }  // namespace mozilla
-diff --git a/widget/gtk/WindowSurfaceWayland.h b/widget/gtk/WindowSurfaceWayland.h
---- a/widget/gtk/WindowSurfaceWayland.h
-+++ b/widget/gtk/WindowSurfaceWayland.h
+diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h.1656727 firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h
+--- firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h.1656727	2020-09-30 19:42:37.000000000 +0200
++++ firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h	2020-10-08 11:35:41.928508817 +0200
 @@ -161,7 +161,7 @@ class WindowSurfaceWayland : public Wind
    // If we fail (wayland compositor is busy,
    // wl_surface is not created yet) we queue the painting
@@ -225,4 +211,3 @@ diff --git a/widget/gtk/WindowSurfaceWayland.h b/widget/gtk/WindowSurfaceWayland
    bool mBufferCommitAllowed;
  
    // We need to clear WaylandBuffer when entire transparent window is repainted.
-
