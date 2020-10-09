@@ -4,6 +4,9 @@
 %global build_with_clang  0
 %global build_with_asan   0
 
+# Disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1886672
+ExcludeArch: s390x
+
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
 %global enable_mozilla_crashreporter 1
