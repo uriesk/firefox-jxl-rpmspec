@@ -1,0 +1,12 @@
+diff -up firefox-81.0.2/dom/media/mp4/MP4Demuxer.cpp.old firefox-81.0.2/dom/media/mp4/MP4Demuxer.cpp
+--- firefox-81.0.2/dom/media/mp4/MP4Demuxer.cpp.old	2020-10-14 17:06:31.424309071 +0200
++++ firefox-81.0.2/dom/media/mp4/MP4Demuxer.cpp	2020-10-14 17:07:31.029533759 +0200
+@@ -394,7 +394,7 @@ already_AddRefed<MediaRawData> MP4TrackD
+           [[fallthrough]];
+         case H264::FrameType::OTHER: {
+           bool keyframe = type == H264::FrameType::I_FRAME;
+-          if (sample->mKeyframe != keyframe) {
++          if (sample->mKeyframe && sample->mKeyframe != keyframe) {
+             NS_WARNING(nsPrintfCString("Frame incorrectly marked as %skeyframe "
+                                        "@ pts:%" PRId64 " dur:%" PRId64
+                                        " dts:%" PRId64,

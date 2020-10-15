@@ -107,7 +107,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        81.0.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -176,6 +176,7 @@ Patch411:        mozilla-1668771.patch
 Patch412:        mozilla-1634404.patch
 Patch413:        mozilla-1669495.patch
 Patch414:        mozilla-1656727.patch
+Patch415:        mozilla-1670333.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -387,6 +388,7 @@ This package contains results of tests executed during build.
 %patch412 -p1 -b .1634404
 %patch413 -p1 -b .1669495
 %patch414 -p1 -b .1656727
+%patch415 -p1 -b .1670333
 
 # Wayland specific upstream patches
 %if 0%{?fedora} < 32
@@ -981,6 +983,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 15 2020 Martin Stransky <stransky@redhat.com> - 81.0.2-3
+- Added experimental openh264 seek patch (mzbz#1670333)
+
 * Mon Oct 12 2020 Martin Stransky <stransky@redhat.com> - 81.0.2-2
 - Added a partial fox for rhbz#1886722
 
