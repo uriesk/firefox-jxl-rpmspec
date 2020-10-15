@@ -615,9 +615,9 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Temporary disabled due to GCC bug
-%if 0%{?fedora} > 32
+# Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
+# Should be in Firefox 83
 echo "ac_add_options --enable-lto" >> .mozconfig
-%endif
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
