@@ -106,13 +106,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        81.0.2
-Release:        3%{?dist}
+Version:        82.0
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201012.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20201015.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -164,9 +164,6 @@ Patch228:        disable-openh264-download.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
-Patch403:        mozilla-1656505-1.patch
-Patch404:        mozilla-1656505-2.patch
-Patch405:        mozilla-1665324.patch
 Patch406:        mozilla-1665329.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
@@ -376,9 +373,6 @@ This package contains results of tests executed during build.
 %patch228 -p1 -b .disable-openh264-download
 
 %patch402 -p1 -b .1196777
-%patch403 -p1 -b .1656505-1
-%patch404 -p1 -b .1656505-2
-%patch405 -p1 -b .1665324
 %patch406 -p1 -b .1665329
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
@@ -983,6 +977,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 15 2020 Martin Stransky <stransky@redhat.com> - 82.0-1
+- Updated to 82.0 Build 2
+
 * Thu Oct 15 2020 Martin Stransky <stransky@redhat.com> - 81.0.2-3
 - Added experimental openh264 seek patch (mzbz#1670333)
 

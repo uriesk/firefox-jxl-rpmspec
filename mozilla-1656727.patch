@@ -1,6 +1,6 @@
-diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp
---- firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727	2020-10-08 11:35:41.921508799 +0200
-+++ firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp	2020-10-08 11:37:05.036686876 +0200
+diff -up firefox-82.0/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-82.0/widget/gtk/WindowSurfaceWayland.cpp
+--- firefox-82.0/widget/gtk/WindowSurfaceWayland.cpp.1656727	2020-10-15 16:16:53.522050159 +0200
++++ firefox-82.0/widget/gtk/WindowSurfaceWayland.cpp	2020-10-15 16:18:24.956289348 +0200
 @@ -158,7 +158,6 @@ We allocate shared memory (shm) by mmap(
  between us and wayland compositor. We draw our graphics data to the shm and
  handle to wayland compositor by WindowBackBuffer/WindowSurfaceWayland
@@ -51,10 +51,10 @@ diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0
 +  }
 +}
 +
- nsWaylandDisplay* WindowBackBuffer::GetWaylandDisplay() {
+ RefPtr<nsWaylandDisplay> WindowBackBuffer::GetWaylandDisplay() {
    return mWindowSurfaceWayland->GetWaylandDisplay();
  }
-@@ -398,7 +435,6 @@ WindowSurfaceWayland::WindowSurfaceWayla
+@@ -399,7 +436,6 @@ WindowSurfaceWayland::WindowSurfaceWayla
        mWaylandFullscreenDamage(false),
        mFrameCallback(nullptr),
        mLastCommittedSurface(nullptr),
@@ -62,7 +62,7 @@ diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0
        mLastCommitTime(0),
        mDrawToWaylandBufferDirectly(true),
        mCanSwitchWaylandBuffer(true),
-@@ -410,6 +446,7 @@ WindowSurfaceWayland::WindowSurfaceWayla
+@@ -411,6 +447,7 @@ WindowSurfaceWayland::WindowSurfaceWayla
    for (int i = 0; i < BACK_BUFFER_NUM; i++) {
      mShmBackupBuffer[i] = nullptr;
    }
@@ -70,7 +70,7 @@ diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0
  }
  
  WindowSurfaceWayland::~WindowSurfaceWayland() {
-@@ -417,12 +454,9 @@ WindowSurfaceWayland::~WindowSurfaceWayl
+@@ -418,12 +455,9 @@ WindowSurfaceWayland::~WindowSurfaceWayl
      NS_WARNING("Deleted WindowSurfaceWayland with a pending commit!");
    }
  
@@ -86,7 +86,7 @@ diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0
  
    if (mFrameCallback) {
      wl_callback_destroy(mFrameCallback);
-@@ -863,23 +897,11 @@ bool WindowSurfaceWayland::CommitImageCa
+@@ -864,23 +898,11 @@ bool WindowSurfaceWayland::CommitImageCa
    return true;
  }
  
@@ -110,7 +110,7 @@ diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0
    LOGWAYLAND(("   mFrameCallback = %p\n", mFrameCallback));
    LOGWAYLAND(("   mLastCommittedSurface = %p\n", mLastCommittedSurface));
    LOGWAYLAND(("   mBufferPendingCommit = %d\n", mBufferPendingCommit));
-@@ -915,16 +937,10 @@ void WindowSurfaceWayland::CommitWayland
+@@ -916,16 +938,10 @@ void WindowSurfaceWayland::CommitWayland
      MOZ_ASSERT(!mFrameCallback || waylandSurface != mLastCommittedSurface,
                 "Missing wayland surface at frame callback!");
  
@@ -129,7 +129,7 @@ diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0
            EVENT_LOOP_DELAY);
      }
      return;
-@@ -1036,25 +1052,6 @@ void WindowSurfaceWayland::FrameCallback
+@@ -1037,25 +1053,6 @@ void WindowSurfaceWayland::FrameCallback
  
    CommitWaylandBuffer();
  }
@@ -155,9 +155,9 @@ diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.cpp.1656727 firefox-81.0
  
  }  // namespace widget
  }  // namespace mozilla
-diff -up firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h.1656727 firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h
---- firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h.1656727	2020-09-30 19:42:37.000000000 +0200
-+++ firefox-81.0.1/widget/gtk/WindowSurfaceWayland.h	2020-10-08 11:35:41.928508817 +0200
+diff -up firefox-82.0/widget/gtk/WindowSurfaceWayland.h.1656727 firefox-82.0/widget/gtk/WindowSurfaceWayland.h
+--- firefox-82.0/widget/gtk/WindowSurfaceWayland.h.1656727	2020-10-14 19:20:27.000000000 +0200
++++ firefox-82.0/widget/gtk/WindowSurfaceWayland.h	2020-10-15 16:16:53.528050175 +0200
 @@ -161,7 +161,7 @@ class WindowSurfaceWayland : public Wind
    // If we fail (wayland compositor is busy,
    // wl_surface is not created yet) we queue the painting

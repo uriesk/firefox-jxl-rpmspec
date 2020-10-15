@@ -1,6 +1,6 @@
-diff -up firefox-81.0.1/layout/xul/nsMenuPopupFrame.cpp.1669495 firefox-81.0.1/layout/xul/nsMenuPopupFrame.cpp
---- firefox-81.0.1/layout/xul/nsMenuPopupFrame.cpp.1669495	2020-10-08 10:09:23.765819989 +0200
-+++ firefox-81.0.1/layout/xul/nsMenuPopupFrame.cpp	2020-10-08 10:09:23.771820010 +0200
+diff -up firefox-82.0/layout/xul/nsMenuPopupFrame.cpp.1669495 firefox-82.0/layout/xul/nsMenuPopupFrame.cpp
+--- firefox-82.0/layout/xul/nsMenuPopupFrame.cpp.1669495	2020-10-15 16:13:12.304471453 +0200
++++ firefox-82.0/layout/xul/nsMenuPopupFrame.cpp	2020-10-15 16:13:12.308471463 +0200
 @@ -533,6 +533,26 @@ void nsMenuPopupFrame::LayoutPopup(nsBox
    }
    prefSize = XULBoundsCheck(minSize, prefSize, maxSize);
@@ -28,10 +28,10 @@ diff -up firefox-81.0.1/layout/xul/nsMenuPopupFrame.cpp.1669495 firefox-81.0.1/l
    bool sizeChanged = (mPrefSize != prefSize);
    // if the size changed then set the bounds to be the preferred size
    if (sizeChanged) {
-diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gtk/nsWindow.cpp
---- firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495	2020-10-08 10:09:23.770820007 +0200
-+++ firefox-81.0.1/widget/gtk/nsWindow.cpp	2020-10-08 10:10:29.225052014 +0200
-@@ -1090,11 +1090,13 @@ void nsWindow::Show(bool aState) {
+diff -up firefox-82.0/widget/gtk/nsWindow.cpp.1669495 firefox-82.0/widget/gtk/nsWindow.cpp
+--- firefox-82.0/widget/gtk/nsWindow.cpp.1669495	2020-10-15 16:13:12.307471461 +0200
++++ firefox-82.0/widget/gtk/nsWindow.cpp	2020-10-15 16:15:49.243882006 +0200
+@@ -1092,11 +1092,13 @@ void nsWindow::Show(bool aState) {
  
  void nsWindow::ResizeInt(int aX, int aY, int aWidth, int aHeight, bool aMove,
                           bool aRepaint) {
@@ -44,10 +44,10 @@ diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gt
  
 +  LOG(("  ConstrainSize: w:%d h;%d\n", aWidth, aHeight));
 +
-   if (aMove) {
-     mBounds.x = aX;
-     mBounds.y = aY;
-@@ -1132,8 +1134,7 @@ void nsWindow::ResizeInt(int aX, int aY,
+   // If we used to have insane bounds, we may have skipped actually positioning
+   // the widget in NativeMoveResizeWaylandPopup, in which case we need to
+   // actually position it now as well.
+@@ -1141,8 +1143,7 @@ void nsWindow::ResizeInt(int aX, int aY,
  }
  
  void nsWindow::Resize(double aWidth, double aHeight, bool aRepaint) {
@@ -57,7 +57,7 @@ diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gt
  
    double scale =
        BoundsUseDesktopPixels() ? GetDesktopToDeviceScale().scale : 1.0;
-@@ -1145,8 +1146,8 @@ void nsWindow::Resize(double aWidth, dou
+@@ -1154,8 +1155,8 @@ void nsWindow::Resize(double aWidth, dou
  
  void nsWindow::Resize(double aX, double aY, double aWidth, double aHeight,
                        bool aRepaint) {
@@ -68,7 +68,7 @@ diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gt
  
    double scale =
        BoundsUseDesktopPixels() ? GetDesktopToDeviceScale().scale : 1.0;
-@@ -1469,14 +1470,15 @@ void nsWindow::NativeMoveResizeWaylandPo
+@@ -1478,14 +1479,15 @@ void nsWindow::NativeMoveResizeWaylandPo
  
    newBounds.x = GdkCoordToDevicePixels(newBounds.x);
    newBounds.y = GdkCoordToDevicePixels(newBounds.y);
@@ -86,7 +86,7 @@ diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gt
    bool needsPositionUpdate =
        (newBounds.x != mBounds.x || newBounds.y != mBounds.y);
    bool needsSizeUpdate =
-@@ -1484,6 +1486,7 @@ void nsWindow::NativeMoveResizeWaylandPo
+@@ -1493,6 +1495,7 @@ void nsWindow::NativeMoveResizeWaylandPo
    // Update view
  
    if (needsSizeUpdate) {
@@ -94,7 +94,7 @@ diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gt
      int32_t p2a = AppUnitsPerCSSPixel() / gfxPlatformGtk::GetFontScaleFactor();
      mPreferredPopupRect = nsRect(NSIntPixelsToAppUnits(newBounds.x, p2a),
                                   NSIntPixelsToAppUnits(newBounds.y, p2a),
-@@ -1502,6 +1505,7 @@ void nsWindow::NativeMoveResizeWaylandPo
+@@ -1511,6 +1514,7 @@ void nsWindow::NativeMoveResizeWaylandPo
    }
  
    if (needsPositionUpdate) {
@@ -102,7 +102,7 @@ diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gt
      // The newBounds are in coordinates relative to the parent window/popup.
      // The NotifyWindowMoved requires the coordinates relative to the toplevel.
      // We use the gdk_window_get_origin to get correct coordinates.
-@@ -4211,6 +4215,8 @@ nsresult nsWindow::Create(nsIWidget* aPa
+@@ -4245,6 +4249,8 @@ nsresult nsWindow::Create(nsIWidget* aPa
  
    // save our bounds
    mBounds = aRect;
@@ -111,7 +111,7 @@ diff -up firefox-81.0.1/widget/gtk/nsWindow.cpp.1669495 firefox-81.0.1/widget/gt
  
    mPreferredPopupRectFlushed = false;
  
-@@ -5061,13 +5067,16 @@ void nsWindow::NativeShow(bool aAction)
+@@ -5083,13 +5089,16 @@ void nsWindow::NativeShow(bool aAction)
          }
        }
  
