@@ -107,7 +107,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -979,6 +979,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 15 2020 Martin Stransky <stransky@redhat.com> - 82.0-2
+- Updated SELinux relabel setup (rhbz#1731371)
+
 * Thu Oct 15 2020 Martin Stransky <stransky@redhat.com> - 82.0-1
 - Updated to 82.0 Build 2
 

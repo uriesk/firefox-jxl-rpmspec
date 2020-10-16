@@ -65,6 +65,7 @@ MOZ_LANGPACKS_DIR="$MOZ_DIST_BIN/langpacks"
 MOZ_EXTENSIONS_PROFILE_DIR="$HOME/.mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
 MOZ_PROGRAM="$MOZ_DIST_BIN/$MOZ_FIREFOX_FILE"
 MOZ_LAUNCHER="$MOZ_DIST_BIN/run-mozilla.sh"
+GETENFORCE_FILE="/usr/sbin/getenforce"
 
 ##
 ## Enable Wayland backend?
@@ -182,8 +183,8 @@ fi
 # When Firefox is not running, restore SELinux labels for profile files
 # (rhbz#1731371)
 if [ $MOZILLA_DOWN -ne 0 ]; then
-  if [ `getenforce` != "Disabled" ]; then
-    restorecon -vr ~/.mozilla/firefox/* &
+  if [ -x $GETENFORCE_FILE ] && [`getenforce` != "Disabled" ]; then
+    (restorecon -vr ~/.mozilla/firefox/* &)
   fi
 fi
 
