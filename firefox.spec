@@ -618,7 +618,9 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Temporary disabled due to GCC bug
 # Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
-# echo "ac_add_options --enable-lto" >> .mozconfig
+%if 0%{?fedora} > 33
+echo "ac_add_options --enable-lto" >> .mozconfig
+%endif
 
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
