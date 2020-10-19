@@ -107,7 +107,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -981,6 +981,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Oct 19 2020 Martin Stransky <stransky@redhat.com> - 82.0-4
+- Updated openh264 patch to use keyframes from contained
+  for openh264 only.
+
 * Mon Oct 19 2020 Martin Stransky <stransky@redhat.com> - 82.0-3
 - Added ELN build fixes
 
