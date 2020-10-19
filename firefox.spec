@@ -107,7 +107,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -385,10 +385,10 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 
 # Wayland specific upstream patches
-%if 0%{?fedora} < 32
-%patch574 -p1 -b .firefox-pipewire-0-2
-%else
+%if 0%{?fedora} > 31 || 0%{?eln}
 %patch575 -p1 -b .firefox-pipewire-0-3
+%else
+%patch574 -p1 -b .firefox-pipewire-0-2
 %endif
 
 # VA-API fixes
@@ -979,6 +979,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Oct 19 2020 Martin Stransky <stransky@redhat.com> - 82.0-3
+- Added ELN build fixes
+
 * Thu Oct 15 2020 Martin Stransky <stransky@redhat.com> - 82.0-2
 - Updated SELinux relabel setup (rhbz#1731371)
 
