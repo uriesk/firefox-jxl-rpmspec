@@ -183,7 +183,7 @@ fi
 # When Firefox is not running, restore SELinux labels for profile files
 # (rhbz#1731371)
 if [ $MOZILLA_DOWN -ne 0 ]; then
-  if [ -x $GETENFORCE_FILE ] && [`getenforce` != "Disabled" ]; then
+  if [ -x $GETENFORCE_FILE ] && [ `getenforce` != "Disabled" ]; then
     (restorecon -vr ~/.mozilla/firefox/* &)
   fi
 fi
