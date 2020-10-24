@@ -107,7 +107,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -618,7 +618,7 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Temporary disabled due to GCC bug
 # Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
-%if 0%{?fedora} > 33
+%if 0%{?fedora} < 32
 echo "ac_add_options --enable-lto" >> .mozconfig
 %endif
 
@@ -981,6 +981,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Oct 24 2020 Martin Stransky <stransky@redhat.com> - 82.0-6
+- Enable LTO
+
 * Tue Oct 20 2020 Martin Stransky <stransky@redhat.com> - 82.0-5
 - Added fix for rhbz#1889742 - Typo in /usr/bin/firefox
 
