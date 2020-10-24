@@ -618,7 +618,7 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Temporary disabled due to GCC bug
 # Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
-%if 0%{?fedora} < 32
+%if 0%{?fedora} > 31
 echo "ac_add_options --enable-lto" >> .mozconfig
 %endif
 
