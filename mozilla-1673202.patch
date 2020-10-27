@@ -1,31 +1,7 @@
-# HG changeset patch
-# User Jed Davis <jld@mozilla.com>
-
-Bug 1673202 - Call fstat directly in Linux sandbox fstatat interception. r?gcp
-
-Sandbox policies handle the case of `fstatat(fd, "", AT_EMPTY_PATH|...)`
-by invoking the SIGSYS handler (because seccomp-bpf can't tell if the
-string will be empty when the syscall would use it), which makes the
-equivalent call to `fstat`.
-
-Unfortunately, recent development versions of glibc implement `fstat` by
-calling `fstatat`, which causes unbounded recursion and stack overflow.
-(This depends on the headers present at build time; see the bug for more
-details.)  This patch switches it to use the `fstat` (or `fstat64` on
-32-bit) syscall directly.
-
-Differential Revision: https://phabricator.services.mozilla.com/D94798
-
-diff --git a/security/sandbox/linux/SandboxFilter.cpp b/security/sandbox/linux/SandboxFilter.cpp
-index 9bdb10c49e085..a128cce7b266c 100644
---- a/security/sandbox/linux/SandboxFilter.cpp
-+++ b/security/sandbox/linux/SandboxFilter.cpp
-@@ -294,17 +294,21 @@ class SandboxPolicyCommon : public SandboxPolicyBase {
-     auto broker = static_cast<SandboxBrokerClient*>(aux);
-     auto fd = static_cast<int>(aArgs.args[0]);
-     auto path = reinterpret_cast<const char*>(aArgs.args[1]);
-     auto buf = reinterpret_cast<statstruct*>(aArgs.args[2]);
-     auto flags = static_cast<int>(aArgs.args[3]);
+diff -up firefox-82.0/security/sandbox/linux/SandboxFilter.cpp.1673202 firefox-82.0/security/sandbox/linux/SandboxFilter.cpp
+--- firefox-82.0/security/sandbox/linux/SandboxFilter.cpp.1673202	2020-10-27 10:40:54.903158025 +0100
++++ firefox-82.0/security/sandbox/linux/SandboxFilter.cpp	2020-10-27 10:43:19.024883597 +0100
+@@ -246,7 +246,11 @@ class SandboxPolicyCommon : public Sandb
  
      if (fd != AT_FDCWD && (flags & AT_EMPTY_PATH) != 0 &&
          strcmp(path, "") == 0) {
@@ -38,9 +14,3 @@ index 9bdb10c49e085..a128cce7b266c 100644
      }
  
      if (fd != AT_FDCWD && path[0] != '/') {
-       SANDBOX_LOG_ERROR("unsupported fd-relative fstatat(%d, \"%s\", %p, 0x%x)",
-                         fd, path, buf, flags);
-       return BlockedSyscallTrap(aArgs, nullptr);
-     }
- 
-
