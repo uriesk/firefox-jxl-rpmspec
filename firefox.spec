@@ -107,7 +107,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -175,6 +175,7 @@ Patch413:        mozilla-1669495.patch
 Patch414:        mozilla-1656727.patch
 Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1673202.patch
+Patch417:        mozilla-1673313.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -387,6 +388,7 @@ This package contains results of tests executed during build.
 %if 0%{?fedora} > 33 || 0%{?eln}
 %patch416 -p1 -b .1673202
 %endif
+%patch417 -p1 -b .1673313
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 31 || 0%{?eln}
@@ -985,6 +987,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Oct 27 2020 Martin Stransky <stransky@redhat.com> - 82.0-8
+- Added fix for mozbz#1673313
+
 * Tue Oct 27 2020 Martin Stransky <stransky@redhat.com> - 82.0-7
 - Added fix for rawhide crashes (rhbz#1891234)
 
