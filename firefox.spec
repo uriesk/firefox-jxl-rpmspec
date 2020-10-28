@@ -8,8 +8,12 @@
 ExcludeArch: s390x
 
 %global enable_mozilla_crashreporter 0
+# Temporary disable on rawhide due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=1891794
+%if 0%{?fedora} < 34
 %ifarch x86_64 %{ix86}
 %global enable_mozilla_crashreporter 1
+%endif
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -106,13 +110,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        82.0
-Release:        8%{?dist}
+Version:        82.0.1
+Release:        1%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201015.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20201028.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -987,6 +991,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Oct 28 2020 Martin Stransky <stransky@redhat.com> - 82.0.1-1
+- Updated to 82.0.1
+
 * Tue Oct 27 2020 Martin Stransky <stransky@redhat.com> - 82.0-8
 - Added fix for mozbz#1673313
 
