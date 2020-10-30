@@ -10,7 +10,7 @@ ExcludeArch: s390x
 %global enable_mozilla_crashreporter 0
 # Temporary disable on rawhide due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1891794
-%if 0%{?fedora} < 34
+%if 0%{?fedora} < 33
 %ifarch x86_64 %{ix86}
 %global enable_mozilla_crashreporter 1
 %endif
