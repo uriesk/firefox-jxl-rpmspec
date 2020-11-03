@@ -1,6 +1,6 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
-%global debug_build       1
+%global release_build     1
+%global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
 
@@ -114,7 +114,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -629,9 +629,10 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Temporary disabled due to GCC bug
 # Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
-%if 0%{?fedora} > 31
-echo "ac_add_options --enable-lto" >> .mozconfig
-%endif
+# Temporary disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1893474
+#%if 0%{?fedora} > 31
+#echo "ac_add_options --enable-lto" >> .mozconfig
+#%endif
 
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
@@ -992,6 +993,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Nov 3 2020 Martin Stransky <stransky@redhat.com> - 82.0.2-3
+- Disabled LTO again.
+
 * Tue Nov 3 2020 Martin Stransky <stransky@redhat.com> - 82.0.2-2
 - NSS debug build
 
