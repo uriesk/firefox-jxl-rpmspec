@@ -15,6 +15,7 @@ ac_add_options --update-channel=release
 ac_add_options BINDGEN_CFLAGS="$(pkg-config nspr pixman-1 --cflags)"
 ac_add_options --allow-addon-sideload
 ac_add_options --with-system-fdk-aac
+ac_add_options --enable-js-shell
 
 export BUILD_OFFICIAL=1
 export MOZILLA_OFFICIAL=1

@@ -3,9 +3,16 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
+%global run_tests         0
+%global create_debuginfo  1
+%global system_nss        1
 
 # Disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1886672
 ExcludeArch: s390x
+
+%ifarch armv7hl
+%global create_debuginfo  0
+%endif
 
 %global enable_mozilla_crashreporter 0
 # Temporary disable on rawhide due to
@@ -21,8 +28,11 @@ ExcludeArch: s390x
 %if 0%{?flatpak}
 %global enable_mozilla_crashreporter 0
 %endif
+%if !%{create_debuginfo}
+%define _unpackaged_files_terminate_build 0
+%global debug_package %{nil}
+%endif
 
-%global system_nss        1
 %global system_ffi        1
 %ifarch armv7hl
 %global system_libvpx     1
@@ -31,9 +41,11 @@ ExcludeArch: s390x
 %endif
 %global hardened_build    1
 %global system_jpeg       1
-%global run_tests         0
 %global disable_elfhack   1
 %global use_bundled_cbindgen  1
+%if %{debug_build}
+%global release_build     1
+%endif
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
 %global build_with_pgo    0
@@ -51,11 +63,6 @@ ExcludeArch: s390x
 # Big endian platforms
 %ifarch ppc64 s390x
 %global big_endian        1
-%endif
-
-%ifarch armv7hl
-%define _unpackaged_files_terminate_build 0
-%global debug_package %{nil}
 %endif
 
 %if 0%{?build_with_pgo}
@@ -114,7 +121,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0.2
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -139,6 +146,7 @@ Source32:       node-stdout-nonblocking-wrapper
 Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
+Source36:       run-tests
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -247,6 +255,7 @@ BuildRequires:  icu
 %endif
 
 Requires:       mozilla-filesystem
+Requires:       mozilla-openh264 >= 2.1.1
 Requires:       p11-kit-trust
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
@@ -660,6 +669,7 @@ echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
 echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
 echo "export STRIP=/bin/true" >> .mozconfig
 export MACH_USE_SYSTEM_PYTHON=1
+export MACH_NO_WRITE_TIMES=1
 %if %{build_with_pgo}
 %if %{pgo_wayland}
 if [ -z "$XDG_RUNTIME_DIR" ]; then
@@ -685,34 +695,8 @@ make -C objdir buildsymbols
 %endif
 
 %if %{?run_tests}
-%if %{?system_nss}
-ln -s %{_prefix}/bin/certutil objdir/dist/bin/certutil
-ln -s %{_prefix}/bin/pk12util objdir/dist/bin/pk12util
-
-%endif
-mkdir test_results
-./mach --log-no-times check-spidermonkey &> test_results/check-spidermonkey || true
-./mach --log-no-times check-spidermonkey &> test_results/check-spidermonkey-2nd-run || true
-./mach --log-no-times cppunittest &> test_results/cppunittest || true
-xvfb-run ./mach --log-no-times crashtest &> test_results/crashtest || true
-./mach --log-no-times gtest &> test_results/gtest || true
-xvfb-run ./mach --log-no-times jetpack-test &> test_results/jetpack-test || true
-# not working right now ./mach marionette-test &> test_results/marionette-test || true
-xvfb-run ./mach --log-no-times mochitest-a11y &> test_results/mochitest-a11y || true
-xvfb-run ./mach --log-no-times mochitest-browser &> test_results/mochitest-browser || true
-xvfb-run ./mach --log-no-times mochitest-chrome &> test_results/mochitest-chrome || true
-xvfb-run ./mach --log-no-times mochitest-devtools &> test_results/mochitest-devtools || true
-xvfb-run ./mach --log-no-times mochitest-plain &> test_results/mochitest-plain || true
-xvfb-run ./mach --log-no-times reftest &> test_results/reftest || true
-xvfb-run ./mach --log-no-times webapprt-test-chrome &> test_results/webapprt-test-chrome || true
-xvfb-run ./mach --log-no-times webapprt-test-content &> test_results/webapprt-test-content || true
-./mach --log-no-times webidl-parser-test &> test_results/webidl-parser-test || true
-xvfb-run ./mach --log-no-times xpcshell-test &> test_results/xpcshell-test || true
-%if %{?system_nss}
-rm -f  objdir/dist/bin/certutil
-rm -f  objdir/dist/bin/pk12util
-%endif
-
+cp %{SOURCE36} .
+./run-tests
 %endif
 #---------------------------------------------------------------------
 
@@ -993,6 +977,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Nov 3 2020 Martin Stransky <stransky@redhat.com> - 82.0.2-4
+- Added mozilla-openh264 dependency to play H264 clips out of the box
+- Updated Firefox tests
+
 * Tue Nov 3 2020 Martin Stransky <stransky@redhat.com> - 82.0.2-3
 - Disabled LTO again.
 
