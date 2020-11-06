@@ -7,9 +7,6 @@
 %global create_debuginfo  1
 %global system_nss        1
 
-# Disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1886672
-ExcludeArch: s390x
-
 %ifarch armv7hl
 %global create_debuginfo  0
 %endif
@@ -121,7 +118,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0.2
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -190,6 +187,7 @@ Patch414:        mozilla-1656727.patch
 Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1673202.patch
 Patch417:        mozilla-1673313.patch
+Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -403,6 +401,7 @@ This package contains results of tests executed during build.
 %patch416 -p1 -b .1673202
 %endif
 %patch417 -p1 -b .1673313
+%patch418 -p1 -b .1556931-s390x-hidden-syms
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 31 || 0%{?eln}
@@ -977,6 +976,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Nov 6 2020 Tomas Popela <tpopela@redhat.com> - 82.0.2-6
+- Re-enable s390x buils by backporting a change from Thunderbird
+  https://src.fedoraproject.org/rpms/thunderbird/c/5f0bec1b5b79e117cc469710afbfa4d008af9c29?branch=master
+
 * Tue Nov 3 2020 Martin Stransky <stransky@redhat.com> - 82.0.2-5
 - Added mozilla-openh264 dependency to play H264 clips out of the box
 - Updated Firefox tests
