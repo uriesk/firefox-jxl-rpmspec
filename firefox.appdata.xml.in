@@ -54,6 +54,6 @@
     <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/c.png</screenshot>
   </screenshots>
   <releases>
-    <release version="__VERSION__"/>
+    <release version="__VERSION__" date="__DATE__"/>
   </releases>
 </component>
