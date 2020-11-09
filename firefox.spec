@@ -122,7 +122,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0.2
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -861,7 +861,9 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 
 # Install appdata file
 mkdir -p %{buildroot}%{_datadir}/metainfo
-%{__sed} -e 's/__VERSION__/%{version}/' %{SOURCE33} > %{buildroot}%{_datadir}/metainfo/firefox.appdata.xml
+%{__sed} -e "s/__VERSION__/%{version}/" \
+         -e "s/__DATE__/$(date '+%F')/" \
+         %{SOURCE33} > %{buildroot}%{_datadir}/metainfo/firefox.appdata.xml
 
 # Install Gnome search provider files
 mkdir -p %{buildroot}%{_datadir}/gnome-shell/search-providers
@@ -980,6 +982,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Nov 09 2020 Kalev Lember <klember@redhat.com> - 82.0.2-7
+- Include date in appdata release tags
+
 * Fri Nov 6 2020 Tomas Popela <tpopela@redhat.com> - 82.0.2-6
 - Re-enable s390x buils by backporting a change from Thunderbird
   https://src.fedoraproject.org/rpms/thunderbird/c/5f0bec1b5b79e117cc469710afbfa4d008af9c29?branch=master
