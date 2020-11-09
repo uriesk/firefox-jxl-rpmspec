@@ -982,10 +982,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Nov 9 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-1
+* Mon Nov 9 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-1
 - Updated to 82.0.3
 
-* Mon Nov 09 2020 Kalev Lember <klember@redhat.com> - 82.0.2-7
+* Mon Nov 9 2020 Kalev Lember <klember@redhat.com> - 82.0.2-7
 - Include date in appdata release tags
 
 * Fri Nov 6 2020 Tomas Popela <tpopela@redhat.com> - 82.0.2-6
