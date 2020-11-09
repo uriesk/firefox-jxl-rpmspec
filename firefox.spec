@@ -120,13 +120,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        82.0.2
-Release:        5%{?pre_tag}%{?dist}
+Version:        82.0.3
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201029.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20201109.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -977,6 +977,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Nov 9 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-1
+- Updated to 82.0.3
+
 * Tue Nov 3 2020 Martin Stransky <stransky@redhat.com> - 82.0.2-5
 - Added mozilla-openh264 dependency to play H264 clips out of the box
 - Updated Firefox tests
