@@ -45,7 +45,7 @@ ExcludeArch: s390x
 %global disable_elfhack   1
 %global use_bundled_cbindgen  1
 %if %{debug_build}
-%global release_build     1
+%global release_build     0
 %endif
 # Build PGO+LTO on x86_64 and aarch64 only due to build issues
 # on other arches.
@@ -122,7 +122,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        82.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -192,6 +192,7 @@ Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1673202.patch
 Patch417:        mozilla-1673313.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
+Patch419:        mozilla-1885133.patch
 
 # Wayland specific upstream patches
 Patch574:        firefox-pipewire-0-2.patch
@@ -406,6 +407,7 @@ This package contains results of tests executed during build.
 %endif
 %patch417 -p1 -b .1673313
 %patch418 -p1 -b .1556931-s390x-hidden-syms
+%patch419 -p1 -b .1885133
 
 # Wayland specific upstream patches
 %if 0%{?fedora} > 31 || 0%{?eln}
@@ -982,6 +984,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Tue 10 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-2
+- Added fix for mozbz#1885133
+
 * Mon Nov 9 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-1
 - Updated to 82.0.3
 
