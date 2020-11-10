@@ -258,7 +258,9 @@ BuildRequires:  icu
 %endif
 
 Requires:       mozilla-filesystem
+%if 0%{?fedora} > 31
 Recommends:     mozilla-openh264 >= 2.1.1
+%endif
 Requires:       p11-kit-trust
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
