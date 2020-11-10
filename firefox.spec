@@ -986,7 +986,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Tue 10 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-2
+* Tue Nov 10 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-2
 - Added fix for mozbz#1885133
 
 * Mon Nov 9 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-1
