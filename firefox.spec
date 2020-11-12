@@ -121,13 +121,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        82.0.3
-Release:        2%{?pre_tag}%{?dist}
+Version:        83.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201109.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20201112.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -166,7 +166,6 @@ Patch49:        build-arm-libaom.patch
 Patch53:        firefox-gcc-build.patch
 # This should be fixed in Firefox 83
 Patch54:        mozilla-1669639.patch
-Patch55:        mozilla-1669442.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -180,23 +179,22 @@ Patch228:        disable-openh264-download.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
-Patch406:        mozilla-1665329.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
-Patch409:        mozilla-1640567.patch
-Patch410:        mozilla-1661192.patch
-Patch412:        mozilla-1634404.patch
-Patch413:        mozilla-1669495.patch
-Patch414:        mozilla-1656727.patch
 Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1673202.patch
 Patch417:        mozilla-1673313.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch419:        mozilla-1885133.patch
 
-# Wayland specific upstream patches
-Patch574:        firefox-pipewire-0-2.patch
-Patch575:        firefox-pipewire-0-3.patch
+# Upstream patches from mozbz#1672944
+Patch450:        pw1.patch
+Patch451:        pw2.patch
+Patch452:        pw3.patch
+Patch453:        pw4.patch
+Patch454:        pw5.patch
+Patch455:        pw6.patch
+Patch456:        pw7.patch
 
 #VA-API patches
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
@@ -380,7 +378,6 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
-%patch55 -p1 -b .1669442
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -395,14 +392,8 @@ This package contains results of tests executed during build.
 %patch228 -p1 -b .disable-openh264-download
 
 %patch402 -p1 -b .1196777
-%patch406 -p1 -b .1665329
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
-%patch409 -p1 -b .1640567
-%patch410 -p1 -b .1661192
-%patch412 -p1 -b .1634404
-%patch413 -p1 -b .1669495
-%patch414 -p1 -b .1656727
 %patch415 -p1 -b .1670333
 %if 0%{?fedora} > 33 || 0%{?eln}
 %patch416 -p1 -b .1673202
@@ -411,12 +402,13 @@ This package contains results of tests executed during build.
 %patch418 -p1 -b .1556931-s390x-hidden-syms
 %patch419 -p1 -b .1885133
 
-# Wayland specific upstream patches
-%if 0%{?fedora} > 31 || 0%{?eln}
-%patch575 -p1 -b .firefox-pipewire-0-3
-%else
-%patch574 -p1 -b .firefox-pipewire-0-2
-%endif
+%patch450 -p1 -b .pw1
+%patch451 -p1 -b .pw2
+%patch452 -p1 -b .pw3
+%patch453 -p1 -b .pw4
+%patch454 -p1 -b .pw5
+%patch455 -p1 -b .pw6
+%patch456 -p1 -b .pw7
 
 # VA-API fixes
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
@@ -986,6 +978,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Nov 12 2020 Martin Stransky <stransky@redhat.com> - 83.0-1
+- Updated to 83.0
+- Updated PipeWire patches from mozbz#1672944
+
 * Tue Nov 10 2020 Martin Stransky <stransky@redhat.com> - 82.0.3-2
 - Added fix for mozbz#1885133
 
