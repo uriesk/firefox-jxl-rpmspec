@@ -9,6 +9,7 @@
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
+# https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
 %ifarch armv7hl
@@ -89,7 +90,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.56
+%global nss_version 3.58
 %global nss_build_version %{nss_version}
 %endif
 
