@@ -10,7 +10,7 @@
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-ExcludeArch: s390x
+# ExcludeArch: s390x
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -650,12 +650,12 @@ export CCACHE_DISABLE=1
 MOZ_SMP_FLAGS=-j1
 # On x86_64 architectures, Mozilla can build up to 4 jobs at once in parallel,
 # however builds tend to fail on other arches when building in parallel.
-%ifarch %{ix86}
+%ifarch %{ix86} s390x %{arm} aarch64
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 [ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
 %endif
-%ifarch x86_64 ppc ppc64 ppc64le %{arm} aarch64
+%ifarch x86_64 ppc ppc64 ppc64le
 [ -z "$RPM_BUILD_NCPUS" ] && \
      RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 [ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
