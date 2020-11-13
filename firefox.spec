@@ -3,14 +3,16 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_tests         0
+%global run_tests         1
 %global create_debuginfo  1
 %global system_nss        1
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-# ExcludeArch: s390x
+ExcludeArch: s390x
+ExcludeArch: armv7hl
+ExcludeArch: aarch64
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -123,7 +125,7 @@
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -979,6 +981,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Nov 13 2020 Martin Stransky <stransky@redhat.com> - 83.0-2
+- Build with enabled tests
+
 * Thu Nov 12 2020 Martin Stransky <stransky@redhat.com> - 83.0-1
 - Updated to 83.0
 - Updated PipeWire patches from mozbz#1672944

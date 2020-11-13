@@ -8,14 +8,14 @@ ln -s /usr/bin/certutil objdir/dist/bin/certutil
 ln -s /usr/bin/pk12util objdir/dist/bin/pk12util
 
 mkdir test_results
-./jsapi-tests >& test_results/check-jsapi || true &
-xvfb-run ./mach cppunittest >& test_results/check-cppunittest || true &
-xvfb-run ./mach gtest >& test_results/check-gtest || true &
-./mach jstests >& test_results/check-jstests || true &
-xvfb-run ./mach rusttests >& test_results/check-rusttests || true &
-xvfb-run ./mach xpcshell-test >& test_results/check-xpcshell-test || true &
+objdir/dist/bin/jsapi-tests >& test_results/check-jsapi || true &
+./mach cppunittest >& test_results/check-cppunittest || true &
+./mach gtest >& test_results/check-gtest || true &
+./mach rusttests >& test_results/check-rusttests || true &
 
 # We can't parallelize these tests
+./mach jstests >& test_results/check-jstests || true
+./mach xpcshell-test >& test_results/check-xpcshell-test || true
 xvfb-run ./mach jstestbrowser >& test_results/check-jstestbrowser || true
 xvfb-run ./mach crashtest >& test_results/check-crashtest || true
 xvfb-run ./mach marionette-test >& test_results/check-marionette-test || true
