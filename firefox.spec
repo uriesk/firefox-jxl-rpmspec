@@ -3,7 +3,7 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_tests         1
+%global run_tests         0
 %global create_debuginfo  1
 %global system_nss        1
 
@@ -982,7 +982,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Fri Nov 13 2020 Martin Stransky <stransky@redhat.com> - 83.0-2
-- Build with enabled tests
+- Updated to 83.0 Build 2
 
 * Thu Nov 12 2020 Martin Stransky <stransky@redhat.com> - 83.0-1
 - Updated to 83.0

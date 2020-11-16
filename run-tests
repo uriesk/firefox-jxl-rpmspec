@@ -8,19 +8,18 @@ ln -s /usr/bin/certutil objdir/dist/bin/certutil
 ln -s /usr/bin/pk12util objdir/dist/bin/pk12util
 
 mkdir test_results
-objdir/dist/bin/jsapi-tests >& test_results/check-jsapi || true &
-./mach cppunittest >& test_results/check-cppunittest || true &
-./mach gtest >& test_results/check-gtest || true &
-./mach rusttests >& test_results/check-rusttests || true &
-
-# We can't parallelize these tests
+objdir/dist/bin/jsapi-tests >& test_results/check-jsapi || true
+./mach cppunittest >& test_results/check-cppunittest || true
+./mach gtest >& test_results/check-gtest || true
+./mach rusttests >& test_results/check-rusttests || true
 ./mach jstests >& test_results/check-jstests || true
-./mach xpcshell-test >& test_results/check-xpcshell-test || true
+# this test fails to quit
+#xvfb-run ./mach xpcshell-test >& test_results/check-xpcshell-test || true
 xvfb-run ./mach jstestbrowser >& test_results/check-jstestbrowser || true
 xvfb-run ./mach crashtest >& test_results/check-crashtest || true
 xvfb-run ./mach marionette-test >& test_results/check-marionette-test || true
-xvfb-run ./mach reftest >& test_results/check-reftest || true
-xvfb-run ./mach mochitest >& test_results/check-mochitest || true
+xvfb-run ./mach reftest --run-tests-in-parallel >& test_results/check-reftest || true
+xvfb-run ./mach mochitest --quiet >& test_results/check-mochitest || true
 
 rm -f  objdir/dist/bin/certutil
 rm -f  objdir/dist/bin/pk12util
