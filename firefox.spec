@@ -10,9 +10,9 @@
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-#ExcludeArch: s390x
-#ExcludeArch: armv7hl
-#ExcludeArch: aarch64
+ExcludeArch: s390x
+ExcludeArch: armv7hl
+ExcludeArch: aarch64
 
 %ifarch armv7hl
 %global create_debuginfo  0
