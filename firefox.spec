@@ -3,16 +3,16 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_tests         0
+%global run_firefox_tests 0
 %global create_debuginfo  1
 %global system_nss        1
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-ExcludeArch: s390x
-ExcludeArch: armv7hl
-ExcludeArch: aarch64
+#ExcludeArch: s390x
+#ExcludeArch: armv7hl
+#ExcludeArch: aarch64
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -74,7 +74,7 @@ ExcludeArch: aarch64
 %global build_tests       1
 %endif
 
-%if 0%{?run_tests}
+%if 0%{?run_firefox_tests}
 %global use_xvfb          1
 %global build_tests       1
 %endif
@@ -125,7 +125,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -347,7 +347,7 @@ to run Firefox explicitly on Wayland.
 %{_bindir}/firefox-wayland
 %{_datadir}/applications/firefox-wayland.desktop
 
-%if %{run_tests}
+%if 0%{?run_firefox_tests}
 %global testsuite_pkg_name mozilla-%{name}-testresults
 %package -n %{testsuite_pkg_name}
 Summary: Results of testsuite
@@ -606,7 +606,7 @@ echo "ac_add_options --enable-linker=gold" >> .mozconfig
 # __global_ldflags that normally sets this.
 MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -L%{_libdir}"
 %endif
-%ifarch %{arm} %{ix86}
+%ifarch %{arm} %{ix86} %{s390x}
 export RUSTFLAGS="-Cdebuginfo=0"
 %endif
 %if %{build_with_asan}
@@ -696,7 +696,7 @@ GDK_BACKEND=x11 xvfb-run ./mach build  2>&1 | cat -
 make -C objdir buildsymbols
 %endif
 
-%if %{?run_tests}
+%if 0%{?run_firefox_tests}
 cp %{SOURCE36} .
 ./run-tests
 %endif
@@ -842,7 +842,7 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %{__cp} objdir/dist/%{symbols_file_name} %{buildroot}/%{moz_debug_dir}
 %endif
 
-%if %{run_tests}
+%if 0%{?run_firefox_tests}
 # Add debuginfo for crash-stats.mozilla.com
 %{__mkdir_p} %{buildroot}/test_results
 %{__cp} test_results/* %{buildroot}/test_results
@@ -981,7 +981,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Fri Nov 13 2020 Martin Stransky <stransky@redhat.com> - 83.0-2
+* Fri Nov 13 2020 Martin Stransky <stransky@redhat.com> - 83.0-3
 - Updated to 83.0 Build 2
 
 * Thu Nov 12 2020 Martin Stransky <stransky@redhat.com> - 83.0-1
