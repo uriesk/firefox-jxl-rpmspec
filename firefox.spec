@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
@@ -10,9 +10,9 @@
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-ExcludeArch: s390x
-ExcludeArch: armv7hl
-ExcludeArch: aarch64
+#ExcludeArch: s390x
+#ExcludeArch: armv7hl
+#ExcludeArch: aarch64
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -125,7 +125,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -981,6 +981,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Nov 18 2020 Martin Stransky <stransky@redhat.com> - 83.0-4
+- Enable all arches
+
 * Fri Nov 13 2020 Martin Stransky <stransky@redhat.com> - 83.0-3
 - Updated to 83.0 Build 2
 
