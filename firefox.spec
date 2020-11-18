@@ -1,5 +1,5 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     0
+%global release_build     1
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
@@ -10,7 +10,7 @@
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-#ExcludeArch: s390x
+ExcludeArch: s390x
 #ExcludeArch: armv7hl
 #ExcludeArch: aarch64
 
@@ -525,7 +525,7 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 
 %build
 # Disable LTO to work around rhbz#1883904
-%define _lto_cflags %{nil}
+# %define _lto_cflags %{nil}
 
 %if 0%{?use_bundled_cbindgen}
 
@@ -641,9 +641,7 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
 # Temporary disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1893474
-#%if 0%{?fedora} > 31
-#echo "ac_add_options --enable-lto" >> .mozconfig
-#%endif
+echo "ac_add_options --enable-lto" >> .mozconfig
 
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
