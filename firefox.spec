@@ -1,9 +1,9 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 0
+%global run_firefox_tests 1
 %global create_debuginfo  1
 %global system_nss        1
 
@@ -11,8 +11,8 @@
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
-#ExcludeArch: armv7hl
-#ExcludeArch: aarch64
+ExcludeArch: armv7hl
+ExcludeArch: aarch64
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -525,7 +525,7 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 
 %build
 # Disable LTO to work around rhbz#1883904
-# %define _lto_cflags %{nil}
+%define _lto_cflags %{nil}
 
 %if 0%{?use_bundled_cbindgen}
 
@@ -641,7 +641,7 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
 # Temporary disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1893474
-echo "ac_add_options --enable-lto" >> .mozconfig
+# echo "ac_add_options --enable-lto" >> .mozconfig
 
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
@@ -980,7 +980,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Wed Nov 18 2020 Martin Stransky <stransky@redhat.com> - 83.0-5
-- Enabled LTO
+- Build with tests enabled
 
 * Wed Nov 18 2020 Martin Stransky <stransky@redhat.com> - 83.0-4
 - Enable all arches
