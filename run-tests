@@ -14,6 +14,7 @@ mkdir test_results
 
 # Basic render testing
 xvfb-run -s "$X_PARAMS" ./mach mochitest $TEST_PARAMS >& test_results/check-mochitest
+exit
 xvfb-run -s "$X_PARAMS" ./mach jstestbrowser $TEST_PARAMS >& test_results/check-jstestbrowser
 xvfb-run -s "$X_PARAMS" ./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& test_results/check-crashtest
 xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& test_results/check-marionette-test
