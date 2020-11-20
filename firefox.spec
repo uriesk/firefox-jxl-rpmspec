@@ -303,6 +303,7 @@ BuildRequires:  perl-interpreter
 BuildRequires:  fdk-aac-free-devel
 %if 0%{?run_firefox_tests}
 BuildRequires:  nss-tools
+BuildRequires:  python2.7
 %endif
 
 Obsoletes:      mozilla <= 37:1.7.13
