@@ -169,6 +169,7 @@ Patch49:        build-arm-libaom.patch
 Patch53:        firefox-gcc-build.patch
 # This should be fixed in Firefox 83
 Patch54:        mozilla-1669639.patch
+Patch55:        firefox-testing.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -381,6 +382,7 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
+%patch55 -p1 -b .testing
 
 # Fedora patches
 %patch215 -p1 -b .addons
