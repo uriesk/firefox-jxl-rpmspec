@@ -301,6 +301,9 @@ BuildRequires:  libasan-static
 %endif
 BuildRequires:  perl-interpreter
 BuildRequires:  fdk-aac-free-devel
+%if 0%{?run_firefox_tests}
+BuildRequires:  nss-tools
+%endif
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
