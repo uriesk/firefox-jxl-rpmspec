@@ -151,6 +151,8 @@ Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
 Source36:       run-tests
+Source37:       print_results_general
+Source38:       print_results_spec
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -359,7 +361,10 @@ Summary: Results of testsuite
 %description -n %{testsuite_pkg_name}
 This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
-/test_results
+/test_general
+/test_basic
+/test_wr
+/test_summary.txt
 %endif
 
 #---------------------------------------------------------------------
@@ -702,6 +707,8 @@ make -C objdir buildsymbols
 
 %if 0%{?run_firefox_tests}
 cp %{SOURCE36} .
+cp %{SOURCE37} .
+cp %{SOURCE38} .
 ./run-tests
 %endif
 #---------------------------------------------------------------------
@@ -847,9 +854,13 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %endif
 
 %if 0%{?run_firefox_tests}
-# Add debuginfo for crash-stats.mozilla.com
-%{__mkdir_p} %{buildroot}/test_results
-%{__cp} test_results/* %{buildroot}/test_results
+%{__mkdir_p} %{buildroot}/test_general
+%{__mkdir_p} %{buildroot}/test_basic
+%{__mkdir_p} %{buildroot}/test_wr
+%{__cp} test_general/* %{buildroot}/test_general
+%{__cp} test_basic/* %{buildroot}/test_basic
+%{__cp} test_wr/* %{buildroot}/test_wr
+%{__cp} test_summary.txt %{buildroot}/
 %endif
 
 # Default

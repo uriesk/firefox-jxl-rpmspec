@@ -5,36 +5,54 @@ export MACH_USE_SYSTEM_PYTHON=1
 export MOZ_NODE_PATH=/usr/bin/node
 export TEST_PARAMS=""
 export X_PARAMS="-screen 0 1600x1200x24"
+export TEST_SUMMARY="test_summary.txt"
 
 # Fix for system nss
 ln -s /usr/bin/certutil objdir/dist/bin/certutil
 ln -s /usr/bin/pk12util objdir/dist/bin/pk12util
 
-mkdir test_results
+mkdir test_general
+mkdir test_basic
+mkdir test_wr
+
+NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 
 # Basic render testing
-xvfb-run -s "$X_PARAMS" ./mach mochitest $TEST_PARAMS >& test_results/check-mochitest
-xvfb-run -s "$X_PARAMS" ./mach jstestbrowser $TEST_PARAMS >& test_results/check-jstestbrowser
-xvfb-run -s "$X_PARAMS" ./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& test_results/check-crashtest
-xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& test_results/check-marionette-test
-xvfb-run -s "$X_PARAMS" ./mach reftest $TEST_PARAMS --run-tests-in-parallel >& test_results/check-reftest
-./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > test_results/check-xpcshell-test
+export TEST_DIR="test_basic"
+xvfb-run -s "$X_PARAMS" ./mach mochitest $TEST_PARAMS >& $TEST_DIR/mochitest
+xvfb-run -s "$X_PARAMS" ./mach jstestbrowser $TEST_PARAMS >& $TEST_DIR/jstestbrowser
+xvfb-run -s "$X_PARAMS" ./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/crashtest
+xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& $TEST_DIR/marionette
+xvfb-run -s "$X_PARAMS" ./mach reftest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/reftest
+./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > $TEST_DIR/xpcshell
+./mach gtest -j $NCPUS $TEST_PARAMS >& $TEST_DIR/gtest
 
 # WebRender testing
 TEST_PARAMS="--enable-webrender $TEST_PARAMS"
-xvfb-run -s "$X_PARAMS" ./mach mochitest $TEST_PARAMS >& test_results/check-mochitest-wr
-xvfb-run -s "$X_PARAMS" ./mach jstestbrowser $TEST_PARAMS >& test_results/check-jstestbrowser-wr
-xvfb-run -s "$X_PARAMS" ./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& test_results/check-crashtest-wr
-xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& test_results/check-marionette-test-wr
-xvfb-run -s "$X_PARAMS" ./mach reftest $TEST_PARAMS --run-tests-in-parallel >& test_results/check-reftest-wr
-./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > test_results/check-xpcshell-test-wr
+export TEST_DIR="test_wr"
+xvfb-run -s "$X_PARAMS" ./mach mochitest $TEST_PARAMS >& $TEST_DIR/mochitest
+xvfb-run -s "$X_PARAMS" ./mach jstestbrowser $TEST_PARAMS >& $TEST_DIR/jstestbrowser
+xvfb-run -s "$X_PARAMS" ./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/crashtest
+xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& $TEST_DIR/marionette
+xvfb-run -s "$X_PARAMS" ./mach reftest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/reftest
+./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > $TEST_DIR/xpcshell
+./mach gtest -j $NCPUS $TEST_PARAMS >& $TEST_DIR/gtest
 
 # Rest
-objdir/dist/bin/jsapi-tests >& test_results/check-jsapi
-./mach cppunittest >& test_results/check-cppunittest
-./mach gtest >& test_results/check-gtest
-./mach rusttests >& test_results/check-rusttests
-./mach jstests >& test_results/check-jstests
+export TEST_DIR="test_general"
+objdir/dist/bin/jsapi-tests >& $TEST_DIR/jsapi
+./mach cppunittest >& $TEST_DIR/cppunittest
+./mach rusttests >& $TEST_DIR/rusttests
+./mach jstests >& $TEST_DIR/jstests
+
+echo "Test results" > $TEST_SUMMARY
+echo "" >> $TEST_SUMMARY
+echo "Basic test results" >> $TEST_SUMMARY
+./print_results_spec test_basic >> $TEST_SUMMARY
+echo "WR test results" >> $TEST_SUMMARY
+./print_results_spec test_wr >> $TEST_SUMMARY
+echo "General test results" >> $TEST_SUMMARY
+./print_results_general >> $TEST_SUMMARY
 
 rm -f  objdir/dist/bin/certutil
 rm -f  objdir/dist/bin/pk12util
