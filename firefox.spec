@@ -125,7 +125,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -150,9 +150,7 @@ Source32:       node-stdout-nonblocking-wrapper
 Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
-Source36:       run-tests
-Source37:       print_results_general
-Source38:       print_results_spec
+Source36:       firefox-testing.tar.gz
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -706,9 +704,11 @@ make -C objdir buildsymbols
 %endif
 
 %if 0%{?run_firefox_tests}
-cp %{SOURCE36} .
-cp %{SOURCE37} .
-cp %{SOURCE38} .
+tar xf %{SOURCE36}
+cat > objdir/_virtualenvs/init_py3/pip.conf << EOF
+[install]
+find-links=`pwd`/mochitest-python
+EOF
 ./run-tests
 %endif
 #---------------------------------------------------------------------
@@ -996,6 +996,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Nov 24 2020 Martin Stransky <stransky@redhat.com> - 83.0-6
+- Fix mochitest
+
 * Wed Nov 18 2020 Martin Stransky <stransky@redhat.com> - 83.0-5
 - Build with tests enabled
 
