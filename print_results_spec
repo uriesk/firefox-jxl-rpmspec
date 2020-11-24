@@ -27,6 +27,7 @@ echo " "
 echo "XPCShell:"
 grep --text "INFO INFO | Passed:" $TEST_DIR/xpcshell
 grep --text "INFO INFO | Failed:" $TEST_DIR/xpcshell
+echo " "
 
 echo "Crash test:"
 grep "REFTEST INFO | Successful:" $TEST_DIR/crashtest
