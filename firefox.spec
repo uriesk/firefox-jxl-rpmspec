@@ -361,10 +361,10 @@ Summary: Results of testsuite
 %description -n %{testsuite_pkg_name}
 This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
-/test_general
-/test_basic
-/test_wr
-/test_summary.txt
+/%{version}%-%{release}/test_general
+/%{version}%-%{release}/test_basic
+/%{version}%-%{release}/test_wr
+/%{version}%-%{release}/test_summary.txt
 %endif
 
 #---------------------------------------------------------------------
@@ -854,13 +854,13 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %endif
 
 %if 0%{?run_firefox_tests}
-%{__mkdir_p} %{buildroot}/test_general
-%{__mkdir_p} %{buildroot}/test_basic
-%{__mkdir_p} %{buildroot}/test_wr
-%{__cp} test_general/* %{buildroot}/test_general
-%{__cp} test_basic/* %{buildroot}/test_basic
-%{__cp} test_wr/* %{buildroot}/test_wr
-%{__cp} test_summary.txt %{buildroot}/
+%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_general
+%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_basic
+%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_wr
+%{__cp} test_general/* %{buildroot}/%{version}%-%{release}/test_general
+%{__cp} test_basic/* %{buildroot}/%{version}%-%{release}/test_basic
+%{__cp} test_wr/* %{buildroot}/%{version}%-%{release}/test_wr
+%{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/
 %endif
 
 # Default
