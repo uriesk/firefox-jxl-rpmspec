@@ -1,7 +1,7 @@
-diff --git a/browser/actors/WebRTCParent.jsm b/browser/actors/WebRTCParent.jsm
---- a/browser/actors/WebRTCParent.jsm
-+++ b/browser/actors/WebRTCParent.jsm
-@@ -45,6 +45,9 @@
+diff -up firefox-83.0/browser/actors/WebRTCParent.jsm.pw6 firefox-83.0/browser/actors/WebRTCParent.jsm
+--- firefox-83.0/browser/actors/WebRTCParent.jsm.pw6	2020-11-12 19:04:30.000000000 +0100
++++ firefox-83.0/browser/actors/WebRTCParent.jsm	2020-11-25 10:28:32.492865982 +0100
+@@ -45,6 +45,9 @@ XPCOMUtils.defineLazyServiceGetter(
    "nsIOSPermissionRequest"
  );
  
@@ -11,7 +11,16 @@ diff --git a/browser/actors/WebRTCParent.jsm b/browser/actors/WebRTCParent.jsm
  class WebRTCParent extends JSWindowActorParent {
    didDestroy() {
      webrtcUI.forgetStreamsFromBrowserContext(this.browsingContext);
-@@ -774,6 +777,23 @@
+@@ -753,6 +756,8 @@ function prompt(aActor, aBrowser, aReque
+         );
+         menupopup.appendChild(doc.createXULElement("menuseparator"));
+ 
++        let isPipeWire = false;
++
+         // Build the list of 'devices'.
+         let monitorIndex = 1;
+         for (let i = 0; i < devices.length; ++i) {
+@@ -774,6 +779,29 @@ function prompt(aActor, aBrowser, aReque
              }
            } else {
              name = device.name;
@@ -21,10 +30,16 @@ diff --git a/browser/actors/WebRTCParent.jsm b/browser/actors/WebRTCParent.jsm
 +            // Don't mark it as scary as there's an extra confirmation step by
 +            // PipeWire portal dialog.
 +            if (name == PIPEWIRE_PORTAL_NAME && device.id == PIPEWIRE_ID) {
-+              let sawcStringId = "getUserMedia.sharePipeWirePortal.label";
++              isPipeWire = true;
++              let name;
++              try {
++                name = stringBundle.getString("getUserMedia.sharePipeWirePortal.label");
++              } catch (err) {
++                name = "Use operating system settings"
++              }
 +              let item = addDeviceToList(
 +                menupopup,
-+                stringBundle.getString(sawcStringId),
++                name,
 +                i,
 +                type
 +              );
@@ -35,10 +50,84 @@ diff --git a/browser/actors/WebRTCParent.jsm b/browser/actors/WebRTCParent.jsm
              if (type == "application") {
                // The application names returned by the platform are of the form:
                // <window count>\x1e<application name>
-diff --git a/browser/locales/en-US/chrome/browser/browser.properties b/browser/locales/en-US/chrome/browser/browser.properties
---- a/browser/locales/en-US/chrome/browser/browser.properties
-+++ b/browser/locales/en-US/chrome/browser/browser.properties
-@@ -767,6 +767,7 @@
+@@ -888,39 +916,41 @@ function prompt(aActor, aBrowser, aReque
+             perms.EXPIRE_SESSION
+           );
+ 
+-          video.deviceId = deviceId;
+-          let constraints = {
+-            video: { mediaSource: type, deviceId: { exact: deviceId } },
+-          };
+-          chromeWin.navigator.mediaDevices.getUserMedia(constraints).then(
+-            stream => {
+-              if (video.deviceId != deviceId) {
+-                // The user has selected a different device or closed the panel
+-                // before getUserMedia finished.
+-                stream.getTracks().forEach(t => t.stop());
+-                return;
+-              }
+-              video.srcObject = stream;
+-              video.stream = stream;
+-              doc.getElementById("webRTC-preview").hidden = false;
+-              video.onloadedmetadata = function(e) {
+-                video.play();
+-              };
+-            },
+-            err => {
+-              if (
+-                err.name == "OverconstrainedError" &&
+-                err.constraint == "deviceId"
+-              ) {
+-                // Window has disappeared since enumeration, which can happen.
+-                // No preview for you.
+-                return;
++          if (!isPipeWire) {
++            video.deviceId = deviceId;
++            let constraints = {
++              video: { mediaSource: type, deviceId: { exact: deviceId } },
++            };
++            chromeWin.navigator.mediaDevices.getUserMedia(constraints).then(
++              stream => {
++                if (video.deviceId != deviceId) {
++                  // The user has selected a different device or closed the panel
++                  // before getUserMedia finished.
++                  stream.getTracks().forEach(t => t.stop());
++                  return;
++                }
++                video.srcObject = stream;
++                video.stream = stream;
++                doc.getElementById("webRTC-preview").hidden = false;
++                video.onloadedmetadata = function(e) {
++                  video.play();
++                };
++              },
++              err => {
++                if (
++                  err.name == "OverconstrainedError" &&
++                  err.constraint == "deviceId"
++                ) {
++                  // Window has disappeared since enumeration, which can happen.
++                  // No preview for you.
++                  return;
++                }
++                Cu.reportError(
++                  `error in preview: ${err.message} ${err.constraint}`
++                );
+               }
+-              Cu.reportError(
+-                `error in preview: ${err.message} ${err.constraint}`
+-              );
+-            }
+-          );
++            );
++          }
+         };
+         menupopup.addEventListener("command", menupopup._commandEventListener);
+       }
+diff -up firefox-83.0/browser/locales/en-US/chrome/browser/browser.properties.pw6 firefox-83.0/browser/locales/en-US/chrome/browser/browser.properties
+--- firefox-83.0/browser/locales/en-US/chrome/browser/browser.properties.pw6	2020-11-12 19:04:30.000000000 +0100
++++ firefox-83.0/browser/locales/en-US/chrome/browser/browser.properties	2020-11-25 09:24:26.378857626 +0100
+@@ -764,6 +764,7 @@ getUserMedia.selectWindowOrScreen.label=
  getUserMedia.selectWindowOrScreen.accesskey=W
  getUserMedia.pickWindowOrScreen.label = Select Window or Screen
  getUserMedia.shareEntireScreen.label = Entire screen
@@ -46,10 +135,10 @@ diff --git a/browser/locales/en-US/chrome/browser/browser.properties b/browser/l
  # LOCALIZATION NOTE (getUserMedia.shareMonitor.label):
  # %S is screen number (digits 1, 2, etc)
  # Example: Screen 1, Screen 2,..
-diff --git a/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc b/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
---- a/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-+++ b/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-@@ -898,17 +898,17 @@
+diff -up firefox-83.0/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc.pw6 firefox-83.0/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
+--- firefox-83.0/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc.pw6	2020-11-25 09:24:26.358857788 +0100
++++ firefox-83.0/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc	2020-11-25 09:24:26.378857626 +0100
+@@ -879,17 +879,17 @@ void BaseCapturerPipeWire::CaptureFrame(
    callback_->OnCaptureResult(Result::SUCCESS, std::move(result));
  }
  
@@ -72,4 +161,3 @@ diff --git a/third_party/libwebrtc/webrtc/modules/desktop_capture/linux/base_cap
  }
  
  // static
-

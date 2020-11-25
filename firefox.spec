@@ -125,7 +125,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -198,7 +198,6 @@ Patch452:        pw3.patch
 Patch453:        pw4.patch
 Patch454:        pw5.patch
 Patch455:        pw6.patch
-Patch456:        pw7.patch
 
 #VA-API patches
 Patch584:        firefox-disable-ffvpx-with-vapi.patch
@@ -420,7 +419,6 @@ This package contains results of tests executed during build.
 %patch453 -p1 -b .pw4
 %patch454 -p1 -b .pw5
 %patch455 -p1 -b .pw6
-%patch456 -p1 -b .pw7
 
 # VA-API fixes
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
@@ -996,6 +994,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Nov 25 2020 Martin Stransky <stransky@redhat.com> - 83.0-8
+- Added fix for rhbz#1900542
+
 * Wed Nov 25 2020 Martin Stransky <stransky@redhat.com> - 83.0-7
 - Export MOZ_GMP_PATH from /usr/bin/firefox script
   (https://pagure.io/fedora-workstation/issue/126)
