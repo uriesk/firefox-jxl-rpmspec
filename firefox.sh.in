@@ -124,6 +124,11 @@ FONTCONFIG_PATH="/etc/fonts:${MOZILLA_FIVE_HOME}/res/Xft"
 export FONTCONFIG_PATH
 
 ##
+## We want Firefox to use Openh264 provided by Fedora
+##
+export MOZ_GMP_PATH=$MOZ_LIB_DIR/mozilla/plugins/gmp-gmpopenh264/system-installed
+
+##
 ## In order to better support certain scripts (such as Indic and some CJK
 ## scripts), Fedora builds its Firefox, with permission from the Mozilla
 ## Corporation, with the Pango system as its text renderer.  This change
