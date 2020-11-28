@@ -1,9 +1,9 @@
 # Set to true if it's going to be submitted as update.
-%global release_build     1
+%global release_build     0
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 0
+%global run_firefox_tests 1
 %global create_debuginfo  1
 %global system_nss        1
 
@@ -125,7 +125,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        8%{?pre_tag}%{?dist}
+Release:        9%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -151,6 +151,7 @@ Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
 Source36:       firefox-testing.tar.gz
+Source37:       site-packages.tar.gz
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -707,6 +708,7 @@ cat > objdir/_virtualenvs/init_py3/pip.conf << EOF
 [install]
 find-links=`pwd`/mochitest-python
 EOF
+tar xf %{SOURCE37} -C "objdir/_virtualenvs/init_py3/lib64/python3.9"
 ./run-tests
 %endif
 #---------------------------------------------------------------------
@@ -994,6 +996,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Nov 25 2020 Martin Stransky <stransky@redhat.com> - 83.0-9
+- Added mochitest test files
+
 * Wed Nov 25 2020 Martin Stransky <stransky@redhat.com> - 83.0-8
 - Added fix for rhbz#1900542
 
