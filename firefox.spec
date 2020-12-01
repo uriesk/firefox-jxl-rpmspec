@@ -127,7 +127,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        11%{?pre_tag}%{?dist}
+Release:        12%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -152,8 +152,10 @@ Source32:       node-stdout-nonblocking-wrapper
 Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
-Source36:       firefox-testing.tar.gz
 Source37:       site-packages.tar.gz
+Source38:       print_results
+Source39:       print_subtest
+Source40:       run-tests
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -362,9 +364,7 @@ Summary: Results of testsuite
 %description -n %{testsuite_pkg_name}
 This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
-/%{version}%-%{release}/test_general
-/%{version}%-%{release}/test_basic
-/%{version}%-%{release}/test_wr
+/%{version}%-%{release}/test_results
 /%{version}%-%{release}/test_summary.txt
 %endif
 
@@ -707,13 +707,10 @@ make -C objdir buildsymbols
 %endif
 
 %if 0%{?run_firefox_tests}
-tar xf %{SOURCE36}
-cat > objdir/_virtualenvs/init_py3/pip.conf << EOF
-[install]
-find-links=`pwd`/mochitest-python
-EOF
 tar xf %{SOURCE37} -C "objdir/_virtualenvs/init_py3/lib64/python3.9"
+cp {SOURCE40} {SOURCE38} {SOURCE39} .
 ./run-tests
+./print_results > test_summary.txt 2>&1
 %endif
 #---------------------------------------------------------------------
 
@@ -858,12 +855,8 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %endif
 
 %if 0%{?run_firefox_tests}
-%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_general
-%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_basic
-%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_wr
-%{__cp} test_general/* %{buildroot}/%{version}%-%{release}/test_general
-%{__cp} test_basic/* %{buildroot}/%{version}%-%{release}/test_basic
-%{__cp} test_wr/* %{buildroot}/%{version}%-%{release}/test_wr
+%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_results
+%{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results
 %{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/
 %endif
 
@@ -1000,6 +993,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 1 2020 Martin Stransky <stransky@redhat.com> - 83.0-12
+- More mochitest fixes
+
 * Mon Nov 30 2020 Martin Stransky <stransky@redhat.com> - 83.0-11
 - Mochitest tweaking
 

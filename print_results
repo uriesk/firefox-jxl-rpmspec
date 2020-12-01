@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+# Analyze and print general test results
+
+export TEST_DIR="test_results"
+
+echo "Test results"
+echo "SW"
+./print_subtest "test_results" ""
+echo "WR"
+./print_subtest "test_results" "-wr"
+echo "General"
+
+UNPASS=`grep "cppunittests INFO | Passed:" $TEST_DIR/cppunittest | cut -d ' ' -f 5`
+UNFAIL=`grep "cppunittests INFO | Failed:" $TEST_DIR/cppunittest | cut -d ' ' -f 5`
+echo "CPP UNIT:   PASSED: $UNPASS FAILED: $UNFAIL"
+
+JSPASS=`grep "TEST-PASS" $TEST_DIR/jsapi | wc -l`
+echo "JSAPI:      PASSED: $JSPASS"
+
+echo "JStests:    "`tail -n 1 $TEST_DIR/jstests`
