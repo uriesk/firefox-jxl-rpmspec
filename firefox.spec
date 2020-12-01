@@ -127,7 +127,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        12%{?pre_tag}%{?dist}
+Release:        13%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -196,6 +196,7 @@ Patch417:        mozilla-1673313.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch419:        mozilla-1885133.patch
 Patch420:        mozilla-1678680.patch
+Patch421:        mozilla-1672139.patch
 
 # Upstream patches from mozbz#1672944
 Patch450:        pw1.patch
@@ -424,6 +425,7 @@ This package contains results of tests executed during build.
 %patch454 -p1 -b .pw5
 %patch455 -p1 -b .pw6
 %patch420 -p1 -b .1678680
+%patch421 -p1 -b .1672139
 
 # VA-API fixes
 %patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
@@ -993,6 +995,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 1 2020 Martin Stransky <stransky@redhat.com> - 83.0-13
+- Added fix for mozbz#1672139
+
 * Tue Dec 1 2020 Martin Stransky <stransky@redhat.com> - 83.0-12
 - More mochitest fixes
 
