@@ -3,8 +3,10 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
+%if 0%{?fedora} == 33
 %ifarch x86_64
 %global run_firefox_tests 0
+%endif
 %endif
 %global create_debuginfo  1
 %global system_nss        1
