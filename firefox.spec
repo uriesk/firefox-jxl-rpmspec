@@ -5,7 +5,7 @@
 %global build_with_asan   0
 %if 0%{?fedora} == 33
 %ifarch x86_64
-%global run_firefox_tests 0
+%global run_firefox_tests 1
 %endif
 %endif
 %global create_debuginfo  1
@@ -129,7 +129,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        13%{?pre_tag}%{?dist}
+Release:        14%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -657,7 +657,7 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 # Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
 # Temporary disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1893474
-# echo "ac_add_options --enable-lto" >> .mozconfig
+echo "ac_add_options --enable-lto" >> .mozconfig
 
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
@@ -997,6 +997,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 1 2020 Martin Stransky <stransky@redhat.com> - 83.0-14
+- Enabled LTO
+
 * Tue Dec 1 2020 Martin Stransky <stransky@redhat.com> - 83.0-13
 - Added fix for mozbz#1672139
 
