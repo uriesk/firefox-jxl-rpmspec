@@ -3,7 +3,7 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%if 0%{?fedora} == 33
+%if 0%{?fedora} >= 33
 %ifarch x86_64
 %global run_firefox_tests 1
 %endif
@@ -541,7 +541,7 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 
 %build
 # Disable LTO to work around rhbz#1883904
-%define _lto_cflags %{nil}
+# %define _lto_cflags %{nil}
 
 %if 0%{?use_bundled_cbindgen}
 

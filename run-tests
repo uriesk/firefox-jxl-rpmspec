@@ -4,7 +4,7 @@ set -x
 export MACH_USE_SYSTEM_PYTHON=1
 export MOZ_NODE_PATH=/usr/bin/node
 export X_PARAMS="-screen 0 1600x1200x24"
-export MOCHITEST_PARAMS="--timeout 10 --chunk-by-dir 4"
+export MOCHITEST_PARAMS="--timeout 1 --chunk-by-dir 4"
 export TEST_DIR="test_results"
 
 # Fix for system nss
