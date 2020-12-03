@@ -713,11 +713,12 @@ make -C objdir buildsymbols
 %if 0%{?run_firefox_tests}
 tar xf %{SOURCE37} -C "objdir/_virtualenvs/init_py3/lib64/python3.9"
 cp %{SOURCE40} %{SOURCE38} %{SOURCE39} .
+mkdir -p test_results
 ./run-tests
 ./print_results > test_summary.txt 2>&1
 %endif
-#---------------------------------------------------------------------
 
+#---------------------------------------------------------------------
 %install
 
 # set up our default bookmarks
