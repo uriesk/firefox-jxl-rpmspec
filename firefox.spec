@@ -540,9 +540,6 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 #---------------------------------------------------------------------
 
 %build
-# Disable LTO to work around rhbz#1883904
-# %define _lto_cflags %{nil}
-
 %if 0%{?use_bundled_cbindgen}
 
 mkdir -p my_rust_vendor
@@ -652,12 +649,11 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-
-# Temporary disabled due to GCC bug
-# Fixed by https://bugzilla.mozilla.org/show_bug.cgi?id=1671345
 # Should be in Firefox 83
 # Temporary disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1893474
+%if 0%{?fedora} >= 33
 echo "ac_add_options --enable-lto" >> .mozconfig
+%endif
 
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
@@ -679,6 +675,7 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
 [ "$RPM_BUILD_NCPUS" -ge 16 ] && MOZ_SMP_FLAGS=-j16
 [ "$RPM_BUILD_NCPUS" -ge 24 ] && MOZ_SMP_FLAGS=-j24
+[ "$RPM_BUILD_NCPUS" -ge 32 ] && MOZ_SMP_FLAGS=-j32
 %endif
 
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
