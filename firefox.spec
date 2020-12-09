@@ -534,8 +534,10 @@ chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 #---------------------------------------------------------------------
 
 %build
-%if 0%{?use_bundled_cbindgen}
+# Disable LTO to work around rhbz#1883904
+%define _lto_cflags %{nil}
 
+%if 0%{?use_bundled_cbindgen}
 mkdir -p my_rust_vendor
 cd my_rust_vendor
 %{__tar} xf %{SOURCE2}
@@ -550,8 +552,8 @@ EOL
 
 env CARGO_HOME=.cargo cargo install cbindgen
 export PATH=`pwd`/.cargo/bin:$PATH
-%endif
 cd -
+%endif
 
 #echo "Generate big endian version of config/external/icu/data/icudt67l.dat"
 #%if 0%{?big_endian}
