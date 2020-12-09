@@ -996,7 +996,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Dec 9 2020 Martin Stransky <stransky@redhat.com> - 83.0-15
+* Wed Dec 9 2020 Martin Stransky <stransky@redhat.com> - 83.0-15
 - Enabled tests everywhere
 - Enabled crash reporter
 
