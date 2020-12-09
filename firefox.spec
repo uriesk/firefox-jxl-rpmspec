@@ -3,32 +3,24 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%if 0%{?fedora} >= 33
-%ifarch x86_64
 %global run_firefox_tests 1
-%endif
-%endif
 %global create_debuginfo  1
 %global system_nss        1
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-ExcludeArch: s390x
-ExcludeArch: armv7hl
-ExcludeArch: aarch64
+#ExcludeArch: s390x
+#ExcludeArch: armv7hl
+#ExcludeArch: aarch64
 
 %ifarch armv7hl
 %global create_debuginfo  0
 %endif
 
 %global enable_mozilla_crashreporter 0
-# Temporary disable on rawhide due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=1891794
-%if 0%{?fedora} < 33
 %ifarch x86_64 %{ix86}
 %global enable_mozilla_crashreporter 1
-%endif
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -129,7 +121,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        83.0
-Release:        14%{?pre_tag}%{?dist}
+Release:        15%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -154,7 +146,7 @@ Source32:       node-stdout-nonblocking-wrapper
 Source33:       firefox.appdata.xml.in
 Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
-Source37:       site-packages.tar.gz
+Source37:       mochitest-python.tar.gz
 Source38:       print_results
 Source39:       print_subtest
 Source40:       run-tests
@@ -187,6 +179,7 @@ Patch224:        mozilla-1170092.patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        disable-openh264-download.patch
+Patch229:        firefox-mochitest.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -408,6 +401,7 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .disable-openh264-download
+%patch229 -p1 -b .firefox-mochitest
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
@@ -707,8 +701,15 @@ GDK_BACKEND=x11 xvfb-run ./mach build  2>&1 | cat -
 make -C objdir buildsymbols
 %endif
 
+# run Firefox test suite
 %if 0%{?run_firefox_tests}
-tar xf %{SOURCE37} -C "objdir/_virtualenvs/init_py3/lib64/python3.9"
+mkdir -p objdir/_virtualenvs/init_py3
+%{__cat} > objdir/_virtualenvs/init_py3/pip.conf << EOF
+[global]
+find-links=`pwd`/mochitest-python
+no-index=true
+EOF
+tar xf %{SOURCE37}
 cp %{SOURCE40} %{SOURCE38} %{SOURCE39} .
 mkdir -p test_results
 ./run-tests
@@ -995,6 +996,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 9 2020 Martin Stransky <stransky@redhat.com> - 83.0-15
+- Enabled tests everywhere
+- Enabled crash reporter
+
 * Tue Dec 1 2020 Martin Stransky <stransky@redhat.com> - 83.0-14
 - Enabled LTO
 

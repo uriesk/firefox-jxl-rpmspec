@@ -9,18 +9,13 @@ MERR=`grep "TEST_END: Test ERROR" $TEST_DIR/mochitest$TEST_FLAVOUR | wc -l`
 MUNEX=`grep "TEST-UNEXPECTED-FAIL" $TEST_DIR/mochitest$TEST_FLAVOUR | wc  -l`
 echo "Mochitest   PASSED: $MPASS FAILED: $MERR UNEXPECTED-FAILURES: $MUNEX"
 
-JSPASS=`grep --text "REFTEST INFO | Successful:" $TEST_DIR/jstestbrowser$TEST_FLAVOUR | cut -d ' ' -f 5`
-JSFAILS=`grep --text "REFTEST INFO | Unexpected:" $TEST_DIR/jstestbrowser$TEST_FLAVOUR | cut -d ' ' -f 5`
-JSKNOWN=`grep --text "REFTEST INFO | Known problems:" $TEST_DIR/jstestbrowser$TEST_FLAVOUR | cut -d ' ' -f 6`
-echo "JSBrowser   PASSED: $JSPASS FAILED: $JSFAILS Known issues: $JSKNOWN"
-
 MARPASS=`grep --text "Expected results:" $TEST_DIR/marionette$TEST_FLAVOUR | cut -d ' ' -f 3`
 MARSKIP=`grep --text "Skipped:" $TEST_DIR/marionette$TEST_FLAVOUR | cut -d ' ' -f 2`
 MARFAILED=`grep --text "Unexpected results:" $TEST_DIR/marionette$TEST_FLAVOUR | cut -d ' ' -f 3`
 echo "Marionette: PASSED: $MARPASS FAILED: $MARSKIP Known issues: $MARFAILED"
 
-XPCPASS=`grep --text "INFO INFO | Passed:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 6`
-XPCFAIL=`grep --text "INFO INFO | Failed:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 6`
+XPCPASS=`grep --text "INFO INFO | Passed:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 7`
+XPCFAIL=`grep --text "INFO INFO | Failed:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 7`
 echo "XPCShell:   PASSED: $XPCPASS FAILED: $XPCFAIL"
 
 CRPASS=`grep "REFTEST INFO | Successful:" $TEST_DIR/crashtest$TEST_FLAVOUR | cut -d ' ' -f 5`
@@ -31,7 +26,3 @@ RFPASS=`grep --text "REFTEST INFO | Successful:" $TEST_DIR/reftest$TEST_FLAVOUR 
 RFUN=`grep --text "^REFTEST INFO | Unexpected:" $TEST_DIR/reftest$TEST_FLAVOUR | cut -d ' ' -f 5`
 RFKNOWN=`grep --text "REFTEST INFO | Known problems:" $TEST_DIR/reftest$TEST_FLAVOUR | cut -d ' ' -f 6`
 echo "Reftest:    PASSED: $RFPASS FAILED: $RFUN Known issues: $RFKNOWN"
-
-GPASS=`grep "\[  PASSED  \]" $TEST_DIR/gtest$TEST_FLAVOUR | cut -d ' ' -f 7`
-GFAIL=`grep "FAILED TESTS" $TEST_DIR/gtest$TEST_FLAVOUR | cut -d ' ' -f 2`
-echo "GTest:      PASSED: "$GPASS" FAILED: "$GFAIL

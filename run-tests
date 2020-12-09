@@ -17,23 +17,19 @@ NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 export TEST_PARAMS=""
 export TEST_FLAVOUR=""
 xvfb-run -s "$X_PARAMS" ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS >& $TEST_DIR/mochitest$TEST_FLAVOUR
-xvfb-run -s "$X_PARAMS" ./mach jstestbrowser $TEST_PARAMS >& $TEST_DIR/jstestbrowser$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" ./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/crashtest$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& $TEST_DIR/marionette$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" ./mach reftest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/reftest$TEST_FLAVOUR
 ./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > $TEST_DIR/xpcshell$TEST_FLAVOUR
-./mach gtest -j $NCPUS $TEST_PARAMS >& $TEST_DIR/gtest$TEST_FLAVOUR
 
 # WebRender testing
 export TEST_PARAMS="--enable-webrender $TEST_PARAMS"
 export TEST_FLAVOUR="-wr"
 xvfb-run -s "$X_PARAMS" ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS >& $TEST_DIR/mochitest$TEST_FLAVOUR
-xvfb-run -s "$X_PARAMS" ./mach jstestbrowser $TEST_PARAMS >& $TEST_DIR/jstestbrowser$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" ./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/crashtest$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& $TEST_DIR/marionette$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" ./mach reftest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/reftest$TEST_FLAVOUR
 ./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > $TEST_DIR/xpcshell$TEST_FLAVOUR
-./mach gtest -j $NCPUS $TEST_PARAMS >& $TEST_DIR/gtest$TEST_FLAVOUR
 
 # Rest
 export TEST_DIR="test"
