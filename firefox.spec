@@ -5,7 +5,7 @@
 %global build_with_asan   0
 %global run_firefox_tests 1
 %global test_offscreen    1
-%global test_on_wayland   1
+%global test_on_wayland   0
 %global create_debuginfo  1
 %global system_nss        0
 
