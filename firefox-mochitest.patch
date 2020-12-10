@@ -1,9 +1,0 @@
-diff --git a/testing/tools/websocketprocessbridge/websocketprocessbridge_requirements_3.txt b/testing/tools/websocketprocessbridge/websocketprocessbridge_requirements_3.txt
---- a/testing/tools/websocketprocessbridge/websocketprocessbridge_requirements_3.txt
-+++ b/testing/tools/websocketprocessbridge/websocketprocessbridge_requirements_3.txt
-@@ -1,4 +1,5 @@
- # This file is the websocketprocess requirements.txt used with python 3.
-+pyrsistent
- 
- # needed by txws, and we'd like pip to get it from the local server before setuptools tries pypi
- six

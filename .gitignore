@@ -436,3 +436,5 @@ firefox-3.6.4.source.tar.bz2
 /firefox-testing.tar.gz
 /site-packages.tar.gz
 /mochitest-python.tar.gz
+/firefox-84.0.source.tar.xz
+/firefox-langpacks-84.0-20201210.tar.xz

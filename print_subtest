@@ -14,8 +14,8 @@ MARSKIP=`grep --text "Skipped:" $TEST_DIR/marionette$TEST_FLAVOUR | cut -d ' ' -
 MARFAILED=`grep --text "Unexpected results:" $TEST_DIR/marionette$TEST_FLAVOUR | cut -d ' ' -f 3`
 echo "Marionette: PASSED: $MARPASS FAILED: $MARSKIP Known issues: $MARFAILED"
 
-XPCPASS=`grep --text "INFO INFO | Passed:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 7`
-XPCFAIL=`grep --text "INFO INFO | Failed:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 7`
+XPCPASS=`grep --text "Expected results:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 3`
+XPCFAIL=`grep --text "Unexpected results:" $TEST_DIR/xpcshell$TEST_FLAVOUR | cut -d ' ' -f 3`
 echo "XPCShell:   PASSED: $XPCPASS FAILED: $XPCFAIL"
 
 CRPASS=`grep "REFTEST INFO | Successful:" $TEST_DIR/crashtest$TEST_FLAVOUR | cut -d ' ' -f 5`

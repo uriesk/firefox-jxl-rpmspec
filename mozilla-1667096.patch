@@ -1,18 +1,6 @@
-changeset:   551978:40c95986d358
-tag:         tip
-parent:      551976:daadcfadb2f8
-user:        stransky <stransky@redhat.com>
-date:        Thu Sep 24 15:51:06 2020 +0200
-files:       media/ffvpx/libavcodec/codec_list.c media/ffvpx/libavcodec/libfdk-aacdec.c media/ffvpx/libavcodec/moz.build toolkit/moz.configure
-description:
-Bug 1667096 Add libfdk-aacdec.c to bundled ffvpx and allow build Firefox with system fdk-aac-free library, r?jya
-
-Differential Revision: https://phabricator.services.mozilla.com/D91278
-
-
-diff --git a/media/ffvpx/libavcodec/codec_list.c b/media/ffvpx/libavcodec/codec_list.c
---- a/media/ffvpx/libavcodec/codec_list.c
-+++ b/media/ffvpx/libavcodec/codec_list.c
+diff -up firefox-84.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-84.0/media/ffvpx/libavcodec/codec_list.c
+--- firefox-84.0/media/ffvpx/libavcodec/codec_list.c.1667096	2020-12-07 23:33:03.000000000 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/codec_list.c	2020-12-10 12:57:14.722762321 +0100
 @@ -11,4 +11,8 @@ static const AVCodec * const codec_list[
  #if CONFIG_MP3_DECODER
      &ff_mp3_decoder,
@@ -22,10 +10,9 @@ diff --git a/media/ffvpx/libavcodec/codec_list.c b/media/ffvpx/libavcodec/codec_
 +#endif
 +
      NULL };
-diff --git a/media/ffvpx/libavcodec/libfdk-aacdec.c b/media/ffvpx/libavcodec/libfdk-aacdec.c
-new file mode 100644
---- /dev/null
-+++ b/media/ffvpx/libavcodec/libfdk-aacdec.c
+diff -up firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c
+--- firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096	2020-12-10 12:57:14.722762321 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c	2020-12-10 12:57:14.722762321 +0100
 @@ -0,0 +1,409 @@
 +/*
 + * AAC decoder wrapper
@@ -436,9 +423,9 @@ new file mode 100644
 +                      FF_CODEC_CAP_INIT_CLEANUP,
 +    .wrapper_name   = "libfdk",
 +};
-diff --git a/media/ffvpx/libavcodec/moz.build b/media/ffvpx/libavcodec/moz.build
---- a/media/ffvpx/libavcodec/moz.build
-+++ b/media/ffvpx/libavcodec/moz.build
+diff -up firefox-84.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-84.0/media/ffvpx/libavcodec/moz.build
+--- firefox-84.0/media/ffvpx/libavcodec/moz.build.1667096	2020-12-08 00:35:05.000000000 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/moz.build	2020-12-10 12:57:14.722762321 +0100
 @@ -97,6 +97,12 @@ if not CONFIG['MOZ_FFVPX_AUDIOONLY']:
          'vp9recon.c'
      ]
@@ -452,12 +439,12 @@ diff --git a/media/ffvpx/libavcodec/moz.build b/media/ffvpx/libavcodec/moz.build
  if CONFIG['MOZ_LIBAV_FFT']:
      SOURCES += [
          'avfft.c',
-diff --git a/toolkit/moz.configure b/toolkit/moz.configure
---- a/toolkit/moz.configure
-+++ b/toolkit/moz.configure
-@@ -1592,6 +1592,14 @@ with only_when(compile_environment):
-     set_define('MOZ_LIBAV_FFT', depends(when=libav_fft)(lambda: True))
-     set_config('LIBAV_FFT_ASFLAGS', libav_fft.flags)
+diff -up firefox-84.0/toolkit/moz.configure.1667096 firefox-84.0/toolkit/moz.configure
+--- firefox-84.0/toolkit/moz.configure.1667096	2020-12-10 12:57:14.723762349 +0100
++++ firefox-84.0/toolkit/moz.configure	2020-12-10 12:58:29.051855203 +0100
+@@ -1868,6 +1868,14 @@ with only_when(compile_environment):
+     set_define("MOZ_LIBAV_FFT", depends(when=libav_fft)(lambda: True))
+     set_config("LIBAV_FFT_ASFLAGS", libav_fft.flags)
  
 +# fdk aac support
 +option('--with-system-fdk-aac',
@@ -470,4 +457,3 @@ diff --git a/toolkit/moz.configure b/toolkit/moz.configure
  
  # FFmpeg's ffvpx configuration
  # ==============================================================
-

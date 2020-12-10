@@ -5,7 +5,7 @@
 %global build_with_asan   0
 %global run_firefox_tests 1
 %global create_debuginfo  1
-%global system_nss        1
+%global system_nss        0
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
@@ -120,13 +120,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        83.0
-Release:        15%{?pre_tag}%{?dist}
+Version:        84.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201116.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20201210.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -179,7 +179,6 @@ Patch224:        mozilla-1170092.patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        disable-openh264-download.patch
-Patch229:        firefox-mochitest.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -187,11 +186,8 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1673202.patch
-Patch417:        mozilla-1673313.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
-Patch419:        mozilla-1885133.patch
 Patch420:        mozilla-1678680.patch
-Patch421:        mozilla-1672139.patch
 
 # Upstream patches from mozbz#1672944
 Patch450:        pw1.patch
@@ -201,8 +197,9 @@ Patch453:        pw4.patch
 Patch454:        pw5.patch
 Patch455:        pw6.patch
 
+Patch500:        ffvpx.patch
+
 #VA-API patches
-Patch584:        firefox-disable-ffvpx-with-vapi.patch
 Patch585:        firefox-vaapi-extra-frames.patch
 
 # PGO/LTO patches
@@ -401,7 +398,6 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .disable-openh264-download
-%patch229 -p1 -b .firefox-mochitest
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
@@ -410,21 +406,19 @@ This package contains results of tests executed during build.
 %if 0%{?fedora} > 33 || 0%{?eln}
 %patch416 -p1 -b .1673202
 %endif
-%patch417 -p1 -b .1673313
 %patch418 -p1 -b .1556931-s390x-hidden-syms
-%patch419 -p1 -b .1885133
 
-%patch450 -p1 -b .pw1
-%patch451 -p1 -b .pw2
-%patch452 -p1 -b .pw3
-%patch453 -p1 -b .pw4
-%patch454 -p1 -b .pw5
+#%patch450 -p1 -b .pw1
+#%patch451 -p1 -b .pw2
+#%patch452 -p1 -b .pw3
+#%patch453 -p1 -b .pw4
+#%patch454 -p1 -b .pw5
 %patch455 -p1 -b .pw6
 %patch420 -p1 -b .1678680
-%patch421 -p1 -b .1672139
+
+%patch500 -p1 -b .ffvpx
 
 # VA-API fixes
-%patch584 -p1 -b .firefox-disable-ffvpx-with-vapi
 %patch585 -p1 -b .firefox-vaapi-extra-frames
 
 # PGO patches

@@ -31,11 +31,5 @@ xvfb-run -s "$X_PARAMS" ./mach marionette-test $TEST_PARAMS >& $TEST_DIR/marione
 xvfb-run -s "$X_PARAMS" ./mach reftest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/reftest$TEST_FLAVOUR
 ./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > $TEST_DIR/xpcshell$TEST_FLAVOUR
 
-# Rest
-export TEST_DIR="test"
-objdir/dist/bin/jsapi-tests >& $TEST_DIR/jsapi
-./mach cppunittest >& $TEST_DIR/cppunittest
-./mach jstests >& $TEST_DIR/jstests
-
 rm -f  objdir/dist/bin/certutil
 rm -f  objdir/dist/bin/pk12util

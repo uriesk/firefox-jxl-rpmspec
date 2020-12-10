@@ -4,17 +4,7 @@
 export TEST_DIR="test_results"
 
 echo "Test results"
-echo "SW"
+echo "Basic compositor"
 ./print_subtest "test_results" ""
-echo "WR"
+echo "WebRender"
 ./print_subtest "test_results" "-wr"
-echo "General"
-
-UNPASS=`grep "cppunittests INFO | Passed:" $TEST_DIR/cppunittest | cut -d ' ' -f 5`
-UNFAIL=`grep "cppunittests INFO | Failed:" $TEST_DIR/cppunittest | cut -d ' ' -f 5`
-echo "CPP UNIT:   PASSED: $UNPASS FAILED: $UNFAIL"
-
-JSPASS=`grep "TEST-PASS" $TEST_DIR/jsapi | wc -l`
-echo "JSAPI:      PASSED: $JSPASS"
-
-echo "JStests:    "`tail -n 1 $TEST_DIR/jstests`
