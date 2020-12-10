@@ -4,6 +4,8 @@
 %global build_with_clang  0
 %global build_with_asan   0
 %global run_firefox_tests 1
+%global test_offscreen    1
+%global test_on_wayland   1
 %global create_debuginfo  1
 %global system_nss        0
 
@@ -53,8 +55,6 @@
 %if %{release_build}
 %global build_with_pgo    1
 %endif
-# Build PGO builds on Wayland backend
-%global pgo_wayland       0
 %endif
 %global wayland_backend_default 1
 %if 0%{?flatpak}
@@ -150,6 +150,7 @@ Source37:       mochitest-python.tar.gz
 Source38:       print_results
 Source39:       print_subtest
 Source40:       run-tests
+Source41:       run-tests-wayland
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -185,9 +186,9 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-Patch416:        mozilla-1673202.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch420:        mozilla-1678680.patch
+Patch421:        mozilla-1680505.patch
 
 # Upstream patches from mozbz#1672944
 Patch450:        pw1.patch
@@ -284,7 +285,7 @@ BuildRequires:  pkgconfig(libffi)
 %if 0%{?use_xvfb}
 BuildRequires:  xorg-x11-server-Xvfb
 %endif
-%if 0%{?pgo_wayland}
+%if 0%{?test_on_wayland}
 BuildRequires:  mutter
 BuildRequires:  gsettings-desktop-schemas
 BuildRequires:  gnome-settings-daemon
@@ -403,9 +404,6 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-%if 0%{?fedora} > 33 || 0%{?eln}
-%patch416 -p1 -b .1673202
-%endif
 %patch418 -p1 -b .1556931-s390x-hidden-syms
 
 #%patch450 -p1 -b .pw1
@@ -415,11 +413,13 @@ This package contains results of tests executed during build.
 #%patch454 -p1 -b .pw5
 %patch455 -p1 -b .pw6
 %patch420 -p1 -b .1678680
+%patch421 -p1 -b .1680505
 
 %patch500 -p1 -b .ffvpx
 
 # VA-API fixes
-%patch585 -p1 -b .firefox-vaapi-extra-frames
+# merged with ffvpx
+# %patch585 -p1 -b .firefox-vaapi-extra-frames
 
 # PGO patches
 %if %{build_with_pgo}
@@ -666,6 +666,7 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 16 ] && MOZ_SMP_FLAGS=-j16
 [ "$RPM_BUILD_NCPUS" -ge 24 ] && MOZ_SMP_FLAGS=-j24
 [ "$RPM_BUILD_NCPUS" -ge 32 ] && MOZ_SMP_FLAGS=-j32
+#[ "$RPM_BUILD_NCPUS" -ge 64 ] && MOZ_SMP_FLAGS=-j64
 %endif
 
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
@@ -673,8 +674,10 @@ echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
 echo "export STRIP=/bin/true" >> .mozconfig
 export MACH_USE_SYSTEM_PYTHON=1
 export MACH_NO_WRITE_TIMES=1
+
 %if %{build_with_pgo}
-%if %{pgo_wayland}
+%if %{test_offscreen}
+%if %{test_on_wayland}
 if [ -z "$XDG_RUNTIME_DIR" ]; then
   export XDG_RUNTIME_DIR=$HOME
 fi
@@ -685,10 +688,18 @@ else
   export WAYLAND_DISPLAY=wayland-1
 fi
 MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
-%else
-GDK_BACKEND=x11 xvfb-run ./mach build  2>&1 | cat -
 %endif
-%else
+%if !%{test_on_wayland}
+MOZ_ENABLE_WAYLAND=0 xvfb-run ./mach build  2>&1 | cat -
+%endif
+%endif
+
+%if !%{test_offscreen}
+MOZ_ENABLE_WAYLAND=%{test_on_wayland} ./mach build  2>&1 | cat -
+%endif
+%endif
+
+%if !%{build_with_pgo}
 ./mach build -v 2>&1 | cat -
 %endif
 
@@ -706,9 +717,13 @@ find-links=`pwd`/mochitest-python
 no-index=true
 EOF
 tar xf %{SOURCE37}
-cp %{SOURCE40} %{SOURCE38} %{SOURCE39} .
+cp %{SOURCE40} %{SOURCE41} %{SOURCE38} %{SOURCE39} .
 mkdir -p test_results
+%if %{test_on_wayland}
+./run-tests-wayland %{test_offscreen}
+%else
 ./run-tests
+%endif
 ./print_results > test_summary.txt 2>&1
 %endif
 

@@ -1,6 +1,6 @@
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/ffmpeg58/moz.build.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/ffmpeg58/moz.build
 --- firefox-84.0/dom/media/platforms/ffmpeg/ffmpeg58/moz.build.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/ffmpeg58/moz.build	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/dom/media/platforms/ffmpeg/ffmpeg58/moz.build	2020-12-10 20:36:08.398441034 +0100
 @@ -27,8 +27,6 @@ if CONFIG['CC_TYPE'] == 'gcc':
    ]
  if CONFIG['MOZ_WAYLAND']:
@@ -12,7 +12,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/ffmpeg58/moz.build.ffvpx firefo
  FINAL_LIBRARY = 'xul'
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.cpp.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.cpp
 --- firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.cpp.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.cpp	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.cpp	2020-12-10 20:40:53.388541336 +0100
 @@ -11,6 +11,10 @@
  #include "mozilla/Types.h"
  #include "PlatformDecoderModule.h"
@@ -73,7 +73,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.cpp.ffvpx fire
    return VA_FUNC_LOADED(avcodec_get_hw_config) &&
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h
 --- firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h	2020-12-10 20:40:53.388541336 +0100
 @@ -56,6 +56,7 @@ struct MOZ_ONLY_USED_TO_AVOID_STATIC_CON
  #ifdef MOZ_WAYLAND
    // Check if mVALib are available and we can use HW decode.
@@ -84,7 +84,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h.ffvpx firefo
    // indicate the version of libavcodec linked to.
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegRuntimeLinker.cpp.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/FFmpegRuntimeLinker.cpp
 --- firefox-84.0/dom/media/platforms/ffmpeg/FFmpegRuntimeLinker.cpp.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegRuntimeLinker.cpp	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegRuntimeLinker.cpp	2020-12-10 20:40:53.388541336 +0100
 @@ -9,10 +9,6 @@
  #include "mozilla/ArrayUtils.h"
  #include "FFmpegLog.h"
@@ -143,8 +143,26 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegRuntimeLinker.cpp.ffvpx f
    // While going through all possible libs, this status will be updated with a
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp
 --- firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp	2020-12-10 17:03:31.731266180 +0100
-@@ -124,8 +124,8 @@ static AVPixelFormat ChooseVAAPIPixelFor
++++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp	2020-12-10 20:40:53.392541452 +0100
+@@ -32,6 +32,8 @@
+ #  define AV_PIX_FMT_NONE PIX_FMT_NONE
+ #endif
+ #include "mozilla/PodOperations.h"
++#include "mozilla/ScopeExit.h"
++#include "mozilla/StaticPrefs_media.h"
+ #include "mozilla/TaskQueue.h"
+ #include "nsThreadUtils.h"
+ #include "prsystem.h"
+@@ -45,7 +47,7 @@ typedef int VAStatus;
+ #endif
+ 
+ // Use some extra HW frames for potential rendering lags.
+-#define EXTRA_HW_FRAMES 6
++#define EXTRA_HW_FRAMES 20
+ 
+ typedef mozilla::layers::Image Image;
+ typedef mozilla::layers::PlanarYCbCrImage PlanarYCbCrImage;
+@@ -124,8 +126,8 @@ static AVPixelFormat ChooseVAAPIPixelFor
    return AV_PIX_FMT_NONE;
  }
  
@@ -155,7 +173,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
      : mSurface(aSurface),
        mLib(aLib),
        mAVHWFramesContext(nullptr),
-@@ -138,8 +138,8 @@ DMABufSurfaceWrapper::DMABufSurfaceWrapp
+@@ -138,8 +140,8 @@ DMABufSurfaceWrapper::DMABufSurfaceWrapp
               mSurface->GetUID());
  }
  
@@ -166,7 +184,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
    FFMPEG_LOG("DMABufSurfaceWrapper: VAAPI locking dmabuf surface UID = %d",
               mSurface->GetUID());
    if (aAVCodecContext && aAVFrame) {
-@@ -148,7 +148,7 @@ void DMABufSurfaceWrapper::LockVAAPIData
+@@ -148,7 +150,7 @@ void DMABufSurfaceWrapper::LockVAAPIData
    }
  }
  
@@ -175,7 +193,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
    FFMPEG_LOG("DMABufSurfaceWrapper: VAAPI releasing dmabuf surface UID = %d",
               mSurface->GetUID());
    if (mHWAVBuffer && mAVHWFramesContext) {
-@@ -158,7 +158,7 @@ void DMABufSurfaceWrapper::ReleaseVAAPID
+@@ -158,7 +160,7 @@ void DMABufSurfaceWrapper::ReleaseVAAPID
    mSurface->ReleaseSurface();
  }
  
@@ -184,7 +202,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
    FFMPEG_LOG("DMABufSurfaceWrapper: deleting dmabuf surface UID = %d",
               mSurface->GetUID());
    ReleaseVAAPIData();
-@@ -181,7 +181,14 @@ AVCodec* FFmpegVideoDecoder<LIBAV_VER>::
+@@ -181,7 +183,14 @@ AVCodec* FFmpegVideoDecoder<LIBAV_VER>::
    return nullptr;
  }
  
@@ -200,7 +218,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
   public:
    VAAPIDisplayHolder(FFmpegLibWrapper* aLib, VADisplay aDisplay)
        : mLib(aLib), mDisplay(aDisplay){};
-@@ -193,7 +200,8 @@ class VAAPIDisplayHolder {
+@@ -193,7 +202,8 @@ class VAAPIDisplayHolder {
  };
  
  static void VAAPIDisplayReleaseCallback(struct AVHWDeviceContext* hwctx) {
@@ -210,7 +228,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
    delete displayHolder;
  }
  
-@@ -229,7 +237,7 @@ bool FFmpegVideoDecoder<LIBAV_VER>::Crea
+@@ -229,7 +239,7 @@ bool FFmpegVideoDecoder<LIBAV_VER>::Crea
      }
    }
  
@@ -219,7 +237,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
    hwctx->free = VAAPIDisplayReleaseCallback;
  
    int major, minor;
-@@ -703,7 +711,7 @@ void FFmpegVideoDecoder<LIBAV_VER>::Rele
+@@ -703,7 +713,7 @@ void FFmpegVideoDecoder<LIBAV_VER>::Rele
    }
  }
  
@@ -228,7 +246,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
  FFmpegVideoDecoder<LIBAV_VER>::GetUnusedDMABufSurfaceWrapper() {
    int len = mDMABufSurfaces.Length();
    for (int i = 0; i < len; i++) {
-@@ -769,7 +777,8 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER
+@@ -769,7 +779,8 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER
  
    RefPtr<DMABufSurfaceYUV> surface;
  
@@ -240,7 +258,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.cpp.ffvpx fi
        surface = DMABufSurfaceYUV::CreateYUVSurface(vaDesc);
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.h.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.h
 --- firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.h.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.h	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.h	2020-12-10 20:40:53.388541336 +0100
 @@ -55,7 +55,14 @@ namespace mozilla {
  // We own the DMABufSurface underlying GPU data and we use it for
  // repeated rendering of video frames.
@@ -277,7 +295,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/FFmpegVideoDecoder.h.ffvpx fire
    RefPtr<ImageContainer> mImageContainer;
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/FFVPXRuntimeLinker.cpp.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/FFVPXRuntimeLinker.cpp
 --- firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/FFVPXRuntimeLinker.cpp.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/FFVPXRuntimeLinker.cpp	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/FFVPXRuntimeLinker.cpp	2020-12-10 20:40:53.388541336 +0100
 @@ -64,6 +64,10 @@ bool FFVPXRuntimeLinker::Init() {
    MOZ_ASSERT(NS_IsMainThread());
    sLinkStatus = LinkStatus_FAILED;
@@ -291,7 +309,7 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/FFVPXRuntimeLinker.cpp.ff
    PathString lgpllibsname = GetLibraryName(nullptr, "lgpllibs");
 diff -up firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/moz.build.ffvpx firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/moz.build
 --- firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/moz.build.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/moz.build	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/moz.build	2020-12-10 20:36:08.431441959 +0100
 @@ -36,4 +36,8 @@ if CONFIG["CC_TYPE"] == "gcc":
  DEFINES["FFVPX_VERSION"] = 46465650
  DEFINES["USING_MOZFFVPX"] = True
@@ -303,18 +321,87 @@ diff -up firefox-84.0/dom/media/platforms/ffmpeg/ffvpx/moz.build.ffvpx firefox-8
  FINAL_LIBRARY = "xul"
 diff -up firefox-84.0/gfx/layers/DMABUFSurfaceImage.cpp.ffvpx firefox-84.0/gfx/layers/DMABUFSurfaceImage.cpp
 --- firefox-84.0/gfx/layers/DMABUFSurfaceImage.cpp.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/gfx/layers/DMABUFSurfaceImage.cpp	2020-12-10 17:03:31.731266180 +0100
-@@ -9,6 +9,7 @@
++++ firefox-84.0/gfx/layers/DMABUFSurfaceImage.cpp	2020-12-10 20:36:08.308438509 +0100
+@@ -5,16 +5,23 @@
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ #include "DMABUFSurfaceImage.h"
+-#include "gfxPlatform.h"
++#include "mozilla/widget/DMABufSurface.h"
  #include "mozilla/layers/CompositableClient.h"
  #include "mozilla/layers/CompositableForwarder.h"
  #include "mozilla/layers/DMABUFTextureClientOGL.h"
+-#include "mozilla/UniquePtr.h"
 +#include "mozilla/layers/TextureForwarder.h"
- #include "mozilla/UniquePtr.h"
  
  using namespace mozilla;
+ using namespace mozilla::layers;
+ using namespace mozilla::gfx;
+ 
++DMABUFSurfaceImage::DMABUFSurfaceImage(DMABufSurface* aSurface)
++    : Image(nullptr, ImageFormat::DMABUF), mSurface(aSurface) {
++  mSurface->GlobalRefAdd();
++}
++
++DMABUFSurfaceImage::~DMABUFSurfaceImage() { mSurface->GlobalRefRelease(); }
++
+ TextureClient* DMABUFSurfaceImage::GetTextureClient(
+     KnowsCompositor* aKnowsCompositor) {
+   if (!mTextureClient) {
+@@ -25,3 +32,7 @@ TextureClient* DMABUFSurfaceImage::GetTe
+   }
+   return mTextureClient;
+ }
++
++gfx::IntSize DMABUFSurfaceImage::GetSize() const {
++  return gfx::IntSize::Truncate(mSurface->GetWidth(), mSurface->GetHeight());
++}
+diff -up firefox-84.0/gfx/layers/DMABUFSurfaceImage.h.ffvpx firefox-84.0/gfx/layers/DMABUFSurfaceImage.h
+--- firefox-84.0/gfx/layers/DMABUFSurfaceImage.h.ffvpx	2020-12-10 20:53:45.300792876 +0100
++++ firefox-84.0/gfx/layers/DMABUFSurfaceImage.h	2020-12-10 20:36:08.279437696 +0100
+@@ -8,32 +8,24 @@
+ #define SURFACE_DMABUF_H
+ 
+ #include "ImageContainer.h"
+-#include "mozilla/widget/DMABufSurface.h"
+-#include "mozilla/gfx/Point.h"
+-#include "mozilla/layers/TextureClient.h"
++
++class DMABufSurface;
+ 
+ namespace mozilla {
+ namespace layers {
+ 
++class TextureClient;
++
+ class DMABUFSurfaceImage : public Image {
+  public:
+-  explicit DMABUFSurfaceImage(DMABufSurface* aSurface)
+-      : Image(nullptr, ImageFormat::DMABUF), mSurface(aSurface) {
+-    mSurface->GlobalRefAdd();
+-  }
+-
+-  ~DMABUFSurfaceImage() { mSurface->GlobalRefRelease(); }
++  explicit DMABUFSurfaceImage(DMABufSurface* aSurface);
++  ~DMABUFSurfaceImage();
+ 
+   DMABufSurface* GetSurface() { return mSurface; }
+-
+-  gfx::IntSize GetSize() const override {
+-    return gfx::IntSize::Truncate(mSurface->GetWidth(), mSurface->GetHeight());
+-  }
+-
++  gfx::IntSize GetSize() const override;
+   already_AddRefed<gfx::SourceSurface> GetAsSourceSurface() override {
+     return nullptr;
+   }
+-
+   TextureClient* GetTextureClient(KnowsCompositor* aKnowsCompositor) override;
+ 
+  private:
 diff -up firefox-84.0/media/ffvpx/changes.patch.ffvpx firefox-84.0/media/ffvpx/changes.patch
 --- firefox-84.0/media/ffvpx/changes.patch.ffvpx	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/media/ffvpx/changes.patch	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/media/ffvpx/changes.patch	2020-12-10 20:40:53.388541336 +0100
 @@ -50,3 +50,27 @@ index 9fb8d0a..97ad3b9 100644
           rgba_color[0] = rgba >> 24;
           rgba_color[1] = rgba >> 16;
@@ -345,7 +432,7 @@ diff -up firefox-84.0/media/ffvpx/changes.patch.ffvpx firefox-84.0/media/ffvpx/c
 +
 diff -up firefox-84.0/media/ffvpx/config_common.h.ffvpx firefox-84.0/media/ffvpx/config_common.h
 --- firefox-84.0/media/ffvpx/config_common.h.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/config_common.h	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/media/ffvpx/config_common.h	2020-12-10 20:40:53.388541336 +0100
 @@ -18,4 +18,13 @@
  #define CONFIG_RDFT 1
  #endif
@@ -362,7 +449,7 @@ diff -up firefox-84.0/media/ffvpx/config_common.h.ffvpx firefox-84.0/media/ffvpx
  #endif
 diff -up firefox-84.0/media/ffvpx/FILES.ffvpx firefox-84.0/media/ffvpx/FILES
 --- firefox-84.0/media/ffvpx/FILES.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/FILES	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/media/ffvpx/FILES	2020-12-10 20:40:53.388541336 +0100
 @@ -131,6 +131,11 @@
  ./libavcodec/thread.h
  ./libavcodec/unary.h
@@ -386,7 +473,7 @@ diff -up firefox-84.0/media/ffvpx/FILES.ffvpx firefox-84.0/media/ffvpx/FILES
  ./libavutil/imgutils_internal.h
 diff -up firefox-84.0/media/ffvpx/libavcodec/avcodec.symbols.ffvpx firefox-84.0/media/ffvpx/libavcodec/avcodec.symbols
 --- firefox-84.0/media/ffvpx/libavcodec/avcodec.symbols.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/avcodec.symbols	2020-12-10 17:03:31.731266180 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/avcodec.symbols	2020-12-10 20:40:53.389541365 +0100
 @@ -28,6 +28,11 @@ av_get_pcm_codec
  av_get_profile_name
  av_grow_packet
@@ -408,8 +495,8 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/avcodec.symbols.ffvpx firefox-84.0/
  avcodec_get_subtitle_rect_class
  avcodec_get_type
 diff -up firefox-84.0/media/ffvpx/libavcodec/moz.build.ffvpx firefox-84.0/media/ffvpx/libavcodec/moz.build
---- firefox-84.0/media/ffvpx/libavcodec/moz.build.ffvpx	2020-12-10 17:03:31.725266007 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/moz.build	2020-12-10 17:03:31.732266209 +0100
+--- firefox-84.0/media/ffvpx/libavcodec/moz.build.ffvpx	2020-12-10 20:40:53.383541192 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/moz.build	2020-12-10 20:40:53.389541365 +0100
 @@ -96,6 +96,13 @@ if not CONFIG['MOZ_FFVPX_AUDIOONLY']:
          'vp9prob.c',
          'vp9recon.c'
@@ -425,8 +512,8 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/moz.build.ffvpx firefox-84.0/media/
  if CONFIG['MOZ_FDK_AAC']:
      SOURCES += [
 diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.c.ffvpx firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.c
---- firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.c.ffvpx	2020-12-10 17:03:31.732266209 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.c	2020-12-10 17:03:31.732266209 +0100
+--- firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.c.ffvpx	2020-12-10 20:40:53.389541365 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.c	2020-12-10 20:40:53.389541365 +0100
 @@ -0,0 +1,732 @@
 +/*
 + * This file is part of FFmpeg.
@@ -1161,8 +1248,8 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.c.ffvpx firefox-84.0/m
 +    return 0;
 +}
 diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.h.ffvpx firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.h
---- firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.h.ffvpx	2020-12-10 17:03:31.732266209 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.h	2020-12-10 17:03:31.732266209 +0100
+--- firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.h.ffvpx	2020-12-10 20:40:53.389541365 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.h	2020-12-10 20:40:53.389541365 +0100
 @@ -0,0 +1,105 @@
 +/*
 + * This file is part of FFmpeg.
@@ -1270,8 +1357,8 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_decode.h.ffvpx firefox-84.0/m
 +
 +#endif /* AVCODEC_VAAPI_DECODE_H */
 diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi.h.ffvpx firefox-84.0/media/ffvpx/libavcodec/vaapi.h
---- firefox-84.0/media/ffvpx/libavcodec/vaapi.h.ffvpx	2020-12-10 17:03:31.732266209 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/vaapi.h	2020-12-10 17:03:31.732266209 +0100
+--- firefox-84.0/media/ffvpx/libavcodec/vaapi.h.ffvpx	2020-12-10 20:40:53.389541365 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/vaapi.h	2020-12-10 20:40:53.389541365 +0100
 @@ -0,0 +1,86 @@
 +/*
 + * Video Acceleration API (shared data between FFmpeg and the video player)
@@ -1360,8 +1447,8 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi.h.ffvpx firefox-84.0/media/ff
 +
 +#endif /* AVCODEC_VAAPI_H */
 diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_vp8.c.ffvpx firefox-84.0/media/ffvpx/libavcodec/vaapi_vp8.c
---- firefox-84.0/media/ffvpx/libavcodec/vaapi_vp8.c.ffvpx	2020-12-10 17:03:31.732266209 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/vaapi_vp8.c	2020-12-10 17:03:31.732266209 +0100
+--- firefox-84.0/media/ffvpx/libavcodec/vaapi_vp8.c.ffvpx	2020-12-10 20:40:53.389541365 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/vaapi_vp8.c	2020-12-10 20:40:53.389541365 +0100
 @@ -0,0 +1,237 @@
 +/*
 + * This file is part of FFmpeg.
@@ -1601,8 +1688,8 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_vp8.c.ffvpx firefox-84.0/medi
 +    .caps_internal        = HWACCEL_CAP_ASYNC_SAFE,
 +};
 diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_vp9.c.ffvpx firefox-84.0/media/ffvpx/libavcodec/vaapi_vp9.c
---- firefox-84.0/media/ffvpx/libavcodec/vaapi_vp9.c.ffvpx	2020-12-10 17:03:31.732266209 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/vaapi_vp9.c	2020-12-10 17:03:31.732266209 +0100
+--- firefox-84.0/media/ffvpx/libavcodec/vaapi_vp9.c.ffvpx	2020-12-10 20:40:53.389541365 +0100
++++ firefox-84.0/media/ffvpx/libavcodec/vaapi_vp9.c	2020-12-10 20:40:53.389541365 +0100
 @@ -0,0 +1,185 @@
 +/*
 + * VP9 HW decode acceleration through VA API
@@ -1791,7 +1878,7 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/vaapi_vp9.c.ffvpx firefox-84.0/medi
 +};
 diff -up firefox-84.0/media/ffvpx/libavutil/avutil.symbols.ffvpx firefox-84.0/media/ffvpx/libavutil/avutil.symbols
 --- firefox-84.0/media/ffvpx/libavutil/avutil.symbols.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/libavutil/avutil.symbols	2020-12-10 17:03:31.732266209 +0100
++++ firefox-84.0/media/ffvpx/libavutil/avutil.symbols	2020-12-10 20:40:53.389541365 +0100
 @@ -158,6 +158,9 @@ av_get_token
  av_gettime
  av_gettime_relative
@@ -1813,8 +1900,8 @@ diff -up firefox-84.0/media/ffvpx/libavutil/avutil.symbols.ffvpx firefox-84.0/me
  av_malloc_array
  av_mallocz_array
 diff -up firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.c.ffvpx firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.c
---- firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.c.ffvpx	2020-12-10 17:03:31.732266209 +0100
-+++ firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.c	2020-12-10 17:03:31.732266209 +0100
+--- firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.c.ffvpx	2020-12-10 20:40:53.390541394 +0100
++++ firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.c	2020-12-10 20:40:53.389541365 +0100
 @@ -0,0 +1,1691 @@
 +/*
 + * This file is part of FFmpeg.
@@ -3508,8 +3595,8 @@ diff -up firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.c.ffvpx firefox-84.0
 +    },
 +};
 diff -up firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.h.ffvpx firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.h
---- firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.h.ffvpx	2020-12-10 17:03:31.733266237 +0100
-+++ firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.h	2020-12-10 17:03:31.733266237 +0100
+--- firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.h.ffvpx	2020-12-10 20:40:53.390541394 +0100
++++ firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.h	2020-12-10 20:40:53.390541394 +0100
 @@ -0,0 +1,117 @@
 +/*
 + * This file is part of FFmpeg.
@@ -3630,7 +3717,7 @@ diff -up firefox-84.0/media/ffvpx/libavutil/hwcontext_vaapi.h.ffvpx firefox-84.0
 +#endif /* AVUTIL_HWCONTEXT_VAAPI_H */
 diff -up firefox-84.0/media/ffvpx/libavutil/moz.build.ffvpx firefox-84.0/media/ffvpx/libavutil/moz.build
 --- firefox-84.0/media/ffvpx/libavutil/moz.build.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/libavutil/moz.build	2020-12-10 17:03:31.733266237 +0100
++++ firefox-84.0/media/ffvpx/libavutil/moz.build	2020-12-10 20:40:53.390541394 +0100
 @@ -45,6 +45,11 @@ SOURCES += [
      'time.c',
      'utils.c'
@@ -3645,7 +3732,7 @@ diff -up firefox-84.0/media/ffvpx/libavutil/moz.build.ffvpx firefox-84.0/media/f
      SOURCES += [
 diff -up firefox-84.0/media/ffvpx/moz.build.ffvpx firefox-84.0/media/ffvpx/moz.build
 --- firefox-84.0/media/ffvpx/moz.build.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/moz.build	2020-12-10 17:03:31.733266237 +0100
++++ firefox-84.0/media/ffvpx/moz.build	2020-12-10 20:40:53.390541394 +0100
 @@ -11,3 +11,8 @@ DIRS += [
      'libavutil',
      'libavcodec'
@@ -3656,8 +3743,8 @@ diff -up firefox-84.0/media/ffvpx/moz.build.ffvpx firefox-84.0/media/ffvpx/moz.b
 +        'mozva',
 +    ]
 diff -up firefox-84.0/media/ffvpx/mozva/moz.build.ffvpx firefox-84.0/media/ffvpx/mozva/moz.build
---- firefox-84.0/media/ffvpx/mozva/moz.build.ffvpx	2020-12-10 17:06:25.599272289 +0100
-+++ firefox-84.0/media/ffvpx/mozva/moz.build	2020-12-10 17:07:19.630827998 +0100
+--- firefox-84.0/media/ffvpx/mozva/moz.build.ffvpx	2020-12-10 20:40:53.390541394 +0100
++++ firefox-84.0/media/ffvpx/mozva/moz.build	2020-12-10 20:40:53.390541394 +0100
 @@ -0,0 +1,13 @@
 +# -*- Mode: python; indent-tabs-mode: nil; tab-width: 40 -*-
 +# vim: set filetype=python:
@@ -3673,8 +3760,8 @@ diff -up firefox-84.0/media/ffvpx/mozva/moz.build.ffvpx firefox-84.0/media/ffvpx
 +
 +Library('mozva')
 diff -up firefox-84.0/media/ffvpx/mozva/mozva.c.ffvpx firefox-84.0/media/ffvpx/mozva/mozva.c
---- firefox-84.0/media/ffvpx/mozva/mozva.c.ffvpx	2020-12-10 17:05:06.119983875 +0100
-+++ firefox-84.0/media/ffvpx/mozva/mozva.c	2020-12-10 17:05:06.119983875 +0100
+--- firefox-84.0/media/ffvpx/mozva/mozva.c.ffvpx	2020-12-10 20:40:53.390541394 +0100
++++ firefox-84.0/media/ffvpx/mozva/mozva.c	2020-12-10 20:40:53.390541394 +0100
 @@ -0,0 +1,406 @@
 +/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* vim:expandtab:shiftwidth=4:tabstop=4:
@@ -4084,7 +4171,7 @@ diff -up firefox-84.0/media/ffvpx/mozva/mozva.c.ffvpx firefox-84.0/media/ffvpx/m
 +#pragma GCC visibility pop
 diff -up firefox-84.0/media/ffvpx/README_MOZILLA.ffvpx firefox-84.0/media/ffvpx/README_MOZILLA
 --- firefox-84.0/media/ffvpx/README_MOZILLA.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/README_MOZILLA	2020-12-10 17:05:06.119983875 +0100
++++ firefox-84.0/media/ffvpx/README_MOZILLA	2020-12-10 20:40:53.390541394 +0100
 @@ -56,3 +56,5 @@ $ for i in `cat $PATH_CENTRAL/media/ffvp
  Then apply patch.diff on the ffvpx tree.
  
@@ -4092,15 +4179,15 @@ diff -up firefox-84.0/media/ffvpx/README_MOZILLA.ffvpx firefox-84.0/media/ffvpx/
 +
 +Apply linux-vaapi-build.patch patch to enable build VA-API support for Linux.
 diff -up firefox-84.0/media/ffvpx/va/README.ffvpx firefox-84.0/media/ffvpx/va/README
---- firefox-84.0/media/ffvpx/va/README.ffvpx	2020-12-10 17:05:06.119983875 +0100
-+++ firefox-84.0/media/ffvpx/va/README	2020-12-10 17:05:06.119983875 +0100
+--- firefox-84.0/media/ffvpx/va/README.ffvpx	2020-12-10 20:40:53.390541394 +0100
++++ firefox-84.0/media/ffvpx/va/README	2020-12-10 20:40:53.390541394 +0100
 @@ -0,0 +1,2 @@
 +There are libva headers from libva 1.7.0 used to build vaapi support for in-tree ffvpx.
 +Apply va.patch when you update it to new versions.
 \ No newline at end of file
 diff -up firefox-84.0/media/ffvpx/va/va_dec_vp8.h.ffvpx firefox-84.0/media/ffvpx/va/va_dec_vp8.h
---- firefox-84.0/media/ffvpx/va/va_dec_vp8.h.ffvpx	2020-12-10 17:05:06.119983875 +0100
-+++ firefox-84.0/media/ffvpx/va/va_dec_vp8.h	2020-12-10 17:05:06.119983875 +0100
+--- firefox-84.0/media/ffvpx/va/va_dec_vp8.h.ffvpx	2020-12-10 20:40:53.390541394 +0100
++++ firefox-84.0/media/ffvpx/va/va_dec_vp8.h	2020-12-10 20:40:53.390541394 +0100
 @@ -0,0 +1,254 @@
 +/*
 + * Copyright (c) 2007-2012 Intel Corporation. All Rights Reserved.
@@ -4357,8 +4444,8 @@ diff -up firefox-84.0/media/ffvpx/va/va_dec_vp8.h.ffvpx firefox-84.0/media/ffvpx
 +
 +#endif /* VA_DEC_VP8_H */
 diff -up firefox-84.0/media/ffvpx/va/va_dec_vp9.h.ffvpx firefox-84.0/media/ffvpx/va/va_dec_vp9.h
---- firefox-84.0/media/ffvpx/va/va_dec_vp9.h.ffvpx	2020-12-10 17:05:06.119983875 +0100
-+++ firefox-84.0/media/ffvpx/va/va_dec_vp9.h	2020-12-10 17:05:06.119983875 +0100
+--- firefox-84.0/media/ffvpx/va/va_dec_vp9.h.ffvpx	2020-12-10 20:40:53.390541394 +0100
++++ firefox-84.0/media/ffvpx/va/va_dec_vp9.h	2020-12-10 20:40:53.390541394 +0100
 @@ -0,0 +1,319 @@
 +/*
 + * Copyright (c) 2014 Intel Corporation. All Rights Reserved.
@@ -4680,8 +4767,8 @@ diff -up firefox-84.0/media/ffvpx/va/va_dec_vp9.h.ffvpx firefox-84.0/media/ffvpx
 +
 +#endif /* VA_DEC_VP9_H */
 diff -up firefox-84.0/media/ffvpx/va/va.h.ffvpx firefox-84.0/media/ffvpx/va/va.h
---- firefox-84.0/media/ffvpx/va/va.h.ffvpx	2020-12-10 17:05:06.121983932 +0100
-+++ firefox-84.0/media/ffvpx/va/va.h	2020-12-10 17:05:06.121983932 +0100
+--- firefox-84.0/media/ffvpx/va/va.h.ffvpx	2020-12-10 20:40:53.391541423 +0100
++++ firefox-84.0/media/ffvpx/va/va.h	2020-12-10 20:40:53.391541423 +0100
 @@ -0,0 +1,4636 @@
 +/*
 + * Copyright (c) 2007-2009 Intel Corporation. All Rights Reserved.
@@ -9320,8 +9407,8 @@ diff -up firefox-84.0/media/ffvpx/va/va.h.ffvpx firefox-84.0/media/ffvpx/va/va.h
 +
 +#endif /* _VA_H_ */
 diff -up firefox-84.0/media/ffvpx/va/va.patch.ffvpx firefox-84.0/media/ffvpx/va/va.patch
---- firefox-84.0/media/ffvpx/va/va.patch.ffvpx	2020-12-10 17:05:06.121983932 +0100
-+++ firefox-84.0/media/ffvpx/va/va.patch	2020-12-10 17:05:06.121983932 +0100
+--- firefox-84.0/media/ffvpx/va/va.patch.ffvpx	2020-12-10 20:40:53.391541423 +0100
++++ firefox-84.0/media/ffvpx/va/va.patch	2020-12-10 20:40:53.391541423 +0100
 @@ -0,0 +1,33 @@
 +--- va.h.old	2020-10-22 10:41:57.805112031 +0200
 ++++ va.h	2020-10-22 10:37:22.597088670 +0200
@@ -9357,8 +9444,8 @@ diff -up firefox-84.0/media/ffvpx/va/va.patch.ffvpx firefox-84.0/media/ffvpx/va/
 + 
 + /**@}*/
 diff -up firefox-84.0/media/ffvpx/va/va_version.h.ffvpx firefox-84.0/media/ffvpx/va/va_version.h
---- firefox-84.0/media/ffvpx/va/va_version.h.ffvpx	2020-12-10 17:05:06.121983932 +0100
-+++ firefox-84.0/media/ffvpx/va/va_version.h	2020-12-10 17:05:06.121983932 +0100
+--- firefox-84.0/media/ffvpx/va/va_version.h.ffvpx	2020-12-10 20:40:53.391541423 +0100
++++ firefox-84.0/media/ffvpx/va/va_version.h	2020-12-10 20:40:53.391541423 +0100
 @@ -0,0 +1,87 @@
 +/*
 + * Copyright (C) 2009 Splitted-Desktop Systems. All Rights Reserved.
@@ -9449,7 +9536,7 @@ diff -up firefox-84.0/media/ffvpx/va/va_version.h.ffvpx firefox-84.0/media/ffvpx
 +#endif /* VA_VERSION_H */
 diff -up firefox-84.0/widget/gtk/DMABufSurface.h.ffvpx firefox-84.0/widget/gtk/DMABufSurface.h
 --- firefox-84.0/widget/gtk/DMABufSurface.h.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/widget/gtk/DMABufSurface.h	2020-12-10 17:05:06.121983932 +0100
++++ firefox-84.0/widget/gtk/DMABufSurface.h	2020-12-10 20:40:53.391541423 +0100
 @@ -8,10 +8,9 @@
  #define DMABufSurface_h__
  
@@ -9474,7 +9561,7 @@ diff -up firefox-84.0/widget/gtk/DMABufSurface.h.ffvpx firefox-84.0/widget/gtk/D
  typedef enum {
 diff -up firefox-84.0/widget/gtk/nsWaylandDisplay.cpp.ffvpx firefox-84.0/widget/gtk/nsWaylandDisplay.cpp
 --- firefox-84.0/widget/gtk/nsWaylandDisplay.cpp.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/widget/gtk/nsWaylandDisplay.cpp	2020-12-10 17:05:06.121983932 +0100
++++ firefox-84.0/widget/gtk/nsWaylandDisplay.cpp	2020-12-10 20:40:53.391541423 +0100
 @@ -6,6 +6,10 @@
   * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  
@@ -9488,7 +9575,7 @@ diff -up firefox-84.0/widget/gtk/nsWaylandDisplay.cpp.ffvpx firefox-84.0/widget/
  namespace mozilla {
 diff -up firefox-84.0/widget/gtk/nsWaylandDisplay.h.ffvpx firefox-84.0/widget/gtk/nsWaylandDisplay.h
 --- firefox-84.0/widget/gtk/nsWaylandDisplay.h.ffvpx	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/widget/gtk/nsWaylandDisplay.h	2020-12-10 17:05:06.122983961 +0100
++++ firefox-84.0/widget/gtk/nsWaylandDisplay.h	2020-12-10 20:40:53.391541423 +0100
 @@ -10,10 +10,6 @@
  
  #include "DMABufLibWrapper.h"
