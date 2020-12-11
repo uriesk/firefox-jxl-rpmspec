@@ -524,6 +524,7 @@ chmod a-x third_party/rust/gfx-backend-vulkan/src/*.rs
 chmod a-x third_party/rust/gfx-hal/src/*.rs
 chmod a-x third_party/rust/ash/src/extensions/ext/*.rs
 chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
+chmod a-x third_party/rust/ash/src/extensions/nv/*.rs
 
 #---------------------------------------------------------------------
 
