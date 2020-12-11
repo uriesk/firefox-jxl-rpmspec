@@ -56,7 +56,6 @@
 %global build_with_pgo    1
 %endif
 %endif
-%global wayland_backend_default 1
 %if 0%{?flatpak}
 %global build_with_pgo    0
 %endif
@@ -259,9 +258,8 @@ BuildRequires:  icu
 %endif
 
 Requires:       mozilla-filesystem
-%if 0%{?fedora} > 31
 Recommends:     mozilla-openh264 >= 2.1.1
-%endif
+Recommends:     libva
 Requires:       p11-kit-trust
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
@@ -329,7 +327,6 @@ debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
 %endif
 
-%if 0%{?wayland_backend_default}
 %package x11
 Summary: Firefox X11 launcher.
 Requires: %{name}
@@ -339,7 +336,6 @@ to run Firefox explicitly on X11.
 %files x11
 %{_bindir}/firefox-x11
 %{_datadir}/applications/firefox-x11.desktop
-%endif
 
 %package wayland
 Summary: Firefox Wayland launcher.
@@ -667,7 +663,7 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 16 ] && MOZ_SMP_FLAGS=-j16
 [ "$RPM_BUILD_NCPUS" -ge 24 ] && MOZ_SMP_FLAGS=-j24
 [ "$RPM_BUILD_NCPUS" -ge 32 ] && MOZ_SMP_FLAGS=-j32
-#[ "$RPM_BUILD_NCPUS" -ge 64 ] && MOZ_SMP_FLAGS=-j64
+[ "$RPM_BUILD_NCPUS" -ge 64 ] && MOZ_SMP_FLAGS=-j64
 %endif
 
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
@@ -746,19 +742,12 @@ DESTDIR=%{buildroot} make -C objdir install
 %{__mkdir_p} %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
-%if 0%{?wayland_backend_default}
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE31}
-%endif
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 
 # set up the firefox start script
-%if 0%{?wayland_backend_default}
-%global wayland_default true
-%else
-%global wayland_default false
-%endif
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
-%{__sed} -e 's/__DEFAULT_WAYLAND__/%{wayland_default}/' \
+%{__sed} -e 's/__DEFAULT_WAYLAND__/true/' \
          -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
@@ -769,10 +758,8 @@ sed -i -e 's|%FLATPAK_ENV_VARS%|export TMPDIR="$XDG_CACHE_HOME/tmp"|' %{buildroo
 sed -i -e 's|%FLATPAK_ENV_VARS%||' %{buildroot}%{_bindir}/firefox
 %endif
 
-%if 0%{?wayland_backend_default}
 %{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-x11
-%endif
 %{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox-wayland
 
