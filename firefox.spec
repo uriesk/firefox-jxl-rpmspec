@@ -87,7 +87,7 @@
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.58
+%global nss_version 3.59
 %global nss_build_version %{nss_version}
 %endif
 
@@ -269,8 +269,6 @@ BuildRequires:  python3-devel
 %if !0%{?flatpak}
 Requires:       u2f-hidraw-policy
 %endif
-BuildRequires:  nss-devel >= 3.29.1-2.1
-Requires:       nss >= 3.48.0
 
 BuildRequires:  desktop-file-utils
 %if !0%{?flatpak}
