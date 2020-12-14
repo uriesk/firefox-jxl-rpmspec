@@ -691,7 +691,7 @@ fi
 %if %{test_on_wayland}
 MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
 %else
-MOZ_ENABLE_WAYLAND=0 xvfb-run ./mach build  2>&1 | cat -
+xvfb-run ./mach build  2>&1 | cat -
 %endif
 %else
 ./mach build  2>&1 | cat -
