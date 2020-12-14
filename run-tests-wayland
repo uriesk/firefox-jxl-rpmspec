@@ -1,10 +1,11 @@
 #!/usr/bin/bash
 set -x
+OFFSCREEN_TESTING=$1
 
-export MACH_USE_SYSTEM_PYTHON=1
-export MOZ_NODE_PATH=/usr/bin/node
-export MOCHITEST_PARAMS="--timeout 1 --chunk-by-dir 4"
-export TEST_DIR="test_results"
+MACH_USE_SYSTEM_PYTHON=1
+MOZ_NODE_PATH=/usr/bin/node
+MOCHITEST_PARAMS="--timeout 1 --chunk-by-dir 4"
+TEST_DIR="test_results"
 
 # Fix for system nss
 ln -s /usr/bin/certutil objdir/dist/bin/certutil
@@ -12,24 +13,45 @@ ln -s /usr/bin/pk12util objdir/dist/bin/pk12util
 
 NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 
+export MOZ_ENABLE_WAYLAND=1
+
+if [ $OFFSCREEN_TESTING -ne 0 ] ; then
+  xvfb-run -s "-screen 0 1600x1200x24" -n 80 mutter --wayland --nested &
+  if [ -z "$WAYLAND_DISPLAY" ] ; then
+    export WAYLAND_DISPLAY=wayland-0
+  else
+    export WAYLAND_DISPLAY=wayland-1
+  fi
+  sleep 10
+  retry_count=0
+  max_retries=5
+  until [ $retry_count -gt $max_retries ]; do
+    if [ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; then
+      retry_count=$(($max_retries + 1))
+    else
+      retry_count=$(($retry_count + 1))
+      echo "Waiting for Mutter, retry: $retry_count"
+      sleep 2
+    fi
+  done
+fi
+
+./mach xpcshell-test 2>&1 | cat - | tee $TEST_DIR/xpcshell
+./mach xpcshell-test --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
+
 # Basic render testing
 export TEST_PARAMS=""
 export TEST_FLAVOUR=""
-export MOZ_ENABLE_WAYLAND=1
-./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS >& $TEST_DIR/mochitest$TEST_FLAVOUR
-./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/crashtest$TEST_FLAVOUR
-./mach marionette-test $TEST_PARAMS >& $TEST_DIR/marionette$TEST_FLAVOUR
-./mach reftest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/reftest$TEST_FLAVOUR
-./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > $TEST_DIR/xpcshell$TEST_FLAVOUR
+./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
 
 # WebRender testing
 export TEST_PARAMS="--enable-webrender $TEST_PARAMS"
 export TEST_FLAVOUR="-wr"
-./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS >& $TEST_DIR/mochitest$TEST_FLAVOUR
-./mach crashtest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/crashtest$TEST_FLAVOUR
-./mach marionette-test $TEST_PARAMS >& $TEST_DIR/marionette$TEST_FLAVOUR
-./mach reftest $TEST_PARAMS --run-tests-in-parallel >& $TEST_DIR/reftest$TEST_FLAVOUR
-./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - > $TEST_DIR/xpcshell$TEST_FLAVOUR
+./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
 
 rm -f  objdir/dist/bin/certutil
 rm -f  objdir/dist/bin/pk12util

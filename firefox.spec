@@ -12,9 +12,7 @@
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-#ExcludeArch: s390x
-#ExcludeArch: armv7hl
-#ExcludeArch: aarch64
+ExcludeArch: s390x
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -74,6 +72,14 @@
 %global build_tests       1
 %endif
 
+%global launch_wayland_compositor 0
+%if %{build_with_pgo} && %{test_offscreen} && %{test_on_wayland}
+%global launch_wayland_compositor 1
+%endif
+%if %{run_firefox_tests} && %{test_offscreen} && %{test_on_wayland}
+%global launch_wayland_compositor 1
+%endif
+
 %global default_bookmarks_file  %{_datadir}/bookmarks/default-bookmarks.html
 %global firefox_app_id  \{ec8030f7-c20a-464f-9b0e-13a3a9e97384\}
 # Minimal required versions
@@ -125,7 +131,7 @@ URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201210.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20201214.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -148,7 +154,7 @@ Source35:       google-loc-api-key
 Source37:       mochitest-python.tar.gz
 Source38:       print_results
 Source39:       print_subtest
-Source40:       run-tests
+Source40:       run-tests-x11
 Source41:       run-tests-wayland
 
 # Build patches
@@ -670,9 +676,7 @@ echo "export STRIP=/bin/true" >> .mozconfig
 export MACH_USE_SYSTEM_PYTHON=1
 export MACH_NO_WRITE_TIMES=1
 
-%if %{build_with_pgo}
-%if %{test_offscreen}
-%if %{test_on_wayland}
+%if %{launch_wayland_compositor}
 if [ -z "$XDG_RUNTIME_DIR" ]; then
   export XDG_RUNTIME_DIR=$HOME
 fi
@@ -682,20 +686,16 @@ if [ -z "$WAYLAND_DISPLAY" ]; then
 else
   export WAYLAND_DISPLAY=wayland-1
 fi
-MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
 %endif
-%if !%{test_on_wayland}
+
+%if %{build_with_pgo}
+%if %{test_on_wayland}
+MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
+%else
 MOZ_ENABLE_WAYLAND=0 xvfb-run ./mach build  2>&1 | cat -
 %endif
-%endif
-
-%if !%{test_offscreen}
-MOZ_ENABLE_WAYLAND=%{test_on_wayland} ./mach build  2>&1 | cat -
-%endif
-%endif
-
-%if !%{build_with_pgo}
-./mach build -v 2>&1 | cat -
+%else
+./mach build  2>&1 | cat -
 %endif
 
 # create debuginfo for crash-stats.mozilla.com
@@ -715,9 +715,9 @@ tar xf %{SOURCE37}
 cp %{SOURCE40} %{SOURCE41} %{SOURCE38} %{SOURCE39} .
 mkdir -p test_results
 %if %{test_on_wayland}
-./run-tests-wayland %{test_offscreen}
+./run-tests-wayland
 %else
-./run-tests
+./run-tests-x11
 %endif
 ./print_results > test_summary.txt 2>&1
 %endif
@@ -748,7 +748,6 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 %{__sed} -e 's/__DEFAULT_WAYLAND__/true/' \
          -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
-
 
 %if 0%{?flatpak}
 sed -i -e 's|%FLATPAK_ENV_VARS%|export TMPDIR="$XDG_CACHE_HOME/tmp"|' %{buildroot}%{_bindir}/firefox
