@@ -50,3 +50,15 @@ diff --git a/testing/tools/websocketprocessbridge/websocketprocessbridge_require
  
  # needed by txws, and we'd like pip to get it from the local server before setuptools tries pypi
  six
+diff -up firefox-84.0/toolkit/crashreporter/test/unit/xpcshell.ini.old firefox-84.0/toolkit/crashreporter/test/unit/xpcshell.ini
+--- firefox-84.0/toolkit/crashreporter/test/unit/xpcshell.ini.old	2020-12-15 12:21:16.177169732 +0100
++++ firefox-84.0/toolkit/crashreporter/test/unit/xpcshell.ini	2020-12-15 12:21:22.336348783 +0100
+@@ -37,7 +37,7 @@ skip-if = (os != 'win' && os != 'linux')
+ 
+ [test_crash_AsyncShutdown.js]
+ [test_event_files.js]
+-[test_crash_terminator.js]
++#[test_crash_terminator.js]
+ 
+ [test_crash_heap_corruption.js]
+ skip-if = os != 'win'
