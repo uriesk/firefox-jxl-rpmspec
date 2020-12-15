@@ -3,7 +3,7 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 1
+%global run_firefox_tests 0
 %global test_offscreen    1
 %global test_on_wayland   0
 %global create_debuginfo  1
