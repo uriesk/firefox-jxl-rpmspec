@@ -3,7 +3,7 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 0
+%global run_firefox_tests 1
 %global test_offscreen    1
 %global test_on_wayland   0
 %global create_debuginfo  1
@@ -991,6 +991,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 16 2020 Martin Stransky <stransky@redhat.com> - 84.0-5
+- Build with tests enabled
+
 * Wed Dec 16 2020 Martin Stransky <stransky@redhat.com> - 84.0-4
 - Disabled LTO due to massive test failures
 
