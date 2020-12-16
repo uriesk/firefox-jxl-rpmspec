@@ -36,8 +36,8 @@ if [ $OFFSCREEN_TESTING -ne 0 ] ; then
   done
 fi
 
-./mach xpcshell-test 2>&1 | cat - | tee $TEST_DIR/xpcshell
-./mach xpcshell-test --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
+./mach xpcshell-test --sequential 2>&1 | cat - | tee $TEST_DIR/xpcshell
+./mach xpcshell-test --sequential --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
 
 # Basic render testing
 export TEST_PARAMS=""

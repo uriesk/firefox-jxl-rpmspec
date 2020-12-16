@@ -13,8 +13,8 @@ ln -s /usr/bin/pk12util objdir/dist/bin/pk12util
 
 NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 
-./mach xpcshell-test 2>&1 | cat - | tee $TEST_DIR/xpcshell
-./mach xpcshell-test --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
+./mach xpcshell-test --sequential 2>&1 | cat - | tee $TEST_DIR/xpcshell
+./mach xpcshell-test --sequential --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
 
 # Basic render testing
 export TEST_PARAMS=""

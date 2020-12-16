@@ -153,9 +153,10 @@ Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
 Source37:       mochitest-python.tar.gz
 Source38:       print_results
-Source39:       print_subtest
+Source39:       perrors
 Source40:       run-tests-x11
 Source41:       run-tests-wayland
+Source42:       psummary
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -360,6 +361,7 @@ This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
 /%{version}%-%{release}/test_results
 /%{version}%-%{release}/test_summary.txt
+/%{version}%-%{release}/failures-*
 %endif
 
 #---------------------------------------------------------------------
@@ -711,7 +713,7 @@ find-links=`pwd`/mochitest-python
 no-index=true
 EOF
 tar xf %{SOURCE37}
-cp %{SOURCE40} %{SOURCE41} %{SOURCE38} %{SOURCE39} .
+cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} .
 mkdir -p test_results
 %if %{test_on_wayland}
 ./run-tests-wayland
@@ -856,6 +858,7 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_results
 %{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results
 %{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/
+%{__cp} failures-*txt %{buildroot}/%{version}%-%{release}/
 %endif
 
 # Default

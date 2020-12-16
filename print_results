@@ -5,6 +5,9 @@ export TEST_DIR="test_results"
 
 echo "Test results"
 echo "Basic compositor"
-./print_subtest "test_results" ""
+./psummary "test_results" ""
 echo "WebRender"
-./print_subtest "test_results" "-wr"
+./psummary "test_results" "-wr"
+
+./perrors "test_results" ""
+./perrors "test_results" "-wr"
