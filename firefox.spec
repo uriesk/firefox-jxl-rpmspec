@@ -7,6 +7,7 @@
 %global test_offscreen    1
 %global test_on_wayland   0
 %global create_debuginfo  1
+%global system_nss        1
 # Disable system nss for Rawhide due to rhbz#1908018
 %if 0%{?fedora} > 33
 %global system_nss        0
