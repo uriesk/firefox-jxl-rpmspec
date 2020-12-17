@@ -3,11 +3,14 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 1
+%global run_firefox_tests 0
 %global test_offscreen    1
 %global test_on_wayland   0
 %global create_debuginfo  1
+# Disable system nss for Rawhide due to rhbz#1908018
+%if 0%{?fedora} > 33
 %global system_nss        0
+%endif
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
@@ -60,6 +63,11 @@ ExcludeArch: s390x
 # Big endian platforms
 %ifarch ppc64 s390x
 %global big_endian        1
+%endif
+
+# Disable PGO on Rawhide due to build failures
+%if 0%{?fedora} > 33
+%global build_with_pgo    0
 %endif
 
 %if 0%{?build_with_pgo}
@@ -126,7 +134,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -994,6 +1002,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Dec 17 2020 Martin Stransky <stransky@redhat.com> - 84.0-6
+- Disable PGO on Rawhide due to build issues
+- Disable system nss on Rawhide due to rhbz#1908018
+- Enabled system nss on Fedora 33/32
+
 * Wed Dec 16 2020 Martin Stransky <stransky@redhat.com> - 84.0-5
 - Build with tests enabled
 
