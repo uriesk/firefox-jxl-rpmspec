@@ -132,10 +132,13 @@ ExcludeArch: s390x
 %global pre_tag .debug
 %endif
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1908791
+%global __provides_exclude_from ^%{mozappdir}
+
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1003,6 +1006,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sun Dec 20 2020 Miro Hrončok <mhroncok@redhat.com> - 84.0-7
+- Filter out private libraries provides
+- Fixes: rhbz#1908791
+
 * Thu Dec 17 2020 Martin Stransky <stransky@redhat.com> - 84.0-6
 - Disable PGO on Rawhide due to build issues
 - Disable system nss on Rawhide due to rhbz#1908018
