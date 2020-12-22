@@ -207,6 +207,7 @@ Patch415:        mozilla-1670333.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch420:        mozilla-1678680.patch
 Patch421:        mozilla-1680505.patch
+Patch422:        mozilla-1631061.patch
 
 # Upstream patches from mozbz#1672944
 Patch450:        pw1.patch
@@ -394,7 +395,7 @@ This package contains results of tests executed during build.
 %endif
 %patch3  -p1 -b .arm
 %patch44 -p1 -b .build-arm-libopus
-#%patch46 -p1 -b .nss-version
+%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
@@ -428,6 +429,7 @@ This package contains results of tests executed during build.
 %patch455 -p1 -b .pw6
 %patch420 -p1 -b .1678680
 %patch421 -p1 -b .1680505
+%patch422 -p1 -b .1631061
 
 %patch500 -p1 -b .ffvpx
 
