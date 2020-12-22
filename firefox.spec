@@ -133,7 +133,8 @@ ExcludeArch: s390x
 %endif
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1908791
-%global __provides_exclude_from ^%{mozappdir}
+# Disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1908791#c12
+# %global __provides_exclude_from ^%{mozappdir}
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
