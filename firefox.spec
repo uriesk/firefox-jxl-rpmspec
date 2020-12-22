@@ -132,10 +132,6 @@ ExcludeArch: s390x
 %global pre_tag .debug
 %endif
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1908791
-# Disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1908791#c12
-# %global __provides_exclude_from ^%{mozappdir}
-
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.1
