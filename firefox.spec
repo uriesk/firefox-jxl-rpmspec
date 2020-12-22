@@ -3,7 +3,7 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 0
+%global run_firefox_tests 1
 %global test_offscreen    1
 %global test_on_wayland   0
 %global create_debuginfo  1
@@ -135,7 +135,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1003,6 +1003,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Dec 17 2020 Martin Stransky <stransky@redhat.com> - 84.0-7
+- Enabled tests
+
 * Thu Dec 17 2020 Martin Stransky <stransky@redhat.com> - 84.0-6
 - Disable PGO on Rawhide due to build issues
 - Disable system nss on Rawhide due to rhbz#1908018
