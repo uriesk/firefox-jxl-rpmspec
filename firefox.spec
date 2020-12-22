@@ -3,7 +3,7 @@
 %global debug_build       0
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 1
+%global run_firefox_tests 0
 %global test_offscreen    1
 %global test_on_wayland   0
 %global create_debuginfo  1
@@ -132,15 +132,18 @@ ExcludeArch: s390x
 %global pre_tag .debug
 %endif
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1908791
+%global __provides_exclude_from ^%{mozappdir}
+
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        84.0
-Release:        7%{?pre_tag}%{?dist}
+Version:        84.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201214.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20201222.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -678,6 +681,7 @@ MOZ_SMP_FLAGS=-j1
 [ "$RPM_BUILD_NCPUS" -ge 16 ] && MOZ_SMP_FLAGS=-j16
 [ "$RPM_BUILD_NCPUS" -ge 24 ] && MOZ_SMP_FLAGS=-j24
 [ "$RPM_BUILD_NCPUS" -ge 32 ] && MOZ_SMP_FLAGS=-j32
+[ "$RPM_BUILD_NCPUS" -ge 64 ] && MOZ_SMP_FLAGS=-j64
 %endif
 
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
@@ -1003,8 +1007,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Dec 17 2020 Martin Stransky <stransky@redhat.com> - 84.0-7
-- Enabled tests
+* Tue Dec 22 2020 Martin Stransky <stransky@redhat.com> - 84.0.1-1
+- Updated to 84.0.1
+
+* Sun Dec 20 2020 Miro Hrončok <mhroncok@redhat.com> - 84.0-7
+- Filter out private libraries provides
+- Fixes: rhbz#1908791
 
 * Thu Dec 17 2020 Martin Stransky <stransky@redhat.com> - 84.0-6
 - Disable PGO on Rawhide due to build issues
