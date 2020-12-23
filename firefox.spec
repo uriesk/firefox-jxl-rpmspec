@@ -8,15 +8,16 @@
 %global test_on_wayland   0
 %global create_debuginfo  1
 %global system_nss        1
-# Disable system nss for Rawhide due to rhbz#1908018
-%if 0%{?fedora} > 33
-%global system_nss        0
-%endif
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1910277
+%if 0%{?fedora} > 33
+ExcludeArch: armv7hl
+%endif
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -1008,6 +1009,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Wed Dec 23 2020 Martin Stransky <stransky@redhat.com> - 84.0.1-2
 - Reverted mzbz#1631061 due to clipboard regressions
+- Disabled armv7hl build on rawhide due to rhbz#1910277
+- Build with system nss on rawhide (rhbz#1908791).
 
 * Tue Dec 22 2020 Martin Stransky <stransky@redhat.com> - 84.0.1-1
 - Updated to 84.0.1
