@@ -135,7 +135,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -426,7 +426,7 @@ This package contains results of tests executed during build.
 %patch455 -p1 -b .pw6
 %patch420 -p1 -b .1678680
 %patch421 -p1 -b .1680505
-%patch422 -p1 -b .1631061
+#%patch422 -p1 -b .1631061
 
 %patch500 -p1 -b .ffvpx
 
@@ -1006,6 +1006,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 23 2020 Martin Stransky <stransky@redhat.com> - 84.0.1-2
+- Reverted mzbz#1631061 due to clipboard regressions
+
 * Tue Dec 22 2020 Martin Stransky <stransky@redhat.com> - 84.0.1-1
 - Updated to 84.0.1
 
