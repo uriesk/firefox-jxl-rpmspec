@@ -14,11 +14,6 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1910277
-%if 0%{?fedora} > 33
-ExcludeArch: armv7hl
-%endif
-
 %ifarch armv7hl
 %global create_debuginfo  0
 %endif
@@ -136,7 +131,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1007,6 +1002,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 4 2021 Martin Stransky <stransky@redhat.com> - 84.0.1-3
+- Enabled armv7hl arch on rawhide
+
 * Wed Dec 23 2020 Martin Stransky <stransky@redhat.com> - 84.0.1-2
 - Reverted mzbz#1631061 due to clipboard regressions
 - Disabled armv7hl build on rawhide due to rhbz#1910277
