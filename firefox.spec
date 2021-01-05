@@ -131,7 +131,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.1
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -713,6 +713,14 @@ xvfb-run ./mach build  2>&1 | cat -
 make -C objdir buildsymbols
 %endif
 
+# Don't provide/require bundled libs
+%filter_provides_in %{mozappdir}/
+%filter_requires_in %{mozappdir}/
+%filter_provides_in %{mozappdir}/gmp-clearkey/0.1/
+%filter_requires_in %{mozappdir}/gmp-clearkey/0.1/
+%filter_provides_in %{mozappdir}/gtk2
+%filter_requires_in %{mozappdir}/gtk2
+
 # run Firefox test suite
 %if 0%{?run_firefox_tests}
 mkdir -p objdir/_virtualenvs/init_py3
@@ -1003,6 +1011,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 05 2021 Jan Horak <jhorak@redhat.com> - 84.0.1-5
+- Removing requires/provides of the bundled libraries
+
 * Mon Jan 4 2021 Martin Stransky <stransky@redhat.com> - 84.0.1-4
 - Enabled tests
 
