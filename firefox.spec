@@ -369,7 +369,7 @@ This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
 /%{version}%-%{release}/test_results
 /%{version}%-%{release}/test_summary.txt
-/%{version}%-%{release}/test_failures.txt
+/%{version}%-%{release}/failures-*
 %endif
 
 #---------------------------------------------------------------------
@@ -739,8 +739,7 @@ mkdir -p test_results
 ./run-tests-x11 || true
 %endif
 ./print_results > test_summary.txt 2>&1 || true
-./print_failures >> test_summary.txt 2>&1 || true
-./print_failures > test_failures.txt 2>&1 || true
+./print_failures || true
 %endif
 
 #---------------------------------------------------------------------
@@ -878,7 +877,7 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_results
 %{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results
 %{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/
-%{__cp} test_failures.txt %{buildroot}/%{version}%-%{release}/
+%{__cp} failures-* %{buildroot}/%{version}%-%{release}/ || true
 %endif
 
 # Default

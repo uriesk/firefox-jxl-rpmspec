@@ -3,6 +3,5 @@
 
 export TEST_DIR="test_results"
 
-echo "Test failures"
 ./perrors $TEST_DIR ""
 ./perrors $TEST_DIR "-wr"
