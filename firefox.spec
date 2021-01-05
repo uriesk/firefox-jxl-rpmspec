@@ -724,11 +724,11 @@ tar xf %{SOURCE37}
 cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} .
 mkdir -p test_results
 %if %{test_on_wayland}
-./run-tests-wayland
+./run-tests-wayland || true
 %else
-./run-tests-x11
+./run-tests-x11 || true
 %endif
-./print_results > test_summary.txt 2>&1
+./print_results > test_summary.txt 2>&1 || true
 %endif
 
 #---------------------------------------------------------------------
