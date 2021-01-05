@@ -873,9 +873,9 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 
 %if 0%{?run_firefox_tests}
 %{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_results
-%{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results
-%{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/
-%{__cp} failures-*txt %{buildroot}/%{version}%-%{release}/
+%{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results || true
+%{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/ || true
+%{__cp} failures-*txt %{buildroot}/%{version}%-%{release}/ || true
 %endif
 
 # Default
