@@ -313,6 +313,7 @@ BuildRequires:  fdk-aac-free-devel
 BuildRequires:  nss-tools
 BuildRequires:  python2.7
 %endif
+BuildRequires: make
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
