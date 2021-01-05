@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+# Analyze and print test failures
+
+export TEST_DIR="test_results"
+
+./perrors $TEST_DIR ""
+./perrors $TEST_DIR "-wr"
