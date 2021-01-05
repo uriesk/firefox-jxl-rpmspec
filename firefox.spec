@@ -162,6 +162,7 @@ Source39:       perrors
 Source40:       run-tests-x11
 Source41:       run-tests-wayland
 Source42:       psummary
+Source43:       print_failures
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -368,7 +369,7 @@ This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
 /%{version}%-%{release}/test_results
 /%{version}%-%{release}/test_summary.txt
-/%{version}%-%{release}/failures-*
+/%{version}%-%{release}/test_failures.txt
 %endif
 
 #---------------------------------------------------------------------
@@ -730,7 +731,7 @@ find-links=`pwd`/mochitest-python
 no-index=true
 EOF
 tar xf %{SOURCE37}
-cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} .
+cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} %{SOURCE43} .
 mkdir -p test_results
 %if %{test_on_wayland}
 ./run-tests-wayland || true
@@ -738,6 +739,8 @@ mkdir -p test_results
 ./run-tests-x11 || true
 %endif
 ./print_results > test_summary.txt 2>&1 || true
+./print_failures >> test_summary.txt 2>&1 || true
+./print_failures > test_failures.txt 2>&1 || true
 %endif
 
 #---------------------------------------------------------------------
@@ -873,9 +876,9 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 
 %if 0%{?run_firefox_tests}
 %{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_results
-%{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results || true
-%{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/ || true
-%{__cp} failures-*txt %{buildroot}/%{version}%-%{release}/ || true
+%{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results
+%{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/
+%{__cp} test_failures.txt %{buildroot}/%{version}%-%{release}/
 %endif
 
 # Default
