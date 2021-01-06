@@ -130,13 +130,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        84.0.1
-Release:        5%{?pre_tag}%{?dist}
+Version:        84.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20201222.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210106.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1013,6 +1013,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 6 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-1
+- Updated to 84.0.2
+
 * Tue Jan 05 2021 Jan Horak <jhorak@redhat.com> - 84.0.1-5
 - Removing requires/provides of the bundled libraries
 
