@@ -70,8 +70,8 @@ if [ $OFFSCREEN_TESTING -ne 0 ] ; then
 fi
 
 if [ $RUN_XPCSHELL_TEST -ne 0 ] ; then
-  ./mach xpcshell-test --sequential 2>&1 | cat - | tee $TEST_DIR/xpcshell
-  ./mach xpcshell-test --sequential --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
+  ./mach xpcshell-test 2>&1 | cat - | tee $TEST_DIR/xpcshell
+  ./mach xpcshell-test --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
 fi
 
 # Basic render testing
