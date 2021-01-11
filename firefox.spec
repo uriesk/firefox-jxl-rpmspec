@@ -140,7 +140,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -201,6 +201,7 @@ Patch224:        mozilla-1170092.patch
 Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        disable-openh264-download.patch
+Patch229:        firefox-nss-addon-hack.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -418,6 +419,7 @@ This package contains results of tests executed during build.
 %endif
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .disable-openh264-download
+%patch229 -p1 -b .firefox-nss-addon-hack
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
@@ -1022,6 +1024,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jan 11 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-2
+- Added a workaround for rhbz#1908018
+
 * Wed Jan 6 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-1
 - Updated to 84.0.2
 
