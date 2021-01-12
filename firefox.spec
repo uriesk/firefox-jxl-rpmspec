@@ -1032,7 +1032,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Jan 11 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-3
+* Tue Jan 12 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-3
 - Removed failing xpcshell/reftests, test tweaks.
 
 * Mon Jan 11 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-2
