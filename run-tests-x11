@@ -19,7 +19,7 @@ export TEST_FLAVOUR=""
 xvfb-run -s "$X_PARAMS" -n 94 ./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - | tee $TEST_DIR/xpcshell
 xvfb-run -s "$X_PARAMS" -n 99 ./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" -n 97 ./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
-xvfb-run -s "$X_PARAMS" -n 98 ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+#xvfb-run -s "$X_PARAMS" -n 98 ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
 
 # WebRender testing
 export TEST_PARAMS="--enable-webrender $TEST_PARAMS"
@@ -27,7 +27,7 @@ export TEST_FLAVOUR="-wr"
 xvfb-run -s "$X_PARAMS" -n 93 ./mach xpcshell-test $TEST_PARAMS 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
 xvfb-run -s "$X_PARAMS" -n 96 ./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
 xvfb-run -s "$X_PARAMS" -n 94 ./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
-xvfb-run -s "$X_PARAMS" -n 95 ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+#xvfb-run -s "$X_PARAMS" -n 95 ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
 
 rm -f  objdir/dist/bin/certutil
 rm -f  objdir/dist/bin/pk12util

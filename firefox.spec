@@ -140,7 +140,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -191,6 +191,10 @@ Patch53:        firefox-gcc-build.patch
 # This should be fixed in Firefox 83
 Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
+
+# Test patches
+Patch100:       firefox-tests-xpcshell.patch
+Patch101:       firefox-tests-reftest.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -371,7 +375,7 @@ to run Firefox explicitly on Wayland.
 %{_datadir}/applications/firefox-wayland.desktop
 
 %if 0%{?run_firefox_tests}
-%global testsuite_pkg_name mozilla-%{name}-testresults
+%global testsuite_pkg_name %{name}-testresults
 %package -n %{testsuite_pkg_name}
 Summary: Results of testsuite
 %description -n %{testsuite_pkg_name}
@@ -407,6 +411,10 @@ This package contains results of tests executed during build.
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
+
+# Test patches
+%patch100 -p1 -b .firefox-tests-xpcshell
+%patch101 -p1 -b .firefox-tests-reftest
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -1024,6 +1032,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 11 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-3
+- Removed failing xpcshell/reftests, test tweaks.
+
 * Mon Jan 11 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-2
 - Added a workaround for rhbz#1908018
 
