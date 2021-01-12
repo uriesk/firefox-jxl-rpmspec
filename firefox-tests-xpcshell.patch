@@ -1,0 +1,90 @@
+diff -up firefox-84.0.2/browser/components/enterprisepolicies/tests/xpcshell/xpcshell.ini.testt firefox-84.0.2/browser/components/enterprisepolicies/tests/xpcshell/xpcshell.ini
+--- firefox-84.0.2/browser/components/enterprisepolicies/tests/xpcshell/xpcshell.ini.testt	2021-01-11 14:49:02.685267936 +0100
++++ firefox-84.0.2/browser/components/enterprisepolicies/tests/xpcshell/xpcshell.ini	2021-01-11 14:49:08.628439644 +0100
+@@ -6,7 +6,6 @@ support-files =
+ 
+ [test_3rdparty.js]
+ [test_addon_update.js]
+-[test_appupdateurl.js]
+ [test_bug1658259.js]
+ [test_cleanup.js]
+ [test_clear_blocked_cookies.js]
+diff -up firefox-84.0.2/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini.testt firefox-84.0.2/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini
+--- firefox-84.0.2/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini.testt	2021-01-11 14:46:36.791052800 +0100
++++ firefox-84.0.2/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini	2021-01-11 14:46:45.029290819 +0100
+@@ -6,6 +6,5 @@ skip-if = toolkit == 'android' || socket
+ support-files =
+   adb.py
+ 
+-[test_adb.js]
+ run-sequentially = An extension having the same id is installed/uninstalled in different tests
+ [test_prepare-tcp-connection.js]
+diff -up firefox-84.0.2/netwerk/test/unit/xpcshell.ini.testt firefox-84.0.2/netwerk/test/unit/xpcshell.ini
+--- firefox-84.0.2/netwerk/test/unit/xpcshell.ini.testt	2021-01-11 14:50:19.172477783 +0100
++++ firefox-84.0.2/netwerk/test/unit/xpcshell.ini	2021-01-11 14:53:17.114618842 +0100
+@@ -223,7 +223,6 @@ skip-if = socketprocess_networking # Bug
+ [test_fallback_request-error_passing.js]
+ [test_fallback_response-error_canceled.js]
+ [test_fallback_response-error_passing.js]
+-[test_file_protocol.js]
+ [test_filestreams.js]
+ [test_freshconnection.js]
+ [test_gre_resources.js]
+@@ -392,8 +391,6 @@ skip-if = (verify && !debug && (os == 'w
+ [test_bug1355539_http1.js]
+ [test_bug1378385_http1.js]
+ [test_tls_flags_separate_connections.js]
+-[test_tls_flags.js]
+-skip-if = (verify && (os == 'linux')) || (os == "android" && processor == "x86_64")
+ [test_uri_mutator.js]
+ [test_bug1411316_http1.js]
+ [test_header_Server_Timing.js]
+@@ -409,7 +406,6 @@ skip-if = tsan || socketprocess_networki
+ run-sequentially = node server exceptions dont replay well
+ skip-if = socketprocess_networking
+ [test_esni_dns_fetch.js]
+-[test_network_connectivity_service.js]
+ [test_suspend_channel_on_authRetry.js]
+ [test_suspend_channel_on_examine_merged_response.js]
+ [test_bug1527293.js]
+diff -up firefox-84.0.2/security/manager/ssl/tests/unit/xpcshell.ini.testt firefox-84.0.2/security/manager/ssl/tests/unit/xpcshell.ini
+diff -up firefox-84.0.2/security/manager/ssl/tests/unit/xpcshell-smartcards.ini.testt firefox-84.0.2/security/manager/ssl/tests/unit/xpcshell-smartcards.ini
+--- firefox-84.0.2/security/manager/ssl/tests/unit/xpcshell-smartcards.ini.testt	2021-01-11 14:54:29.138699743 +0100
++++ firefox-84.0.2/security/manager/ssl/tests/unit/xpcshell-smartcards.ini	2021-01-11 14:54:34.898866164 +0100
+@@ -7,7 +7,6 @@ support-files =
+ 
+ [test_osclientcerts_module.js]
+ skip-if = (os != 'win' && os != 'mac') || processor == 'aarch64'
+-[test_pkcs11_module.js]
+ [test_pkcs11_moduleDB.js]
+ [test_pkcs11_safe_mode.js]
+ [test_pkcs11_slot.js]
+diff -up firefox-84.0.2/toolkit/components/commandlines/test/unit/xpcshell.ini.testt firefox-84.0.2/toolkit/components/commandlines/test/unit/xpcshell.ini
+--- firefox-84.0.2/toolkit/components/commandlines/test/unit/xpcshell.ini.testt	2021-01-11 14:55:28.946427692 +0100
++++ firefox-84.0.2/toolkit/components/commandlines/test/unit/xpcshell.ini	2021-01-11 14:55:35.289610958 +0100
+@@ -7,4 +7,3 @@ support-files =
+ 
+ [test_classinfo.js]
+ [test_bug666224.js]
+-[test_resolvefile.js]
+diff -up firefox-84.0.2/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini.testt firefox-84.0.2/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini
+--- firefox-84.0.2/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini.testt	2021-01-11 14:56:24.386028041 +0100
++++ firefox-84.0.2/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini	2021-01-11 14:56:30.424202265 +0100
+@@ -7,6 +7,5 @@ support-files =
+   data_text_file.txt
+   data_test_script.py
+ 
+-[test_subprocess.js]
+ [test_subprocess_getEnvironment.js]
+ [test_subprocess_pathSearch.js]
+diff -up firefox-84.0.2/toolkit/mozapps/extensions/test/xpcshell/xpcshell.ini.testt firefox-84.0.2/toolkit/mozapps/extensions/test/xpcshell/xpcshell.ini
+--- firefox-84.0.2/toolkit/mozapps/extensions/test/xpcshell/xpcshell.ini.testt	2021-01-11 14:57:08.721307286 +0100
++++ firefox-84.0.2/toolkit/mozapps/extensions/test/xpcshell/xpcshell.ini	2021-01-11 14:57:16.856542019 +0100
+@@ -97,7 +97,6 @@ tags = webextensions
+ head = head_addons.js head_sideload.js
+ skip-if = os == "linux" # Bug 1613268
+ [test_sideloads.js]
+-[test_sideloads_after_rebuild.js]
+ head = head_addons.js head_sideload.js
+ [test_signed_inject.js]
+ # Bug 1394122
