@@ -135,7 +135,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.2
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -665,12 +665,6 @@ echo "export RANLIB=\"gcc-ranlib\"" >> .mozconfig
 %endif
 %if 0%{?build_with_pgo}
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
-# Should be in Firefox 83
-# Temporary disabled due to https://bugzilla.redhat.com/show_bug.cgi?id=1893474
-#%if 0%{?fedora} >= 33
-#echo "ac_add_options --enable-lto" >> .mozconfig
-#%endif
-
 # PGO build doesn't work with ccache
 export CCACHE_DISABLE=1
 %endif
@@ -1027,6 +1021,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 12 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-4
+- Enabled LTO in Firefox build system.
+
 * Tue Jan 12 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-3
 - Removed failing xpcshell/reftests, test tweaks.
 
