@@ -71,11 +71,6 @@ ExcludeArch: s390x
 %global big_endian        1
 %endif
 
-# Disable PGO on Rawhide due to build failures
-%if 0%{?fedora} > 33
-%global build_with_pgo    0
-%endif
-
 %if 0%{?build_with_pgo}
 %global use_xvfb          1
 %global build_tests       1
