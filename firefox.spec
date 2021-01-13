@@ -376,9 +376,9 @@ Summary: Results of testsuite
 %description -n %{testsuite_pkg_name}
 This package contains results of tests executed during build.
 %files -n %{testsuite_pkg_name}
-/%{version}%-%{release}/test_results
-/%{version}%-%{release}/test_summary.txt
-/%{version}%-%{release}/failures-*
+/%{version}%_%{release}/test_results
+/%{version}%_%{release}/test_summary.txt
+/%{version}%_%{release}/failures-*
 %endif
 
 #---------------------------------------------------------------------
@@ -882,10 +882,10 @@ sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{moz
 %endif
 
 %if 0%{?run_firefox_tests}
-%{__mkdir_p} %{buildroot}/%{version}%-%{release}/test_results
-%{__cp} test_results/* %{buildroot}/%{version}%-%{release}/test_results
-%{__cp} test_summary.txt %{buildroot}/%{version}%-%{release}/
-%{__cp} failures-* %{buildroot}/%{version}%-%{release}/ || true
+%{__mkdir_p} %{buildroot}/%{version}%_%{release}/test_results
+%{__cp} test_results/* %{buildroot}/%{version}%_%{release}/test_results
+%{__cp} test_summary.txt %{buildroot}/%{version}%_%{release}/
+%{__cp} failures-* %{buildroot}/%{version}%_%{release}/ || true
 %endif
 
 # Default
