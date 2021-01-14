@@ -1,9 +1,30 @@
-# Set to true if it's going to be submitted as update.
+# Produce a build suitable for release, i.e. use PGO/LTO. You can turn it off
+# when building locally to reduce build time.
 %global release_build     1
+
+# Run Mozilla test suite as a part of compile rpm section. Turn off when
+# building locally and don't want to spend 24 hours waiting for results.
+%global run_firefox_tests 1
+
+# Don't create debuginfo rpm packages. It reduces build time as
+# exctracting debuginfo takes long time.
+%global create_debuginfo  1
+
+# Produce debug (non-optimized) package build. Suitable for debugging only
+# as the build is *very* slow.
 %global debug_build       0
+
+%global system_nss        1
 %global build_with_clang  0
 %global build_with_asan   0
-%global run_firefox_tests 1
+%global test_offscreen    1
+%global test_on_wayland   0
+
+# There are still build problems on s390x, see
+# https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
+# https://bugzilla.redhat.com/show_bug.cgi?id=1897522
+ExcludeArch: s390x
+
 # Temporary disable tests on Rawhide/arm/i686 due to failures
 %if 0%{?fedora} > 33
 %ifarch armv7hl
@@ -13,15 +34,6 @@
 %global run_firefox_tests 0
 %endif
 %endif
-%global test_offscreen    1
-%global test_on_wayland   0
-%global create_debuginfo  1
-%global system_nss        1
-
-# There are still build problems on s390x, see
-# https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
-# https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-ExcludeArch: s390x
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -135,7 +147,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.2
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1021,6 +1033,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jan 14 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-5
+- Removed some failing tests.
+- Spec file tweaks.
+
 * Tue Jan 12 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-4
 - Enabled LTO in Firefox build system.
 

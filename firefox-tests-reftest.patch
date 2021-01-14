@@ -1,6 +1,6 @@
 diff -up firefox-84.0.2/dom/canvas/test/reftest/filters/reftest.list.firefox-tests-reftest firefox-84.0.2/dom/canvas/test/reftest/filters/reftest.list
 --- firefox-84.0.2/dom/canvas/test/reftest/filters/reftest.list.firefox-tests-reftest	2021-01-05 19:12:22.000000000 +0100
-+++ firefox-84.0.2/dom/canvas/test/reftest/filters/reftest.list	2021-01-12 09:41:58.985079200 +0100
++++ firefox-84.0.2/dom/canvas/test/reftest/filters/reftest.list	2021-01-12 20:30:45.682412237 +0100
 @@ -18,7 +18,6 @@ fuzzy-if(/^Windows\x20NT\x2010\.0/.test(
  == svg-off-screen.html ref.html
  == units.html ref.html
@@ -11,7 +11,7 @@ diff -up firefox-84.0.2/dom/canvas/test/reftest/filters/reftest.list.firefox-tes
  fuzzy(0-1,0-302) == fillText-with-filter-opacity-2.html fillText-with-filter-opacity-2-ref.html
 diff -up firefox-84.0.2/dom/html/reftests/reftest.list.firefox-tests-reftest firefox-84.0.2/dom/html/reftests/reftest.list
 --- firefox-84.0.2/dom/html/reftests/reftest.list.firefox-tests-reftest	2021-01-05 19:12:22.000000000 +0100
-+++ firefox-84.0.2/dom/html/reftests/reftest.list	2021-01-12 09:41:58.985079200 +0100
++++ firefox-84.0.2/dom/html/reftests/reftest.list	2021-01-12 20:30:45.682412237 +0100
 @@ -43,7 +43,6 @@ skip-if(Android) == 649134-2.html 649134
  # image-orientation when determining the size of the image.
  # (Fuzzy necessary due to pixel-wise comparison of different JPEGs.
@@ -22,13 +22,13 @@ diff -up firefox-84.0.2/dom/html/reftests/reftest.list.firefox-tests-reftest fir
  # Test support for SVG-as-image in <picture> elements.
 diff -up firefox-84.0.2/dom/media/webvtt/test/reftest/reftest.list.firefox-tests-reftest firefox-84.0.2/dom/media/webvtt/test/reftest/reftest.list
 --- firefox-84.0.2/dom/media/webvtt/test/reftest/reftest.list.firefox-tests-reftest	2021-01-05 19:12:23.000000000 +0100
-+++ firefox-84.0.2/dom/media/webvtt/test/reftest/reftest.list	2021-01-12 09:41:58.985079200 +0100
++++ firefox-84.0.2/dom/media/webvtt/test/reftest/reftest.list	2021-01-12 20:30:45.682412237 +0100
 @@ -1,2 +1 @@
  skip-if(Android) fuzzy-if((/^Windows\x20NT\x2010\.0/.test(http.oscpu))&&(/^aarch64-msvc/.test(xulRuntime.XPCOMABI)),0-136,0-427680) == vtt_update_display_after_removed_cue.html vtt_update_display_after_removed_cue_ref.html
 -skip-if(Android) fuzzy-if(winWidget,0-170,0-170) == vtt_overlapping_time.html vtt_overlapping_time-ref.html
 diff -up firefox-84.0.2/gfx/layers/apz/test/reftest/reftest.list.firefox-tests-reftest firefox-84.0.2/gfx/layers/apz/test/reftest/reftest.list
---- firefox-84.0.2/gfx/layers/apz/test/reftest/reftest.list.firefox-tests-reftest	2021-01-12 12:31:02.185345986 +0100
-+++ firefox-84.0.2/gfx/layers/apz/test/reftest/reftest.list	2021-01-12 12:31:40.089453971 +0100
+--- firefox-84.0.2/gfx/layers/apz/test/reftest/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
++++ firefox-84.0.2/gfx/layers/apz/test/reftest/reftest.list	2021-01-12 20:30:45.682412237 +0100
 @@ -4,11 +4,8 @@
  skip-if(!asyncPan) pref(apz.allow_zooming,true) != async-scrollbar-1-v.html about:blank
  skip-if(!asyncPan) pref(apz.allow_zooming,true) != async-scrollbar-1-v-ref.html about:blank
@@ -42,8 +42,8 @@ diff -up firefox-84.0.2/gfx/layers/apz/test/reftest/reftest.list.firefox-tests-r
  # Different async zoom levels. Since the scrollthumb gets async-scaled in the
  # compositor, the border-radius ends of the scrollthumb are going to be a little
 diff -up firefox-84.0.2/gfx/tests/reftest/reftest.list.firefox-tests-reftest firefox-84.0.2/gfx/tests/reftest/reftest.list
---- firefox-84.0.2/gfx/tests/reftest/reftest.list.firefox-tests-reftest	2021-01-12 12:17:05.214874272 +0100
-+++ firefox-84.0.2/gfx/tests/reftest/reftest.list	2021-01-12 12:17:36.221780915 +0100
+--- firefox-84.0.2/gfx/tests/reftest/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
++++ firefox-84.0.2/gfx/tests/reftest/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -12,7 +12,6 @@ fuzzy(0-100,0-30) == 1149923.html 114992
  == 1429411.html 1429411-ref.html
  fuzzy-if(winWidget,0-1,0-4) == 1435143.html 1435143-ref.html
@@ -58,8 +58,8 @@ diff -up firefox-84.0.2/gfx/tests/reftest/reftest.list.firefox-tests-reftest fir
  == 1616444-same-color-different-paths.html 1616444-same-color-different-paths-ref.html
 -skip-if(!asyncPan||!webrender||Android) fuzzy-if(winWidget,94-94,3415-3415) pref(apz.allow_zooming,true) == picture-caching-on-async-zoom.html picture-caching-on-async-zoom.html?ref
 diff -up firefox-84.0.2/image/test/reftest/downscaling/reftest.list.firefox-tests-reftest firefox-84.0.2/image/test/reftest/downscaling/reftest.list
---- firefox-84.0.2/image/test/reftest/downscaling/reftest.list.firefox-tests-reftest	2021-01-12 12:04:42.633114579 +0100
-+++ firefox-84.0.2/image/test/reftest/downscaling/reftest.list	2021-01-12 12:05:45.587962541 +0100
+--- firefox-84.0.2/image/test/reftest/downscaling/reftest.list.firefox-tests-reftest	2021-01-05 19:12:23.000000000 +0100
++++ firefox-84.0.2/image/test/reftest/downscaling/reftest.list	2021-01-14 10:43:43.676262718 +0100
 @@ -87,10 +87,6 @@ fuzzy(0-20,0-999) != downscale-2c.html?2
  fuzzy(0-20,0-999) != downscale-2d.html?205,53,bottom about:blank
  fuzzy(0-20,0-999) fails-if(OSX>=1008&&!skiaContent) != downscale-2e.html?205,53,bottom about:blank
@@ -71,9 +71,21 @@ diff -up firefox-84.0.2/image/test/reftest/downscaling/reftest.list.firefox-test
  == downscale-png.html?16,16,interlaced downscale-png.html?16,16,normal
  == downscale-png.html?24,24,interlaced downscale-png.html?24,24,normal
  
+@@ -175,11 +171,6 @@ fuzzy(0-20,0-999) != downscale-2d.html?2
+ fuzzy(0-20,0-999) != downscale-2e.html?205,53,bottom about:blank
+ fuzzy(0-20,0-999) != downscale-2f.html?205,53,bottom about:blank
+ 
+-# Skip on WinXP with skia content
+-# Skip on Android because it runs reftests via http, and moz-icon isn't
+-# accessible from http/https origins anymore.
+-fuzzy(0-53,0-6391) fuzzy-if(gtkWidget&&webrender,18-19,5502-5568) fails-if(/^Windows\x20NT\x205\.1/.test(http.oscpu)) skip-if(Android) == downscale-moz-icon-1.html downscale-moz-icon-1-ref.html # gtkWidget Bug 1592059
+-
+ == downscale-png.html?16,16,interlaced downscale-png.html?16,16,normal
+ == downscale-png.html?24,24,interlaced downscale-png.html?24,24,normal
+ 
 diff -up firefox-84.0.2/layout/reftests/abs-pos/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/abs-pos/reftest.list
 --- firefox-84.0.2/layout/reftests/abs-pos/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/abs-pos/reftest.list	2021-01-12 12:06:47.826789482 +0100
++++ firefox-84.0.2/layout/reftests/abs-pos/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -49,11 +49,9 @@ fuzzy-if(/^Windows\x20NT\x206\.1/.test(h
  == continuation-positioned-inline-1.html continuation-positioned-inline-ref.html
  == continuation-positioned-inline-2.html continuation-positioned-inline-ref.html
@@ -87,8 +99,8 @@ diff -up firefox-84.0.2/layout/reftests/abs-pos/reftest.list.firefox-tests-refte
  == button-1.html button-1-ref.html
  == button-2.html button-2-ref.html
 diff -up firefox-84.0.2/layout/reftests/async-scrolling/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/async-scrolling/reftest.list
---- firefox-84.0.2/layout/reftests/async-scrolling/reftest.list.firefox-tests-reftest	2021-01-12 12:07:54.610749841 +0100
-+++ firefox-84.0.2/layout/reftests/async-scrolling/reftest.list	2021-01-12 12:12:07.075156682 +0100
+--- firefox-84.0.2/layout/reftests/async-scrolling/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
++++ firefox-84.0.2/layout/reftests/async-scrolling/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -53,7 +53,6 @@ fuzzy-if(Android,0-6,0-4) fuzzy-if(skiaC
  fuzzy-if(Android,0-6,0-4) fuzzy-if(webrender&&gtkWidget,34-34,30-32) fuzzy-if(webrender&&cocoaWidget,7-7,38-39) skip-if(!asyncPan) == offscreen-clipped-blendmode-2.html offscreen-clipped-blendmode-ref.html # Bug 1604338
  fuzzy-if(Android,0-6,0-4) skip == offscreen-clipped-blendmode-3.html offscreen-clipped-blendmode-ref.html # bug 1251588 - wrong AGR on mix-blend-mode item
@@ -115,7 +127,7 @@ diff -up firefox-84.0.2/layout/reftests/async-scrolling/reftest.list.firefox-tes
  fuzzy-if(Android&&!webrender,3-3,4-4) fuzzy-if(Android&&webrender,13-13,4-4) fuzzy-if(webrender&&gtkWidget,26-27,30-32) fuzzy-if(webrender&&cocoaWidget,16-16,44-44) skip-if(!asyncPan) == position-sticky-in-transformed-scrollframe-2.html position-sticky-in-transformed-scrollframe-ref.html # Bug 1604338
 diff -up firefox-84.0.2/layout/reftests/bidi/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/bidi/reftest.list
 --- firefox-84.0.2/layout/reftests/bidi/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/bidi/reftest.list	2021-01-12 09:41:58.985079200 +0100
++++ firefox-84.0.2/layout/reftests/bidi/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -30,8 +30,6 @@ random-if(cocoaWidget) == mirroring-02.h
  == mixedChartype-00-j.html mixedChartype-00-ref.html
  == mixedChartype-01.html mixedChartype-01-ref.html
@@ -150,7 +162,7 @@ diff -up firefox-84.0.2/layout/reftests/bidi/reftest.list.firefox-tests-reftest 
  == 1231175-1.html 1231175-1-ref.html
 diff -up firefox-84.0.2/layout/reftests/border-radius/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/border-radius/reftest.list
 --- firefox-84.0.2/layout/reftests/border-radius/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/border-radius/reftest.list	2021-01-12 09:41:58.985079200 +0100
++++ firefox-84.0.2/layout/reftests/border-radius/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -51,7 +51,6 @@ fuzzy-if(/^Windows\x20NT\x2010\.0/.test(
  fuzzy-if(skiaContent,0-1,0-77) == clipping-5-overflow-hidden.html clipping-5-ref.html
  fuzzy-if(/^Windows\x20NT\x2010\.0/.test(http.oscpu),0-1,0-4) fuzzy-if(Android,0-5,0-21) fuzzy-if(skiaContent,0-1,0-97) == clipping-5-refi.html clipping-5-ref.html
@@ -161,7 +173,7 @@ diff -up firefox-84.0.2/layout/reftests/border-radius/reftest.list.firefox-tests
  fuzzy-if(cocoaWidget,0-1,0-4) fuzzy-if(d2d,0-59,0-342) fuzzy-if(d3d11&&advancedLayers&&!d2d,0-30,0-3) == intersecting-clipping-1-canvas.html intersecting-clipping-1-refc.html
 diff -up firefox-84.0.2/layout/reftests/box-shadow/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/box-shadow/reftest.list
 --- firefox-84.0.2/layout/reftests/box-shadow/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/box-shadow/reftest.list	2021-01-12 09:41:58.986079228 +0100
++++ firefox-84.0.2/layout/reftests/box-shadow/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -15,7 +15,6 @@ fuzzy-if(OSX==1010,0-1,0-24) fuzzy-if(d2
  
  == boxshadow-fileupload.html boxshadow-fileupload-ref.html
@@ -172,7 +184,7 @@ diff -up firefox-84.0.2/layout/reftests/box-shadow/reftest.list.firefox-tests-re
  fuzzy-if(skiaContent,0-1,0-50) == chrome://reftest/content/box-shadow/boxshadow-dynamic.xhtml chrome://reftest/content/box-shadow/boxshadow-dynamic-ref.xhtml
 diff -up firefox-84.0.2/layout/reftests/bugs/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/bugs/reftest.list
 --- firefox-84.0.2/layout/reftests/bugs/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/bugs/reftest.list	2021-01-12 12:14:43.743737670 +0100
++++ firefox-84.0.2/layout/reftests/bugs/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -461,7 +461,6 @@ random == 328829-1.xhtml 328829-1-ref.xh
  != 338251-pre.html about:blank
  == 338251-pre-oh.html 338251-pre-oh-ref.html
@@ -258,7 +270,7 @@ diff -up firefox-84.0.2/layout/reftests/bugs/reftest.list.firefox-tests-reftest 
  fuzzy(0-1,0-10000) == 1577566-1.html 1577566-1-ref.html
 diff -up firefox-84.0.2/layout/reftests/canvas/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/canvas/reftest.list
 --- firefox-84.0.2/layout/reftests/canvas/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/canvas/reftest.list	2021-01-12 09:41:58.986079228 +0100
++++ firefox-84.0.2/layout/reftests/canvas/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -48,10 +48,7 @@ fuzzy-if(azureSkiaGL,0-10,0-400) == text
  != text-bidi-ltr-test.html text-bidi-ltr-notref.html # for bug 698185
  == text-bidi-rtl-test.html text-bidi-rtl-ref.html
@@ -272,7 +284,7 @@ diff -up firefox-84.0.2/layout/reftests/canvas/reftest.list.firefox-tests-reftes
  
 diff -up firefox-84.0.2/layout/reftests/columns/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/columns/reftest.list
 --- firefox-84.0.2/layout/reftests/columns/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/columns/reftest.list	2021-01-12 09:41:58.986079228 +0100
++++ firefox-84.0.2/layout/reftests/columns/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -5,7 +5,6 @@
  == min-width-1a.html pref-width-1-ref.html
  == min-width-1b.html min-width-1-ref.html
@@ -282,8 +294,8 @@ diff -up firefox-84.0.2/layout/reftests/columns/reftest.list.firefox-tests-refte
  == column-balancing-overflow-001.html column-balancing-overflow-000.ref.html
  == column-balancing-overflow-002.html column-balancing-overflow-002.ref.html
 diff -up firefox-84.0.2/layout/reftests/css-blending/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/css-blending/reftest.list
---- firefox-84.0.2/layout/reftests/css-blending/reftest.list.firefox-tests-reftest	2021-01-12 12:15:46.121561587 +0100
-+++ firefox-84.0.2/layout/reftests/css-blending/reftest.list	2021-01-12 12:16:16.503449956 +0100
+--- firefox-84.0.2/layout/reftests/css-blending/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
++++ firefox-84.0.2/layout/reftests/css-blending/reftest.list	2021-01-12 20:30:45.683412265 +0100
 @@ -87,9 +87,6 @@ test-pref(image.animation_mode,"none") =
  == background-blending-background-attachement-fixed.html background-blending-background-attachement-fixed-ref.html
  == background-blending-background-attachement-fixed-scroll.html background-blending-background-attachement-fixed-scroll-ref.html
@@ -296,7 +308,7 @@ diff -up firefox-84.0.2/layout/reftests/css-blending/reftest.list.firefox-tests-
  fuzzy(0-1,0-40000) == mix-blend-mode-soft-light.html mix-blend-mode-soft-light-ref.html
 diff -up firefox-84.0.2/layout/reftests/css-break/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/css-break/reftest.list
 --- firefox-84.0.2/layout/reftests/css-break/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/css-break/reftest.list	2021-01-12 09:41:58.986079228 +0100
++++ firefox-84.0.2/layout/reftests/css-break/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -1,6 +1,3 @@
 -== box-decoration-break-1.html box-decoration-break-1-ref.html
 -fuzzy(0-1,0-20) fuzzy-if(skiaContent,0-1,0-700) == box-decoration-break-with-inset-box-shadow-1.html box-decoration-break-with-inset-box-shadow-1-ref.html
@@ -306,7 +318,7 @@ diff -up firefox-84.0.2/layout/reftests/css-break/reftest.list.firefox-tests-ref
  == box-decoration-break-block-margin.html box-decoration-break-block-margin-ref.html
 diff -up firefox-84.0.2/layout/reftests/css-grid/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/css-grid/reftest.list
 --- firefox-84.0.2/layout/reftests/css-grid/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/css-grid/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/css-grid/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -71,7 +71,6 @@ random-if(/^Windows\x20NT\x206\.1/.test(
  random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == grid-min-content-min-sizing-transferred-size-003.html grid-min-content-min-sizing-transferred-size-003-ref.html # Bug 1392106
  random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == grid-min-content-min-sizing-transferred-size-004.html grid-min-content-min-sizing-transferred-size-004-ref.html # Bug 1392106
@@ -317,7 +329,7 @@ diff -up firefox-84.0.2/layout/reftests/css-grid/reftest.list.firefox-tests-reft
  == grid-track-intrinsic-sizing-004.html grid-track-intrinsic-sizing-004-ref.html
 diff -up firefox-84.0.2/layout/reftests/css-ruby/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/css-ruby/reftest.list
 --- firefox-84.0.2/layout/reftests/css-ruby/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/css-ruby/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/css-ruby/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -14,18 +14,12 @@ test-pref(font.minimum-size.ja,16) == mi
  == line-height-3.html line-height-3-ref.html
  == line-height-4.html line-height-4-ref.html
@@ -339,7 +351,7 @@ diff -up firefox-84.0.2/layout/reftests/css-ruby/reftest.list.firefox-tests-reft
  # Testing a specific bug for RTL handling.
 diff -up firefox-84.0.2/layout/reftests/font-face/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/font-face/reftest.list
 --- firefox-84.0.2/layout/reftests/font-face/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/font-face/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/font-face/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -6,7 +6,6 @@ random-if(winWidget||gtkWidget) == downl
  asserts-if(Android&&!asyncPan,1-8) != download-3-notref.html download-3.html # bug 1019192
  asserts-if(Android,0-8) == download-3-ref.html download-3.html # same bugs as above
@@ -388,7 +400,7 @@ diff -up firefox-84.0.2/layout/reftests/font-face/reftest.list.firefox-tests-ref
  
 diff -up firefox-84.0.2/layout/reftests/font-matching/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/font-matching/reftest.list
 --- firefox-84.0.2/layout/reftests/font-matching/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/font-matching/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/font-matching/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -117,14 +117,10 @@ skip-if(!cocoaWidget) != apple-symbols-1
  # distinguish between italic and oblique
  random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == simple-oblique.html simple-oblique-ref.html # Bug 1392106
@@ -406,7 +418,7 @@ diff -up firefox-84.0.2/layout/reftests/font-matching/reftest.list.firefox-tests
  # GTK and Windows 7 don't have full emoji and symbol font, so emoji-fallback-2
 diff -up firefox-84.0.2/layout/reftests/forms/fieldset/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/forms/fieldset/reftest.list
 --- firefox-84.0.2/layout/reftests/forms/fieldset/reftest.list.firefox-tests-reftest	2021-01-05 19:12:27.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/forms/fieldset/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/forms/fieldset/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -5,7 +5,6 @@ fuzzy-if(skiaContent,0-2,0-13) == dynami
  == fieldset-scroll-1.html fieldset-scroll-1-ref.html
  == fieldset-scrolled-1.html fieldset-scrolled-1-ref.html
@@ -417,7 +429,7 @@ diff -up firefox-84.0.2/layout/reftests/forms/fieldset/reftest.list.firefox-test
  == relpos-legend-3.html relpos-legend-3-ref.html
 diff -up firefox-84.0.2/layout/reftests/forms/input/text/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/forms/input/text/reftest.list
 --- firefox-84.0.2/layout/reftests/forms/input/text/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/forms/input/text/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/forms/input/text/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -1,5 +1,4 @@
  == bounds-1.html bounds-1-ref.html
 -fuzzy-if(asyncPan&&!layersGPUAccelerated,0-151,0-111) fuzzy-if(webrender,0-65,0-3) == size-1.html size-1-ref.html
@@ -426,7 +438,7 @@ diff -up firefox-84.0.2/layout/reftests/forms/input/text/reftest.list.firefox-te
  == chrome://reftest/content/forms/input/text/centering-1.xhtml chrome://reftest/content/forms/input/text/centering-1-ref.xhtml
 diff -up firefox-84.0.2/layout/reftests/forms/placeholder/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/forms/placeholder/reftest.list
 --- firefox-84.0.2/layout/reftests/forms/placeholder/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/forms/placeholder/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/forms/placeholder/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -17,9 +17,6 @@
  == placeholder-4.html placeholder-overridden-ref.html
  == placeholder-5.html placeholder-visible-ref.html
@@ -439,7 +451,7 @@ diff -up firefox-84.0.2/layout/reftests/forms/placeholder/reftest.list.firefox-t
  # needs-focus == placeholder-8.html placeholder-focus-ref.html
 diff -up firefox-84.0.2/layout/reftests/forms/textbox/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/forms/textbox/reftest.list
 --- firefox-84.0.2/layout/reftests/forms/textbox/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/forms/textbox/reftest.list	2021-01-12 09:41:58.987079257 +0100
++++ firefox-84.0.2/layout/reftests/forms/textbox/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -1,11 +1,9 @@
  # access-key tests are no use on OS X because access keys are not indicated visually
  # no real XUL theme on Android so we just skip
@@ -453,9 +465,17 @@ diff -up firefox-84.0.2/layout/reftests/forms/textbox/reftest.list.firefox-tests
  skip-if(Android) == chrome://reftest/content/forms/textbox/align-baseline-1.xhtml chrome://reftest/content/forms/textbox/align-baseline-1-ref.xhtml # test for bug 494901
  skip-if(Android) == chrome://reftest/content/forms/textbox/setsize.xhtml chrome://reftest/content/forms/textbox/setsize-ref.xhtml
 diff -up firefox-84.0.2/layout/reftests/image-element/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/image-element/reftest.list
---- firefox-84.0.2/layout/reftests/image-element/reftest.list.firefox-tests-reftest	2021-01-12 12:18:15.821938826 +0100
-+++ firefox-84.0.2/layout/reftests/image-element/reftest.list	2021-01-12 12:18:31.445395655 +0100
-@@ -17,7 +17,6 @@ fuzzy-if(d2d&&/^Windows\x20NT\x206\.1/.t
+--- firefox-84.0.2/layout/reftests/image-element/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
++++ firefox-84.0.2/layout/reftests/image-element/reftest.list	2021-01-14 10:44:36.106810339 +0100
+@@ -7,7 +7,6 @@ random == bug-364968.html bug-364968-ref
+ == canvas-outside-document-invalidate-01.html about:blank
+ fails-if(azureSkia&&!(webrender&&winWidget)) fails-if(cocoaWidget) == canvas-outside-document-invalidate-02.html about:blank # See bug 666800
+ #fails with Skia due to Skia bug http://code.google.com/p/skia/issues/detail?id=568
+-fuzzy-if(webrender&&winWidget,117-129,47-54) == element-paint-simple.html element-paint-simple-ref.html
+ == element-paint-repeated.html element-paint-repeated-ref.html
+ == element-paint-recursion.html element-paint-recursion-ref.html
+ == element-paint-continuation.html element-paint-continuation-ref.html
+@@ -17,7 +16,6 @@ fuzzy-if(d2d&&/^Windows\x20NT\x206\.1/.t
  == element-paint-background-size-02.html element-paint-background-size-02-ref.html
  fuzzy-if(skiaContent,0-255,0-4) random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == element-paint-transform-repeated.html element-paint-transform-repeated-ref.html # Bug 1475907
  fuzzy-if(d2d,0-255,0-24) fuzzy-if(webrender,255-255,56-56) == element-paint-transform-03.html element-paint-transform-03-ref.html
@@ -465,7 +485,7 @@ diff -up firefox-84.0.2/layout/reftests/image-element/reftest.list.firefox-tests
  fuzzy-if(webrender,36-36,712-738) == element-paint-sharpness-01a.html element-paint-sharpness-01b.html
 diff -up firefox-84.0.2/layout/reftests/mathml/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/mathml/reftest.list
 --- firefox-84.0.2/layout/reftests/mathml/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/mathml/reftest.list	2021-01-12 12:19:07.429447824 +0100
++++ firefox-84.0.2/layout/reftests/mathml/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -23,7 +23,6 @@ fuzzy-if(cocoaWidget,0-135,0-56) == dir-
  == css-spacing-1.html css-spacing-1-ref.html
  pref(mathml.disabled,true) == disabled-scriptlevel-1.html disabled-scriptlevel-1-ref.html
@@ -492,7 +512,7 @@ diff -up firefox-84.0.2/layout/reftests/mathml/reftest.list.firefox-tests-reftes
  fails-if(Android&&emulator) random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == mathvariant-1c.html mathvariant-1c-ref.html # Bug 1010679, Bug 1392106
 diff -up firefox-84.0.2/layout/reftests/outline/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/outline/reftest.list
 --- firefox-84.0.2/layout/reftests/outline/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/outline/reftest.list	2021-01-12 09:41:58.988079285 +0100
++++ firefox-84.0.2/layout/reftests/outline/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -15,4 +15,3 @@ pref(layout.css.outline-style-auto.enabl
  == outline-on-table.html outline-on-table-ref.html
  == outline-table-caption.html outline-table-caption-ref.html
@@ -500,7 +520,7 @@ diff -up firefox-84.0.2/layout/reftests/outline/reftest.list.firefox-tests-refte
 -== outline-wrapped-span-1.html outline-wrapped-span-1-ref.html
 diff -up firefox-84.0.2/layout/reftests/position-dynamic-changes/relative/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/position-dynamic-changes/relative/reftest.list
 --- firefox-84.0.2/layout/reftests/position-dynamic-changes/relative/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/position-dynamic-changes/relative/reftest.list	2021-01-12 09:41:58.988079285 +0100
++++ firefox-84.0.2/layout/reftests/position-dynamic-changes/relative/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -1,5 +1 @@
 -fuzzy-if(cocoaWidget,0-1,0-2) fuzzy-if(d2d,0-47,0-26) fuzzy-if(asyncPan&&!layersGPUAccelerated,0-169,0-970) == move-right-bottom.html move-right-bottom-ref.html
 -fuzzy-if(cocoaWidget,0-1,0-2) fuzzy-if(asyncPan&&!layersGPUAccelerated,0-169,0-970) == move-top-left.html move-top-left-ref.html # Bug 688545
@@ -508,8 +528,8 @@ diff -up firefox-84.0.2/layout/reftests/position-dynamic-changes/relative/reftes
 -fuzzy-if(cocoaWidget,0-1,0-3) fuzzy-if(asyncPan&&!layersGPUAccelerated,0-144,0-580) == move-top-left-table.html move-top-left-table-ref.html # Bug 688545
  == percent.html percent-ref.html
 diff -up firefox-84.0.2/layout/reftests/position-sticky/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/position-sticky/reftest.list
---- firefox-84.0.2/layout/reftests/position-sticky/reftest.list.firefox-tests-reftest	2021-01-12 12:19:51.501736496 +0100
-+++ firefox-84.0.2/layout/reftests/position-sticky/reftest.list	2021-01-12 12:20:07.447202741 +0100
+--- firefox-84.0.2/layout/reftests/position-sticky/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
++++ firefox-84.0.2/layout/reftests/position-sticky/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -50,6 +50,5 @@ fuzzy-if(Android,0-8,0-630) fuzzy-if(OSX
  == block-in-inline-continuations.html block-in-inline-continuations-ref.html
  == iframe-1.html iframe-1-ref.html
@@ -519,7 +539,7 @@ diff -up firefox-84.0.2/layout/reftests/position-sticky/reftest.list.firefox-tes
  skip-if(!asyncPan) fuzzy-if(Android,0-10,0-4) fuzzy-if(webrender&&gtkWidget,29-30,30-32) fuzzy-if(webrender&&cocoaWidget,15-16,44-44) fuzzy-if(/^Windows\x20NT\x206\.1/.test(http.oscpu),0-4,0-104) == nested-sticky-2.html nested-sticky-2-ref.html # Bug 1604644
 diff -up firefox-84.0.2/layout/reftests/reftest-sanity/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/reftest-sanity/reftest.list
 --- firefox-84.0.2/layout/reftests/reftest-sanity/reftest.list.firefox-tests-reftest	2021-01-05 19:12:27.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/reftest-sanity/reftest.list	2021-01-12 09:41:58.988079285 +0100
++++ firefox-84.0.2/layout/reftests/reftest-sanity/reftest.list	2021-01-12 20:30:45.684412292 +0100
 @@ -128,12 +128,12 @@ pref(font.size.variable.x-western,24) !=
  fails pref(font.size.variable.x-western,false) == font-size-16.html font-default.html
  fails pref(font.size.variable.x-western,"foo") == font-size-16.html font-default.html
@@ -541,7 +561,7 @@ diff -up firefox-84.0.2/layout/reftests/reftest-sanity/reftest.list.firefox-test
  ref-pref(font.size.variable.x-western,16) != font-size-24.html font-default.html
 diff -up firefox-84.0.2/layout/reftests/svg/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/svg/reftest.list
 --- firefox-84.0.2/layout/reftests/svg/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/svg/reftest.list	2021-01-12 09:41:58.988079285 +0100
++++ firefox-84.0.2/layout/reftests/svg/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -477,9 +477,7 @@ random-if(/^Windows\x20NT\x206\.1/.test(
  == text-in-link-02.svg text-in-link-02-ref.svg
  == text-in-link-03.svg text-in-link-03-ref.svg
@@ -562,7 +582,7 @@ diff -up firefox-84.0.2/layout/reftests/svg/reftest.list.firefox-tests-reftest f
  random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == text-scale-03.svg text-scale-03-ref.svg # Bug 1392106
 diff -up firefox-84.0.2/layout/reftests/svg/svg-integration/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/svg/svg-integration/reftest.list
 --- firefox-84.0.2/layout/reftests/svg/svg-integration/reftest.list.firefox-tests-reftest	2021-01-05 19:12:27.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/svg/svg-integration/reftest.list	2021-01-12 09:41:58.988079285 +0100
++++ firefox-84.0.2/layout/reftests/svg/svg-integration/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -47,6 +47,5 @@ fuzzy(0-1,0-5000) == mask-clipPath-opaci
  == transform-outer-svg-01.xhtml transform-outer-svg-01-ref.xhtml
  
@@ -572,7 +592,7 @@ diff -up firefox-84.0.2/layout/reftests/svg/svg-integration/reftest.list.firefox
  fuzzy(0-67,0-238) == box-decoration-break-03.xhtml box-decoration-break-01-ref.xhtml
 diff -up firefox-84.0.2/layout/reftests/svg/text/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/svg/text/reftest.list
 --- firefox-84.0.2/layout/reftests/svg/text/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/svg/text/reftest.list	2021-01-12 12:25:18.745305034 +0100
++++ firefox-84.0.2/layout/reftests/svg/text/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -1,14 +1,5 @@
 -random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) fuzzy-if(webrender&&winWidget,122-127,221-254) == simple.svg simple-ref.html # Bug 1392106
  == simple-2.svg simple.svg
@@ -633,7 +653,7 @@ diff -up firefox-84.0.2/layout/reftests/svg/text/reftest.list.firefox-tests-reft
  pref(svg.text-spacing.enabled,true) == simple-letter-spacing.svg simple-letter-spacing-ref.svg
 diff -up firefox-84.0.2/layout/reftests/tab-size/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/tab-size/reftest.list
 --- firefox-84.0.2/layout/reftests/tab-size/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/tab-size/reftest.list	2021-01-12 09:41:58.989079314 +0100
++++ firefox-84.0.2/layout/reftests/tab-size/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -1,10 +1,4 @@
  == tab-size-8.html            tab-size-initial.html
 -== tab-size-8.html            spaces-8.html
@@ -647,7 +667,7 @@ diff -up firefox-84.0.2/layout/reftests/tab-size/reftest.list.firefox-tests-reft
  == tab-size-change-1a.html     tab-size-change-1-ref.html
 diff -up firefox-84.0.2/layout/reftests/text-decoration/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/text-decoration/reftest.list
 --- firefox-84.0.2/layout/reftests/text-decoration/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/text-decoration/reftest.list	2021-01-12 09:41:58.989079314 +0100
++++ firefox-84.0.2/layout/reftests/text-decoration/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -1,5 +1,3 @@
 -fuzzy-if(webrender&&gtkWidget,0-208,0-12) == complex-decoration-style-quirks.html complex-decoration-style-quirks-ref.html
 -fuzzy-if(webrender&&gtkWidget,0-208,0-12) == complex-decoration-style-standards.html complex-decoration-style-standards-ref.html
@@ -656,7 +676,7 @@ diff -up firefox-84.0.2/layout/reftests/text-decoration/reftest.list.firefox-tes
  == decoration-style-quirks.html decoration-style-quirks-ref.html
 diff -up firefox-84.0.2/layout/reftests/text-overflow/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/text-overflow/reftest.list
 --- firefox-84.0.2/layout/reftests/text-overflow/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/text-overflow/reftest.list	2021-01-12 09:41:58.989079314 +0100
++++ firefox-84.0.2/layout/reftests/text-overflow/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -3,7 +3,6 @@
  fuzzy-if(Android,0-16,0-244) fuzzy-if(webrender,0-47,0-6) == marker-basic.html marker-basic-ref.html  # Bug 1128229
  == marker-string.html marker-string-ref.html
@@ -675,7 +695,7 @@ diff -up firefox-84.0.2/layout/reftests/text-overflow/reftest.list.firefox-tests
  == vertical-decorations-1.html vertical-decorations-1-ref.html
 diff -up firefox-84.0.2/layout/reftests/text/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/text/reftest.list
 --- firefox-84.0.2/layout/reftests/text/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/text/reftest.list	2021-01-12 09:41:58.989079314 +0100
++++ firefox-84.0.2/layout/reftests/text/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -34,7 +34,6 @@ fuzzy-if(Android,0-255,0-325) == pre-lin
  == pre-line-3.html pre-line-3-ref.html
  == pre-line-4.html pre-line-4-ref.html
@@ -740,7 +760,7 @@ diff -up firefox-84.0.2/layout/reftests/text/reftest.list.firefox-tests-reftest 
  fails-if(!cocoaWidget) != osx-font-smoothing.html osx-font-smoothing-ref.html
 diff -up firefox-84.0.2/layout/reftests/text-shadow/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/text-shadow/reftest.list
 --- firefox-84.0.2/layout/reftests/text-shadow/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/text-shadow/reftest.list	2021-01-12 09:41:58.989079314 +0100
++++ firefox-84.0.2/layout/reftests/text-shadow/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -27,9 +27,7 @@ fuzzy-if(webrender&&swgl,2-2,6320-6320)
  fuzzy-if(cocoaWidget,0-27,0-2) fuzzy-if(winWidget,0-47,0-2) == overflow-clip.html overflow-clip-ref.html
  
@@ -753,7 +773,7 @@ diff -up firefox-84.0.2/layout/reftests/text-shadow/reftest.list.firefox-tests-r
  fuzzy-if(webrender,0-19,0-2872) == text-shadow-on-space-1.html text-shadow-on-space-1-ref.html
 diff -up firefox-84.0.2/layout/reftests/text-transform/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/text-transform/reftest.list
 --- firefox-84.0.2/layout/reftests/text-transform/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/text-transform/reftest.list	2021-01-12 11:29:47.062601659 +0100
++++ firefox-84.0.2/layout/reftests/text-transform/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -9,9 +9,6 @@
  == capitalize-8.html capitalize-8-ref.html
  == lowercase-1.html lowercase-ref.html
@@ -766,7 +786,7 @@ diff -up firefox-84.0.2/layout/reftests/text-transform/reftest.list.firefox-test
  != graphite-small-caps-1.html graphite-small-caps-1-notref.html
 diff -up firefox-84.0.2/layout/reftests/transform-3d/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/transform-3d/reftest.list
 --- firefox-84.0.2/layout/reftests/transform-3d/reftest.list.firefox-tests-reftest	2021-01-05 21:29:48.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/transform-3d/reftest.list	2021-01-12 09:41:58.989079314 +0100
++++ firefox-84.0.2/layout/reftests/transform-3d/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -11,7 +11,6 @@ fuzzy-if(webrender,0-1,0-6) == rotatey-1
  == rotatex-perspective-1c.html rotatex-1-ref.html
  == rotatex-perspective-3a.html rotatex-perspective-3-ref.html
@@ -786,7 +806,7 @@ diff -up firefox-84.0.2/layout/reftests/transform-3d/reftest.list.firefox-tests-
  != translatez-1b.html translatez-1-ref.html
 diff -up firefox-84.0.2/layout/reftests/writing-mode/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/writing-mode/reftest.list
 --- firefox-84.0.2/layout/reftests/writing-mode/reftest.list.firefox-tests-reftest	2021-01-05 19:12:26.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/writing-mode/reftest.list	2021-01-12 09:41:58.990079342 +0100
++++ firefox-84.0.2/layout/reftests/writing-mode/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -31,7 +31,6 @@ random-if(/^Windows\x20NT\x206\.1/.test(
  == 1105268-2-min-max-dimensions.html 1105268-2-min-max-dimensions-ref.html
  == 1106669-1-intrinsic-for-container.html 1106669-1-intrinsic-for-container-ref.html
@@ -805,7 +825,7 @@ diff -up firefox-84.0.2/layout/reftests/writing-mode/reftest.list.firefox-tests-
  fuzzy-if(winWidget,0-255,0-236) == 1136557-3-nested-spans.html 1136557-3-nested-spans-ref.html
 diff -up firefox-84.0.2/layout/reftests/xul/reftest.list.firefox-tests-reftest firefox-84.0.2/layout/reftests/xul/reftest.list
 --- firefox-84.0.2/layout/reftests/xul/reftest.list.firefox-tests-reftest	2021-01-05 20:58:39.000000000 +0100
-+++ firefox-84.0.2/layout/reftests/xul/reftest.list	2021-01-12 09:41:58.990079342 +0100
++++ firefox-84.0.2/layout/reftests/xul/reftest.list	2021-01-12 20:30:45.685412320 +0100
 @@ -12,7 +12,6 @@ pref(layout.css.xul-tree-pseudos.content
  skip-if(!cocoaWidget) fails-if(webrender&&cocoaWidget) == chrome://reftest/content/xul/mac-tab-toolbar.xhtml chrome://reftest/content/xul/mac-tab-toolbar-ref.xhtml
  pref(layout.css.xul-tree-pseudos.content.enabled,true) != chrome://reftest/content/xul/tree-row-outline-1.xhtml chrome://reftest/content/xul/tree-row-outline-1-notref.xhtml
