@@ -1035,7 +1035,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Jan 15 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-6
+* Fri Jan 15 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-6
 - Added WebRender fix (mozbz#1681107).
 
 * Thu Jan 14 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-5
