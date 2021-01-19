@@ -147,7 +147,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.2
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -224,6 +224,7 @@ Patch420:        mozilla-1678680.patch
 Patch421:        mozilla-1680505.patch
 Patch422:        mozilla-1631061.patch
 Patch423:        mozilla-1681107.patch
+Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
 
 # Upstream patches from mozbz#1672944
 Patch450:        pw1.patch
@@ -453,6 +454,7 @@ This package contains results of tests executed during build.
 %patch421 -p1 -b .1680505
 #%patch422 -p1 -b .1631061
 %patch423 -p1 -b .1681107
+%patch424 -p1 -b .fix-mzbz-1642949-regression
 
 %patch500 -p1 -b .ffvpx
 
@@ -1035,6 +1037,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 19 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-7
+- Fixed mzbz#164294 regression.
+
 * Fri Jan 15 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-6
 - Added WebRender fix (mozbz#1681107).
 
