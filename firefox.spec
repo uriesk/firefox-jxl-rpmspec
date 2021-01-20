@@ -225,6 +225,7 @@ Patch421:        mozilla-1680505.patch
 Patch422:        mozilla-1631061.patch
 Patch423:        mozilla-1681107.patch
 Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
+Patch425:        mozilla-1645695.patch
 
 # Upstream patches from mozbz#1672944
 Patch450:        pw1.patch
@@ -455,6 +456,7 @@ This package contains results of tests executed during build.
 #%patch422 -p1 -b .1631061
 %patch423 -p1 -b .1681107
 %patch424 -p1 -b .fix-mzbz-1642949-regression
+%patch425 -p1 -b .1645695
 
 %patch500 -p1 -b .ffvpx
 
