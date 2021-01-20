@@ -147,7 +147,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        84.0.2
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -747,6 +747,10 @@ make -C objdir buildsymbols
 %filter_requires_in %{mozappdir}/gmp-clearkey/0.1/
 %filter_provides_in %{mozappdir}/gtk2
 %filter_requires_in %{mozappdir}/gtk2
+# Do not check .so files in an application-specific library directory
+# or any files in the application's data directory for provides
+%global __requires_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
+%global __provides_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
 
 # run Firefox test suite
 %if 0%{?run_firefox_tests}
@@ -1039,6 +1043,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 20 2021 Jan Horak <jhorak@redhat.com> - 84.0.2-8
+- Fixing package requires/provides
+
 * Tue Jan 19 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-7
 - Fixed mzbz#164294 regression.
 
