@@ -1,7 +1,7 @@
-diff -up firefox-84.0/build/moz.configure/lto-pgo.configure.pgo firefox-84.0/build/moz.configure/lto-pgo.configure
---- firefox-84.0/build/moz.configure/lto-pgo.configure.pgo	2020-12-10 15:55:41.932635998 +0100
-+++ firefox-84.0/build/moz.configure/lto-pgo.configure	2020-12-10 16:01:24.674052547 +0100
-@@ -228,13 +228,13 @@ def lto(value, c_compiler, ld64_known_go
+diff -up firefox-85.0/build/moz.configure/lto-pgo.configure.pgo firefox-85.0/build/moz.configure/lto-pgo.configure
+--- firefox-85.0/build/moz.configure/lto-pgo.configure.pgo	2021-01-18 19:29:32.000000000 +0100
++++ firefox-85.0/build/moz.configure/lto-pgo.configure	2021-01-21 10:23:59.499111297 +0100
+@@ -240,13 +240,13 @@ def lto(
                  cflags.append("-flto")
                  ldflags.append("-flto")
              else:
@@ -18,18 +18,9 @@ diff -up firefox-84.0/build/moz.configure/lto-pgo.configure.pgo firefox-84.0/bui
              # With clang-cl, -flto can only be used with -c or -fuse-ld=lld.
              # AC_TRY_LINKs during configure don't have -c, so pass -fuse-ld=lld.
              cflags.append("-fuse-ld=lld")
-@@ -268,7 +268,7 @@ def lto(value, c_compiler, ld64_known_go
-             if len(value) and value[0].lower() == "full":
-                 cflags.append("-flto")
-             else:
--                cflags.append("-flto=thin")
-+                cflags.append("-flto")
-             cflags.append("-flifetime-dse=1")
- 
-             ldflags.append("-flto=%s" % num_cores)
-diff -up firefox-84.0/build/pgo/profileserver.py.pgo firefox-84.0/build/pgo/profileserver.py
---- firefox-84.0/build/pgo/profileserver.py.pgo	2020-12-07 23:32:58.000000000 +0100
-+++ firefox-84.0/build/pgo/profileserver.py	2020-12-10 16:05:16.278668657 +0100
+diff -up firefox-85.0/build/pgo/profileserver.py.pgo firefox-85.0/build/pgo/profileserver.py
+--- firefox-85.0/build/pgo/profileserver.py.pgo	2021-01-18 19:29:32.000000000 +0100
++++ firefox-85.0/build/pgo/profileserver.py	2021-01-21 10:23:59.499111297 +0100
 @@ -11,7 +11,7 @@ import glob
  import subprocess
  
@@ -76,9 +67,9 @@ diff -up firefox-84.0/build/pgo/profileserver.py.pgo firefox-84.0/build/pgo/prof
          llvm_profdata = env.get("LLVM_PROFDATA")
          if llvm_profdata:
              profraw_files = glob.glob("*.profraw")
-diff -up firefox-84.0/build/unix/mozconfig.unix.pgo firefox-84.0/build/unix/mozconfig.unix
---- firefox-84.0/build/unix/mozconfig.unix.pgo	2020-12-07 23:32:58.000000000 +0100
-+++ firefox-84.0/build/unix/mozconfig.unix	2020-12-10 15:55:41.933636031 +0100
+diff -up firefox-85.0/build/unix/mozconfig.unix.pgo firefox-85.0/build/unix/mozconfig.unix
+--- firefox-85.0/build/unix/mozconfig.unix.pgo	2021-01-18 19:29:32.000000000 +0100
++++ firefox-85.0/build/unix/mozconfig.unix	2021-01-21 10:23:59.499111297 +0100
 @@ -6,6 +6,15 @@ if [ -n "$FORCE_GCC" ]; then
      CC="$MOZ_FETCHES_DIR/gcc/bin/gcc"
      CXX="$MOZ_FETCHES_DIR/gcc/bin/g++"
@@ -95,34 +86,19 @@ diff -up firefox-84.0/build/unix/mozconfig.unix.pgo firefox-84.0/build/unix/mozc
      # We want to make sure we use binutils and other binaries in the tooltool
      # package.
      mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$PATH"
-diff -up firefox-84.0/extensions/spellcheck/src/moz.build.pgo firefox-84.0/extensions/spellcheck/src/moz.build
---- firefox-84.0/extensions/spellcheck/src/moz.build.pgo	2020-12-10 15:55:41.933636031 +0100
-+++ firefox-84.0/extensions/spellcheck/src/moz.build	2020-12-10 16:16:05.897011122 +0100
+diff -up firefox-85.0/extensions/spellcheck/src/moz.build.pgo firefox-85.0/extensions/spellcheck/src/moz.build
+--- firefox-85.0/extensions/spellcheck/src/moz.build.pgo	2021-01-18 19:29:38.000000000 +0100
++++ firefox-85.0/extensions/spellcheck/src/moz.build	2021-01-21 10:23:59.499111297 +0100
 @@ -31,3 +31,5 @@ EXPORTS.mozilla += [
  
  if CONFIG["CC_TYPE"] in ("clang", "gcc"):
      CXXFLAGS += ["-Wno-error=shadow"]
 +
 +CXXFLAGS += ['-fno-devirtualize']
-diff -up firefox-84.0/python/mozbuild/mozbuild/build_commands.py.pgo firefox-84.0/python/mozbuild/mozbuild/build_commands.py
---- firefox-84.0/python/mozbuild/mozbuild/build_commands.py.pgo	2020-12-10 15:55:41.933636031 +0100
-+++ firefox-84.0/python/mozbuild/mozbuild/build_commands.py	2020-12-10 16:14:30.017272529 +0100
-@@ -126,9 +126,8 @@ class Build(MachCommandBase):
-                 return status
- 
-             pgo_env = os.environ.copy()
--            pgo_env["LLVM_PROFDATA"] = instr.config_environment.substs.get(
--                "LLVM_PROFDATA"
--            )
-+            if instr.config_environment.substs.get('CC_TYPE') != 'gcc':
-+                pgo_env["LLVM_PROFDATA"] = instr.config_environment.substs.get("LLVM_PROFDATA")
-             pgo_env["JARLOG_FILE"] = mozpath.join(orig_topobjdir, "jarlog/en-US.log")
-             pgo_cmd = [
-                 instr.virtualenv_manager.python_path,
-diff -up firefox-84.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-84.0/toolkit/components/terminator/nsTerminator.cpp
---- firefox-84.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2020-12-07 23:33:08.000000000 +0100
-+++ firefox-84.0/toolkit/components/terminator/nsTerminator.cpp	2020-12-10 15:55:41.933636031 +0100
-@@ -418,6 +418,11 @@ void nsTerminator::StartWatchdog() {
+diff -up firefox-85.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-85.0/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-85.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2021-01-18 19:31:16.000000000 +0100
++++ firefox-85.0/toolkit/components/terminator/nsTerminator.cpp	2021-01-21 10:23:59.500111327 +0100
+@@ -430,6 +430,11 @@ void nsTerminator::StartWatchdog() {
    }
  #endif
  
