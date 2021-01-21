@@ -220,8 +220,6 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
-Patch420:        mozilla-1678680.patch
-Patch421:        mozilla-1680505.patch
 Patch422:        mozilla-1631061.patch
 Patch423:        mozilla-1681107.patch
 Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
