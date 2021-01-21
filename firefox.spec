@@ -14,7 +14,7 @@
 # as the build is *very* slow.
 %global debug_build       0
 
-%global system_nss        1
+%global system_nss        0
 %global build_with_clang  0
 %global build_with_asan   0
 %global test_offscreen    1
@@ -146,13 +146,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        84.0.2
-Release:        7%{?pre_tag}%{?dist}
+Version:        85.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210106.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210120.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -226,19 +226,7 @@ Patch422:        mozilla-1631061.patch
 Patch423:        mozilla-1681107.patch
 Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
 Patch425:        mozilla-1645695.patch
-
-# Upstream patches from mozbz#1672944
-Patch450:        pw1.patch
-Patch451:        pw2.patch
-Patch452:        pw3.patch
-Patch453:        pw4.patch
-Patch454:        pw5.patch
-Patch455:        pw6.patch
-
-Patch500:        ffvpx.patch
-
-#VA-API patches
-Patch585:        firefox-vaapi-extra-frames.patch
+Patch426:        mozilla-1687931.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -414,7 +402,7 @@ This package contains results of tests executed during build.
 %endif
 %patch3  -p1 -b .arm
 %patch44 -p1 -b .build-arm-libopus
-%patch46 -p1 -b .nss-version
+#%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
 %patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
@@ -445,24 +433,10 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 %patch418 -p1 -b .1556931-s390x-hidden-syms
 
-#%patch450 -p1 -b .pw1
-#%patch451 -p1 -b .pw2
-#%patch452 -p1 -b .pw3
-#%patch453 -p1 -b .pw4
-#%patch454 -p1 -b .pw5
-%patch455 -p1 -b .pw6
-%patch420 -p1 -b .1678680
-%patch421 -p1 -b .1680505
-#%patch422 -p1 -b .1631061
 %patch423 -p1 -b .1681107
 %patch424 -p1 -b .fix-mzbz-1642949-regression
 %patch425 -p1 -b .1645695
-
-%patch500 -p1 -b .ffvpx
-
-# VA-API fixes
-# merged with ffvpx
-# %patch585 -p1 -b .firefox-vaapi-extra-frames
+%patch426 -p1 -b .1687931
 
 # PGO patches
 %if %{build_with_pgo}
@@ -747,6 +721,10 @@ make -C objdir buildsymbols
 %filter_requires_in %{mozappdir}/gmp-clearkey/0.1/
 %filter_provides_in %{mozappdir}/gtk2
 %filter_requires_in %{mozappdir}/gtk2
+# Do not check .so files in an application-specific library directory
+# or any files in the application's data directory for provides
+%global __requires_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
+%global __provides_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
 
 # run Firefox test suite
 %if 0%{?run_firefox_tests}
@@ -1039,6 +1017,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jan 20 2021 Martin Stransky <stransky@redhat.com> - 85.0-1
+- Update to 85.0.
+
+* Wed Jan 20 2021 Jan Horak <jhorak@redhat.com> - 84.0.2-8
+- Fixing package requires/provides
+
 * Tue Jan 19 2021 Martin Stransky <stransky@redhat.com> - 84.0.2-7
 - Fixed mzbz#164294 regression.
 

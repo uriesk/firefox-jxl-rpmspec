@@ -1,6 +1,6 @@
-diff -up firefox-84.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-84.0/media/ffvpx/libavcodec/codec_list.c
---- firefox-84.0/media/ffvpx/libavcodec/codec_list.c.1667096	2020-12-07 23:33:03.000000000 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/codec_list.c	2020-12-10 12:57:14.722762321 +0100
+diff -up firefox-85.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-85.0/media/ffvpx/libavcodec/codec_list.c
+--- firefox-85.0/media/ffvpx/libavcodec/codec_list.c.1667096	2021-01-18 19:29:51.000000000 +0100
++++ firefox-85.0/media/ffvpx/libavcodec/codec_list.c	2021-01-21 09:56:17.637831802 +0100
 @@ -11,4 +11,8 @@ static const AVCodec * const codec_list[
  #if CONFIG_MP3_DECODER
      &ff_mp3_decoder,
@@ -10,9 +10,9 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-84.0/m
 +#endif
 +
      NULL };
-diff -up firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c
---- firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096	2020-12-10 12:57:14.722762321 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c	2020-12-10 12:57:14.722762321 +0100
+diff -up firefox-85.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-85.0/media/ffvpx/libavcodec/libfdk-aacdec.c
+--- firefox-85.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096	2021-01-21 09:56:17.638831832 +0100
++++ firefox-85.0/media/ffvpx/libavcodec/libfdk-aacdec.c	2021-01-21 09:56:17.638831832 +0100
 @@ -0,0 +1,409 @@
 +/*
 + * AAC decoder wrapper
@@ -423,12 +423,12 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-84.
 +                      FF_CODEC_CAP_INIT_CLEANUP,
 +    .wrapper_name   = "libfdk",
 +};
-diff -up firefox-84.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-84.0/media/ffvpx/libavcodec/moz.build
---- firefox-84.0/media/ffvpx/libavcodec/moz.build.1667096	2020-12-08 00:35:05.000000000 +0100
-+++ firefox-84.0/media/ffvpx/libavcodec/moz.build	2020-12-10 12:57:14.722762321 +0100
-@@ -97,6 +97,12 @@ if not CONFIG['MOZ_FFVPX_AUDIOONLY']:
-         'vp9recon.c'
-     ]
+diff -up firefox-85.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-85.0/media/ffvpx/libavcodec/moz.build
+--- firefox-85.0/media/ffvpx/libavcodec/moz.build.1667096	2021-01-21 09:56:17.638831832 +0100
++++ firefox-85.0/media/ffvpx/libavcodec/moz.build	2021-01-21 10:06:18.958716728 +0100
+@@ -104,6 +104,12 @@ if not CONFIG['MOZ_FFVPX_AUDIOONLY']:
+         ]
+         USE_LIBS += ['mozva']
  
 +if CONFIG['MOZ_FDK_AAC']:
 +    SOURCES += [
@@ -439,9 +439,9 @@ diff -up firefox-84.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-84.0/medi
  if CONFIG['MOZ_LIBAV_FFT']:
      SOURCES += [
          'avfft.c',
-diff -up firefox-84.0/toolkit/moz.configure.1667096 firefox-84.0/toolkit/moz.configure
---- firefox-84.0/toolkit/moz.configure.1667096	2020-12-10 12:57:14.723762349 +0100
-+++ firefox-84.0/toolkit/moz.configure	2020-12-10 12:58:29.051855203 +0100
+diff -up firefox-85.0/toolkit/moz.configure.1667096 firefox-85.0/toolkit/moz.configure
+--- firefox-85.0/toolkit/moz.configure.1667096	2021-01-21 09:56:17.603830793 +0100
++++ firefox-85.0/toolkit/moz.configure	2021-01-21 09:56:17.638831832 +0100
 @@ -1868,6 +1868,14 @@ with only_when(compile_environment):
      set_define("MOZ_LIBAV_FFT", depends(when=libav_fft)(lambda: True))
      set_config("LIBAV_FFT_ASFLAGS", libav_fft.flags)
