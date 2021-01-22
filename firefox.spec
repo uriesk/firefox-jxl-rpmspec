@@ -224,7 +224,6 @@ Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch422:        mozilla-1631061.patch
 Patch423:        mozilla-1681107.patch
 Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
-Patch425:        mozilla-1645695.patch
 Patch426:        mozilla-1687931.patch
 
 # PGO/LTO patches
@@ -434,7 +433,6 @@ This package contains results of tests executed during build.
 
 %patch423 -p1 -b .1681107
 %patch424 -p1 -b .fix-mzbz-1642949-regression
-%patch425 -p1 -b .1645695
 %patch426 -p1 -b .1687931
 
 # PGO patches
