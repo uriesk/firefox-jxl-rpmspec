@@ -722,6 +722,7 @@ make -C objdir buildsymbols
 # or any files in the application's data directory for provides
 %global __requires_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
 %global __provides_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
+%global __requires_exclude ^libxul.*$
 
 # run Firefox test suite
 %if 0%{?run_firefox_tests}
