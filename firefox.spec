@@ -52,6 +52,7 @@ ExcludeArch: s390x
 %if !%{create_debuginfo}
 %define _unpackaged_files_terminate_build 0
 %global debug_package %{nil}
+%global enable_mozilla_crashreporter 0
 %endif
 
 %global system_ffi        1
