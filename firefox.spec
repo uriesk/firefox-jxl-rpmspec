@@ -14,7 +14,7 @@
 # as the build is *very* slow.
 %global debug_build       0
 
-%global system_nss        0
+%global system_nss        1
 %global build_with_clang  0
 %global build_with_asan   0
 %global test_offscreen    1
@@ -115,7 +115,7 @@ ExcludeArch: s390x
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.59
+%global nss_version 3.60
 %global nss_build_version %{nss_version}
 %endif
 
@@ -148,7 +148,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        85.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1017,7 +1017,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Jan 20 2021 Martin Stransky <stransky@redhat.com> - 85.0-1
+* Wed Jan 20 2021 Martin Stransky <stransky@redhat.com> - 85.0-2
 - Update to 85.0.
 
 * Wed Jan 20 2021 Jan Horak <jhorak@redhat.com> - 84.0.2-8
