@@ -225,6 +225,7 @@ Patch422:        mozilla-1631061.patch
 Patch423:        mozilla-1681107.patch
 Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
 Patch426:        mozilla-1687931.patch
+Patch427:        mozilla-1678247.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -434,6 +435,7 @@ This package contains results of tests executed during build.
 %patch423 -p1 -b .1681107
 %patch424 -p1 -b .fix-mzbz-1642949-regression
 %patch426 -p1 -b .1687931
+%patch427 -p1 -b .1678247
 
 # PGO patches
 %if %{build_with_pgo}
@@ -722,6 +724,7 @@ make -C objdir buildsymbols
 # or any files in the application's data directory for provides
 %global __requires_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
 %global __provides_exclude_from ^(%{_libdir}/%{name}/.*\\.so.*|%{_libdir}/%{name}/gmp-clearkey/0.1/.*\\.so.*|%{_libdir}/%{name}/gtk2/.*\\.so.*)$
+%global __requires_exclude ^libxul.*$
 
 # run Firefox test suite
 %if 0%{?run_firefox_tests}
@@ -735,7 +738,7 @@ tar xf %{SOURCE37}
 cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} %{SOURCE43} .
 mkdir -p test_results
 %if %{test_on_wayland}
-./run-tests-wayland || true
+./run-tests-wayland %{test_offscreen} || true
 %else
 ./run-tests-x11 || true
 %endif
