@@ -148,7 +148,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        85.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -226,6 +226,7 @@ Patch423:        mozilla-1681107.patch
 Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
 Patch426:        mozilla-1687931.patch
 Patch427:        mozilla-1678247.patch
+Patch428:        mozilla-1679933.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -436,6 +437,7 @@ This package contains results of tests executed during build.
 %patch424 -p1 -b .fix-mzbz-1642949-regression
 %patch426 -p1 -b .1687931
 %patch427 -p1 -b .1678247
+%patch428 -p1 -b .1679933
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1017,6 +1019,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 26 2021 Martin Stransky <stransky@redhat.com> - 85.0-4
+- Added fix for mozbz#1679933 - startup crash
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 85.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
 * Wed Jan 20 2021 Martin Stransky <stransky@redhat.com> - 85.0-2
 - Update to 85.0.
 
