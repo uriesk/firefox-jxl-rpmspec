@@ -148,7 +148,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        85.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -287,6 +287,7 @@ Requires:       mozilla-filesystem
 Recommends:     mozilla-openh264 >= 2.1.1
 Recommends:     libva
 Requires:       p11-kit-trust
+Requires:       dbus-glib
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
@@ -1019,6 +1020,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jan 28 2021 Martin Stransky <stransky@redhat.com> - 85.0-5
+- Add dbus-glib requires.
+
 * Tue Jan 26 2021 Martin Stransky <stransky@redhat.com> - 85.0-4
 - Added fix for mozbz#1679933 - startup crash
 
