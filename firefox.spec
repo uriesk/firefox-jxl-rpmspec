@@ -25,6 +25,12 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
+# Exclude ARM due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=1922599
+%if 0%{?fedora} > 33
+ExcludeArch: armv7hl
+%endif
+
 # Temporary disable tests on Rawhide/arm/i686 due to failures
 %if 0%{?fedora} > 33
 %ifarch armv7hl
@@ -75,6 +81,11 @@ ExcludeArch: s390x
 %if %{release_build}
 %global build_with_pgo    1
 %endif
+%endif
+# Disable PGO on Rawhide due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=1922600
+%if 0%{?fedora} > 33
+%global build_with_pgo    0
 %endif
 %if 0%{?flatpak}
 %global build_with_pgo    0
