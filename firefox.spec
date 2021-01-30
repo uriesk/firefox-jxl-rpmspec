@@ -221,12 +221,13 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
-Patch422:        mozilla-1631061.patch
 Patch423:        mozilla-1681107.patch
 Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
 Patch426:        mozilla-1687931.patch
 Patch427:        mozilla-1678247.patch
 Patch428:        mozilla-1679933.patch
+Patch429:        mozilla-1631061-1.patch
+Patch430:        mozilla-1631061-2.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -439,6 +440,8 @@ This package contains results of tests executed during build.
 %patch426 -p1 -b .1687931
 %patch427 -p1 -b .1678247
 %patch428 -p1 -b .1679933
+%patch429 -p1 -b .1631061
+%patch430 -p1 -b .1631061
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1020,6 +1023,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jan 28 2021 Martin Stransky <stransky@redhat.com> - 85.0-7
+- Added clipboard fix mozbz#1631061.
+
 * Thu Jan 28 2021 Martin Stransky <stransky@redhat.com> - 85.0-5
 - Add dbus-glib requires.
 
