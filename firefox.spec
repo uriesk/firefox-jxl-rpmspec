@@ -61,6 +61,11 @@ ExcludeArch: armv7hl
 %if 0%{?flatpak}
 %global enable_mozilla_crashreporter 0
 %endif
+# Temporary disabled due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=1922744
+%if 0%{?fedora} > 33
+%global enable_mozilla_crashreporter 0
+%endif
 %if !%{create_debuginfo}
 %define _unpackaged_files_terminate_build 0
 %global debug_package %{nil}
