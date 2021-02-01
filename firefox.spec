@@ -240,6 +240,7 @@ Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        disable-openh264-download.patch
 Patch229:        firefox-nss-addon-hack.patch
+Patch230:        firefox-kde-webrender.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -453,6 +454,7 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .disable-openh264-download
 %patch229 -p1 -b .firefox-nss-addon-hack
+%patch230 -p1 -b .firefox-kde-webrender
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
