@@ -141,8 +141,8 @@ ExcludeArch: armv7hl
 %global nss_build_version %{nss_version}
 %endif
 
-%global mozappdir     %{_libdir}/%{name}
-%global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
+%global mozappdir     %{_libdir}/firefox
+%global mozappdirdev  %{_libdir}/firefox-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
 %global tarballdir    firefox-%{version}
 
