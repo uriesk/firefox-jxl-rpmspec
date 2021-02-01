@@ -141,8 +141,8 @@ ExcludeArch: armv7hl
 %global nss_build_version %{nss_version}
 %endif
 
-%global mozappdir     %{_libdir}/%{name}
-%global mozappdirdev  %{_libdir}/%{name}-devel-%{version}
+%global mozappdir     %{_libdir}/firefox
+%global mozappdirdev  %{_libdir}/firefox-devel-%{version}
 %global langpackdir   %{mozappdir}/langpacks
 %global tarballdir    firefox-%{version}
 
@@ -174,7 +174,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        85.0
-Release:        8%{?pre_tag}%{?dist}
+Release:        9%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -240,6 +240,7 @@ Patch226:        rhbz-1354671.patch
 Patch227:        firefox-locale-debug.patch
 Patch228:        disable-openh264-download.patch
 Patch229:        firefox-nss-addon-hack.patch
+Patch230:        firefox-kde-webrender.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -453,6 +454,7 @@ This package contains results of tests executed during build.
 %patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .disable-openh264-download
 %patch229 -p1 -b .firefox-nss-addon-hack
+%patch230 -p1 -b .firefox-kde-webrender
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
@@ -1040,6 +1042,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Jan 30 2021 Martin Stransky <stransky@redhat.com> - 85.0-9
+- Enable WebRender on KDE/Wayland and AMD/Intel drivers.
+
 * Sat Jan 30 2021 Martin Stransky <stransky@redhat.com> - 85.0-8
 - Enable Wayland backend on Fedora 34/KDE/Plasma (and other compositors)
   by default (https://bugzilla.redhat.com/show_bug.cgi?id=1922608).
