@@ -173,13 +173,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        85.0
-Release:        9%{?pre_tag}%{?dist}
+Version:        85.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210120.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210208.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -255,6 +255,7 @@ Patch427:        mozilla-1678247.patch
 Patch428:        mozilla-1679933.patch
 Patch429:        mozilla-1631061-1.patch
 Patch430:        mozilla-1631061-2.patch
+Patch431:        mozilla-1690152.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -469,6 +470,7 @@ This package contains results of tests executed during build.
 %patch428 -p1 -b .1679933
 %patch429 -p1 -b .1631061
 %patch430 -p1 -b .1631061
+%patch431 -p1 -b .1690152
 
 # PGO patches
 %if %{build_with_pgo}
@@ -929,6 +931,9 @@ mkdir -p %{buildroot}%{_datadir}/metainfo
 mkdir -p %{buildroot}%{_datadir}/gnome-shell/search-providers
 %{__cp} %{SOURCE34} %{buildroot}%{_datadir}/gnome-shell/search-providers
 
+# Remove gtk2 support as flash plugin is no longer supported
+rm -rf %{buildroot}%{mozappdir}/gtk2/
+
 # Remove copied libraries to speed up build
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozjs.so
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozalloc.so
@@ -1023,7 +1028,6 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/browser/crashreporter-override.ini
 %endif
 %{mozappdir}/*.so
-%{mozappdir}/gtk2/*.so
 %{mozappdir}/defaults/pref/channel-prefs.js
 %{mozappdir}/dependentlibs.list
 %{mozappdir}/dictionaries
@@ -1042,6 +1046,15 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 08 2021 Martin Stransky <stransky@redhat.com> - 85.0.1-1
+- Updated to 85.0.1
+
+* Wed Feb 03 2021 Dan Horák <dan[at]danny.cz> - 85.0-11
+- Fix parameter passing on ppc64le (mozb#1690152)
+
+* Tue Feb 02 2021 Kalev Lember <klember@redhat.com> - 85.0-10
+- Remove gtk2 support as flash plugin is no longer supported
+
 * Sat Jan 30 2021 Martin Stransky <stransky@redhat.com> - 85.0-9
 - Enable WebRender on KDE/Wayland and AMD/Intel drivers.
 
