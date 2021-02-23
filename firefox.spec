@@ -174,7 +174,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        85.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -336,12 +336,6 @@ BuildRequires:  pkgconfig(libffi)
 %if 0%{?use_xvfb}
 BuildRequires:  xorg-x11-server-Xvfb
 %endif
-%if 0%{?test_on_wayland}
-BuildRequires:  mutter
-BuildRequires:  gsettings-desktop-schemas
-BuildRequires:  gnome-settings-daemon
-BuildRequires:  mesa-dri-drivers
-%endif
 BuildRequires:  rust
 BuildRequires:  cargo
 BuildRequires:  clang-devel
@@ -351,11 +345,52 @@ BuildRequires:  libasan-static
 %endif
 BuildRequires:  perl-interpreter
 BuildRequires:  fdk-aac-free-devel
+%if 0%{?test_on_wayland}
+BuildRequires:  mutter
+BuildRequires:  gsettings-desktop-schemas
+BuildRequires:  gnome-settings-daemon
+BuildRequires:  mesa-dri-drivers
+%endif
 %if 0%{?run_firefox_tests}
 BuildRequires:  nss-tools
 BuildRequires:  python2.7
+BuildRequires:  dejavu-sans-mono-fonts
+BuildRequires:  dejavu-sans-fonts
+BuildRequires:  dejavu-serif-fonts
+BuildRequires:  mesa-dri-drivers
+# ----------------------------------------
+BuildRequires:  liberation-fonts-common
+BuildRequires:  liberation-mono-fonts
+BuildRequires:  liberation-sans-fonts
+BuildRequires:  liberation-serif-fonts
+# ----------------------------------
+BuildRequires:  google-carlito-fonts
+BuildRequires:  google-droid-sans-fonts
+BuildRequires:  google-noto-fonts-common
+BuildRequires:  google-noto-cjk-fonts-common
+BuildRequires:  google-noto-sans-cjk-ttc-fonts
+BuildRequires:  google-noto-sans-gurmukhi-fonts
+BuildRequires:  google-noto-sans-fonts
+BuildRequires:  google-noto-emoji-color-fonts
+# -----------------------------------
+BuildRequires:  khmeros-fonts-common
+BuildRequires:  thai-scalable-fonts-common
+BuildRequires:  thai-scalable-waree-fonts
+BuildRequires:  khmeros-base-fonts
+BuildRequires:  jomolhari-fonts
+# ----------------------------------
+BuildRequires:  lohit-tamil-fonts
+BuildRequires:  lohit-telugu-fonts
+# ----------------------------------
+BuildRequires:  paktype-naskh-basic-fonts
+BuildRequires:  pt-sans-fonts
+BuildRequires:  smc-meera-fonts
+BuildRequires:  stix-fonts
+BuildRequires:  abattis-cantarell-fonts
+BuildRequires:  xorg-x11-fonts-ISO8859-1-100dpi
+BuildRequires:  xorg-x11-fonts-misc
 %endif
-BuildRequires: make
+BuildRequires:  make
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
@@ -1046,6 +1081,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Feb 23 2021 Martin Stransky <stransky@redhat.com> - 85.0.1-2
+- Fixed some reftest run in Mock
+
 * Mon Feb 08 2021 Martin Stransky <stransky@redhat.com> - 85.0.1-1
 - Updated to 85.0.1
 
