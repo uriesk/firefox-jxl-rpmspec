@@ -373,7 +373,8 @@ BuildRequires:  google-noto-sans-gurmukhi-fonts
 BuildRequires:  google-noto-sans-fonts
 BuildRequires:  google-noto-emoji-color-fonts
 # -----------------------------------
-BuildRequires:  khmeros-fonts-common
+# faild to build in Koji
+#BuildRequires:  khmeros-fonts-common
 BuildRequires:  thai-scalable-fonts-common
 BuildRequires:  thai-scalable-waree-fonts
 BuildRequires:  khmeros-base-fonts
