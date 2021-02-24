@@ -14,7 +14,7 @@
 # as the build is *very* slow.
 %global debug_build       0
 
-%global system_nss        1
+%global system_nss        0
 %global build_with_clang  0
 %global build_with_asan   0
 %global test_offscreen    1
@@ -173,13 +173,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        85.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        86.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210208.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210222.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -225,8 +225,12 @@ Patch53:        firefox-gcc-build.patch
 # This should be fixed in Firefox 83
 Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
+Patch56:        mozilla-1686888.patch
 
 # Test patches
+# Generate without context by
+# GENDIFF_DIFF_ARGS=-U0 gendiff firefox-xxxx .firefox-tests-xpcshell
+# GENDIFF_DIFF_ARGS=-U0 gendiff firefox-xxxx .firefox-tests-reftest
 Patch100:       firefox-tests-xpcshell.patch
 Patch101:       firefox-tests-reftest.patch
 
@@ -248,14 +252,9 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch418:        mozilla-1556931-s390x-hidden-syms.patch
-Patch423:        mozilla-1681107.patch
-Patch424:        firefox-wayland-fix-mzbz-1642949-regression.patch
-Patch426:        mozilla-1687931.patch
-Patch427:        mozilla-1678247.patch
-Patch428:        mozilla-1679933.patch
 Patch429:        mozilla-1631061-1.patch
 Patch430:        mozilla-1631061-2.patch
-Patch431:        mozilla-1690152.patch
+Patch431:        mozilla-1683578.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -474,6 +473,7 @@ This package contains results of tests executed during build.
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
+%patch56 -p1 -b .1686888-dump-syms
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -499,14 +499,9 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 %patch418 -p1 -b .1556931-s390x-hidden-syms
 
-%patch423 -p1 -b .1681107
-%patch424 -p1 -b .fix-mzbz-1642949-regression
-%patch426 -p1 -b .1687931
-%patch427 -p1 -b .1678247
-%patch428 -p1 -b .1679933
 %patch429 -p1 -b .1631061
 %patch430 -p1 -b .1631061
-%patch431 -p1 -b .1690152
+%patch431 -p1 -b .1683578
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1082,6 +1077,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Feb 23 2021 Martin Stransky <stransky@redhat.com> - 86.0-1
+- Update to 86.0
+- Disabled Wayland backend on KDE/Plasma
+
 * Tue Feb 23 2021 Martin Stransky <stransky@redhat.com> - 85.0.1-2
 - Fixed some reftest run in Mock
 

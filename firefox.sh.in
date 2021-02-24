@@ -74,9 +74,11 @@ if ! [ $MOZ_DISABLE_WAYLAND ]; then
   if [ "$XDG_CURRENT_DESKTOP" == "GNOME" ]; then
     export MOZ_ENABLE_WAYLAND=1
   fi
-  if __DEFAULT_WAYLAND__ && [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-    export MOZ_ENABLE_WAYLAND=1
-  fi
+##  Remove comments to enable Wayland on KDE/Sway
+##
+##  if __DEFAULT_WAYLAND__ && [ "$XDG_SESSION_TYPE" == "wayland" ]; then
+##    export MOZ_ENABLE_WAYLAND=1
+##  fi
 fi
 
 ##

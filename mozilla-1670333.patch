@@ -1,6 +1,6 @@
-diff -up firefox-84.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-84.0/dom/media/mp4/MP4Demuxer.cpp
---- firefox-84.0/dom/media/mp4/MP4Demuxer.cpp.1670333	2020-12-07 23:32:59.000000000 +0100
-+++ firefox-84.0/dom/media/mp4/MP4Demuxer.cpp	2020-12-10 14:07:49.095266466 +0100
+diff -up firefox-86.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-86.0/dom/media/mp4/MP4Demuxer.cpp
+--- firefox-86.0/dom/media/mp4/MP4Demuxer.cpp.1670333	2021-02-22 14:43:37.000000000 +0100
++++ firefox-86.0/dom/media/mp4/MP4Demuxer.cpp	2021-02-23 17:59:14.824346217 +0100
 @@ -31,6 +31,8 @@ mozilla::LogModule* GetDemuxerLog() { re
    DDMOZ_LOG(gMediaDemuxerLog, mozilla::LogLevel::Debug, "::%s: " arg, \
              __func__, ##__VA_ARGS__)
@@ -23,10 +23,10 @@ diff -up firefox-84.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-84.0/dom/medi
            if (sample->mKeyframe != keyframe) {
              NS_WARNING(nsPrintfCString("Frame incorrectly marked as %skeyframe "
                                         "@ pts:%" PRId64 " dur:%" PRId64
-diff -up firefox-84.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-84.0/dom/media/platforms/PDMFactory.cpp
---- firefox-84.0/dom/media/platforms/PDMFactory.cpp.1670333	2020-12-10 14:07:49.095266466 +0100
-+++ firefox-84.0/dom/media/platforms/PDMFactory.cpp	2020-12-10 15:29:28.969006031 +0100
-@@ -52,6 +52,8 @@
+diff -up firefox-86.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-86.0/dom/media/platforms/PDMFactory.cpp
+--- firefox-86.0/dom/media/platforms/PDMFactory.cpp.1670333	2021-02-22 15:47:05.000000000 +0100
++++ firefox-86.0/dom/media/platforms/PDMFactory.cpp	2021-02-23 18:01:08.124715733 +0100
+@@ -59,6 +59,8 @@
  
  #include <functional>
  
@@ -34,8 +34,8 @@ diff -up firefox-84.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-84.0/do
 +
  namespace mozilla {
  
- // Set on the main thread, in content processes before any PDMFactory will ever
-@@ -522,9 +524,11 @@ void PDMFactory::CreateContentPDMs() {
+ extern already_AddRefed<PlatformDecoderModule> CreateNullDecoderModule();
+@@ -537,9 +539,11 @@ void PDMFactory::CreateDefaultPDMs() {
    }
  #endif
  #ifdef MOZ_FFMPEG
@@ -50,7 +50,7 @@ diff -up firefox-84.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-84.0/do
    }
  #endif
  #ifdef MOZ_WIDGET_ANDROID
-@@ -536,8 +540,9 @@ void PDMFactory::CreateContentPDMs() {
+@@ -551,8 +555,9 @@ void PDMFactory::CreateDefaultPDMs() {
  
    CreateAndStartupPDM<AgnosticDecoderModule>();
  
@@ -61,10 +61,10 @@ diff -up firefox-84.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-84.0/do
      mFailureFlags += DecoderDoctorDiagnostics::Flags::GMPPDMFailedToStartup;
    }
  }
-diff -up firefox-84.0/dom/media/platforms/PDMFactory.h.1670333 firefox-84.0/dom/media/platforms/PDMFactory.h
---- firefox-84.0/dom/media/platforms/PDMFactory.h.1670333	2020-12-10 14:07:49.096266493 +0100
-+++ firefox-84.0/dom/media/platforms/PDMFactory.h	2020-12-10 15:27:42.363034881 +0100
-@@ -116,6 +116,8 @@ class PDMFactory final {
+diff -up firefox-86.0/dom/media/platforms/PDMFactory.h.1670333 firefox-86.0/dom/media/platforms/PDMFactory.h
+--- firefox-86.0/dom/media/platforms/PDMFactory.h.1670333	2021-02-22 15:47:05.000000000 +0100
++++ firefox-86.0/dom/media/platforms/PDMFactory.h	2021-02-23 17:59:14.824346217 +0100
+@@ -125,6 +125,8 @@ class PDMFactory final {
  
    DecoderDoctorDiagnostics::FlagsSet mFailureFlags;
  
