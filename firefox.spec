@@ -14,7 +14,7 @@
 # as the build is *very* slow.
 %global debug_build       0
 
-%global system_nss        0
+%global system_nss        1
 %global build_with_clang  0
 %global build_with_asan   0
 %global test_offscreen    1
@@ -174,7 +174,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        86.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -363,7 +363,8 @@ BuildRequires:  liberation-mono-fonts
 BuildRequires:  liberation-sans-fonts
 BuildRequires:  liberation-serif-fonts
 # ----------------------------------
-BuildRequires:  google-carlito-fonts
+# Missing on f32
+# BuildRequires:  google-carlito-fonts
 BuildRequires:  google-droid-sans-fonts
 BuildRequires:  google-noto-fonts-common
 BuildRequires:  google-noto-cjk-fonts-common
@@ -1077,6 +1078,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Feb 26 2021 Martin Stransky <stransky@redhat.com> - 86.0-2
+- Built with system nss
+
 * Tue Feb 23 2021 Martin Stransky <stransky@redhat.com> - 86.0-1
 - Update to 86.0
 - Disabled Wayland backend on KDE/Plasma
