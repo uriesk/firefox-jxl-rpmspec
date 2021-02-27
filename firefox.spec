@@ -137,7 +137,7 @@ ExcludeArch: armv7hl
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.60
+%global nss_version 3.61
 %global nss_build_version %{nss_version}
 %endif
 
