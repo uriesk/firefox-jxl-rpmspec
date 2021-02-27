@@ -373,7 +373,7 @@ BuildRequires:  google-noto-sans-gurmukhi-fonts
 BuildRequires:  google-noto-sans-fonts
 BuildRequires:  google-noto-emoji-color-fonts
 # -----------------------------------
-# faild to build in Koji
+# faild to build in Koji / f32
 #BuildRequires:  khmeros-fonts-common
 BuildRequires:  thai-scalable-fonts-common
 BuildRequires:  thai-scalable-waree-fonts
@@ -384,7 +384,8 @@ BuildRequires:  lohit-tamil-fonts
 BuildRequires:  lohit-telugu-fonts
 # ----------------------------------
 BuildRequires:  paktype-naskh-basic-fonts
-BuildRequires:  pt-sans-fonts
+# faild to build in Koji / f32
+# BuildRequires:  pt-sans-fonts
 BuildRequires:  smc-meera-fonts
 BuildRequires:  stix-fonts
 BuildRequires:  abattis-cantarell-fonts
