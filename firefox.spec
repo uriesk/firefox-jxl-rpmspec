@@ -174,7 +174,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        86.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1081,6 +1081,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-5
+- Run xpcshell tests sequential
+
 * Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-4
 - Enable Wayland backend only when Wayland display is set.
 
