@@ -226,6 +226,7 @@ Patch53:        firefox-gcc-build.patch
 Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch56:        mozilla-1686888.patch
+Patch57:        icecat-78.7.1-fix_error_template_with_C_linkage.patch
 
 # Test patches
 # Generate without context by
@@ -474,6 +475,7 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
 %patch56 -p1 -b .1686888-dump-syms
+%patch57 -p1 -b .icecat-78.7.1-fix_error_template_with_C_linkage
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
