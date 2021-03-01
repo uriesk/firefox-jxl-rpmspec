@@ -14,7 +14,7 @@
 # as the build is *very* slow.
 %global debug_build       0
 
-%global system_nss        0
+%global system_nss        1
 %global build_with_clang  0
 %global build_with_asan   0
 %global test_offscreen    1
@@ -137,7 +137,7 @@ ExcludeArch: armv7hl
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.60
+%global nss_version 3.61
 %global nss_build_version %{nss_version}
 %endif
 
@@ -174,7 +174,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        86.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -364,7 +364,8 @@ BuildRequires:  liberation-mono-fonts
 BuildRequires:  liberation-sans-fonts
 BuildRequires:  liberation-serif-fonts
 # ----------------------------------
-BuildRequires:  google-carlito-fonts
+# Missing on f32
+# BuildRequires:  google-carlito-fonts
 BuildRequires:  google-droid-sans-fonts
 BuildRequires:  google-noto-fonts-common
 BuildRequires:  google-noto-cjk-fonts-common
@@ -373,7 +374,7 @@ BuildRequires:  google-noto-sans-gurmukhi-fonts
 BuildRequires:  google-noto-sans-fonts
 BuildRequires:  google-noto-emoji-color-fonts
 # -----------------------------------
-# faild to build in Koji
+# faild to build in Koji / f32
 #BuildRequires:  khmeros-fonts-common
 BuildRequires:  thai-scalable-fonts-common
 BuildRequires:  thai-scalable-waree-fonts
@@ -384,7 +385,8 @@ BuildRequires:  lohit-tamil-fonts
 BuildRequires:  lohit-telugu-fonts
 # ----------------------------------
 BuildRequires:  paktype-naskh-basic-fonts
-BuildRequires:  pt-sans-fonts
+# faild to build in Koji / f32
+# BuildRequires:  pt-sans-fonts
 BuildRequires:  smc-meera-fonts
 BuildRequires:  stix-fonts
 BuildRequires:  abattis-cantarell-fonts
@@ -1079,6 +1081,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Feb 26 2021 Martin Stransky <stransky@redhat.com> - 86.0-2
+- Built with system nss
+
 * Tue Feb 23 2021 Martin Stransky <stransky@redhat.com> - 86.0-1
 - Update to 86.0
 - Disabled Wayland backend on KDE/Plasma
