@@ -70,7 +70,7 @@ GETENFORCE_FILE="/usr/sbin/getenforce"
 ##
 ## Enable Wayland backend?
 ##
-if ! [ $MOZ_DISABLE_WAYLAND ]; then
+if ! [ $MOZ_DISABLE_WAYLAND ] && [ "$WAYLAND_DISPLAY" ]; then
   if [ "$XDG_CURRENT_DESKTOP" == "GNOME" ]; then
     export MOZ_ENABLE_WAYLAND=1
   fi
