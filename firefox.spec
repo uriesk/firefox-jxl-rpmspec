@@ -201,11 +201,12 @@ Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
 Source37:       mochitest-python.tar.gz
 Source38:       print_results
-Source39:       perrors
+Source39:       print-errors
 Source40:       run-tests-x11
 Source41:       run-tests-wayland
 Source42:       psummary
 Source43:       print_failures
+Source44:       print-error-reftest
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -792,7 +793,7 @@ find-links=`pwd`/mochitest-python
 no-index=true
 EOF
 tar xf %{SOURCE37}
-cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} %{SOURCE43} .
+cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} %{SOURCE43} %{SOURCE44} .
 mkdir -p test_results
 %if %{test_on_wayland}
 ./run-tests-wayland %{test_offscreen} || true
