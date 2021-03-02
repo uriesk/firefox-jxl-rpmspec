@@ -1084,6 +1084,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-5
 - Run xpcshell tests sequential
+- Test fixes
 
 * Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-4
 - Enable Wayland backend only when Wayland display is set.
