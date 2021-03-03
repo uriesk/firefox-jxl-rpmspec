@@ -4,7 +4,10 @@
 
 # Run Mozilla test suite as a part of compile rpm section. Turn off when
 # building locally and don't want to spend 24 hours waiting for results.
+%global run_firefox_tests 0
+%ifarch x86_64 %{ix86}
 %global run_firefox_tests 1
+%endif
 
 # Don't create debuginfo rpm packages. It reduces build time as
 # exctracting debuginfo takes long time.
