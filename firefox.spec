@@ -256,6 +256,7 @@ Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch429:        mozilla-1631061-1.patch
 Patch430:        mozilla-1631061-2.patch
 Patch431:        mozilla-1683578.patch
+Patch432:        mozilla-1694670.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -506,6 +507,7 @@ This package contains results of tests executed during build.
 %patch429 -p1 -b .1631061
 %patch430 -p1 -b .1631061
 %patch431 -p1 -b .1683578
+%patch432 -p1 -b .1694670
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1081,6 +1083,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-6
+- Added fix for mozbz#1694670
+
 * Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-4
 - Enable Wayland backend only when Wayland display is set.
 
