@@ -227,7 +227,7 @@ diff -U0 firefox-86.0/layout/reftests/first-letter/reftest.list.firefox-tests-re
 +++ firefox-86.0/layout/reftests/first-letter/reftest.list	2021-03-02 08:55:53.085679961 +0100
 @@ -64 +64 @@
 -fails-if(winWidget||cocoaWidget) fails-if(geckoview) == 617869-1.html 617869-1-ref.html # Bug 1558513 for GV
-+fuzzy-if(gtkWidget,0-260, 0-900) fails-if(winWidget||cocoaWidget) fails-if(geckoview) == 617869-1.html 617869-1-ref.html # Bug 1558513 for GV
++fuzzy-if(gtkWidget,0-260,0-900) fails-if(winWidget||cocoaWidget) fails-if(geckoview) == 617869-1.html 617869-1-ref.html # Bug 1558513 for GV
 diff -U0 firefox-86.0/layout/reftests/font-face/reftest.list.firefox-tests-reftest firefox-86.0/layout/reftests/font-face/reftest.list
 --- firefox-86.0/layout/reftests/font-face/reftest.list.firefox-tests-reftest	2021-02-22 15:47:05.000000000 +0100
 +++ firefox-86.0/layout/reftests/font-face/reftest.list	2021-03-02 08:55:53.085679961 +0100
