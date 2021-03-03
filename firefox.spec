@@ -177,7 +177,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        86.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -260,6 +260,7 @@ Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch429:        mozilla-1631061-1.patch
 Patch430:        mozilla-1631061-2.patch
 Patch431:        mozilla-1683578.patch
+Patch432:        mozilla-1694670.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -510,6 +511,7 @@ This package contains results of tests executed during build.
 %patch429 -p1 -b .1631061
 %patch430 -p1 -b .1631061
 %patch431 -p1 -b .1683578
+%patch432 -p1 -b .1694670
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1085,6 +1087,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 3 2021 Martin Stransky <stransky@redhat.com> - 86.0-7
+- Added fix for mozbz#1694670
+
 * Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-6
 - Run xpcshell tests sequential
 - Test fixes
