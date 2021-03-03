@@ -174,7 +174,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        86.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -201,11 +201,12 @@ Source34:       firefox-search-provider.ini
 Source35:       google-loc-api-key
 Source37:       mochitest-python.tar.gz
 Source38:       print_results
-Source39:       perrors
+Source39:       print-errors
 Source40:       run-tests-x11
 Source41:       run-tests-wayland
 Source42:       psummary
 Source43:       print_failures
+Source44:       print-error-reftest
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -794,7 +795,7 @@ find-links=`pwd`/mochitest-python
 no-index=true
 EOF
 tar xf %{SOURCE37}
-cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} %{SOURCE43} .
+cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} %{SOURCE43} %{SOURCE44} .
 mkdir -p test_results
 %if %{test_on_wayland}
 ./run-tests-wayland %{test_offscreen} || true
@@ -1083,8 +1084,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-6
+* Wed Mar 3 2021 Martin Stransky <stransky@redhat.com> - 86.0-7
 - Added fix for mozbz#1694670
+
+* Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-6
+- Run xpcshell tests sequential
+- Test fixes
 
 * Mon Mar 1 2021 Martin Stransky <stransky@redhat.com> - 86.0-4
 - Enable Wayland backend only when Wayland display is set.
