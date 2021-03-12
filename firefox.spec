@@ -182,13 +182,13 @@ ExcludeArch: ppc64le
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        86.0
-Release:        8%{?pre_tag}%{?dist}
+Version:        86.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210222.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210312.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -266,7 +266,6 @@ Patch418:        mozilla-1556931-s390x-hidden-syms.patch
 Patch429:        mozilla-1631061-1.patch
 Patch430:        mozilla-1631061-2.patch
 Patch431:        mozilla-1683578.patch
-Patch432:        mozilla-1694670.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -517,7 +516,6 @@ This package contains results of tests executed during build.
 %patch429 -p1 -b .1631061
 %patch430 -p1 -b .1631061
 %patch431 -p1 -b .1683578
-%patch432 -p1 -b .1694670
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1093,6 +1091,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Mar 12 2021 Martin Stransky <stransky@redhat.com> - 86.0.1-1
+- Update to latest upstream (86.0.1)
+
 * Wed Mar 10 2021 Martin Stransky <stransky@redhat.com> - 86.0-8
 - Temporary disable ppc64le/Fedora 35 due to
   https://bugzilla.redhat.com/show_bug.cgi?id=1933742
