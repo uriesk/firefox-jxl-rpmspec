@@ -42,7 +42,7 @@ ExcludeArch: armv7hl
 
 # Temporary disable due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1933742
-%if 0%{?fedora} > 34
+%if 0%{?fedora} > 33
 ExcludeArch: ppc64le
 %endif
 
