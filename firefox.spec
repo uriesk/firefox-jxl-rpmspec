@@ -37,7 +37,7 @@ ExcludeArch: s390x
 # Exclude ARM due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1922599
 %if 0%{?fedora} > 33
-ExcludeArch: armv7hl
+#ExcludeArch: armv7hl
 %endif
 
 # Temporary disable due to
@@ -183,7 +183,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        86.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1091,6 +1091,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Mar 13 2021 Martin Stransky <stransky@redhat.com> - 86.0.1-2
+- Enabled ARM
+
 * Fri Mar 12 2021 Martin Stransky <stransky@redhat.com> - 86.0.1-1
 - Update to latest upstream (86.0.1)
 
