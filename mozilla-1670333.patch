@@ -1,6 +1,6 @@
-diff -up firefox-86.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-86.0/dom/media/mp4/MP4Demuxer.cpp
---- firefox-86.0/dom/media/mp4/MP4Demuxer.cpp.1670333	2021-02-22 14:43:37.000000000 +0100
-+++ firefox-86.0/dom/media/mp4/MP4Demuxer.cpp	2021-02-23 17:59:14.824346217 +0100
+diff -up firefox-87.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-87.0/dom/media/mp4/MP4Demuxer.cpp
+--- firefox-87.0/dom/media/mp4/MP4Demuxer.cpp.1670333	2021-03-18 14:48:35.000000000 +0100
++++ firefox-87.0/dom/media/mp4/MP4Demuxer.cpp	2021-03-22 20:05:43.862198652 +0100
 @@ -31,6 +31,8 @@ mozilla::LogModule* GetDemuxerLog() { re
    DDMOZ_LOG(gMediaDemuxerLog, mozilla::LogLevel::Debug, "::%s: " arg, \
              __func__, ##__VA_ARGS__)
@@ -23,10 +23,10 @@ diff -up firefox-86.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-86.0/dom/medi
            if (sample->mKeyframe != keyframe) {
              NS_WARNING(nsPrintfCString("Frame incorrectly marked as %skeyframe "
                                         "@ pts:%" PRId64 " dur:%" PRId64
-diff -up firefox-86.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-86.0/dom/media/platforms/PDMFactory.cpp
---- firefox-86.0/dom/media/platforms/PDMFactory.cpp.1670333	2021-02-22 15:47:05.000000000 +0100
-+++ firefox-86.0/dom/media/platforms/PDMFactory.cpp	2021-02-23 18:01:08.124715733 +0100
-@@ -59,6 +59,8 @@
+diff -up firefox-87.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-87.0/dom/media/platforms/PDMFactory.cpp
+--- firefox-87.0/dom/media/platforms/PDMFactory.cpp.1670333	2021-03-18 14:48:35.000000000 +0100
++++ firefox-87.0/dom/media/platforms/PDMFactory.cpp	2021-03-22 20:08:35.850255636 +0100
+@@ -58,6 +58,8 @@
  
  #include <functional>
  
@@ -34,8 +34,8 @@ diff -up firefox-86.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-86.0/do
 +
  namespace mozilla {
  
- extern already_AddRefed<PlatformDecoderModule> CreateNullDecoderModule();
-@@ -537,9 +539,11 @@ void PDMFactory::CreateDefaultPDMs() {
+ #define PDM_INIT_LOG(msg, ...) \
+@@ -558,9 +560,11 @@ void PDMFactory::CreateDefaultPDMs() {
    }
  #endif
  #ifdef MOZ_FFMPEG
@@ -50,7 +50,7 @@ diff -up firefox-86.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-86.0/do
    }
  #endif
  #ifdef MOZ_WIDGET_ANDROID
-@@ -551,8 +555,9 @@ void PDMFactory::CreateDefaultPDMs() {
+@@ -572,8 +576,9 @@ void PDMFactory::CreateDefaultPDMs() {
  
    CreateAndStartupPDM<AgnosticDecoderModule>();
  
@@ -61,15 +61,14 @@ diff -up firefox-86.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-86.0/do
      mFailureFlags += DecoderDoctorDiagnostics::Flags::GMPPDMFailedToStartup;
    }
  }
-diff -up firefox-86.0/dom/media/platforms/PDMFactory.h.1670333 firefox-86.0/dom/media/platforms/PDMFactory.h
---- firefox-86.0/dom/media/platforms/PDMFactory.h.1670333	2021-02-22 15:47:05.000000000 +0100
-+++ firefox-86.0/dom/media/platforms/PDMFactory.h	2021-02-23 17:59:14.824346217 +0100
-@@ -125,6 +125,8 @@ class PDMFactory final {
+diff -up firefox-87.0/dom/media/platforms/PDMFactory.h.1670333 firefox-87.0/dom/media/platforms/PDMFactory.h
+--- firefox-87.0/dom/media/platforms/PDMFactory.h.1670333	2021-03-22 20:05:43.862198652 +0100
++++ firefox-87.0/dom/media/platforms/PDMFactory.h	2021-03-22 20:08:17.705722130 +0100
+@@ -120,6 +120,7 @@ class PDMFactory final {
+   RefPtr<PlatformDecoderModule> mNullPDM;
  
    DecoderDoctorDiagnostics::FlagsSet mFailureFlags;
- 
 +  bool mFFmpegUsed = false;
-+
+ 
    friend class RemoteVideoDecoderParent;
    static void EnsureInit();
-   template <class T>

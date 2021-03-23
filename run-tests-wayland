@@ -19,19 +19,19 @@ RUN_MOCHITEST=0
 RUN_CRASHTEST=0
 
 SELECTED_TEST=$2
-if [ $SELECTED_TEST = "xpc" ] ; then
+if [ "$SELECTED_TEST" = "xpc" ] ; then
   RUN_XPCSHELL_TEST=1
-elif [ $SELECTED_TEST = "ref" ] ; then
+elif [ "$SELECTED_TEST" = "ref" ] ; then
   RUN_REFTEST=1
-elif [ $SELECTED_TEST = "moch" ] ; then
+elif [ "$SELECTED_TEST" = "moch" ] ; then
   RUN_MOCHITEST=1
-elif [ $SELECTED_TEST = "crash" ] ; then
+elif [ "$SELECTED_TEST" = "crash" ] ; then
   RUN_CRASHTEST=1
 else
-  RUN_XPCSHELL_TEST=1
+  RUN_XPCSHELL_TEST=0
   RUN_REFTEST=1
-  RUN_MOCHITEST=1
-  RUN_CRASHTEST=1
+  RUN_MOCHITEST=0
+  RUN_CRASHTEST=0
 fi
 
 MACH_USE_SYSTEM_PYTHON=1

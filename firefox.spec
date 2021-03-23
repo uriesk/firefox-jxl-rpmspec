@@ -182,13 +182,13 @@ ExcludeArch: ppc64le
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        86.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        87.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210312.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210322.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -236,7 +236,7 @@ Patch53:        firefox-gcc-build.patch
 Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch56:        mozilla-1686888.patch
-Patch57:        icecat-78.7.1-fix_error_template_with_C_linkage.patch
+Patch57:        firefox-disable-ffvpx-with-vapi.patch
 
 # Test patches
 # Generate without context by
@@ -252,7 +252,6 @@ Patch221:        firefox-fedora-ua.patch
 Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
-Patch227:        firefox-locale-debug.patch
 Patch228:        disable-openh264-download.patch
 Patch229:        firefox-nss-addon-hack.patch
 Patch230:        firefox-kde-webrender.patch
@@ -262,10 +261,6 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-Patch418:        mozilla-1556931-s390x-hidden-syms.patch
-Patch429:        mozilla-1631061-1.patch
-Patch430:        mozilla-1631061-2.patch
-Patch431:        mozilla-1683578.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -487,7 +482,7 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
 %patch56 -p1 -b .1686888-dump-syms
-%patch57 -p1 -b .icecat-78.7.1-fix_error_template_with_C_linkage
+%patch57 -p1 -b .ffvpx-with-vapi
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -502,7 +497,6 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch226 -p1 -b .1354671
 %endif
-%patch227 -p1 -b .locale-debug
 %patch228 -p1 -b .disable-openh264-download
 %patch229 -p1 -b .firefox-nss-addon-hack
 %patch230 -p1 -b .firefox-kde-webrender
@@ -511,11 +505,6 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-%patch418 -p1 -b .1556931-s390x-hidden-syms
-
-%patch429 -p1 -b .1631061
-%patch430 -p1 -b .1631061
-%patch431 -p1 -b .1683578
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1091,6 +1080,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 23 2021 Martin Stransky <stransky@redhat.com> - 87.0-1
+- Updated to 87.0
+
 * Sat Mar 13 2021 Martin Stransky <stransky@redhat.com> - 86.0.1-2
 - Enabled ARM
 
