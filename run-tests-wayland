@@ -75,29 +75,29 @@ if [ $RUN_XPCSHELL_TEST -ne 0 ] ; then
 fi
 
 # Basic render testing
-export TEST_PARAMS=""
+export TEST_PARAMS="--setpref reftest.ignoreWindowSize=true"
 export TEST_FLAVOUR=""
 if [ $RUN_REFTEST -ne 0 ] ; then
-  ./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+  ./mach reftest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
 fi
 if [ $RUN_CRASHTEST -ne 0 ] ; then
-  ./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+  ./mach crashtest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
 fi
 if [ $RUN_MOCHITEST -ne 0 ] ; then
-  ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+  ./mach mochitest --marionette localhost:$(($(($RANDOM))+2000)) $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
 fi
 
 # WebRender testing
 export TEST_PARAMS="--enable-webrender $TEST_PARAMS"
 export TEST_FLAVOUR="-wr"
 if [ $RUN_REFTEST -ne 0 ] ; then
-./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+./mach reftest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
 fi
 if [ $RUN_CRASHTEST -ne 0 ] ; then
-./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+./mach crashtest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
 fi
 if [ $RUN_MOCHITEST -ne 0 ] ; then
-./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+./mach mochitest --marionette localhost:$(($(($RANDOM))+2000)) $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
 fi
 
 rm -f  objdir/dist/bin/certutil
