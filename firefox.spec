@@ -36,9 +36,8 @@ ExcludeArch: s390x
 
 # Exclude ARM due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1922599
-%if 0%{?fedora} > 33
-#ExcludeArch: armv7hl
-%endif
+# https://bugzilla.redhat.com/show_bug.cgi?id=1942516
+ExcludeArch: armv7hl
 
 # Temporary disable due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1933742
@@ -1081,6 +1080,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Mar 23 2021 Martin Stransky <stransky@redhat.com> - 87.0-1
+- Disabled ARM due to build failures
 - Updated to 87.0
 
 * Sat Mar 13 2021 Martin Stransky <stransky@redhat.com> - 86.0.1-2
