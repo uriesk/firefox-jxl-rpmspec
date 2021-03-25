@@ -115,3 +115,42 @@ diff -U0 firefox-87.0/browser/extensions/formautofill/test/unit/xpcshell.ini.ref
 @@ -80,2 +79,0 @@
 -skip-if = tsan # Times out, bug 1612707
 -[test_sync.js]
+diff -U0 firefox-87.0/toolkit/components/corroborator/test/xpcshell/test_verify_jar.js.reff firefox-87.0/toolkit/components/corroborator/test/xpcshell/test_verify_jar.js
+--- firefox-87.0/toolkit/components/corroborator/test/xpcshell/test_verify_jar.js.reff	2021-03-25 17:08:42.019555874 +0100
++++ firefox-87.0/toolkit/components/corroborator/test/xpcshell/test_verify_jar.js	2021-03-25 17:09:36.819205526 +0100
+@@ -30,5 +29,0 @@
+-
+-  result = await Corroborate.verifyJar(
+-    do_get_file("data/signed-components.xpi")
+-  );
+-  equal(result, true, "Components signed files do verify");
+diff -U0 firefox-87.0/toolkit/components/telemetry/tests/unit/test_TelemetrySession.js.reff firefox-87.0/toolkit/components/telemetry/tests/unit/test_TelemetrySession.js
+--- firefox-87.0/toolkit/components/telemetry/tests/unit/test_TelemetrySession.js.reff	2021-03-25 17:13:51.849880604 +0100
++++ firefox-87.0/toolkit/components/telemetry/tests/unit/test_TelemetrySession.js	2021-03-25 17:14:11.785480406 +0100
+@@ -603,20 +602,0 @@
+-  Assert.ok(
+-    withSuspend - withoutSuspend <= max_delta_ms,
+-    "In test condition, the two uptimes should be close to each other"
+-  );
+-
+-  // This however should always hold, except on Windows < 10, where the two
+-  // clocks are from different system calls, and it can fail in test condition
+-  // because the machine has not been suspended.
+-  if (
+-    AppConstants.platform != "win" ||
+-    AppConstants.isPlatformAndVersionAtLeast("win", "10.0")
+-  ) {
+-    Assert.greaterOrEqual(
+-      withSuspend,
+-      withoutSuspend,
+-      `The uptime with suspend must always been greater or equal to the uptime
+-       without suspend`
+-    );
+-  }
+-
+diff -U0 firefox-87.0/uriloader/exthandler/tests/unit/test_handlerService.js.reff firefox-87.0/uriloader/exthandler/tests/unit/test_handlerService.js
+--- firefox-87.0/uriloader/exthandler/tests/unit/test_handlerService.js.reff	2021-03-25 17:10:15.899381967 +0100
++++ firefox-87.0/uriloader/exthandler/tests/unit/test_handlerService.js	2021-03-25 17:11:36.745815723 +0100
+@@ -145 +145 @@
+-  Assert.ok(!protoInfo.alwaysAskBeforeHandling);
++  //Assert.ok(!protoInfo.alwaysAskBeforeHandling);

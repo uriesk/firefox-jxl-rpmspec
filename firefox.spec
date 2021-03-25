@@ -69,11 +69,6 @@ ExcludeArch: ppc64le
 %if 0%{?flatpak}
 %global enable_mozilla_crashreporter 0
 %endif
-# Temporary disabled due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=1922744
-%if 0%{?fedora} > 33
-%global enable_mozilla_crashreporter 0
-%endif
 %if !%{create_debuginfo}
 %define _unpackaged_files_terminate_build 0
 %global debug_package %{nil}
@@ -182,7 +177,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        87.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -236,6 +231,7 @@ Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch56:        mozilla-1686888.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
+Patch58:        firefox-crashreporter-build.patch
 
 # Test patches
 # Generate without context by
@@ -369,7 +365,7 @@ BuildRequires:  liberation-sans-fonts
 BuildRequires:  liberation-serif-fonts
 # ----------------------------------
 # Missing on f32
-# BuildRequires:  google-carlito-fonts
+BuildRequires:  google-carlito-fonts
 BuildRequires:  google-droid-sans-fonts
 BuildRequires:  google-noto-fonts-common
 BuildRequires:  google-noto-cjk-fonts-common
@@ -378,8 +374,6 @@ BuildRequires:  google-noto-sans-gurmukhi-fonts
 BuildRequires:  google-noto-sans-fonts
 BuildRequires:  google-noto-emoji-color-fonts
 # -----------------------------------
-# faild to build in Koji / f32
-#BuildRequires:  khmeros-fonts-common
 BuildRequires:  thai-scalable-fonts-common
 BuildRequires:  thai-scalable-waree-fonts
 BuildRequires:  khmeros-base-fonts
@@ -390,7 +384,7 @@ BuildRequires:  lohit-telugu-fonts
 # ----------------------------------
 BuildRequires:  paktype-naskh-basic-fonts
 # faild to build in Koji / f32
-# BuildRequires:  pt-sans-fonts
+BuildRequires:  pt-sans-fonts
 BuildRequires:  smc-meera-fonts
 BuildRequires:  stix-fonts
 BuildRequires:  abattis-cantarell-fonts
@@ -482,6 +476,7 @@ This package contains results of tests executed during build.
 %patch55 -p1 -b .testing
 %patch56 -p1 -b .1686888-dump-syms
 %patch57 -p1 -b .ffvpx-with-vapi
+%patch58 -p1 -b .firefox-crashreporter-build
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -1079,6 +1074,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 25 2021 Martin Stransky <stransky@redhat.com> - 87.0-3
+- Enable crashreporter on Fedora 34+
+
 * Wed Mar 24 2021 Martin Stransky <stransky@redhat.com> - 87.0-2
 - More test fixes
 
