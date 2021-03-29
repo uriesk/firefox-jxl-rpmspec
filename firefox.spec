@@ -365,7 +365,9 @@ BuildRequires:  liberation-sans-fonts
 BuildRequires:  liberation-serif-fonts
 # ----------------------------------
 # Missing on f32
+%if 0%{?fedora} > 33
 BuildRequires:  google-carlito-fonts
+%endif
 BuildRequires:  google-droid-sans-fonts
 BuildRequires:  google-noto-fonts-common
 BuildRequires:  google-noto-cjk-fonts-common
@@ -385,7 +387,9 @@ BuildRequires:  lohit-telugu-fonts
 # ----------------------------------
 BuildRequires:  paktype-naskh-basic-fonts
 # faild to build in Koji / f32
+%if 0%{?fedora} > 33
 BuildRequires:  pt-sans-fonts
+%endif
 BuildRequires:  smc-meera-fonts
 BuildRequires:  stix-fonts
 BuildRequires:  abattis-cantarell-fonts
