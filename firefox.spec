@@ -39,12 +39,6 @@ ExcludeArch: s390x
 # https://bugzilla.redhat.com/show_bug.cgi?id=1942516
 ExcludeArch: armv7hl
 
-# Temporary disable due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=1933742
-%if 0%{?fedora} > 33
-ExcludeArch: ppc64le
-%endif
-
 # Temporary disable tests on Rawhide/arm/i686 due to failures
 %if 0%{?fedora} > 33
 %ifarch armv7hl
@@ -72,6 +66,11 @@ ExcludeArch: ppc64le
 %if !%{create_debuginfo}
 %define _unpackaged_files_terminate_build 0
 %global debug_package %{nil}
+%global enable_mozilla_crashreporter 0
+%endif
+# Temporary disabled due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=1922744
+%if 0%{?fedora} > 33
 %global enable_mozilla_crashreporter 0
 %endif
 
@@ -177,7 +176,7 @@ ExcludeArch: ppc64le
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        87.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -232,6 +231,7 @@ Patch55:        firefox-testing.patch
 Patch56:        mozilla-1686888.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch58:        firefox-crashreporter-build.patch
+Patch59:        mozilla-1700520.patch
 
 # Test patches
 # Generate without context by
@@ -373,6 +373,7 @@ BuildRequires:  google-noto-sans-cjk-ttc-fonts
 BuildRequires:  google-noto-sans-gurmukhi-fonts
 BuildRequires:  google-noto-sans-fonts
 BuildRequires:  google-noto-emoji-color-fonts
+BuildRequires:  google-noto-sans-sinhala-vf-fonts
 # -----------------------------------
 BuildRequires:  thai-scalable-fonts-common
 BuildRequires:  thai-scalable-waree-fonts
@@ -477,6 +478,7 @@ This package contains results of tests executed during build.
 %patch56 -p1 -b .1686888-dump-syms
 %patch57 -p1 -b .ffvpx-with-vapi
 %patch58 -p1 -b .firefox-crashreporter-build
+%patch59 -p1 -b .1700520
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -1074,8 +1076,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Mar 25 2021 Martin Stransky <stransky@redhat.com> - 87.0-3
-- Enable crashreporter on Fedora 34+
+* Fri Mar 26 2021 Martin Stransky <stransky@redhat.com> - 87.0-4
+- More test fixes
+- Enabled ppc64le
+- Disabled crashreporter on Fedora 34+
 
 * Wed Mar 24 2021 Martin Stransky <stransky@redhat.com> - 87.0-2
 - More test fixes
