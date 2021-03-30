@@ -118,7 +118,7 @@ diff -U0 firefox-87.0/layout/reftests/bidi/reftest.list.firefox-tests-reftest fi
 +++ firefox-87.0/layout/reftests/bidi/reftest.list	2021-03-25 18:32:51.616417722 +0100
 @@ -3 +3 @@
 -fuzzy-if(cocoaWidget,0-1,0-1) random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == bdi-element.html bdi-element-ref.html # Bug 1392106
-+fuzzy(0-1, 0-1) fuzzy-if(cocoaWidget,0-1,0-1) random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == bdi-element.html bdi-element-ref.html # Bug 1392106
++fuzzy(0-1,0-1) fuzzy-if(cocoaWidget,0-1,0-1) random-if(/^Windows\x20NT\x206\.1/.test(http.oscpu)) == bdi-element.html bdi-element-ref.html # Bug 1392106
 @@ -33,2 +33,2 @@
 -fuzzy-if(Android,0-1,0-6) fuzzy-if(cocoaWidget,0-1,0-2) == mixedChartype-02.html mixedChartype-02-ref.html
 -fuzzy-if(Android,0-1,0-6) fuzzy-if(cocoaWidget,0-1,0-2) == mixedChartype-02-j.html mixedChartype-02-ref.html
