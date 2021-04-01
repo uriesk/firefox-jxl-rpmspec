@@ -22,7 +22,7 @@
 %global build_with_asan   0
 %global test_offscreen    1
 %global test_on_wayland   0
-%if 0%{?fedora} > 33
+%if 0%{?fedora} > 32
 %global test_on_wayland   1
 %endif
 
