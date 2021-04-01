@@ -76,7 +76,7 @@ if ! [ $MOZ_DISABLE_WAYLAND ] && [ "$WAYLAND_DISPLAY" ]; then
   fi
 ##  Remove comments to enable Wayland on KDE/Sway
 ##
-##  if __DEFAULT_WAYLAND__ && [ "$XDG_SESSION_TYPE" == "wayland" ]; then
+##  if [ "$XDG_SESSION_TYPE" == "wayland" ]; then
 ##    export MOZ_ENABLE_WAYLAND=1
 ##  fi
 fi

@@ -22,11 +22,8 @@
 %global build_with_asan   0
 %global test_offscreen    1
 %global test_on_wayland   0
-
-# Enable Wayland on all Wayland compositors (Gnome/KDE/Sway) by default.
-%global default_wayland   0
 %if 0%{?fedora} > 33
-%global default_wayland   1
+%global test_on_wayland   1
 %endif
 
 # There are still build problems on s390x, see
@@ -38,16 +35,6 @@ ExcludeArch: s390x
 # https://bugzilla.redhat.com/show_bug.cgi?id=1922599
 # https://bugzilla.redhat.com/show_bug.cgi?id=1942516
 ExcludeArch: armv7hl
-
-# Temporary disable tests on Rawhide/arm/i686 due to failures
-%if 0%{?fedora} > 33
-%ifarch armv7hl
-%global run_firefox_tests 0
-%endif
-%ifarch %{ix86}
-%global run_firefox_tests 0
-%endif
-%endif
 
 %ifarch armv7hl
 %global create_debuginfo  0
@@ -176,7 +163,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        87.0
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -827,13 +814,7 @@ desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 
 # set up the firefox start script
 %{__rm} -rf %{buildroot}%{_bindir}/firefox
-%{__sed} \
-%if %{?default_wayland}
-         -e 's/__DEFAULT_WAYLAND__/true/' \
-%else
-         -e 's/__DEFAULT_WAYLAND__/false/' \
-%endif
-         -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
+%{__sed} -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE21} > %{buildroot}%{_bindir}/firefox
 %{__chmod} 755 %{buildroot}%{_bindir}/firefox
 
 %if 0%{?flatpak}
@@ -1082,6 +1063,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 1 2021 Martin Stransky <stransky@redhat.com> - 87.0-8
+- Run testsuite on Wayland on Fedora 33+
+- Spec cleanup
+
 * Wed Mar 31 2021 Martin Stransky <stransky@redhat.com> - 87.0-7
 - Added fix for mozbz#1693472 - Wayland/KDE rendering issues.
 
