@@ -20,8 +20,7 @@
 %global system_nss        1
 %global build_with_clang  0
 %global build_with_asan   0
-%global test_offscreen    1
-%global test_on_wayland   0
+%global test_on_wayland   1
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
@@ -79,11 +78,6 @@ ExcludeArch: armv7hl
 %global build_with_pgo    1
 %endif
 %endif
-# Disable PGO on Rawhide due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=1922600
-%if 0%{?fedora} > 33
-%global build_with_pgo    0
-%endif
 %if 0%{?flatpak}
 %global build_with_pgo    0
 %endif
@@ -103,10 +97,10 @@ ExcludeArch: armv7hl
 %endif
 
 %global launch_wayland_compositor 0
-%if %{build_with_pgo} && %{test_offscreen} && %{test_on_wayland}
+%if %{build_with_pgo} && %{test_on_wayland}
 %global launch_wayland_compositor 1
 %endif
-%if %{run_firefox_tests} && %{test_offscreen} && %{test_on_wayland}
+%if %{run_firefox_tests} && %{test_on_wayland}
 %global launch_wayland_compositor 1
 %endif
 
@@ -160,7 +154,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        87.0
-Release:        9%{?pre_tag}%{?dist}
+Release:        10%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -193,6 +187,7 @@ Source41:       run-tests-wayland
 Source42:       psummary
 Source43:       print_failures
 Source44:       print-error-reftest
+Source45:       run-wayland-compositor
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
@@ -744,19 +739,13 @@ export MACH_USE_SYSTEM_PYTHON=1
 export MACH_NO_WRITE_TIMES=1
 
 %if %{launch_wayland_compositor}
-if [ -z "$XDG_RUNTIME_DIR" ]; then
-  export XDG_RUNTIME_DIR=$HOME
-fi
-xvfb-run mutter --wayland --nested &
-if [ -z "$WAYLAND_DISPLAY" ]; then
-  export WAYLAND_DISPLAY=wayland-0
-else
-  export WAYLAND_DISPLAY=wayland-1
-fi
+cp %{SOURCE45} .
+. ./run-wayland-compositor
 %endif
 
 %if %{build_with_pgo}
 %if %{test_on_wayland}
+env | grep "WAYLAND"
 MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
 %else
 xvfb-run ./mach build  2>&1 | cat -
@@ -782,7 +771,7 @@ tar xf %{SOURCE37}
 cp %{SOURCE40} %{SOURCE41} %{SOURCE42} %{SOURCE38} %{SOURCE39} %{SOURCE43} %{SOURCE44} .
 mkdir -p test_results
 %if %{test_on_wayland}
-./run-tests-wayland %{test_offscreen} || true
+./run-tests-wayland || true
 %else
 ./run-tests-x11 || true
 %endif
@@ -1062,6 +1051,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Sat Apr 4 2021 Martin Stransky <stransky@redhat.com> - 87.0-10
+- Wayland testing again.
+
 * Thu Apr 1 2021 Martin Stransky <stransky@redhat.com> - 87.0-9
 - Added fix for mozbz#1702606 / rhbz#1936071
 - Switched tests back to X11 due to massive failures.
