@@ -339,6 +339,8 @@ BuildRequires:  dejavu-sans-mono-fonts
 BuildRequires:  dejavu-sans-fonts
 BuildRequires:  dejavu-serif-fonts
 BuildRequires:  mesa-dri-drivers
+BuildRequires:  dbus-x11
+BuildRequires:  gnome-keyring
 # ----------------------------------------
 BuildRequires:  liberation-fonts-common
 BuildRequires:  liberation-mono-fonts
