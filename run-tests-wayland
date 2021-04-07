@@ -3,7 +3,7 @@
 
 set -x
 
-RUN_XPCSHELL_TEST=1
+RUN_XPCSHELL_TEST=0
 RUN_REFTEST=1
 RUN_MOCHITEST=0
 RUN_CRASHTEST=1
@@ -42,7 +42,7 @@ if [ $RUN_XPCSHELL_TEST -ne 0 ] ; then
 fi
 
 # Basic render testing
-export TEST_PARAMS="--setpref reftest.ignoreWindowSize=true"
+export TEST_PARAMS="--setpref reftest.ignoreWindowSize=true --setpref widget.wayland-focus-workaroud=true"
 export TEST_FLAVOUR=""
 if [ $RUN_REFTEST -ne 0 ] ; then
   ./mach reftest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
