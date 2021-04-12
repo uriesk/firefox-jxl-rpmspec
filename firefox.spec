@@ -20,7 +20,7 @@
 %global system_nss        1
 %global build_with_clang  0
 %global build_with_asan   0
-%global test_on_wayland   1
+%global test_on_wayland   0
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
@@ -154,7 +154,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        87.0
-Release:        11%{?pre_tag}%{?dist}
+Release:        12%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -238,6 +238,7 @@ Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1693472.patch
 Patch417:        mozilla-1702606.patch
 Patch418:        mozilla-1703657.patch
+Patch419:        mozilla-1701089.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -492,6 +493,7 @@ This package contains results of tests executed during build.
 %patch416 -p1 -b .1693472
 %patch417 -p1 -b .1702606
 %patch418 -p1 -b .1703657
+%patch419 -p1 -b .1701089
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1055,6 +1057,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Apr 12 2021 Martin Stransky <stransky@redhat.com> - 87.0-12
+- Added fix for mozbz#1701089 (Widevine playback issues).
+
 * Tue Apr 6 2021 Martin Stransky <stransky@redhat.com> - 87.0-11
 - Enabled xpcshell/crashtests on Wayland.
 
