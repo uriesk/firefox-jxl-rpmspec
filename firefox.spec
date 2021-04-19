@@ -304,6 +304,7 @@ Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
 %endif
 BuildRequires:  python3-devel
+BuildRequires:  python3-setuptools
 %if !0%{?flatpak}
 Requires:       u2f-hidraw-policy
 %endif
