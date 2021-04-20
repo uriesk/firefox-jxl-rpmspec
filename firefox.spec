@@ -153,13 +153,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        87.0
-Release:        12%{?pre_tag}%{?dist}
+Version:        88.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210322.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210419.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -207,10 +207,8 @@ Patch53:        firefox-gcc-build.patch
 # This should be fixed in Firefox 83
 Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
-Patch56:        mozilla-1686888.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch58:        firefox-crashreporter-build.patch
-Patch59:        mozilla-1700520.patch
 
 # Test patches
 # Generate without context by
@@ -228,7 +226,6 @@ Patch224:        mozilla-1170092.patch
 Patch226:        rhbz-1354671.patch
 Patch228:        disable-openh264-download.patch
 Patch229:        firefox-nss-addon-hack.patch
-Patch230:        firefox-kde-webrender.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -238,7 +235,6 @@ Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1693472.patch
 Patch417:        mozilla-1702606.patch
 Patch418:        mozilla-1703657.patch
-Patch419:        mozilla-1701089.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -464,10 +460,8 @@ This package contains results of tests executed during build.
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
-%patch56 -p1 -b .1686888-dump-syms
 %patch57 -p1 -b .ffvpx-with-vapi
 %patch58 -p1 -b .firefox-crashreporter-build
-%patch59 -p1 -b .1700520
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -484,7 +478,6 @@ This package contains results of tests executed during build.
 %endif
 %patch228 -p1 -b .disable-openh264-download
 %patch229 -p1 -b .firefox-nss-addon-hack
-%patch230 -p1 -b .firefox-kde-webrender
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
@@ -493,7 +486,6 @@ This package contains results of tests executed during build.
 %patch416 -p1 -b .1693472
 %patch417 -p1 -b .1702606
 %patch418 -p1 -b .1703657
-%patch419 -p1 -b .1701089
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1057,6 +1049,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Apr 19 2021 Martin Stransky <stransky@redhat.com> - 88.0-1
+- Update to 88.0
+
 * Mon Apr 12 2021 Martin Stransky <stransky@redhat.com> - 87.0-12
 - Added fix for mozbz#1701089 (Widevine playback issues).
 
