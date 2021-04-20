@@ -36,9 +36,11 @@ ExcludeArch: armv7hl
 %global create_debuginfo  0
 %endif
 
+# Temporary disabled due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
-%global enable_mozilla_crashreporter 1
+%global enable_mozilla_crashreporter 0
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -49,11 +51,6 @@ ExcludeArch: armv7hl
 %if !%{create_debuginfo}
 %define _unpackaged_files_terminate_build 0
 %global debug_package %{nil}
-%global enable_mozilla_crashreporter 0
-%endif
-# Temporary disabled due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=1922744
-%if 0%{?fedora} > 33
 %global enable_mozilla_crashreporter 0
 %endif
 
@@ -117,7 +114,7 @@ ExcludeArch: armv7hl
 %if %{?system_nss}
 %global nspr_version 4.21
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.61
+%global nss_version 3.63
 %global nss_build_version %{nss_version}
 %endif
 
