@@ -1,0 +1,317 @@
+diff -up firefox-88.0/widget/gtk/nsClipboard.cpp.1703763 firefox-88.0/widget/gtk/nsClipboard.cpp
+--- firefox-88.0/widget/gtk/nsClipboard.cpp.1703763	2021-04-16 01:11:48.000000000 +0200
++++ firefox-88.0/widget/gtk/nsClipboard.cpp	2021-04-21 09:46:55.642676394 +0200
+@@ -153,10 +153,11 @@ nsClipboard::SetData(nsITransferable* aT
+   bool imagesAdded = false;
+   for (uint32_t i = 0; i < flavors.Length(); i++) {
+     nsCString& flavorStr = flavors[i];
++    LOGCLIP(("    processing target %s\n", flavorStr.get()));
+ 
+     // Special case text/unicode since we can handle all of the string types.
+     if (flavorStr.EqualsLiteral(kUnicodeMime)) {
+-      LOGCLIP(("    text targets\n"));
++      LOGCLIP(("    adding TEXT targets\n"));
+       gtk_target_list_add_text_targets(list, 0);
+       continue;
+     }
+@@ -165,7 +166,7 @@ nsClipboard::SetData(nsITransferable* aT
+       // Don't bother adding image targets twice
+       if (!imagesAdded) {
+         // accept any writable image type
+-        LOGCLIP(("    image targets\n"));
++        LOGCLIP(("    adding IMAGE targets\n"));
+         gtk_target_list_add_image_targets(list, 0, TRUE);
+         imagesAdded = true;
+       }
+@@ -173,6 +174,7 @@ nsClipboard::SetData(nsITransferable* aT
+     }
+ 
+     // Add this to our list of valid targets
++    LOGCLIP(("    adding OTHER target %s\n", flavorStr.get()));
+     GdkAtom atom = gdk_atom_intern(flavorStr.get(), FALSE);
+     gtk_target_list_add(list, atom, 0, 0);
+   }
+@@ -184,14 +186,17 @@ nsClipboard::SetData(nsITransferable* aT
+   gint numTargets;
+   GtkTargetEntry* gtkTargets =
+       gtk_target_table_new_from_list(list, &numTargets);
+-
+-  LOGCLIP(("    gtk_target_table_new_from_list() = %p\n", (void*)gtkTargets));
++  if (!gtkTargets) {
++    LOGCLIP(("    gtk_clipboard_set_with_data() failed!\n"));
++    // Clear references to the any old data and let GTK know that it is no
++    // longer available.
++    EmptyClipboard(aWhichClipboard);
++    return NS_ERROR_FAILURE;
++  }
+ 
+   // Set getcallback and request to store data after an application exit
+-  if (gtkTargets &&
+-      gtk_clipboard_set_with_data(gtkClipboard, gtkTargets, numTargets,
++  if (gtk_clipboard_set_with_data(gtkClipboard, gtkTargets, numTargets,
+                                   clipboard_get_cb, clipboard_clear_cb, this)) {
+-    LOGCLIP(("    gtk_clipboard_set_with_data() is ok\n"));
+     // We managed to set-up the clipboard so update internal state
+     // We have to set it now because gtk_clipboard_set_with_data() calls
+     // clipboard_clear_cb() which reset our internal state
+@@ -207,8 +212,6 @@ nsClipboard::SetData(nsITransferable* aT
+     rv = NS_OK;
+   } else {
+     LOGCLIP(("    gtk_clipboard_set_with_data() failed!\n"));
+-    // Clear references to the any old data and let GTK know that it is no
+-    // longer available.
+     EmptyClipboard(aWhichClipboard);
+     rv = NS_ERROR_FAILURE;
+   }
+@@ -419,6 +422,22 @@ nsClipboard::HasDataMatchingFlavors(cons
+     return NS_OK;
+   }
+ 
++#ifdef MOZ_LOGGING
++  LOGCLIP(("    Clipboard content (target nums %d):\n", targetNums));
++  for (int32_t j = 0; j < targetNums; j++) {
++    gchar* atom_name = gdk_atom_name(targets[j]);
++    if (!atom_name) {
++      LOGCLIP(("        failed to get MIME\n"));
++      continue;
++    }
++    LOGCLIP(("        MIME %s\n", atom_name));
++  }
++  LOGCLIP(("    Asking for content:\n"));
++  for (auto& flavor : aFlavorList) {
++    LOGCLIP(("        MIME %s\n", flavor.get()));
++  }
++#endif
++
+   // Walk through the provided types and try to match it to a
+   // provided type.
+   for (auto& flavor : aFlavorList) {
+diff -up firefox-88.0/widget/gtk/nsClipboard.h.1703763 firefox-88.0/widget/gtk/nsClipboard.h
+--- firefox-88.0/widget/gtk/nsClipboard.h.1703763	2021-04-16 01:11:48.000000000 +0200
++++ firefox-88.0/widget/gtk/nsClipboard.h	2021-04-21 09:46:55.642676394 +0200
+@@ -23,6 +23,8 @@ extern mozilla::LazyLogModule gClipboard
+ #  define LOGCLIP(args)
+ #endif /* MOZ_LOGGING */
+ 
++enum ClipboardDataType { CLIPBOARD_DATA, CLIPBOARD_TEXT, CLIPBOARD_TARGETS };
++
+ class nsRetrievalContext {
+  public:
+   // Get actual clipboard content (GetClipboardData/GetClipboardText)
+diff -up firefox-88.0/widget/gtk/nsClipboardWayland.cpp.1703763 firefox-88.0/widget/gtk/nsClipboardWayland.cpp
+--- firefox-88.0/widget/gtk/nsClipboardWayland.cpp.1703763	2021-04-16 01:11:48.000000000 +0200
++++ firefox-88.0/widget/gtk/nsClipboardWayland.cpp	2021-04-21 09:46:55.642676394 +0200
+@@ -233,6 +233,7 @@ nsWaylandDragContext* WaylandDataOffer::
+ static void data_offer_offer(void* data, struct wl_data_offer* wl_data_offer,
+                              const char* type) {
+   auto* offer = static_cast<DataOffer*>(data);
++  LOGCLIP(("Data offer %p add MIME %s\n", wl_data_offer, type));
+   offer->AddMIMEType(type);
+ }
+ 
+@@ -311,6 +312,8 @@ bool PrimaryDataOffer::RequestDataTransf
+ static void primary_data_offer(
+     void* data, gtk_primary_selection_offer* primary_selection_offer,
+     const char* mime_type) {
++  LOGCLIP(("Primary data offer %p add MIME %s\n", primary_selection_offer,
++           mime_type));
+   auto* offer = static_cast<DataOffer*>(data);
+   offer->AddMIMEType(mime_type);
+ }
+@@ -318,6 +321,8 @@ static void primary_data_offer(
+ static void primary_data_offer(
+     void* data, zwp_primary_selection_offer_v1* primary_selection_offer,
+     const char* mime_type) {
++  LOGCLIP(("Primary data offer %p add MIME %s\n", primary_selection_offer,
++           mime_type));
+   auto* offer = static_cast<DataOffer*>(data);
+   offer->AddMIMEType(mime_type);
+ }
+@@ -814,30 +819,15 @@ nsRetrievalContextWayland::~nsRetrievalC
+   g_hash_table_destroy(mActiveOffers);
+ }
+ 
+-GdkAtom* nsRetrievalContextWayland::GetTargets(int32_t aWhichClipboard,
+-                                               int* aTargetNum) {
+-  if (GetSelectionAtom(aWhichClipboard) == GDK_SELECTION_CLIPBOARD) {
+-    if (mClipboardOffer) {
+-      return mClipboardOffer->GetTargets(aTargetNum);
+-    }
+-  } else {
+-    if (mPrimaryOffer) {
+-      return mPrimaryOffer->GetTargets(aTargetNum);
+-    }
+-  }
+-
+-  *aTargetNum = 0;
+-  return nullptr;
+-}
+-
+ struct FastTrackClipboard {
+-  FastTrackClipboard(int aClipboardRequestNumber,
++  FastTrackClipboard(ClipboardDataType aDataType, int aClipboardRequestNumber,
+                      nsRetrievalContextWayland* aRetrievalContex)
+       : mClipboardRequestNumber(aClipboardRequestNumber),
+-        mRetrievalContex(aRetrievalContex) {}
+-
++        mRetrievalContex(aRetrievalContex),
++        mDataType(aDataType) {}
+   int mClipboardRequestNumber;
+   nsRetrievalContextWayland* mRetrievalContex;
++  ClipboardDataType mDataType;
+ };
+ 
+ static void wayland_clipboard_contents_received(
+@@ -846,17 +836,24 @@ static void wayland_clipboard_contents_r
+            selection_data));
+   FastTrackClipboard* fastTrack = static_cast<FastTrackClipboard*>(data);
+   fastTrack->mRetrievalContex->TransferFastTrackClipboard(
+-      fastTrack->mClipboardRequestNumber, selection_data);
++      fastTrack->mDataType, fastTrack->mClipboardRequestNumber, selection_data);
+   delete fastTrack;
+ }
+ 
+ void nsRetrievalContextWayland::TransferFastTrackClipboard(
+-    int aClipboardRequestNumber, GtkSelectionData* aSelectionData) {
++    ClipboardDataType aDataType, int aClipboardRequestNumber,
++    GtkSelectionData* aSelectionData) {
+   LOGCLIP(
+       ("nsRetrievalContextWayland::TransferFastTrackClipboard(), "
+        "aSelectionData = %p\n",
+        aSelectionData));
+ 
++  if (mClipboardRequestNumber != aClipboardRequestNumber) {
++    LOGCLIP(("    request number does not match!\n"));
++    NS_WARNING("Received obsoleted clipboard data!");
++  }
++  LOGCLIP(("    request number matches\n"));
++
+   int dataLength = gtk_selection_data_get_length(aSelectionData);
+   if (dataLength < 0) {
+     LOGCLIP(
+@@ -866,24 +863,76 @@ void nsRetrievalContextWayland::Transfer
+     return;
+   }
+ 
+-  if (mClipboardRequestNumber == aClipboardRequestNumber) {
+-    LOGCLIP(("    request number matches\n"));
+-    LOGCLIP(("    fastracking %d bytes of data.\n", dataLength));
+-    mClipboardDataLength = dataLength;
+-    if (dataLength > 0) {
+-      mClipboardData = reinterpret_cast<char*>(
+-          g_malloc(sizeof(char) * (mClipboardDataLength + 1)));
+-      memcpy(mClipboardData, gtk_selection_data_get_data(aSelectionData),
+-             sizeof(char) * mClipboardDataLength);
+-      mClipboardData[mClipboardDataLength] = '\0';
+-      LOGCLIP(("    done, mClipboardData = %p\n", mClipboardData));
+-    } else {
+-      ReleaseClipboardData(mClipboardData);
++  switch (aDataType) {
++    case CLIPBOARD_TARGETS: {
++      LOGCLIP(("    fastracking %d bytes of clipboard targets.\n", dataLength));
++      gint n_targets = 0;
++      GdkAtom* targets = nullptr;
++
++      if (!gtk_selection_data_get_targets(aSelectionData, &targets,
++                                          &n_targets) ||
++          !n_targets) {
++        ReleaseClipboardData(mClipboardData);
++      }
++
++      mClipboardData = reinterpret_cast<char*>(targets);
++      mClipboardDataLength = n_targets;
++      break;
++    }
++    case CLIPBOARD_DATA:
++    case CLIPBOARD_TEXT: {
++      LOGCLIP(("    fastracking %d bytes of data.\n", dataLength));
++      mClipboardDataLength = dataLength;
++      if (dataLength > 0) {
++        mClipboardData = reinterpret_cast<char*>(
++            g_malloc(sizeof(char) * (mClipboardDataLength + 1)));
++        memcpy(mClipboardData, gtk_selection_data_get_data(aSelectionData),
++               sizeof(char) * mClipboardDataLength);
++        mClipboardData[mClipboardDataLength] = '\0';
++        LOGCLIP(("    done, mClipboardData = %p\n", mClipboardData));
++      } else {
++        ReleaseClipboardData(mClipboardData);
++      }
++    }
++  }
++}
++
++GdkAtom* nsRetrievalContextWayland::GetTargets(int32_t aWhichClipboard,
++                                               int* aTargetNum) {
++  /* If actual clipboard data is owned by us we don't need to go
++   * through Wayland but we ask Gtk+ to directly call data
++   * getter callback nsClipboard::SelectionGetEvent().
++   * see gtk_selection_convert() at gtk+/gtkselection.c.
++   */
++  GdkAtom selection = GetSelectionAtom(aWhichClipboard);
++  if (gdk_selection_owner_get(selection)) {
++    LOGCLIP(("  Asking for internal clipboard content.\n"));
++    mClipboardRequestNumber++;
++    gtk_clipboard_request_contents(
++        gtk_clipboard_get(selection), gdk_atom_intern("TARGETS", FALSE),
++        wayland_clipboard_contents_received,
++        new FastTrackClipboard(CLIPBOARD_TARGETS, mClipboardRequestNumber,
++                               this));
++    *aTargetNum = mClipboardDataLength;
++    GdkAtom* targets = static_cast<GdkAtom*>((void*)mClipboardData);
++    // We don't hold the target list internally but we transfer the ownership.
++    mClipboardData = nullptr;
++    mClipboardDataLength = 0;
++    return targets;
++  }
++
++  if (GetSelectionAtom(aWhichClipboard) == GDK_SELECTION_CLIPBOARD) {
++    if (mClipboardOffer) {
++      return mClipboardOffer->GetTargets(aTargetNum);
+     }
+   } else {
+-    LOGCLIP(("    request number does not match!\n"));
+-    NS_WARNING("Received obsoleted clipboard data!");
++    if (mPrimaryOffer) {
++      return mPrimaryOffer->GetTargets(aTargetNum);
++    }
+   }
++
++  *aTargetNum = 0;
++  return nullptr;
+ }
+ 
+ const char* nsRetrievalContextWayland::GetClipboardData(
+@@ -906,7 +955,7 @@ const char* nsRetrievalContextWayland::G
+     gtk_clipboard_request_contents(
+         gtk_clipboard_get(selection), gdk_atom_intern(aMimeType, FALSE),
+         wayland_clipboard_contents_received,
+-        new FastTrackClipboard(mClipboardRequestNumber, this));
++        new FastTrackClipboard(CLIPBOARD_DATA, mClipboardRequestNumber, this));
+   } else {
+     LOGCLIP(("  Asking for remote clipboard content.\n"));
+     const auto& dataOffer =
+diff -up firefox-88.0/widget/gtk/nsClipboardWayland.h.1703763 firefox-88.0/widget/gtk/nsClipboardWayland.h
+--- firefox-88.0/widget/gtk/nsClipboardWayland.h.1703763	2021-04-21 09:46:55.642676394 +0200
++++ firefox-88.0/widget/gtk/nsClipboardWayland.h	2021-04-21 09:56:10.939329774 +0200
+@@ -134,7 +134,8 @@ class nsRetrievalContextWayland : public
+ 
+   void ClearDragAndDropDataOffer();
+ 
+-  void TransferFastTrackClipboard(int aClipboardRequestNumber,
++  void TransferFastTrackClipboard(ClipboardDataType aDataType,
++                                  int aClipboardRequestNumber,
+                                   GtkSelectionData* aSelectionData);
+ 
+   virtual ~nsRetrievalContextWayland() override;
+diff -up firefox-88.0/widget/gtk/nsClipboardX11.h.1703763 firefox-88.0/widget/gtk/nsClipboardX11.h
+--- firefox-88.0/widget/gtk/nsClipboardX11.h.1703763	2021-04-16 01:11:48.000000000 +0200
++++ firefox-88.0/widget/gtk/nsClipboardX11.h	2021-04-21 09:46:55.642676394 +0200
+@@ -10,8 +10,6 @@
+ 
+ #include <gtk/gtk.h>
+ 
+-enum ClipboardDataType { CLIPBOARD_DATA, CLIPBOARD_TEXT, CLIPBOARD_TARGETS };
+-
+ class nsRetrievalContextX11 : public nsRetrievalContext {
+  public:
+   enum State { INITIAL, COMPLETED, TIMED_OUT };

@@ -151,7 +151,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        88.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -232,6 +232,7 @@ Patch415:        mozilla-1670333.patch
 Patch416:        mozilla-1693472.patch
 Patch417:        mozilla-1702606.patch
 Patch418:        mozilla-1703657.patch
+Patch419:        mozilla-1703763.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -484,6 +485,7 @@ This package contains results of tests executed during build.
 %patch416 -p1 -b .1693472
 %patch417 -p1 -b .1702606
 %patch418 -p1 -b .1703657
+%patch419 -p1 -b .1703763
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1047,6 +1049,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Apr 21 2021 Martin Stransky <stransky@redhat.com> - 88.0-2
+- Added clipboard fix mzbz#1703763.
+
 * Mon Apr 19 2021 Martin Stransky <stransky@redhat.com> - 88.0-1
 - Update to 88.0
 
