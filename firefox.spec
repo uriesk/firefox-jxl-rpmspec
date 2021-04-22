@@ -40,7 +40,7 @@ ExcludeArch: armv7hl
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
-%global enable_mozilla_crashreporter 0
+%global enable_mozilla_crashreporter 1
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -151,7 +151,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        88.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -233,6 +233,7 @@ Patch416:        mozilla-1693472.patch
 Patch417:        mozilla-1702606.patch
 Patch418:        mozilla-1703657.patch
 Patch419:        mozilla-1703763.patch
+Patch420:        mochitest-wayland-workaround.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -385,23 +386,6 @@ Provides:       webclient
 Mozilla Firefox is an open-source web browser, designed for standards
 compliance, performance and portability.
 
-%if %{enable_mozilla_crashreporter}
-%global moz_debug_prefix %{_prefix}/lib/debug
-%global moz_debug_dir %{moz_debug_prefix}%{mozappdir}
-%global uname_m %(uname -m)
-%global symbols_file_name %{name}-%{version}.en-US.%{_os}-%{uname_m}.crashreporter-symbols.zip
-%global symbols_file_path %{moz_debug_dir}/%{symbols_file_name}
-%global _find_debuginfo_opts -p %{symbols_file_path} -o debugcrashreporter.list
-%global crashreporter_pkg_name mozilla-crashreporter-%{name}-debuginfo
-%package -n %{crashreporter_pkg_name}
-Summary: Debugging symbols used by Mozilla's crash reporter servers
-%description -n %{crashreporter_pkg_name}
-This package provides debug information for Firefox, for use by
-Mozilla's crash reporter servers.  If you are trying to locally
-debug %{name}, you want to install %{name}-debuginfo instead.
-%files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
-%endif
-
 %package x11
 Summary: Firefox X11 launcher.
 Requires: %{name}
@@ -486,6 +470,7 @@ This package contains results of tests executed during build.
 %patch417 -p1 -b .1702606
 %patch418 -p1 -b .1703657
 %patch419 -p1 -b .1703763
+%patch420 -p1 -b .mochitest-wayland-workaround
 
 # PGO patches
 %if %{build_with_pgo}
@@ -570,6 +555,10 @@ echo "ac_add_options --disable-jit" >> .mozconfig
 %if %{build_with_asan}
 echo "ac_add_options --enable-address-sanitizer" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
+%endif
+
+%if !%{enable_mozilla_crashreporter}
+echo "ac_add_options --disable-crashreporter" >> .mozconfig
 %endif
 
 # api keys full path
@@ -890,14 +879,6 @@ create_default_langpack "zh-TW" "zh"
 %{__rm} -rf %{buildroot}%{mozappdir}/dictionaries
 ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
 
-# Enable crash reporter for Firefox application
-%if %{enable_mozilla_crashreporter}
-sed -i -e "s/\[Crash Reporter\]/[Crash Reporter]\nEnabled=1/" %{buildroot}/%{mozappdir}/application.ini
-# Add debuginfo for crash-stats.mozilla.com
-%{__mkdir_p} %{buildroot}/%{moz_debug_dir}
-%{__cp} objdir/dist/%{symbols_file_name} %{buildroot}/%{moz_debug_dir}
-%endif
-
 %if 0%{?run_firefox_tests}
 %{__mkdir_p} %{buildroot}/%{version}-%{release}/test_results
 %{__cp} test_results/* %{buildroot}/%{version}-%{release}/test_results
@@ -1014,11 +995,13 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{_datadir}/icons/hicolor/32x32/apps/firefox.png
 %{_datadir}/icons/hicolor/48x48/apps/firefox.png
 %{_datadir}/icons/hicolor/symbolic/apps/firefox-symbolic.svg
+%if %{enable_mozilla_crashreporter}
 %{mozappdir}/crashreporter
 %{mozappdir}/crashreporter.ini
 %{mozappdir}/minidump-analyzer
 %{mozappdir}/Throbber-small.gif
 %{mozappdir}/browser/crashreporter-override.ini
+%endif
 %{mozappdir}/*.so
 %{mozappdir}/defaults/pref/channel-prefs.js
 %{mozappdir}/dependentlibs.list
@@ -1038,6 +1021,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-4
+- Run with mochitest test suite.
+
 * Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-3
 - Build with crashreporter enabled.
 

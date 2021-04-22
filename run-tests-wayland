@@ -5,7 +5,7 @@ set -x
 
 RUN_XPCSHELL_TEST=0
 RUN_REFTEST=1
-RUN_MOCHITEST=0
+RUN_MOCHITEST=1
 RUN_CRASHTEST=1
 
 while (( "$#" )); do
@@ -37,34 +37,38 @@ NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
 export MOZ_ENABLE_WAYLAND=1
 
 if [ $RUN_XPCSHELL_TEST -ne 0 ] ; then
-  ./mach xpcshell-test 2>&1 | cat - | tee $TEST_DIR/xpcshell
+#  ./mach xpcshell-test 2>&1 | cat - | tee $TEST_DIR/xpcshell
   ./mach xpcshell-test --enable-webrender 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
+  sleep 60
 fi
 
 # Basic render testing
 export TEST_PARAMS="--setpref reftest.ignoreWindowSize=true --setpref widget.wayland-focus-workaroud=true"
-export TEST_FLAVOUR=""
-if [ $RUN_REFTEST -ne 0 ] ; then
-  ./mach reftest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
-fi
-if [ $RUN_CRASHTEST -ne 0 ] ; then
-  ./mach crashtest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
-fi
-if [ $RUN_MOCHITEST -ne 0 ] ; then
-  ./mach mochitest --marionette localhost:$(($(($RANDOM))+2000)) $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
-fi
+#export TEST_FLAVOUR=""
+#if [ $RUN_REFTEST -ne 0 ] ; then
+#  ./mach reftest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+#fi
+#if [ $RUN_CRASHTEST -ne 0 ] ; then
+#  ./mach crashtest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+#fi
+#if [ $RUN_MOCHITEST -ne 0 ] ; then
+#  ./mach mochitest --marionette localhost:$(($(($RANDOM))+2000)) $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+#fi
 
 # WebRender testing
 export TEST_PARAMS="--enable-webrender $TEST_PARAMS"
 export TEST_FLAVOUR="-wr"
 if [ $RUN_REFTEST -ne 0 ] ; then
-./mach reftest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+  ./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+  sleep 60
 fi
 if [ $RUN_CRASHTEST -ne 0 ] ; then
-./mach crashtest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+  ./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+  sleep 60
 fi
 if [ $RUN_MOCHITEST -ne 0 ] ; then
-./mach mochitest --marionette localhost:$(($(($RANDOM))+2000)) $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+  ./mach mochitest dom $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+  sleep 60
 fi
 
 rm -f  objdir/dist/bin/certutil
