@@ -151,7 +151,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        88.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -545,10 +545,6 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
-%if !%{enable_mozilla_crashreporter}
-echo "ac_add_options --disable-crashreporter" >> .mozconfig
-%endif
-
 %if 0%{?build_tests}
 echo "ac_add_options --enable-tests" >> .mozconfig
 %else
@@ -750,11 +746,6 @@ xvfb-run ./mach build  2>&1 | cat -
 %endif
 %else
 ./mach build  2>&1 | cat -
-%endif
-
-# create debuginfo for crash-stats.mozilla.com
-%if %{enable_mozilla_crashreporter}
-make -C objdir buildsymbols
 %endif
 
 # run Firefox test suite
@@ -1023,13 +1014,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{_datadir}/icons/hicolor/32x32/apps/firefox.png
 %{_datadir}/icons/hicolor/48x48/apps/firefox.png
 %{_datadir}/icons/hicolor/symbolic/apps/firefox-symbolic.svg
-%if %{enable_mozilla_crashreporter}
 %{mozappdir}/crashreporter
 %{mozappdir}/crashreporter.ini
 %{mozappdir}/minidump-analyzer
 %{mozappdir}/Throbber-small.gif
 %{mozappdir}/browser/crashreporter-override.ini
-%endif
 %{mozappdir}/*.so
 %{mozappdir}/defaults/pref/channel-prefs.js
 %{mozappdir}/dependentlibs.list
@@ -1049,6 +1038,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-3
+- Build with crashreporter enabled.
+
 * Wed Apr 21 2021 Martin Stransky <stransky@redhat.com> - 88.0-2
 - Added clipboard fix mzbz#1703763.
 
