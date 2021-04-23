@@ -151,7 +151,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        88.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1023,9 +1023,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Apr 23 2021 Martin Stransky <stransky@redhat.com> - 88.0-5
+- Added fix for mozbz#1580595 - mouse pointer lock.
+
 * Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-4
 - Run with mochitest test suite.
-- Added fix for mozbz#1580595 - mouse pointer lock.
 
 * Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-3
 - Build with crashreporter enabled.
