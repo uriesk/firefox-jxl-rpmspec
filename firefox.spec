@@ -234,6 +234,7 @@ Patch417:        mozilla-1702606.patch
 Patch418:        mozilla-1703657.patch
 Patch419:        mozilla-1703763.patch
 Patch420:        mochitest-wayland-workaround.patch
+Patch421:        mozilla-1580595.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -471,6 +472,7 @@ This package contains results of tests executed during build.
 %patch418 -p1 -b .1703657
 %patch419 -p1 -b .1703763
 %patch420 -p1 -b .mochitest-wayland-workaround
+%patch421 -p1 -b .1580595
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1023,6 +1025,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-4
 - Run with mochitest test suite.
+- Added fix for mozbz#1580595 - mouse pointer lock.
 
 * Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-3
 - Build with crashreporter enabled.
