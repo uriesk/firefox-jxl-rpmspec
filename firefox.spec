@@ -151,7 +151,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        88.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -722,7 +722,6 @@ echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
 echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
 echo "export STRIP=/bin/true" >> .mozconfig
 export MACH_USE_SYSTEM_PYTHON=1
-export MACH_NO_WRITE_TIMES=1
 
 %if %{launch_wayland_compositor}
 cp %{SOURCE45} .
@@ -744,6 +743,7 @@ xvfb-run ./mach build  2>&1 | cat -
 #---------------------------------------------------------------------
 %install
 # run Firefox test suite
+export MACH_USE_SYSTEM_PYTHON=1
 %if %{launch_wayland_compositor}
 cp %{SOURCE45} .
 . ./run-wayland-compositor
@@ -1029,6 +1029,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Apr 27 2021 Martin Stransky <stransky@redhat.com> - 88.0-6
+- Test fix.
+
 * Fri Apr 23 2021 Martin Stransky <stransky@redhat.com> - 88.0-5
 - Added fix for mozbz#1580595 - mouse pointer lock.
 - Another test update.
