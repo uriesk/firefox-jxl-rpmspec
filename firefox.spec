@@ -20,7 +20,7 @@
 %global system_nss        1
 %global build_with_clang  0
 %global build_with_asan   0
-%global test_on_wayland   0
+%global test_on_wayland   1
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
@@ -332,6 +332,7 @@ BuildRequires:  gnome-settings-daemon
 BuildRequires:  mesa-dri-drivers
 %endif
 %if 0%{?run_firefox_tests}
+BuildRequires:  procps-ng
 BuildRequires:  nss-tools
 BuildRequires:  python2.7
 BuildRequires:  dejavu-sans-mono-fonts
@@ -739,7 +740,15 @@ xvfb-run ./mach build  2>&1 | cat -
 ./mach build  2>&1 | cat -
 %endif
 
+
+#---------------------------------------------------------------------
+%install
 # run Firefox test suite
+%if %{launch_wayland_compositor}
+cp %{SOURCE45} .
+. ./run-wayland-compositor
+%endif
+
 %if 0%{?run_firefox_tests}
 mkdir -p objdir/_virtualenvs/init_py3
 %{__cat} > objdir/_virtualenvs/init_py3/pip.conf << EOF
@@ -758,9 +767,6 @@ mkdir -p test_results
 ./print_results > test_summary.txt 2>&1 || true
 ./print_failures || true
 %endif
-
-#---------------------------------------------------------------------
-%install
 
 # set up our default bookmarks
 %if !0%{?flatpak}
@@ -1025,6 +1031,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Fri Apr 23 2021 Martin Stransky <stransky@redhat.com> - 88.0-5
 - Added fix for mozbz#1580595 - mouse pointer lock.
+- Another test update.
 
 * Thu Apr 22 2021 Martin Stransky <stransky@redhat.com> - 88.0-4
 - Run with mochitest test suite.

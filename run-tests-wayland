@@ -3,7 +3,7 @@
 
 set -x
 
-RUN_XPCSHELL_TEST=0
+RUN_XPCSHELL_TEST=1
 RUN_REFTEST=1
 RUN_MOCHITEST=1
 RUN_CRASHTEST=1
@@ -27,6 +27,8 @@ MOZ_NODE_PATH=/usr/bin/node
 MOCHITEST_PARAMS="--timeout 1 --chunk-by-dir 4"
 TEST_DIR="test_results"
 mkdir $TEST_DIR
+
+env | grep "DISPLAY"
 
 # Fix for system nss
 ln -s /usr/bin/certutil objdir/dist/bin/certutil

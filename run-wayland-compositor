@@ -26,7 +26,8 @@ if [ -z "$XDG_RUNTIME_DIR" ]; then
   export XDG_RUNTIME_DIR=$HOME
 fi
 
-xvfb-run -s "-screen 0 1600x1200x24" -n 80 mutter --wayland --nested &
+. xvfb-run -s "-screen 0 1600x1200x24" -n 80 mutter --display=:80 --wayland --nested &
+export DISPLAY=:80
 
 if [ -z "$WAYLAND_DISPLAY" ] ; then
   export WAYLAND_DISPLAY=wayland-0
@@ -45,3 +46,5 @@ until [ $retry_count -gt $max_retries ]; do
     sleep 2
   fi
 done
+
+env | grep "DISPLAY"

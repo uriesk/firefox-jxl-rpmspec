@@ -24,14 +24,16 @@ export TEST_FLAVOUR=""
 # WebRender testing
 export TEST_PARAMS="--enable-webrender $TEST_PARAMS"
 export TEST_FLAVOUR="-wr"
-xvfb-run -s "$X_PARAMS" -n 95 ./mach xpcshell-test --sequential $TEST_PARAMS 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
-sleep 60
-xvfb-run -s "$X_PARAMS" -n 96 ./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
-sleep 60
-xvfb-run -s "$X_PARAMS" -n 97 ./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
-sleep 60
-xvfb-run -s "$X_PARAMS" -n 98 ./mach mochitest dom $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
-#xvfb-run -s "$X_PARAMS" -n 98 ./mach mochitest $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+#xvfb-run -s "$X_PARAMS" -n 95 ./mach xpcshell-test --sequential $TEST_PARAMS 2>&1 | cat - | tee $TEST_DIR/xpcshell-wr
+#sleep 60
+#xvfb-run -s "$X_PARAMS" -n 96 ./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
+#sleep 60
+#xvfb-run -s "$X_PARAMS" -n 97 ./mach crashtest $TEST_PARAMS 2>&1 | tee $TEST_DIR/crashtest$TEST_FLAVOUR
+#sleep 60
+#export DISPLAY=:0
+#./mach mochitest dom/base/test/ $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+export DISPLAY=:98
+xvfb-run -s "$X_PARAMS" -n 98 ./mach mochitest dom/base/test/ $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
 
 rm -f  objdir/dist/bin/certutil
 rm -f  objdir/dist/bin/pk12util
