@@ -27,11 +27,6 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
-# Exclude ARM due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=1922599
-# https://bugzilla.redhat.com/show_bug.cgi?id=1942516
-ExcludeArch: armv7hl
-
 %ifarch armv7hl
 %global create_debuginfo  0
 %endif
@@ -213,6 +208,7 @@ Patch58:        firefox-crashreporter-build.patch
 # GENDIFF_DIFF_ARGS=-U0 gendiff firefox-xxxx .firefox-tests-reftest
 Patch100:       firefox-tests-xpcshell.patch
 Patch101:       firefox-tests-reftest.patch
+Patch102:       firefox-tests-xpcshell-freeze.patch
 
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
@@ -451,6 +447,7 @@ This package contains results of tests executed during build.
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
 %patch101 -p1 -b .firefox-tests-reftest
+%patch102 -p1 -b .firefox-tests-xpcshell-freeze
 
 # Fedora patches
 %patch215 -p1 -b .addons

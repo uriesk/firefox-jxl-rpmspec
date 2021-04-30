@@ -22,8 +22,9 @@ while (( "$#" )); do
   shift
 done
 
-MACH_USE_SYSTEM_PYTHON=1
-MOZ_NODE_PATH=/usr/bin/node
+export MACH_USE_SYSTEM_PYTHON=1
+export MOZ_NODE_PATH=/usr/bin/node
+
 MOCHITEST_PARAMS="--timeout 1 --chunk-by-dir 4"
 TEST_DIR="test_results"
 mkdir $TEST_DIR
