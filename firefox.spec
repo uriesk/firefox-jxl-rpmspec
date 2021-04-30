@@ -146,7 +146,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        88.0
-Release:        6%{?pre_tag}%{?dist}
+Release:        7%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -291,6 +291,7 @@ Requires:       mozilla-filesystem
 Recommends:     mozilla-openh264 >= 2.1.1
 Recommends:     libva
 Requires:       p11-kit-trust
+Requires:       pciutils-libs
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
@@ -1026,6 +1027,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Apr 30 2021 Martin Stransky <stransky@redhat.com> - 88.0-7
+- Added pciutils-libs req (rhbz#1955338)
+- Enabled Wayland on KDE (rhbz#1922608)
+
 * Tue Apr 27 2021 Martin Stransky <stransky@redhat.com> - 88.0-6
 - Test fix.
 
