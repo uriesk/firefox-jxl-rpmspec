@@ -4,7 +4,7 @@
 export TEST_DIR="test_results"
 
 echo "Test results"
-echo "Basic compositor"
-./psummary $TEST_DIR ""
+#echo "Basic compositor"
+#./psummary $TEST_DIR ""
 echo "WebRender"
 ./psummary $TEST_DIR "-wr"

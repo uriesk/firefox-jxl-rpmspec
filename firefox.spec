@@ -146,7 +146,7 @@ ExcludeArch: s390x
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        88.0
-Release:        7%{?pre_tag}%{?dist}
+Release:        8%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -231,6 +231,7 @@ Patch418:        mozilla-1703657.patch
 Patch419:        mozilla-1703763.patch
 Patch420:        mochitest-wayland-workaround.patch
 Patch421:        mozilla-1580595.patch
+Patch422:        mozilla-1705048.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -472,6 +473,7 @@ This package contains results of tests executed during build.
 %patch419 -p1 -b .1703763
 %patch420 -p1 -b .mochitest-wayland-workaround
 %patch421 -p1 -b .1580595
+%patch422 -p1 -b .1705048
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1027,6 +1029,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue May 4 2021 Martin Stransky <stransky@redhat.com> - 88.0-8
+- Added fix for mozbz#1705048.
+
 * Fri Apr 30 2021 Martin Stransky <stransky@redhat.com> - 88.0-7
 - Added pciutils-libs req (rhbz#1955338)
 - Enabled Wayland on KDE (rhbz#1922608)

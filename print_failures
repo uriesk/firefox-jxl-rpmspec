@@ -3,7 +3,7 @@
 
 export TEST_DIR="test_results"
 
-./print-errors $TEST_DIR ""
+#./print-errors $TEST_DIR ""
 ./print-errors $TEST_DIR "-wr"
-./print-error-reftest $TEST_DIR ""
+#./print-error-reftest $TEST_DIR ""
 ./print-error-reftest $TEST_DIR "-wr"
