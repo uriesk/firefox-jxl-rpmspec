@@ -226,7 +226,6 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
-Patch421:        mozilla-1580595.patch
 Patch422:        mozilla-1705048.patch
 
 # PGO/LTO patches
@@ -464,7 +463,6 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
-%patch421 -p1 -b .1580595
 %patch422 -p1 -b .1705048
 
 # PGO patches
