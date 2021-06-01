@@ -145,13 +145,13 @@ ExcludeArch: s390x
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        88.0.1
+Version:        89.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210510.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210601.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -225,10 +225,6 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-Patch416:        mozilla-1693472.patch
-Patch417:        mozilla-1702606.patch
-Patch418:        mozilla-1703657.patch
-Patch419:        mozilla-1703763.patch
 Patch420:        mochitest-wayland-workaround.patch
 Patch421:        mozilla-1580595.patch
 Patch422:        mozilla-1705048.patch
@@ -467,10 +463,6 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-%patch416 -p1 -b .1693472
-%patch417 -p1 -b .1702606
-%patch418 -p1 -b .1703657
-%patch419 -p1 -b .1703763
 %patch420 -p1 -b .mochitest-wayland-workaround
 %patch421 -p1 -b .1580595
 %patch422 -p1 -b .1705048
@@ -1029,6 +1021,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jun 1 2021 Martin Stransky <stransky@redhat.com> - 89.0-1
+- Updated to latest upstream (89.0)
+
 * Mon May 10 2021 Martin Stransky <stransky@redhat.com> - 88.0.1-1
 - Updated to latest upstream (88.0.1)
 

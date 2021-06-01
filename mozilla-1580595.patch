@@ -1,7 +1,7 @@
-diff -up firefox-88.0/dom/events/EventStateManager.cpp.1580595 firefox-88.0/dom/events/EventStateManager.cpp
---- firefox-88.0/dom/events/EventStateManager.cpp.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/dom/events/EventStateManager.cpp	2021-04-23 10:16:59.821826691 +0200
-@@ -4760,7 +4760,15 @@ void EventStateManager::SetPointerLock(n
+diff -up firefox-89.0/dom/events/EventStateManager.cpp.1580595 firefox-89.0/dom/events/EventStateManager.cpp
+--- firefox-89.0/dom/events/EventStateManager.cpp.1580595	2021-05-27 22:29:44.000000000 +0200
++++ firefox-89.0/dom/events/EventStateManager.cpp	2021-06-01 10:06:58.641344223 +0200
+@@ -4816,7 +4816,15 @@ void EventStateManager::SetPointerLock(n
      if (dragService) {
        dragService->Suppress();
      }
@@ -17,10 +17,10 @@ diff -up firefox-88.0/dom/events/EventStateManager.cpp.1580595 firefox-88.0/dom/
      // Unlocking, so return pointer to the original position by firing a
      // synthetic mouse event. We first reset sLastRefPoint to its
      // pre-pointerlock position, so that the synthetic mouse event reports
-diff -up firefox-88.0/dom/ipc/BrowserParent.cpp.1580595 firefox-88.0/dom/ipc/BrowserParent.cpp
---- firefox-88.0/dom/ipc/BrowserParent.cpp.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/dom/ipc/BrowserParent.cpp	2021-04-23 10:16:59.821826691 +0200
-@@ -236,7 +236,8 @@ BrowserParent::BrowserParent(ContentPare
+diff -up firefox-89.0/dom/ipc/BrowserParent.cpp.1580595 firefox-89.0/dom/ipc/BrowserParent.cpp
+--- firefox-89.0/dom/ipc/BrowserParent.cpp.1580595	2021-05-27 22:29:44.000000000 +0200
++++ firefox-89.0/dom/ipc/BrowserParent.cpp	2021-06-01 10:06:58.641344223 +0200
+@@ -229,7 +229,8 @@ BrowserParent::BrowserParent(ContentPare
        mHasLayers(false),
        mHasPresented(false),
        mIsReadyToHandleInputEvents(false),
@@ -30,7 +30,7 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.cpp.1580595 firefox-88.0/dom/ipc/Bro
    MOZ_ASSERT(aManager);
    // When the input event queue is disabled, we don't need to handle the case
    // that some input events are dispatched before PBrowserConstructor.
-@@ -601,6 +602,7 @@ void BrowserParent::RemoveWindowListener
+@@ -594,6 +595,7 @@ void BrowserParent::RemoveWindowListener
  }
  
  void BrowserParent::Deactivated() {
@@ -38,7 +38,7 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.cpp.1580595 firefox-88.0/dom/ipc/Bro
    UnsetTopLevelWebFocus(this);
    UnsetLastMouseRemoteTarget(this);
    PointerLockManager::ReleaseLockedRemoteTarget(this);
-@@ -1109,6 +1111,7 @@ void BrowserParent::UpdateDimensions(con
+@@ -1078,6 +1080,7 @@ void BrowserParent::UpdateDimensions(con
      mChromeOffset = chromeOffset;
  
      Unused << SendUpdateDimensions(GetDimensionInfo());
@@ -46,7 +46,7 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.cpp.1580595 firefox-88.0/dom/ipc/Bro
    }
  }
  
-@@ -1129,6 +1132,17 @@ DimensionInfo BrowserParent::GetDimensio
+@@ -1098,6 +1101,17 @@ DimensionInfo BrowserParent::GetDimensio
    return di;
  }
  
@@ -64,7 +64,7 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.cpp.1580595 firefox-88.0/dom/ipc/Bro
  void BrowserParent::SizeModeChanged(const nsSizeMode& aSizeMode) {
    if (!mIsDestroyed && aSizeMode != mSizeMode) {
      mSizeMode = aSizeMode;
-@@ -1915,6 +1929,30 @@ mozilla::ipc::IPCResult BrowserParent::R
+@@ -1899,6 +1913,30 @@ mozilla::ipc::IPCResult BrowserParent::R
    return IPC_OK();
  }
  
@@ -95,10 +95,10 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.cpp.1580595 firefox-88.0/dom/ipc/Bro
  void BrowserParent::SendRealKeyEvent(WidgetKeyboardEvent& aEvent) {
    if (mIsDestroyed || !mIsReadyToHandleInputEvents) {
      return;
-diff -up firefox-88.0/dom/ipc/BrowserParent.h.1580595 firefox-88.0/dom/ipc/BrowserParent.h
---- firefox-88.0/dom/ipc/BrowserParent.h.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/dom/ipc/BrowserParent.h	2021-04-23 10:16:59.821826691 +0200
-@@ -551,6 +551,10 @@ class BrowserParent final : public PBrow
+diff -up firefox-89.0/dom/ipc/BrowserParent.h.1580595 firefox-89.0/dom/ipc/BrowserParent.h
+--- firefox-89.0/dom/ipc/BrowserParent.h.1580595	2021-05-27 22:29:44.000000000 +0200
++++ firefox-89.0/dom/ipc/BrowserParent.h	2021-06-01 10:06:58.641344223 +0200
+@@ -547,6 +547,10 @@ class BrowserParent final : public PBrow
    mozilla::ipc::IPCResult RecvSynthesizeNativeTouchpadDoubleTap(
        const LayoutDeviceIntPoint& aPoint, const uint32_t& aModifierFlags);
  
@@ -109,7 +109,7 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.h.1580595 firefox-88.0/dom/ipc/Brows
    void SendMouseEvent(const nsAString& aType, float aX, float aY,
                        int32_t aButton, int32_t aClickCount, int32_t aModifiers);
  
-@@ -805,6 +809,10 @@ class BrowserParent final : public PBrow
+@@ -794,6 +798,10 @@ class BrowserParent final : public PBrow
    // and have to ensure that the child did not modify links to be loaded.
    bool QueryDropLinksForVerification();
  
@@ -120,7 +120,7 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.h.1580595 firefox-88.0/dom/ipc/Brows
   private:
    // This is used when APZ needs to find the BrowserParent associated with a
    // layer to dispatch events.
-@@ -990,6 +998,10 @@ class BrowserParent final : public PBrow
+@@ -977,6 +985,10 @@ class BrowserParent final : public PBrow
    // BrowserChild was not ready to handle it. We will resend it when the next
    // time we fire a mouse event and the BrowserChild is ready.
    bool mIsMouseEnterIntoWidgetEventSuppressed : 1;
@@ -131,10 +131,10 @@ diff -up firefox-88.0/dom/ipc/BrowserParent.h.1580595 firefox-88.0/dom/ipc/Brows
  };
  
  struct MOZ_STACK_CLASS BrowserParent::AutoUseNewTab final {
-diff -up firefox-88.0/dom/ipc/PBrowser.ipdl.1580595 firefox-88.0/dom/ipc/PBrowser.ipdl
---- firefox-88.0/dom/ipc/PBrowser.ipdl.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/dom/ipc/PBrowser.ipdl	2021-04-23 10:16:59.821826691 +0200
-@@ -545,6 +545,9 @@ parent:
+diff -up firefox-89.0/dom/ipc/PBrowser.ipdl.1580595 firefox-89.0/dom/ipc/PBrowser.ipdl
+--- firefox-89.0/dom/ipc/PBrowser.ipdl.1580595	2021-05-27 22:29:44.000000000 +0200
++++ firefox-89.0/dom/ipc/PBrowser.ipdl	2021-06-01 10:06:58.641344223 +0200
+@@ -538,6 +538,9 @@ parent:
      async SynthesizeNativeTouchpadDoubleTap(LayoutDeviceIntPoint aPoint,
                                              uint32_t aModifierFlags);
  
@@ -144,9 +144,20 @@ diff -up firefox-88.0/dom/ipc/PBrowser.ipdl.1580595 firefox-88.0/dom/ipc/PBrowse
      async AccessKeyNotHandled(WidgetKeyboardEvent event);
  
      async RegisterProtocolHandler(nsString scheme, nsIURI handlerURI, nsString title,
-diff -up firefox-88.0/widget/gtk/mozwayland/mozwayland.c.1580595 firefox-88.0/widget/gtk/mozwayland/mozwayland.c
---- firefox-88.0/widget/gtk/mozwayland/mozwayland.c.1580595	2021-04-15 21:44:37.000000000 +0200
-+++ firefox-88.0/widget/gtk/mozwayland/mozwayland.c	2021-04-23 10:16:59.822826721 +0200
+diff -up firefox-89.0/widget/gtk/mozgtk/mozgtk.c.1580595 firefox-89.0/widget/gtk/mozgtk/mozgtk.c
+--- firefox-89.0/widget/gtk/mozgtk/mozgtk.c.1580595	2021-05-27 22:29:54.000000000 +0200
++++ firefox-89.0/widget/gtk/mozgtk/mozgtk.c	2021-06-01 10:06:58.643344264 +0200
+@@ -647,6 +647,7 @@ STUB(gtk_color_chooser_get_type)
+ STUB(gtk_color_chooser_set_rgba)
+ STUB(gtk_color_chooser_get_rgba)
+ STUB(gtk_color_chooser_set_use_alpha)
++STUB(gdk_wayland_device_get_wl_pointer)
+ #endif
+ 
+ #ifdef GTK2_SYMBOLS
+diff -up firefox-89.0/widget/gtk/mozwayland/mozwayland.c.1580595 firefox-89.0/widget/gtk/mozwayland/mozwayland.c
+--- firefox-89.0/widget/gtk/mozwayland/mozwayland.c.1580595	2021-05-27 22:29:54.000000000 +0200
++++ firefox-89.0/widget/gtk/mozwayland/mozwayland.c	2021-06-01 10:06:58.641344223 +0200
 @@ -23,6 +23,7 @@ const struct wl_interface wl_callback_in
  const struct wl_interface wl_data_device_interface;
  const struct wl_interface wl_data_device_manager_interface;
@@ -155,11 +166,11 @@ diff -up firefox-88.0/widget/gtk/mozwayland/mozwayland.c.1580595 firefox-88.0/wi
  const struct wl_interface wl_region_interface;
  const struct wl_interface wl_registry_interface;
  const struct wl_interface wl_shm_interface;
-diff -up firefox-88.0/widget/gtk/nsWaylandDisplay.cpp.1580595 firefox-88.0/widget/gtk/nsWaylandDisplay.cpp
---- firefox-88.0/widget/gtk/nsWaylandDisplay.cpp.1580595	2021-04-23 10:16:59.814826481 +0200
-+++ firefox-88.0/widget/gtk/nsWaylandDisplay.cpp	2021-04-23 10:26:31.795941023 +0200
-@@ -115,6 +115,16 @@ void nsWaylandDisplay::SetIdleInhibitMan
-   mIdleInhibitManager = aIdleInhibitManager;
+diff -up firefox-89.0/widget/gtk/nsWaylandDisplay.cpp.1580595 firefox-89.0/widget/gtk/nsWaylandDisplay.cpp
+--- firefox-89.0/widget/gtk/nsWaylandDisplay.cpp.1580595	2021-05-27 22:29:54.000000000 +0200
++++ firefox-89.0/widget/gtk/nsWaylandDisplay.cpp	2021-06-01 10:09:49.151849365 +0200
+@@ -119,6 +119,16 @@ void nsWaylandDisplay::SetViewporter(wp_
+   mViewporter = aViewporter;
  }
  
 +void nsWaylandDisplay::SetRelativePointerManager(
@@ -175,7 +186,7 @@ diff -up firefox-88.0/widget/gtk/nsWaylandDisplay.cpp.1580595 firefox-88.0/widge
  static void global_registry_handler(void* data, wl_registry* registry,
                                      uint32_t id, const char* interface,
                                      uint32_t version) {
-@@ -163,6 +173,19 @@ static void global_registry_handler(void
+@@ -167,6 +177,19 @@ static void global_registry_handler(void
      wl_proxy_set_queue((struct wl_proxy*)idle_inhibit_manager,
                         display->GetEventQueue());
      display->SetIdleInhibitManager(idle_inhibit_manager);
@@ -195,18 +206,18 @@ diff -up firefox-88.0/widget/gtk/nsWaylandDisplay.cpp.1580595 firefox-88.0/widge
    } else if (strcmp(interface, "wl_compositor") == 0) {
      // Requested wl_compositor version 4 as we need wl_surface_damage_buffer().
      auto* compositor = WaylandRegistryBind<wl_compositor>(
-@@ -276,6 +299,8 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
+@@ -285,6 +308,8 @@ nsWaylandDisplay::nsWaylandDisplay(wl_di
        mPrimarySelectionDeviceManagerGtk(nullptr),
        mPrimarySelectionDeviceManagerZwpV1(nullptr),
        mIdleInhibitManager(nullptr),
 +      mRelativePointerManager(nullptr),
 +      mPointerConstraints(nullptr),
        mRegistry(nullptr),
+       mViewporter(nullptr),
        mExplicitSync(false) {
-   if (!aLighWrapper) {
-diff -up firefox-88.0/widget/gtk/nsWaylandDisplay.h.1580595 firefox-88.0/widget/gtk/nsWaylandDisplay.h
---- firefox-88.0/widget/gtk/nsWaylandDisplay.h.1580595	2021-04-23 10:16:59.822826721 +0200
-+++ firefox-88.0/widget/gtk/nsWaylandDisplay.h	2021-04-23 10:27:53.216377330 +0200
+diff -up firefox-89.0/widget/gtk/nsWaylandDisplay.h.1580595 firefox-89.0/widget/gtk/nsWaylandDisplay.h
+--- firefox-89.0/widget/gtk/nsWaylandDisplay.h.1580595	2021-06-01 10:06:58.642344243 +0200
++++ firefox-89.0/widget/gtk/nsWaylandDisplay.h	2021-06-01 10:11:03.422376541 +0200
 @@ -14,6 +14,8 @@
  #include "mozilla/widget/gbm.h"
  #include "mozilla/widget/gtk-primary-selection-client-protocol.h"
@@ -215,8 +226,8 @@ diff -up firefox-88.0/widget/gtk/nsWaylandDisplay.h.1580595 firefox-88.0/widget/
 +#include "mozilla/widget/pointer-constraints-unstable-v1-client-protocol.h"
  #include "mozilla/widget/linux-dmabuf-unstable-v1-client-protocol.h"
  #include "mozilla/widget/primary-selection-unstable-v1-client-protocol.h"
- 
-@@ -61,6 +63,12 @@ class nsWaylandDisplay {
+ #include "mozilla/widget/viewporter-client-protocol.h"
+@@ -62,6 +64,12 @@ class nsWaylandDisplay {
    zwp_idle_inhibit_manager_v1* GetIdleInhibitManager(void) {
      return mIdleInhibitManager;
    }
@@ -226,12 +237,12 @@ diff -up firefox-88.0/widget/gtk/nsWaylandDisplay.h.1580595 firefox-88.0/widget/
 +  zwp_pointer_constraints_v1* GetPointerConstraints(void) {
 +    return mPointerConstraints;
 +  }
+   wp_viewporter* GetViewporter(void) { return mViewporter; };
  
    bool IsMainThreadDisplay() { return mEventQueue == nullptr; }
- 
-@@ -75,6 +83,9 @@ class nsWaylandDisplay {
-       zwp_primary_selection_device_manager_v1* aPrimarySelectionDeviceManager);
+@@ -78,6 +86,9 @@ class nsWaylandDisplay {
    void SetIdleInhibitManager(zwp_idle_inhibit_manager_v1* aIdleInhibitManager);
+   void SetViewporter(wp_viewporter* aViewporter);
  
 +  void SetRelativePointerManager(
 +      zwp_relative_pointer_manager_v1* aRelativePointerManager);
@@ -239,18 +250,18 @@ diff -up firefox-88.0/widget/gtk/nsWaylandDisplay.h.1580595 firefox-88.0/widget/
    bool IsExplicitSyncEnabled() { return mExplicitSync; }
  
   private:
-@@ -92,6 +103,8 @@ class nsWaylandDisplay {
+@@ -95,6 +106,8 @@ class nsWaylandDisplay {
    gtk_primary_selection_device_manager* mPrimarySelectionDeviceManagerGtk;
    zwp_primary_selection_device_manager_v1* mPrimarySelectionDeviceManagerZwpV1;
    zwp_idle_inhibit_manager_v1* mIdleInhibitManager;
 +  zwp_relative_pointer_manager_v1* mRelativePointerManager;
 +  zwp_pointer_constraints_v1* mPointerConstraints;
    wl_registry* mRegistry;
+   wp_viewporter* mViewporter;
    bool mExplicitSync;
- };
-diff -up firefox-88.0/widget/gtk/nsWindow.cpp.1580595 firefox-88.0/widget/gtk/nsWindow.cpp
---- firefox-88.0/widget/gtk/nsWindow.cpp.1580595	2021-04-23 10:16:59.819826631 +0200
-+++ firefox-88.0/widget/gtk/nsWindow.cpp	2021-04-23 10:16:59.823826750 +0200
+diff -up firefox-89.0/widget/gtk/nsWindow.cpp.1580595 firefox-89.0/widget/gtk/nsWindow.cpp
+--- firefox-89.0/widget/gtk/nsWindow.cpp.1580595	2021-06-01 10:06:58.640344202 +0200
++++ firefox-89.0/widget/gtk/nsWindow.cpp	2021-06-01 10:06:58.642344243 +0200
 @@ -506,6 +506,9 @@ nsWindow::nsWindow() {
  #ifdef MOZ_WAYLAND
    mNeedsCompositorResume = false;
@@ -261,7 +272,7 @@ diff -up firefox-88.0/widget/gtk/nsWindow.cpp.1580595 firefox-88.0/widget/gtk/ns
  #endif
    mWaitingForMoveToRectCB = false;
    mPendingSizeRect = LayoutDeviceIntRect(0, 0, 0, 0);
-@@ -8013,6 +8016,13 @@ nsresult nsWindow::SynthesizeNativeMouse
+@@ -8037,6 +8040,13 @@ nsresult nsWindow::SynthesizeNativeMouse
        // all other cases we'll synthesize a motion event that will be emitted by
        // gdk_display_warp_pointer().
        // XXX How to activate native modifier for the other events?
@@ -275,7 +286,7 @@ diff -up firefox-88.0/widget/gtk/nsWindow.cpp.1580595 firefox-88.0/widget/gtk/ns
        GdkScreen* screen = gdk_window_get_screen(mGdkWindow);
        GdkPoint point = DevicePixelsToGdkPointRoundDown(aPoint);
        gdk_display_warp_pointer(display, screen, point.x, point.y);
-@@ -8436,6 +8446,106 @@ already_AddRefed<nsIWidget> nsIWidget::C
+@@ -8460,6 +8470,106 @@ already_AddRefed<nsIWidget> nsIWidget::C
  }
  
  #ifdef MOZ_WAYLAND
@@ -382,10 +393,10 @@ diff -up firefox-88.0/widget/gtk/nsWindow.cpp.1580595 firefox-88.0/widget/gtk/ns
  nsresult nsWindow::GetScreenRect(LayoutDeviceIntRect* aRect) {
    typedef struct _GdkMonitor GdkMonitor;
    static auto s_gdk_display_get_monitor_at_window =
-diff -up firefox-88.0/widget/gtk/nsWindow.h.1580595 firefox-88.0/widget/gtk/nsWindow.h
---- firefox-88.0/widget/gtk/nsWindow.h.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/widget/gtk/nsWindow.h	2021-04-23 10:16:59.822826721 +0200
-@@ -424,6 +424,13 @@ class nsWindow final : public nsBaseWidg
+diff -up firefox-89.0/widget/gtk/nsWindow.h.1580595 firefox-89.0/widget/gtk/nsWindow.h
+--- firefox-89.0/widget/gtk/nsWindow.h.1580595	2021-05-27 22:29:54.000000000 +0200
++++ firefox-89.0/widget/gtk/nsWindow.h	2021-06-01 10:06:58.642344243 +0200
+@@ -423,6 +423,13 @@ class nsWindow final : public nsBaseWidg
    static bool GetTopLevelWindowActiveState(nsIFrame* aFrame);
    static bool TitlebarUseShapeMask();
  #ifdef MOZ_WAYLAND
@@ -399,7 +410,7 @@ diff -up firefox-88.0/widget/gtk/nsWindow.h.1580595 firefox-88.0/widget/gtk/nsWi
    virtual nsresult GetScreenRect(LayoutDeviceIntRect* aRect) override;
    virtual nsRect GetPreferredPopupRect() override {
      return mPreferredPopupRect;
-@@ -481,6 +488,7 @@ class nsWindow final : public nsBaseWidg
+@@ -480,6 +487,7 @@ class nsWindow final : public nsBaseWidg
  #ifdef MOZ_WAYLAND
    bool mNeedsCompositorResume;
    bool mCompositorInitiallyPaused;
@@ -407,7 +418,7 @@ diff -up firefox-88.0/widget/gtk/nsWindow.h.1580595 firefox-88.0/widget/gtk/nsWi
  #endif
    bool mWindowScaleFactorChanged;
    int mWindowScaleFactor;
-@@ -562,6 +570,8 @@ class nsWindow final : public nsBaseWidg
+@@ -561,6 +569,8 @@ class nsWindow final : public nsBaseWidg
  #endif
  #ifdef MOZ_WAYLAND
    RefPtr<mozilla::gfx::VsyncSource> mWaylandVsyncSource;
@@ -416,20 +427,21 @@ diff -up firefox-88.0/widget/gtk/nsWindow.h.1580595 firefox-88.0/widget/gtk/nsWi
  #endif
  
    // Upper bound on pending ConfigureNotify events to be dispatched to the
-diff -up firefox-88.0/widget/gtk/wayland/moz.build.1580595 firefox-88.0/widget/gtk/wayland/moz.build
---- firefox-88.0/widget/gtk/wayland/moz.build.1580595	2021-04-23 11:25:30.201028672 +0200
-+++ firefox-88.0/widget/gtk/wayland/moz.build	2021-04-23 11:26:20.015525447 +0200
-@@ -11,7 +11,9 @@ SOURCES += [
+diff -up firefox-89.0/widget/gtk/wayland/moz.build.1580595 firefox-89.0/widget/gtk/wayland/moz.build
+--- firefox-89.0/widget/gtk/wayland/moz.build.1580595	2021-06-01 10:06:58.643344264 +0200
++++ firefox-89.0/widget/gtk/wayland/moz.build	2021-06-01 10:08:52.391682258 +0200
+@@ -11,8 +11,10 @@ SOURCES += [
      "gtk-primary-selection-protocol.c",
      "idle-inhibit-unstable-v1-protocol.c",
      "linux-dmabuf-unstable-v1-protocol.c",
 +    "pointer-constraints-unstable-v1-protocol.c",
      "primary-selection-unstable-v1-protocol.c",
+     "viewporter-protocol.c",
 +    "relative-pointer-unstable-v1-protocol.c",
      "xdg-output-unstable-v1-protocol.c",
  ]
  
-@@ -20,7 +22,9 @@ EXPORTS.mozilla.widget += [
+@@ -21,7 +23,9 @@ EXPORTS.mozilla.widget += [
      "gtk-primary-selection-client-protocol.h",
      "idle-inhibit-unstable-v1-client-protocol.h",
      "linux-dmabuf-unstable-v1-client-protocol.h",
@@ -437,11 +449,11 @@ diff -up firefox-88.0/widget/gtk/wayland/moz.build.1580595 firefox-88.0/widget/g
      "primary-selection-unstable-v1-client-protocol.h",
 +    "relative-pointer-unstable-v1-client-protocol.h",
      "va_drmcommon.h",
+     "viewporter-client-protocol.h",
      "xdg-output-unstable-v1-client-protocol.h",
- ]
-diff -up firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h.1580595 firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h
---- firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h.1580595	2021-04-23 10:16:59.823826750 +0200
-+++ firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h	2021-04-23 10:16:59.823826750 +0200
+diff -up firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h.1580595 firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h
+--- firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h.1580595	2021-06-01 10:06:58.643344264 +0200
++++ firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-protocol.h	2021-06-01 10:06:58.643344264 +0200
 @@ -0,0 +1,650 @@
 +/* Generated by wayland-scanner 1.18.0 */
 +
@@ -1093,9 +1105,9 @@ diff -up firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-client-
 +#endif
 +
 +#endif
-diff -up firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c.1580595 firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c
---- firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c.1580595	2021-04-23 10:16:59.823826750 +0200
-+++ firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c	2021-04-23 10:16:59.823826750 +0200
+diff -up firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c.1580595 firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c
+--- firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c.1580595	2021-06-01 10:06:58.643344264 +0200
++++ firefox-89.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protocol.c	2021-06-01 10:06:58.643344264 +0200
 @@ -0,0 +1,97 @@
 +/* Generated by wayland-scanner 1.18.0 */
 +
@@ -1194,9 +1206,9 @@ diff -up firefox-88.0/widget/gtk/wayland/pointer-constraints-unstable-v1-protoco
 +    "zwp_confined_pointer_v1",        1, 2,
 +    zwp_confined_pointer_v1_requests, 2, zwp_confined_pointer_v1_events,
 +};
-diff -up firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h.1580595 firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h
---- firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h.1580595	2021-04-23 10:16:59.823826750 +0200
-+++ firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h	2021-04-23 10:16:59.823826750 +0200
+diff -up firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h.1580595 firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h
+--- firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h.1580595	2021-06-01 10:06:58.643344264 +0200
++++ firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-protocol.h	2021-06-01 10:06:58.643344264 +0200
 @@ -0,0 +1,293 @@
 +/* Generated by wayland-scanner 1.18.0 */
 +
@@ -1491,9 +1503,9 @@ diff -up firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-client-pro
 +#endif
 +
 +#endif
-diff -up firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c.1580595 firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c
---- firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c.1580595	2021-04-23 10:16:59.823826750 +0200
-+++ firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c	2021-04-23 10:16:59.823826750 +0200
+diff -up firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c.1580595 firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c
+--- firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c.1580595	2021-06-01 10:06:58.643344264 +0200
++++ firefox-89.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c	2021-06-01 10:06:58.643344264 +0200
 @@ -0,0 +1,69 @@
 +/* Generated by wayland-scanner 1.18.0 */
 +
@@ -1564,10 +1576,10 @@ diff -up firefox-88.0/widget/gtk/wayland/relative-pointer-unstable-v1-protocol.c
 +    "zwp_relative_pointer_v1",        1, 1,
 +    zwp_relative_pointer_v1_requests, 1, zwp_relative_pointer_v1_events,
 +};
-diff -up firefox-88.0/widget/nsIWidget.h.1580595 firefox-88.0/widget/nsIWidget.h
---- firefox-88.0/widget/nsIWidget.h.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/widget/nsIWidget.h	2021-04-23 10:16:59.823826750 +0200
-@@ -1771,6 +1771,16 @@ class nsIWidget : public nsISupports {
+diff -up firefox-89.0/widget/nsIWidget.h.1580595 firefox-89.0/widget/nsIWidget.h
+--- firefox-89.0/widget/nsIWidget.h.1580595	2021-05-27 22:29:54.000000000 +0200
++++ firefox-89.0/widget/nsIWidget.h	2021-06-01 10:06:58.643344264 +0200
+@@ -1834,6 +1834,16 @@ class nsIWidget : public nsISupports {
  
  #endif
  
@@ -1584,10 +1596,10 @@ diff -up firefox-88.0/widget/nsIWidget.h.1580595 firefox-88.0/widget/nsIWidget.h
    /*
     * Get safe area insets except to cutout.
     * See https://drafts.csswg.org/css-env-1/#safe-area-insets.
-diff -up firefox-88.0/widget/PuppetWidget.cpp.1580595 firefox-88.0/widget/PuppetWidget.cpp
---- firefox-88.0/widget/PuppetWidget.cpp.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/widget/PuppetWidget.cpp	2021-04-23 10:16:59.822826721 +0200
-@@ -534,6 +534,20 @@ nsresult PuppetWidget::SynthesizeNativeT
+diff -up firefox-89.0/widget/PuppetWidget.cpp.1580595 firefox-89.0/widget/PuppetWidget.cpp
+--- firefox-89.0/widget/PuppetWidget.cpp.1580595	2021-05-27 22:29:54.000000000 +0200
++++ firefox-89.0/widget/PuppetWidget.cpp	2021-06-01 10:06:58.643344264 +0200
+@@ -533,6 +533,20 @@ nsresult PuppetWidget::SynthesizeNativeT
    return NS_OK;
  }
  
@@ -1608,10 +1620,10 @@ diff -up firefox-88.0/widget/PuppetWidget.cpp.1580595 firefox-88.0/widget/Puppet
  void PuppetWidget::SetConfirmedTargetAPZC(
      uint64_t aInputBlockId,
      const nsTArray<ScrollableLayerGuid>& aTargets) const {
-diff -up firefox-88.0/widget/PuppetWidget.h.1580595 firefox-88.0/widget/PuppetWidget.h
---- firefox-88.0/widget/PuppetWidget.h.1580595	2021-04-16 01:11:48.000000000 +0200
-+++ firefox-88.0/widget/PuppetWidget.h	2021-04-23 10:16:59.821826691 +0200
-@@ -283,6 +283,9 @@ class PuppetWidget : public nsBaseWidget
+diff -up firefox-89.0/widget/PuppetWidget.h.1580595 firefox-89.0/widget/PuppetWidget.h
+--- firefox-89.0/widget/PuppetWidget.h.1580595	2021-05-27 22:29:54.000000000 +0200
++++ firefox-89.0/widget/PuppetWidget.h	2021-06-01 10:06:58.643344264 +0200
+@@ -281,6 +281,9 @@ class PuppetWidget : public nsBaseWidget
    virtual nsresult SynthesizeNativeTouchpadDoubleTap(
        LayoutDeviceIntPoint aPoint, uint32_t aModifierFlags) override;
  
@@ -1621,13 +1633,3 @@ diff -up firefox-88.0/widget/PuppetWidget.h.1580595 firefox-88.0/widget/PuppetWi
    virtual void StartAsyncScrollbarDrag(
        const AsyncDragMetrics& aDragMetrics) override;
  
---- firefox-88.0/widget/gtk/mozgtk/mozgtk.c.old	2021-04-23 14:19:07.244820364 +0200
-+++ firefox-88.0/widget/gtk/mozgtk/mozgtk.c	2021-04-23 14:19:34.228631957 +0200
-@@ -644,6 +644,7 @@ STUB(gtk_color_chooser_get_type)
- STUB(gtk_color_chooser_set_rgba)
- STUB(gtk_color_chooser_get_rgba)
- STUB(gtk_color_chooser_set_use_alpha)
-+STUB(gdk_wayland_device_get_wl_pointer)
- #endif
- 
- #ifdef GTK2_SYMBOLS
