@@ -27,6 +27,12 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
+# Disabled due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=1966949
+%if 0%{?fedora} > 34
+ExcludeArch: armv7hl
+%endif
+
 %ifarch armv7hl
 %global create_debuginfo  0
 %endif
