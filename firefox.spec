@@ -152,7 +152,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        89.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -233,6 +233,7 @@ Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
 Patch422:        mozilla-1705048.patch
+Patch423:        mozilla-1646135.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -470,6 +471,7 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
 %patch422 -p1 -b .1705048
+%patch423 -p1 -b .1646135
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1025,6 +1027,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jun 14 2021 Martin Stransky <stransky@redhat.com> - 89.0-2
+- Added fix for mozbz#1646135
+
 * Tue Jun 1 2021 Martin Stransky <stransky@redhat.com> - 89.0-1
 - Updated to latest upstream (89.0)
 
