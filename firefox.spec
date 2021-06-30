@@ -1029,7 +1029,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Jun 30 2021 Martin Stransky <stransky@redhat.com> - 89.0.2-2
+* Wed Jun 30 2021 Martin Stransky <stransky@redhat.com> - 89.0.2-2
 - Added fix for mozbz#1715254 (rhbz#1976892).
 
 * Thu Jun 24 2021 Martin Stransky <stransky@redhat.com> - 89.0.2-1
