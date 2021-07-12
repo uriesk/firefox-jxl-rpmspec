@@ -37,33 +37,6 @@ diff -up firefox-89.0/toolkit/components/browser/nsWebBrowser.cpp.mochitest-wayl
 diff -up firefox-89.0/widget/gtk/nsWindow.cpp.mochitest-wayland-workaround firefox-89.0/widget/gtk/nsWindow.cpp
 --- firefox-89.0/widget/gtk/nsWindow.cpp.mochitest-wayland-workaround	2021-06-01 10:02:59.644432243 +0200
 +++ firefox-89.0/widget/gtk/nsWindow.cpp	2021-06-01 10:04:28.715262874 +0200
-@@ -2225,11 +2225,22 @@ void nsWindow::SetFocus(Raise aRaise, mo
-                                false)) {
-         // Wayland does not support focus changes so we need to workaround it
-         // by window hide/show sequence.
--        owningWindow->NativeShow(false);
-+        LOG(("Applying Wayland focus workaround for nsWindow %p\n",
-+             owningWindow.get()));
-+        GtkAllocation allocation;
-+        gtk_widget_get_allocation(GTK_WIDGET(mContainer), &allocation);
-+        LOG(("    mShell allocation %d %d -> %d %d\n", allocation.x,
-+             allocation.y, allocation.width, allocation.height));
-+        owningWindow->Show(false);
-         RefPtr<nsWindow> self(owningWindow);
--        NS_DispatchToMainThread(NS_NewRunnableFunction(
--            "nsWindow::NativeShow()",
--            [self]() -> void { self->NativeShow(true); }));
-+        const GtkAllocation alloc = allocation;
-+        NS_DispatchToMainThread(
-+            NS_NewRunnableFunction("nsWindow::Show()", [self, alloc]() -> void {
-+              self->Show(true);
-+              GtkAllocation al = alloc;
-+              self->mBounds.width = self->mBounds.height = 1;
-+              self->OnSizeAllocate(&al);
-+            }));
-         return;
-       }
- 
 @@ -7962,6 +7973,8 @@ nsresult nsWindow::SynthesizeNativeMouse
      nsIObserver* aObserver) {
    AutoObserverNotifier notifier(aObserver, "mouseevent");

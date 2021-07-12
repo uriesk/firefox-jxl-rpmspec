@@ -128,11 +128,6 @@ diff -U0 firefox-89.0/toolkit/components/telemetry/tests/unit/test_TelemetrySess
 -    );
 -  }
 -
-diff -U0 firefox-89.0/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini.firefox-tests-xpcshell firefox-89.0/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini
---- firefox-89.0/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini.firefox-tests-xpcshell	2021-05-27 22:29:54.000000000 +0200
-+++ firefox-89.0/toolkit/modules/subprocess/test/xpcshell/xpcshell.ini	2021-06-01 09:47:45.911684995 +0200
-@@ -10 +9,0 @@
--[test_subprocess.js]
 diff -U0 firefox-89.0/toolkit/mozapps/downloads/tests/unit/xpcshell.ini.firefox-tests-xpcshell firefox-89.0/toolkit/mozapps/downloads/tests/unit/xpcshell.ini
 --- firefox-89.0/toolkit/mozapps/downloads/tests/unit/xpcshell.ini.firefox-tests-xpcshell	2021-05-27 22:29:54.000000000 +0200
 +++ firefox-89.0/toolkit/mozapps/downloads/tests/unit/xpcshell.ini	2021-06-01 09:47:45.911684995 +0200

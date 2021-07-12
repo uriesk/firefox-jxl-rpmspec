@@ -6,7 +6,7 @@
 # building locally and don't want to spend 24 hours waiting for results.
 %global run_firefox_tests 0
 %ifarch x86_64 %{ix86}
-%global run_firefox_tests 1
+%global run_firefox_tests 0
 %endif
 
 # Don't create debuginfo rpm packages. It reduces build time as
@@ -113,9 +113,9 @@ ExcludeArch: armv7hl
 %endif
 
 %if %{?system_nss}
-%global nspr_version 4.21
+%global nspr_version 4.26
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.64
+%global nss_version 3.66
 %global nss_build_version %{nss_version}
 %endif
 
@@ -151,13 +151,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        89.0.2
-Release:        2%{?pre_tag}%{?dist}
+Version:        90.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210624.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210712.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -232,7 +232,6 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
-Patch422:        mozilla-1705048.patch
 Patch423:        mozilla-1646135.patch
 Patch424:        mozilla-1715254.patch
 
@@ -471,7 +470,6 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
-%patch422 -p1 -b .1705048
 %patch423 -p1 -b .1646135
 %patch424 -p1 -b .1715254
 
