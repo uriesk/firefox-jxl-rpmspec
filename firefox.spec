@@ -919,6 +919,17 @@ rm -rf %{buildroot}%{mozappdir}/gtk2/
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozjs.so
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozalloc.so
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libxul.so
+
+# Create a symlink to replace libnssckbi.so with p11-kit-client.so
+# instead of p11-kit-trust.so, so that Firefox can see the system
+# trust store on the host through the p11-kit RPC protocol.  A symlink
+# to libnss3.so is also needed, because Firefox tries to load
+# libnssckbi.so from the same directory where libnss3.so is loaded (as
+# of Firefox 89).
+%if 0%{?flatpak}
+ln -sf /usr/lib64/libnss3.so %{buildroot}%{_libdir}/libnss3.so
+ln -sf /usr/lib64/pkcs11/p11-kit-client.so %{buildroot}%{_libdir}/libnssckbi.so
+%endif
 #---------------------------------------------------------------------
 
 # Moves defaults/preferences to browser/defaults/preferences
@@ -1027,6 +1038,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jul 12 2021 Martin Stransky <stransky@redhat.com> - 90.0-1
+- Updated to 90.0
+
+* Mon Jul 12 2021 Daiki Ueno <dueno@redhat.com> - 89.0.2-3
+- flatpak: Enable loading system trust store on the host (rhbz#1766340)
+
 * Wed Jun 30 2021 Martin Stransky <stransky@redhat.com> - 89.0.2-2
 - Added fix for mozbz#1715254 (rhbz#1976892).
 
