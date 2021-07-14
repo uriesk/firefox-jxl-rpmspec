@@ -1006,6 +1006,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/application.ini
 %{mozappdir}/pingsender
 %exclude %{mozappdir}/removed-files
+%if 0%{?flatpak}
+%{_libdir}/libnss3.so
+%{_libdir}/libnssckbi.so
+%endif
 %{_datadir}/icons/hicolor/16x16/apps/firefox.png
 %{_datadir}/icons/hicolor/22x22/apps/firefox.png
 %{_datadir}/icons/hicolor/24x24/apps/firefox.png
