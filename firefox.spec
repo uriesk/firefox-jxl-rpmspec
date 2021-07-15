@@ -152,7 +152,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        90.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1039,6 +1039,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jul 15 2021 Martin Stransky <stransky@redhat.com> - 90.0-3
+- Disabled Wayland backend on KDE due to
+  https://bugzilla.mozilla.org/show_bug.cgi?id=1714132
+
 * Tue Jul 13 2021 Martin Stransky <stransky@redhat.com> - 90.0-2
 - Added xorg-x11-server-Xwayland dependency for Mutter
 
