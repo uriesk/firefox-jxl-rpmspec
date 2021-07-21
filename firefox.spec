@@ -151,13 +151,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        90.0
-Release:        3%{?pre_tag}%{?dist}
+Version:        90.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210712.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210721.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -207,6 +207,9 @@ Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch58:        firefox-crashreporter-build.patch
+Patch59:        build-python-1.patch
+Patch60:        build-python-2.patch
+Patch61:        firefox-glibc-dynstack.patch
 
 # Test patches
 # Generate without context by
@@ -448,6 +451,9 @@ This package contains results of tests executed during build.
 %patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
 %patch58 -p1 -b .firefox-crashreporter-build
+%patch59 -p1 -b .build-python-1
+%patch60 -p1 -b .build-python-2
+%patch61 -p1 -b .glibc-dynstack
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -1043,6 +1049,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jul 21 2021 Martin Stransky <stransky@redhat.com> - 90.0.1-1
+- Updated to 90.0.1
+- Added fixes to build on rawhide
+
 * Thu Jul 15 2021 Martin Stransky <stransky@redhat.com> - 90.0-3
 - Disabled Wayland backend on KDE due to
   https://bugzilla.mozilla.org/show_bug.cgi?id=1714132
