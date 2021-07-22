@@ -1049,8 +1049,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Jul 22 2021 Martin Stransky <stransky@redhat.com> - 90.0.1-2
+* Thu Jul 22 2021 Martin Stransky <stransky@redhat.com> - 90.0.2-1
 - Updated to 90.0.2
+
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 90.0.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
 * Wed Jul 21 2021 Martin Stransky <stransky@redhat.com> - 90.0.1-1
 - Updated to 90.0.1
