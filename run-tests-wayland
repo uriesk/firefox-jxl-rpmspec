@@ -46,7 +46,7 @@ if [ $RUN_XPCSHELL_TEST -ne 0 ] ; then
 fi
 
 # Basic render testing
-export TEST_PARAMS="--setpref reftest.ignoreWindowSize=true --setpref widget.wayland-focus-workaroud=true"
+export TEST_PARAMS="--setpref reftest.ignoreWindowSize=true --setpref widget.wayland.test-workarounds.enabled=true"
 #export TEST_FLAVOUR=""
 #if [ $RUN_REFTEST -ne 0 ] ; then
 #  ./mach reftest --marionette localhost:$(($(($RANDOM))+2000)) $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
@@ -61,6 +61,8 @@ export TEST_PARAMS="--setpref reftest.ignoreWindowSize=true --setpref widget.way
 # WebRender testing
 export TEST_PARAMS="--enable-webrender $TEST_PARAMS"
 export TEST_FLAVOUR="-wr"
+# Use dom/base/test or dom/base/test/chrome for short version
+export MOCHITEST_DIR='dom'
 if [ $RUN_REFTEST -ne 0 ] ; then
   ./mach reftest $TEST_PARAMS 2>&1 | tee $TEST_DIR/reftest$TEST_FLAVOUR
   sleep 60
@@ -70,7 +72,7 @@ if [ $RUN_CRASHTEST -ne 0 ] ; then
   sleep 60
 fi
 if [ $RUN_MOCHITEST -ne 0 ] ; then
-  ./mach mochitest dom $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
+  ./mach mochitest $MOCHITEST_DIR $MOCHITEST_PARAMS $TEST_PARAMS 2>&1 | tee $TEST_DIR/mochitest$TEST_FLAVOUR
   sleep 60
 fi
 
