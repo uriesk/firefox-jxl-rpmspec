@@ -237,6 +237,7 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
+Patch421:        mozilla-1726515.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -474,6 +475,7 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
+%patch421 -p1 -b .1726515
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1044,10 +1046,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Aug 23 2021 Timm Bäder <tbaeder@redhat.com> - 91.0.1-2
+* Mon Aug 23 2021 Martin Stransky <stransky@redhat.com> - 91.0.1-2
 - Set %%build_with_clang automatically based on %%toolchain
+  by Timm Bäder <tbaeder@redhat.com>
 - Updated Fedora UA patch by Eric Engestrom
   (https://src.fedoraproject.org/rpms/firefox/pull-request/21)
+- Added fix for mozbz#1726515
 
 * Mon Aug 23 2021 Martin Stransky <stransky@redhat.com> - 91.0.1-1
 - Updated to 91.0.1
