@@ -18,9 +18,14 @@
 %global debug_build       0
 
 %global system_nss        1
-%global build_with_clang  0
 %global build_with_asan   0
 %global test_on_wayland   1
+
+%if "%{toolchain}" == "clang"
+%global build_with_clang 1
+%else
+%global build_with_clang 0
+%endif
 
 # There are still build problems on s390x, see
 # https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
@@ -152,7 +157,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        91.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1039,6 +1044,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Aug 23 2021 Timm Bäder <tbaeder@redhat.com> - 91.0.1-2
+- Set %%build_with_clang automatically based on %%toolchain
+
 * Mon Aug 23 2021 Martin Stransky <stransky@redhat.com> - 91.0.1-1
 - Updated to 91.0.1
 
