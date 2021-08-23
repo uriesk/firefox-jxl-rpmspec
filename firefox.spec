@@ -726,12 +726,12 @@ cp %{SOURCE45} .
 %if %{build_with_pgo}
 %if %{test_on_wayland}
 env | grep "WAYLAND"
-MOZ_ENABLE_WAYLAND=1 ./mach build  2>&1 | cat -
+MOZ_ENABLE_WAYLAND=1 ./mach build  -v 2>&1 | cat -
 %else
-xvfb-run ./mach build  2>&1 | cat -
+xvfb-run ./mach build  -v 2>&1 | cat -
 %endif
 %else
-./mach build  2>&1 | cat -
+./mach build  -v 2>&1 | cat -
 %endif
 
 
