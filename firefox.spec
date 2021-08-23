@@ -1046,6 +1046,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Mon Aug 23 2021 Timm Bäder <tbaeder@redhat.com> - 91.0.1-2
 - Set %%build_with_clang automatically based on %%toolchain
+- Updated Fedora UA patch by Eric Engestrom
+  (https://src.fedoraproject.org/rpms/firefox/pull-request/21)
 
 * Mon Aug 23 2021 Martin Stransky <stransky@redhat.com> - 91.0.1-1
 - Updated to 91.0.1

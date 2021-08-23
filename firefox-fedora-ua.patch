@@ -1,15 +1,16 @@
-diff -up firefox-65.0/netwerk/protocol/http/nsHttpHandler.cpp.fedora-ua firefox-65.0/netwerk/protocol/http/nsHttpHandler.cpp
---- firefox-65.0/netwerk/protocol/http/nsHttpHandler.cpp.fedora-ua	2019-01-28 14:28:35.806375063 +0100
-+++ firefox-65.0/netwerk/protocol/http/nsHttpHandler.cpp	2019-01-28 14:30:25.886917219 +0100
-@@ -873,6 +873,7 @@ void nsHttpHandler::BuildUserAgent() {
+diff -up firefox-91.0.1/netwerk/protocol/http/nsHttpHandler.cpp.fedora-ua firefox-91.0.1/netwerk/protocol/http/nsHttpHandler.cpp
+--- firefox-91.0.1/netwerk/protocol/http/nsHttpHandler.cpp.fedora-ua	2021-08-16 20:10:57.000000000 +0200
++++ firefox-91.0.1/netwerk/protocol/http/nsHttpHandler.cpp	2021-08-23 12:07:21.128772096 +0200
+@@ -716,7 +716,7 @@ void nsHttpHandler::BuildUserAgent() {
+   // than if we didn't preallocate at all.
    mUserAgent.SetCapacity(mLegacyAppName.Length() + mLegacyAppVersion.Length() +
  #ifndef UA_SPARE_PLATFORM
-                          mPlatform.Length() +
-+                         mPlatform.Length() + 8 +
+-                         mPlatform.Length() +
++                         mPlatform.Length() + 10 +
  #endif
                           mOscpu.Length() + mMisc.Length() + mProduct.Length() +
                           mProductSub.Length() + mAppName.Length() +
-@@ -891,6 +892,7 @@ void nsHttpHandler::BuildUserAgent() {
+@@ -735,6 +735,7 @@ void nsHttpHandler::BuildUserAgent() {
    if (!mPlatform.IsEmpty()) {
      mUserAgent += mPlatform;
      mUserAgent.AppendLiteral("; ");
