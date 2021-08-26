@@ -156,13 +156,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        91.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        91.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210823.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210826.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1046,6 +1046,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Aug 26 2021 Martin Stransky <stransky@redhat.com> - 91.0.2-1
+- Updated to 91.0.2
+
 * Mon Aug 23 2021 Martin Stransky <stransky@redhat.com> - 91.0.1-2
 - Set %%build_with_clang automatically based on %%toolchain
   by Timm Bäder <tbaeder@redhat.com>
