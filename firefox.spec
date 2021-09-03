@@ -120,7 +120,7 @@ ExcludeArch: armv7hl
 %if %{?system_nss}
 %global nspr_version 4.26
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.68
+%global nss_version 3.69
 %global nss_build_version %{nss_version}
 %endif
 
@@ -156,13 +156,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        91.0.2
+Version:        92.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210826.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210903.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -204,7 +204,7 @@ Patch41:        build-disable-elfhack.patch
 Patch44:        build-arm-libopus.patch
 Patch46:        firefox-nss-version.patch
 Patch47:        fedora-shebang-build.patch
-Patch48:        build-arm-wasm.patch
+#Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
 Patch53:        firefox-gcc-build.patch
 # This should be fixed in Firefox 83
@@ -237,7 +237,7 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
-Patch421:        mozilla-1726515.patch
+Patch422:        mozilla-1728749.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -445,13 +445,13 @@ This package contains results of tests executed during build.
 %patch44 -p1 -b .build-arm-libopus
 #%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
-%patch48 -p1 -b .build-arm-wasm
+#%patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
-%patch61 -p1 -b .glibc-dynstack
+#%patch61 -p1 -b .glibc-dynstack
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -475,7 +475,7 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
-%patch421 -p1 -b .1726515
+%patch422 -p1 -b .1728749
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1046,6 +1046,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Sep 3 2021 Martin Stransky <stransky@redhat.com> - 92.0
+- Updated to 92.0
+- Added fix for mozbz#1728749
+
 * Thu Aug 26 2021 Martin Stransky <stransky@redhat.com> - 91.0.2-1
 - Updated to 91.0.2
 
