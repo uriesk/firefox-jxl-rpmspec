@@ -5,17 +5,6 @@ diff -U0 firefox-92.0/browser/components/enterprisepolicies/tests/xpcshell/xpcsh
 -[test_appupdateurl.js]
 @@ -27 +25,0 @@
 -[test_sorted_alphabetically.js]
-diff -U0 firefox-92.0/browser/extensions/formautofill/test/unit/xpcshell.ini.firefox-tests-xpcshell firefox-92.0/browser/extensions/formautofill/test/unit/xpcshell.ini
---- firefox-92.0/browser/extensions/formautofill/test/unit/xpcshell.ini.firefox-tests-xpcshell	2021-09-01 19:14:34.000000000 +0200
-+++ firefox-92.0/browser/extensions/formautofill/test/unit/xpcshell.ini	2021-09-03 18:41:07.754088004 +0200
-@@ -79,0 +80,2 @@
-+skip-if = tsan # Times out, bug 1612707
-+[test_sync.js]
-diff -U0 firefox-92.0/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini.firefox-tests-xpcshell firefox-92.0/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini
---- firefox-92.0/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini.firefox-tests-xpcshell	2021-09-01 19:14:34.000000000 +0200
-+++ firefox-92.0/devtools/client/shared/remote-debugging/adb/xpcshell/xpcshell.ini	2021-09-03 18:41:07.754088004 +0200
-@@ -9 +8,0 @@
--[test_adb.js]
 diff -U0 firefox-92.0/netwerk/test/unit_ipc/xpcshell.ini.firefox-tests-xpcshell firefox-92.0/netwerk/test/unit_ipc/xpcshell.ini
 --- firefox-92.0/netwerk/test/unit_ipc/xpcshell.ini.firefox-tests-xpcshell	2021-09-01 19:15:11.000000000 +0200
 +++ firefox-92.0/netwerk/test/unit_ipc/xpcshell.ini	2021-09-03 18:41:07.754088004 +0200

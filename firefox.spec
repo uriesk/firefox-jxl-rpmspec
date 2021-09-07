@@ -737,12 +737,11 @@ cp %{SOURCE45} .
 env | grep "WAYLAND"
 MOZ_ENABLE_WAYLAND=1 ./mach build  -v 2>&1 | cat -
 %else
-xvfb-run ./mach build  -v 2>&1 | cat -
+xvfb-run ./mach build -v 2>&1 | cat -
 %endif
 %else
-./mach build  -v 2>&1 | cat -
+./mach build -v 2>&1 | cat -
 %endif
-
 
 #---------------------------------------------------------------------
 %install
