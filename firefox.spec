@@ -238,6 +238,7 @@ Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
 Patch422:        mozilla-1728749.patch
+Patch423:        mozilla-1708709.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -476,6 +477,7 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
 %patch422 -p1 -b .1728749
+%patch423 -p1 -b .1708709
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1049,6 +1051,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Fri Sep 3 2021 Martin Stransky <stransky@redhat.com> - 92.0
 - Updated to 92.0
 - Added fix for mozbz#1728749
+- Added fix for mozbz#1708709
 
 * Thu Aug 26 2021 Martin Stransky <stransky@redhat.com> - 91.0.2-1
 - Updated to 91.0.2
