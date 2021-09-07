@@ -386,6 +386,7 @@ BuildRequires:  xorg-x11-fonts-ISO8859-1-100dpi
 BuildRequires:  xorg-x11-fonts-misc
 %endif
 BuildRequires:  make
+BuildRequires:  pciutils-libs
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
