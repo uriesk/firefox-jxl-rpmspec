@@ -336,6 +336,8 @@ BuildRequires:  gsettings-desktop-schemas
 BuildRequires:  gnome-settings-daemon
 BuildRequires:  mesa-dri-drivers
 BuildRequires:  xorg-x11-server-Xwayland
+BuildRequires:  dbus-x11
+BuildRequires:  gnome-keyring
 %endif
 %if 0%{?run_firefox_tests}
 BuildRequires:  procps-ng
@@ -344,9 +346,9 @@ BuildRequires:  python2.7
 BuildRequires:  dejavu-sans-mono-fonts
 BuildRequires:  dejavu-sans-fonts
 BuildRequires:  dejavu-serif-fonts
-BuildRequires:  mesa-dri-drivers
 BuildRequires:  dbus-x11
 BuildRequires:  gnome-keyring
+BuildRequires:  mesa-dri-drivers
 # ----------------------------------------
 BuildRequires:  liberation-fonts-common
 BuildRequires:  liberation-mono-fonts
