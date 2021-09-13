@@ -157,7 +157,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        92.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -239,6 +239,7 @@ Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
 Patch422:        mozilla-1728749.patch
 Patch423:        mozilla-1708709.patch
+Patch424:        mozilla-1725828.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -481,6 +482,7 @@ This package contains results of tests executed during build.
 %patch420 -p1 -b .mochitest-wayland-workaround
 %patch422 -p1 -b .1728749
 %patch423 -p1 -b .1708709
+%patch424 -p1 -b .1725828
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1050,6 +1052,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Sep 13 2021 Martin Stransky <stransky@redhat.com> - 92.0-3
+- Added fix for mozbz#1725828
+
 * Thu Sep 9 2021 Martin Stransky <stransky@redhat.com> - 92.0-2
 - Disable test
 
