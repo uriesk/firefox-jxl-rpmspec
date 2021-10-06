@@ -156,13 +156,13 @@ ExcludeArch: armv7hl
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        92.0.1
+Version:        93.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20210927.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20210929.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -237,8 +237,6 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
-Patch422:        mozilla-1728749.patch
-Patch423:        mozilla-1708709.patch
 Patch424:        mozilla-1725828.patch
 
 # PGO/LTO patches
@@ -480,8 +478,6 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
-%patch422 -p1 -b .1728749
-%patch423 -p1 -b .1708709
 %patch424 -p1 -b .1725828
 
 # PGO patches
@@ -583,8 +579,8 @@ echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .
 
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
-chmod a-x third_party/rust/gfx-backend-vulkan/src/*.rs
-chmod a-x third_party/rust/gfx-hal/src/*.rs
+#chmod a-x third_party/rust/gfx-backend-vulkan/src/*.rs
+#chmod a-x third_party/rust/gfx-hal/src/*.rs
 chmod a-x third_party/rust/ash/src/extensions/ext/*.rs
 chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 chmod a-x third_party/rust/ash/src/extensions/nv/*.rs
@@ -1052,6 +1048,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Sep 29 2021 Martin Stransky <stransky@redhat.com> - 93.0-1
+- Updated to 93.0
+
 * Mon Sep 27 2021 Martin Stransky <stransky@redhat.com> - 92.0.1-1
 - Updated to 92.0.1
 

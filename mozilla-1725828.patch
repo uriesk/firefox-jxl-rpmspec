@@ -1,7 +1,7 @@
-diff -up firefox-92.0/dom/media/gmp/GMPChild.cpp.1725828 firefox-92.0/dom/media/gmp/GMPChild.cpp
---- firefox-92.0/dom/media/gmp/GMPChild.cpp.1725828	2021-09-01 19:14:40.000000000 +0200
-+++ firefox-92.0/dom/media/gmp/GMPChild.cpp	2021-09-13 17:32:01.606739188 +0200
-@@ -232,8 +232,14 @@ mozilla::ipc::IPCResult GMPChild::RecvPr
+diff --git a/dom/media/gmp/GMPChild.cpp b/dom/media/gmp/GMPChild.cpp
+--- a/dom/media/gmp/GMPChild.cpp
++++ b/dom/media/gmp/GMPChild.cpp
+@@ -232,8 +232,14 @@
    }
  #elif defined(XP_LINUX)
    constexpr static const char* whitelist[] = {
@@ -16,7 +16,7 @@ diff -up firefox-92.0/dom/media/gmp/GMPChild.cpp.1725828 firefox-92.0/dom/media/
    };
  
    nsTArray<nsCString> libs;
-@@ -256,7 +262,7 @@ mozilla::ipc::IPCResult GMPChild::RecvPr
+@@ -256,7 +262,7 @@
            }
            // End bug 1698718 logging.
  
@@ -25,14 +25,13 @@ diff -up firefox-92.0/dom/media/gmp/GMPChild.cpp.1725828 firefox-92.0/dom/media/
          }
        }
      }
-diff -up firefox-92.0/dom/media/gmp/GMPParent.cpp.1725828 firefox-92.0/dom/media/gmp/GMPParent.cpp
---- firefox-92.0/dom/media/gmp/GMPParent.cpp.1725828	2021-09-13 17:32:01.606739188 +0200
-+++ firefox-92.0/dom/media/gmp/GMPParent.cpp	2021-09-13 17:55:54.902965506 +0200
-@@ -873,8 +873,21 @@ RefPtr<GenericPromise> GMPParent::ParseC
+diff --git a/dom/media/gmp/GMPParent.cpp b/dom/media/gmp/GMPParent.cpp
+--- a/dom/media/gmp/GMPParent.cpp
++++ b/dom/media/gmp/GMPParent.cpp
+@@ -876,6 +876,20 @@
      return GenericPromise::CreateAndReject(NS_ERROR_FAILURE, __func__);
    }
  
--  GMPCapability video;
 +#ifdef XP_LINUX
 +  // These glibc libraries were merged into libc.so.6 as of glibc
 +  // 2.34; they now exist only as stub libraries for compatibility and
@@ -46,8 +45,8 @@ diff -up firefox-92.0/dom/media/gmp/GMPParent.cpp.1725828 firefox-92.0/dom/media
 +    mLibs.AppendLiteral("libdl.so.2, libpthread.so.0, librt.so.1");
 +  }
 +#endif
- 
-+  GMPCapability video;
++
    nsCString codecsString = NS_ConvertUTF16toUTF8(m.mX_cdm_codecs);
    nsTArray<nsCString> codecs;
    SplitAt(",", codecsString, codecs);
+
