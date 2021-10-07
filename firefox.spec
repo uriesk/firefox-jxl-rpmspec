@@ -120,7 +120,7 @@ ExcludeArch: armv7hl
 %if %{?system_nss}
 %global nspr_version 4.26
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.69
+%global nss_version 3.70
 %global nss_build_version %{nss_version}
 %endif
 
@@ -157,7 +157,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        93.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1048,6 +1048,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Oct 07 2021 Martin Stransky <stransky@redhat.com> - 93.0-2
+- Require NSS 3.70
+
 * Wed Sep 29 2021 Martin Stransky <stransky@redhat.com> - 93.0-1
 - Updated to 93.0
 
