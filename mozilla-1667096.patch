@@ -1,6 +1,6 @@
-diff -up firefox-88.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-88.0/media/ffvpx/libavcodec/codec_list.c
---- firefox-88.0/media/ffvpx/libavcodec/codec_list.c.1667096	2021-04-15 21:44:31.000000000 +0200
-+++ firefox-88.0/media/ffvpx/libavcodec/codec_list.c	2021-04-19 13:34:10.373138674 +0200
+diff -up firefox-94.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-94.0/media/ffvpx/libavcodec/codec_list.c
+--- firefox-94.0/media/ffvpx/libavcodec/codec_list.c.1667096	2021-10-28 20:03:38.000000000 +0200
++++ firefox-94.0/media/ffvpx/libavcodec/codec_list.c	2021-11-01 11:02:50.898723802 +0100
 @@ -11,4 +11,8 @@ static const AVCodec * const codec_list[
  #if CONFIG_MP3_DECODER
      &ff_mp3_decoder,
@@ -10,9 +10,9 @@ diff -up firefox-88.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-88.0/m
 +#endif
 +
      NULL };
-diff -up firefox-88.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-88.0/media/ffvpx/libavcodec/libfdk-aacdec.c
---- firefox-88.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096	2021-04-19 13:34:10.373138674 +0200
-+++ firefox-88.0/media/ffvpx/libavcodec/libfdk-aacdec.c	2021-04-19 13:34:10.373138674 +0200
+diff -up firefox-94.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-94.0/media/ffvpx/libavcodec/libfdk-aacdec.c
+--- firefox-94.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096	2021-11-01 11:02:50.899723835 +0100
++++ firefox-94.0/media/ffvpx/libavcodec/libfdk-aacdec.c	2021-11-01 11:02:50.899723835 +0100
 @@ -0,0 +1,409 @@
 +/*
 + * AAC decoder wrapper
@@ -423,9 +423,9 @@ diff -up firefox-88.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-88.
 +                      FF_CODEC_CAP_INIT_CLEANUP,
 +    .wrapper_name   = "libfdk",
 +};
-diff -up firefox-88.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-88.0/media/ffvpx/libavcodec/moz.build
---- firefox-88.0/media/ffvpx/libavcodec/moz.build.1667096	2021-04-15 21:44:32.000000000 +0200
-+++ firefox-88.0/media/ffvpx/libavcodec/moz.build	2021-04-19 13:34:10.374138704 +0200
+diff -up firefox-94.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-94.0/media/ffvpx/libavcodec/moz.build
+--- firefox-94.0/media/ffvpx/libavcodec/moz.build.1667096	2021-10-28 20:03:43.000000000 +0200
++++ firefox-94.0/media/ffvpx/libavcodec/moz.build	2021-11-01 11:02:50.899723835 +0100
 @@ -104,6 +104,12 @@ if not CONFIG['MOZ_FFVPX_AUDIOONLY']:
          ]
          USE_LIBS += ['mozva']
@@ -439,12 +439,12 @@ diff -up firefox-88.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-88.0/medi
  if CONFIG['MOZ_LIBAV_FFT']:
      SOURCES += [
          'avfft.c',
-diff -up firefox-88.0/toolkit/moz.configure.1667096 firefox-88.0/toolkit/moz.configure
---- firefox-88.0/toolkit/moz.configure.1667096	2021-04-19 13:34:10.374138704 +0200
-+++ firefox-88.0/toolkit/moz.configure	2021-04-19 13:35:29.109506754 +0200
-@@ -1830,6 +1830,14 @@ with only_when(compile_environment):
-     set_config("LIBJPEG_TURBO_USE_NASM", True, when=jpeg_nasm)
-     set_config("LIBJPEG_TURBO_ASFLAGS", in_tree_jpeg)
+diff -up firefox-94.0/toolkit/moz.configure.1667096 firefox-94.0/toolkit/moz.configure
+--- firefox-94.0/toolkit/moz.configure.1667096	2021-11-01 11:02:50.899723835 +0100
++++ firefox-94.0/toolkit/moz.configure	2021-11-01 11:04:28.545873853 +0100
+@@ -1878,6 +1878,14 @@ with only_when(compile_environment):
+         & jpeg_arm_neon_vld1q_u8_x4,
+     )
  
 +# fdk aac support
 +option('--with-system-fdk-aac',
