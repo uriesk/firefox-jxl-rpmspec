@@ -38,6 +38,12 @@ ExcludeArch: s390x
 ExcludeArch: armv7hl
 %endif
 
+# Disabled due to
+# https://bugzilla.redhat.com/show_bug.cgi?id=2019160
+%if 0%{?fedora} == 33
+%global create_debuginfo  0
+%endif
+
 %ifarch armv7hl
 %global create_debuginfo  0
 %endif
@@ -73,7 +79,7 @@ ExcludeArch: armv7hl
 %if %{debug_build}
 %global release_build     0
 %endif
-# Build PGO+LTO on x86_64 and aarch64 only due to build issues
+# Build PGO+LTO on x86_64 only due to build issues
 # on other arches.
 %global build_with_pgo    0
 %ifarch x86_64
