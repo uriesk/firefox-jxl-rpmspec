@@ -41,7 +41,7 @@ ExcludeArch: armv7hl
 # Disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=2019160
 %if 0%{?fedora} == 33
-%global create_debuginfo  0
+ExcludeArch: aarch64
 %endif
 
 %ifarch armv7hl
