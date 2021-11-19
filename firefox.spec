@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        94.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -243,6 +243,7 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
+Patch421:        mozilla-1739924.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -483,6 +484,7 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
+%patch421 -p1 -b .1739924
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1052,6 +1054,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Nov 19 2021 Martin Stransky <stransky@redhat.com> - 94.0-2
+- Added fix for mozbz#1739924 / rhbz#2020981.
+
 * Mon Nov 1 2021 Martin Stransky <stransky@redhat.com> - 94.0-1
 - Updated to 94.0
 
