@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        94.0
-Release:        2%{?pre_tag}%{?dist}
+Version:        94.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20211031.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20211125.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -243,7 +243,6 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch420:        mochitest-wayland-workaround.patch
-Patch421:        mozilla-1739924.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -484,7 +483,6 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch420 -p1 -b .mochitest-wayland-workaround
-%patch421 -p1 -b .1739924
 
 # PGO patches
 %if %{build_with_pgo}
