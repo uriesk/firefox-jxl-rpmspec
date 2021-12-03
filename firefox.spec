@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        94.0.2
+Version:        95.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20211125.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20211203.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -457,7 +457,7 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
-%patch55 -p1 -b .testing
+#%patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
 #%patch61 -p1 -b .glibc-dynstack
 
@@ -1052,6 +1052,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Dec 3 2021 Martin Stransky <stransky@redhat.com> - 95.0-1
+- Updated to 95.0
+
 * Fri Nov 19 2021 Martin Stransky <stransky@redhat.com> - 94.0-2
 - Added fix for mozbz#1739924 / rhbz#2020981.
 
