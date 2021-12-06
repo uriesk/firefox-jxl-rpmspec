@@ -126,7 +126,7 @@ ExcludeArch: aarch64
 %if %{?system_nss}
 %global nspr_version 4.26
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.70
+%global nss_version 3.73
 %global nss_build_version %{nss_version}
 %endif
 
@@ -218,6 +218,7 @@ Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch61:        firefox-glibc-dynstack.patch
+Patch62:        build-python.patch
 
 # Test patches
 # Generate without context by
@@ -460,6 +461,7 @@ This package contains results of tests executed during build.
 #%patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
 #%patch61 -p1 -b .glibc-dynstack
+%patch62 -p1 -b .build-python
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -482,7 +484,7 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-%patch420 -p1 -b .mochitest-wayland-workaround
+#%patch420 -p1 -b .mochitest-wayland-workaround
 
 # PGO patches
 %if %{build_with_pgo}
