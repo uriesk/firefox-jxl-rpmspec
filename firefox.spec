@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        95.0
+Version:        95.0.2
 Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20211203.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20211220.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1054,6 +1054,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Dec 20 2021 Martin Stransky <stransky@redhat.com> - 95.0.2-1
+- Updated to 95.0.2
+- Enabled Wayland on KDE by default
+
 * Thu Dec 9 2021 Martin Stransky <stransky@redhat.com> - 95.0-2
 - Updated symbolic icon (rhbz#2028939)
 
