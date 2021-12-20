@@ -1054,7 +1054,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Dec 20 2021 Martin Stransky <stransky@redhat.com> - 95.0.2-1
+* Mon Dec 20 2021 Martin Stransky <stransky@redhat.com> - 95.0.2-1
 - Updated to 95.0.2
 - Enabled Wayland on KDE by default
 
