@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        95.0.2
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -219,6 +219,7 @@ Patch55:        firefox-testing.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
+Patch63:        mozilla-1745560.patch
 
 # Test patches
 # Generate without context by
@@ -462,6 +463,7 @@ This package contains results of tests executed during build.
 %patch57 -p1 -b .ffvpx-with-vapi
 #%patch61 -p1 -b .glibc-dynstack
 %patch62 -p1 -b .build-python
+%patch63 -p1 -b .1745560
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -1054,6 +1056,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Dec 22 2021 Martin Stransky <stransky@redhat.com> - 95.0.2-3
+- Added Fedora 36 build fix (mzbz#1745560)
+
 * Mon Dec 20 2021 Martin Stransky <stransky@redhat.com> - 95.0.2-1
 - Updated to 95.0.2
 - Enabled Wayland on KDE by default
