@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        95.0.2
-Release:        4%{?pre_tag}%{?dist}
+Version:        96.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20211220.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220111.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -219,7 +219,6 @@ Patch55:        firefox-testing.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
-Patch63:        mozilla-1745560.patch
 
 # Test patches
 # Generate without context by
@@ -244,8 +243,13 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-Patch420:        mochitest-wayland-workaround.patch
-Patch421:        mozilla-1744896.patch
+# xdg-activation backports from 97.0
+Patch421:        D132929.diff
+Patch422:        D133209.diff
+Patch423:        D133485.diff
+Patch424:        D133634.diff
+Patch425:        D133885.diff
+Patch426:        D134141.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -464,7 +468,6 @@ This package contains results of tests executed during build.
 %patch57 -p1 -b .ffvpx-with-vapi
 #%patch61 -p1 -b .glibc-dynstack
 %patch62 -p1 -b .build-python
-%patch63 -p1 -b .1745560
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -487,8 +490,14 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-#%patch420 -p1 -b .mochitest-wayland-workaround
-%patch421 -p1 -b .1744896
+
+# xdg-activation backports from 97.0
+%patch421 -p1 -b .D132929
+%patch422 -p1 -b .D133209
+%patch423 -p1 -b .D133485
+%patch424 -p1 -b .D133634
+%patch425 -p1 -b .D133885
+%patch426 -p1 -b .D134141
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1058,6 +1067,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 11 2022 Martin Stransky <stransky@redhat.com> - 96.0-1
+- Updated to 96.0
+
 * Thu Dec 23 2021 Martin Stransky <stransky@redhat.com> - 95.0.2-4
 - Added fix fox mozbz#1744896 (VSync)
 
