@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        96.0
+Version:        96.0.1
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220111.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220118.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -219,6 +219,7 @@ Patch55:        firefox-testing.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
+Patch63:        build-python-glean.patch
 
 # Test patches
 # Generate without context by
@@ -458,21 +459,19 @@ This package contains results of tests executed during build.
 %endif
 %patch3  -p1 -b .arm
 %patch44 -p1 -b .build-arm-libopus
-#%patch46 -p1 -b .nss-version
 %patch47 -p1 -b .fedora-shebang
-#%patch48 -p1 -b .build-arm-wasm
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
-#%patch55 -p1 -b .testing
+%patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
-#%patch61 -p1 -b .glibc-dynstack
-%patch62 -p1 -b .build-python
+%patch63 -p1 -b .build-python-glean.patch
+#%patch62 -p1 -b .build-python
 
 # Test patches
-#%patch100 -p1 -b .firefox-tests-xpcshell
+%patch100 -p1 -b .firefox-tests-xpcshell
 #%patch101 -p1 -b .firefox-tests-reftest
-#%patch102 -p1 -b .firefox-tests-xpcshell-freeze
+%patch102 -p1 -b .firefox-tests-xpcshell-freeze
 
 # Fedora patches
 %patch215 -p1 -b .addons
@@ -598,8 +597,6 @@ echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .
 
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
-#chmod a-x third_party/rust/gfx-backend-vulkan/src/*.rs
-#chmod a-x third_party/rust/gfx-hal/src/*.rs
 chmod a-x third_party/rust/ash/src/extensions/ext/*.rs
 chmod a-x third_party/rust/ash/src/extensions/khr/*.rs
 chmod a-x third_party/rust/ash/src/extensions/nv/*.rs
@@ -627,13 +624,6 @@ env CARGO_HOME=.cargo cargo install cbindgen
 export PATH=`pwd`/.cargo/bin:$PATH
 cd -
 %endif
-
-#echo "Generate big endian version of config/external/icu/data/icudt67l.dat"
-#%if 0%{?big_endian}
-#  icupkg -tb config/external/icu/data/icudt67l.dat config/external/icu/data/icudt67b.dat
-#  ls -l config/external/icu/data
-#  rm -f config/external/icu/data/icudt*l.dat
-#%endif
 
 mkdir %{_buildrootdir}/bin || :
 cp %{SOURCE32} %{_buildrootdir}/bin || :
@@ -745,7 +735,7 @@ MOZ_SMP_FLAGS=-j1
 echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
 echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
 echo "export STRIP=/bin/true" >> .mozconfig
-export MACH_USE_SYSTEM_PYTHON=1
+#export MACH_USE_SYSTEM_PYTHON=1
 
 %if %{launch_wayland_compositor}
 cp %{SOURCE45} .
@@ -1067,6 +1057,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 18 2022 Martin Stransky <stransky@redhat.com> - 96.0.1-1
+- Updated to 96.0.1
+
 * Tue Jan 11 2022 Martin Stransky <stransky@redhat.com> - 96.0-1
 - Updated to 96.0
 
