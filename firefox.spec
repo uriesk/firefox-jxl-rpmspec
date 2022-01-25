@@ -898,7 +898,11 @@ create_default_langpack "zh-TW" "zh"
 
 # Use the system hunspell dictionaries
 %{__rm} -rf %{buildroot}%{mozappdir}/dictionaries
+%if 0%{?fedora} > 35
 ln -s %{_datadir}/hunspell %{buildroot}%{mozappdir}/dictionaries
+%else
+ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
+%endif
 
 %if 0%{?run_firefox_tests}
 %{__mkdir_p} %{buildroot}/%{version}-%{release}/test_results
