@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        96.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -898,7 +898,7 @@ create_default_langpack "zh-TW" "zh"
 
 # Use the system hunspell dictionaries
 %{__rm} -rf %{buildroot}%{mozappdir}/dictionaries
-ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
+ln -s %{_datadir}/hunspell %{buildroot}%{mozappdir}/dictionaries
 
 %if 0%{?run_firefox_tests}
 %{__mkdir_p} %{buildroot}/%{version}-%{release}/test_results
@@ -1057,6 +1057,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 25 2022 Parag Nemade <pnemade AT redhat DOT com> - 96.0.1-3
+- Update hunspell-dir path
+  F36 Change https://fedoraproject.org/wiki/Changes/Hunspell_dictionary_dir_change
+
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 96.0.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
