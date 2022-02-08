@@ -126,7 +126,7 @@ ExcludeArch: aarch64
 %if %{?system_nss}
 %global nspr_version 4.26
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.73
+%global nss_version 3.74
 %global nss_build_version %{nss_version}
 %endif
 
@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        96.0.3
+Version:        97.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220131.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220208.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -210,16 +210,14 @@ Patch41:        build-disable-elfhack.patch
 Patch44:        build-arm-libopus.patch
 Patch46:        firefox-nss-version.patch
 Patch47:        fedora-shebang-build.patch
-#Patch48:        build-arm-wasm.patch
 Patch49:        build-arm-libaom.patch
 Patch53:        firefox-gcc-build.patch
-# This should be fixed in Firefox 83
 Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
-Patch63:        build-python-glean.patch
+Patch64:        mozilla-1753402.patch
 
 # Test patches
 # Generate without context by
@@ -244,13 +242,6 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-# xdg-activation backports from 97.0
-Patch421:        D132929.diff
-Patch422:        D133209.diff
-Patch423:        D133485.diff
-Patch424:        D133634.diff
-Patch425:        D133885.diff
-Patch426:        D134141.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -465,8 +456,7 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
-%patch63 -p1 -b .build-python-glean.patch
-#%patch62 -p1 -b .build-python
+%patch64 -p1 -b .1753402
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -489,14 +479,6 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-
-# xdg-activation backports from 97.0
-%patch421 -p1 -b .D132929
-%patch422 -p1 -b .D133209
-%patch423 -p1 -b .D133485
-%patch424 -p1 -b .D133634
-%patch425 -p1 -b .D133885
-%patch426 -p1 -b .D134141
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1061,6 +1043,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Feb 8 2022 Martin Stransky <stransky@redhat.com> - 97.0-1
+- Updated to 97.0
+
 * Mon Jan 31 2022 Martin Stransky <stransky@redhat.com> - 96.0.3-1
 - Updated to 96.0.3
 
