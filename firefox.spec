@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        97.0
+Version:        97.0.1
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220208.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220218.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -217,7 +217,11 @@ Patch55:        firefox-testing.patch
 Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
-Patch64:        mozilla-1753402.patch
+#Patch64:        mozilla-1753402.patch
+# GCC12 build fixes
+Patch65:        D139022.diff
+Patch66:        D139078.diff
+Patch67:        D139088.diff
 
 # Test patches
 # Generate without context by
@@ -457,7 +461,10 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
-%patch64 -p1 -b .1753402
+#%patch64 -p1 -b .1753402
+%patch65 -p1 -b .D139022
+%patch66 -p1 -b .D139078
+%patch67 -p1 -b .D139088
 
 # Test patches
 %patch100 -p1 -b .firefox-tests-xpcshell
@@ -1044,6 +1051,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Feb 18 2022 Martin Stransky <stransky@redhat.com> - 97.0.1-1
+- Updated to 97.0.1
+- GCC 12 build fixes
+
 * Tue Feb 8 2022 Martin Stransky <stransky@redhat.com> - 97.0-1
 - Updated to 97.0
 
