@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        97.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -250,6 +250,9 @@ Patch415:        mozilla-1670333.patch
 # PGO/LTO patches
 Patch600:        pgo.patch
 Patch602:        mozilla-1516803.patch
+
+# Backported WebRTC changes for PipeWire/Wayland screen sharing support
+Patch1000:       libwebrtc-screen-cast-sync.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -495,6 +498,8 @@ This package contains results of tests executed during build.
 %patch602 -p1 -b .1516803
 %endif
 %endif
+
+%patch1000 -p1 -b .libwebrtc-screen-cast-sync
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
@@ -1051,6 +1056,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Feb 21 2022 Jan Grulich <jgrulich@redhat.com> - 97.0.1-2
+- Backport WebRTC changes to PipeWire/Wayland screen sharing support
+
 * Fri Feb 18 2022 Martin Stransky <stransky@redhat.com> - 97.0.1-1
 - Updated to 97.0.1
 - GCC 12 build fixes
