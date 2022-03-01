@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        97.0.1
+Version:        98.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220218.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220301.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -459,7 +459,7 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
-%patch55 -p1 -b .testing
+#%patch55 -p1 -b .testing
 %patch57 -p1 -b .ffvpx-with-vapi
 #%patch64 -p1 -b .1753402
 %patch65 -p1 -b .D139022
@@ -467,7 +467,7 @@ This package contains results of tests executed during build.
 %patch67 -p1 -b .D139088
 
 # Test patches
-%patch100 -p1 -b .firefox-tests-xpcshell
+#%patch100 -p1 -b .firefox-tests-xpcshell
 #%patch101 -p1 -b .firefox-tests-reftest
 %patch102 -p1 -b .firefox-tests-xpcshell-freeze
 
@@ -1051,6 +1051,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 1 2022 Martin Stransky <stransky@redhat.com> - 98.0-1
+- Updated to 98.0
+
 * Fri Feb 18 2022 Martin Stransky <stransky@redhat.com> - 97.0.1-1
 - Updated to 97.0.1
 - GCC 12 build fixes
