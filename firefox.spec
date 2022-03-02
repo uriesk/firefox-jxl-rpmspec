@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        98.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -248,6 +248,11 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
+# ffmpeg50
+Patch500:        D139696.diff
+Patch501:        D139697.diff
+Patch502:        D139698.diff
+Patch503:        D139699.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -494,6 +499,12 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
+
+# ffmpeg50
+%patch500 -p1 -b .D139696
+%patch501 -p1 -b .D139697
+%patch502 -p1 -b .D139698
+%patch503 -p1 -b .D139699
 
 # PGO patches
 %if %{build_with_pgo}
@@ -744,12 +755,12 @@ cp %{SOURCE45} .
 %if %{build_with_pgo}
 %if %{test_on_wayland}
 env | grep "WAYLAND"
-MOZ_ENABLE_WAYLAND=1 ./mach build  -v 2>&1 | cat -
+MOZ_ENABLE_WAYLAND=1 ./mach build  -v 2>&1 | cat - || exit 1
 %else
-xvfb-run ./mach build -v 2>&1 | cat -
+xvfb-run ./mach build -v 2>&1 | cat - || exit 1
 %endif
 %else
-./mach build -v 2>&1 | cat -
+./mach build -v 2>&1 | cat - || exit 1
 %endif
 
 #---------------------------------------------------------------------
@@ -1060,6 +1071,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 2 2022 Martin Stransky <stransky@redhat.com> - 98.0-2
+- Added support for ffmpeg 5.0
+- Spec tweaks
+
 * Tue Mar 1 2022 Martin Stransky <stransky@redhat.com> - 98.0-1
 - Updated to 98.0
 
