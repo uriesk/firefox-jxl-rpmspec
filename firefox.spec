@@ -222,6 +222,8 @@ Patch62:        build-python.patch
 Patch65:        D139022.diff
 Patch66:        D139078.diff
 Patch67:        D139088.diff
+Patch68:        D139703.diff
+Patch69:        D139704.diff
 
 # Test patches
 # Generate without context by
@@ -468,6 +470,8 @@ This package contains results of tests executed during build.
 %patch65 -p1 -b .D139022
 %patch66 -p1 -b .D139078
 %patch67 -p1 -b .D139088
+%patch68 -p1 -b .D139703
+%patch69 -p1 -b .D139704
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
