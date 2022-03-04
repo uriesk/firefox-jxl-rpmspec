@@ -224,6 +224,7 @@ Patch66:        D139078.diff
 Patch67:        D139088.diff
 Patch68:        D139703.diff
 Patch69:        D139704.diff
+Patch70:        0001-GLIBCXX-fix-for-GCC-12.patch
 
 # Test patches
 # Generate without context by
@@ -477,6 +478,7 @@ This package contains results of tests executed during build.
 %patch67 -p1 -b .D139088
 %patch68 -p1 -b .D139703
 %patch69 -p1 -b .D139704
+%patch70 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
