@@ -1074,6 +1074,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Wed Mar 2 2022 Martin Stransky <stransky@redhat.com> - 98.0-2
 - Added support for ffmpeg 5.0
 - Spec tweaks
+- Updated to Build 2
 
 * Tue Mar 1 2022 Martin Stransky <stransky@redhat.com> - 98.0-1
 - Updated to 98.0

@@ -1,0 +1,27 @@
+diff --git a/dom/media/platforms/ffmpeg/ffmpeg58/moz.build b/dom/media/platforms/ffmpeg/ffmpeg58/moz.build
+--- a/dom/media/platforms/ffmpeg/ffmpeg58/moz.build
++++ b/dom/media/platforms/ffmpeg/ffmpeg58/moz.build
+@@ -29,9 +29,6 @@
+ if CONFIG['MOZ_WAYLAND']:
+   CXXFLAGS += CONFIG['MOZ_GTK3_CFLAGS']
+   DEFINES['MOZ_WAYLAND_USE_VAAPI'] = 1
+-  UNIFIED_SOURCES += [
+-    '../FFmpegVideoFramePool.cpp',
+-  ]
+   USE_LIBS += ['mozva']
+ 
+ include("/ipc/chromium/chromium-config.mozbuild")
+diff --git a/dom/media/platforms/ffmpeg/ffvpx/moz.build b/dom/media/platforms/ffmpeg/ffvpx/moz.build
+--- a/dom/media/platforms/ffmpeg/ffvpx/moz.build
++++ b/dom/media/platforms/ffmpeg/ffvpx/moz.build
+@@ -41,6 +41,9 @@
+     CXXFLAGS += CONFIG["MOZ_GTK3_CFLAGS"]
+     DEFINES["MOZ_WAYLAND_USE_VAAPI"] = 1
+     USE_LIBS += ["mozva"]
++    UNIFIED_SOURCES += [
++        "../FFmpegVideoFramePool.cpp",
++    ]
+ 
+ include("/ipc/chromium/chromium-config.mozbuild")
+ 
+
