@@ -168,7 +168,7 @@ URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220304.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220305.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1078,7 +1078,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Wed Mar 2 2022 Martin Stransky <stransky@redhat.com> - 98.0-2
 - Added support for ffmpeg 5.0
 - Spec tweaks
-- Updated to Build 2
+- Updated to Build 3
 
 * Tue Mar 1 2022 Martin Stransky <stransky@redhat.com> - 98.0-1
 - Updated to 98.0
