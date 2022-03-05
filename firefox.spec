@@ -503,10 +503,12 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 
 # ffmpeg50
+%ifnarch ppc64le
 %patch500 -p1 -b .D139696
 %patch501 -p1 -b .D139697
 %patch502 -p1 -b .D139698
 %patch503 -p1 -b .D139699
+%endif
 
 # PGO patches
 %if %{build_with_pgo}
