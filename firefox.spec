@@ -1077,7 +1077,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Mar 15 2022 Martin Stransky <stransky@redhat.com> - 98.0-3
+* Wed Mar 16 2022 Martin Stransky <stransky@redhat.com> - 98.0-3
 - Added a workaround for rhbz#2063961
 
 * Wed Mar 2 2022 Martin Stransky <stransky@redhat.com> - 98.0-2
