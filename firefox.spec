@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        98.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -224,7 +224,7 @@ Patch66:        D139078.diff
 Patch67:        D139088.diff
 Patch68:        D139703.diff
 Patch69:        D139704.diff
-Patch70:        0001-GLIBCXX-fix-for-GCC-12.patch
+Patch70:        crossbeam-downgrade-rhbz2063961.patch
 
 # Test patches
 # Generate without context by
@@ -478,7 +478,9 @@ This package contains results of tests executed during build.
 %patch67 -p1 -b .D139088
 %patch68 -p1 -b .D139703
 %patch69 -p1 -b .D139704
-%patch70 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
+%ifarch aarch64
+%patch70 -p1 -b .crossbeam-downgrade-rhbz2063961
+%endif
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -1075,6 +1077,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 15 2022 Martin Stransky <stransky@redhat.com> - 98.0-3
+- Added a workaround for rhbz#2063961
+
 * Wed Mar 2 2022 Martin Stransky <stransky@redhat.com> - 98.0-2
 - Added support for ffmpeg 5.0
 - Spec tweaks
