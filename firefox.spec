@@ -225,6 +225,7 @@ Patch67:        D139088.diff
 Patch68:        D139703.diff
 Patch69:        D139704.diff
 Patch70:        crossbeam-downgrade-rhbz2063961.patch
+Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 
 # Test patches
 # Generate without context by
@@ -481,6 +482,7 @@ This package contains results of tests executed during build.
 %ifarch aarch64
 %patch70 -p1 -b .crossbeam-downgrade-rhbz2063961
 %endif
+%patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
