@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        98.0
-Release:        4%{?pre_tag}%{?dist}
+Version:        98.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220305.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220331.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1079,6 +1079,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 31 2022 Martin Stransky <stransky@redhat.com> - 98.0.2-1
+- Updated to 98.0.2
+
 * Wed Mar 30 2022 Jan Grulich <jgrulich@redhat.com> - 98.0-4
 - Wayland screensharing: avoid potential crash when cursor metadata are not set
 
