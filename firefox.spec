@@ -216,7 +216,6 @@ Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
-Patch70:        crossbeam-downgrade-rhbz2063961.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 
 # Test patches
@@ -459,9 +458,6 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
-%ifarch aarch64
-%patch70 -p1 -b .crossbeam-downgrade-rhbz2063961
-%endif
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 
 # Test patches
