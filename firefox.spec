@@ -126,7 +126,7 @@ ExcludeArch: aarch64
 %if %{?system_nss}
 %global nspr_version 4.26
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.74
+%global nss_version 3.76
 %global nss_build_version %{nss_version}
 %endif
 
@@ -162,7 +162,7 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        98.0.2
+Version:        99.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
@@ -214,16 +214,8 @@ Patch49:        build-arm-libaom.patch
 Patch53:        firefox-gcc-build.patch
 Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
-Patch57:        firefox-disable-ffvpx-with-vapi.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
-#Patch64:        mozilla-1753402.patch
-# GCC12 build fixes
-Patch65:        D139022.diff
-Patch66:        D139078.diff
-Patch67:        D139088.diff
-Patch68:        D139703.diff
-Patch69:        D139704.diff
 Patch70:        crossbeam-downgrade-rhbz2063961.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 
@@ -250,11 +242,7 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-# ffmpeg50
-Patch500:        D139696.diff
-Patch501:        D139697.diff
-Patch502:        D139698.diff
-Patch503:        D139699.diff
+Patch416:        D142257.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -471,14 +459,6 @@ This package contains results of tests executed during build.
 %patch49 -p1 -b .build-arm-libaom
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
-#%patch55 -p1 -b .testing
-%patch57 -p1 -b .ffvpx-with-vapi
-#%patch64 -p1 -b .1753402
-%patch65 -p1 -b .D139022
-%patch66 -p1 -b .D139078
-%patch67 -p1 -b .D139088
-%patch68 -p1 -b .D139703
-%patch69 -p1 -b .D139704
 %ifarch aarch64
 %patch70 -p1 -b .crossbeam-downgrade-rhbz2063961
 %endif
@@ -505,14 +485,7 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-
-# ffmpeg50
-%ifnarch ppc64le
-%patch500 -p1 -b .D139696
-%patch501 -p1 -b .D139697
-%patch502 -p1 -b .D139698
-%patch503 -p1 -b .D139699
-%endif
+%patch416 -p1 -b .D142257
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1079,6 +1052,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Apr 6 2022 Martin Stransky <stransky@redhat.com> - 99.0-1
+- Updated to 99.0
+
 * Thu Mar 31 2022 Martin Stransky <stransky@redhat.com> - 98.0.2-1
 - Updated to 98.0.2
 

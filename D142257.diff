@@ -1,0 +1,313 @@
+diff -up firefox-99.0/gfx/gl/GLContextEGL.h.D142257 firefox-99.0/gfx/gl/GLContextEGL.h
+--- firefox-99.0/gfx/gl/GLContextEGL.h.D142257	2022-03-31 01:24:45.000000000 +0200
++++ firefox-99.0/gfx/gl/GLContextEGL.h	2022-04-06 10:32:53.287145554 +0200
+@@ -21,11 +21,9 @@ class CompositorWidget;
+ }  // namespace widget
+ namespace gl {
+ 
+-RefPtr<GLLibraryEGL> DefaultEglLibrary(nsACString* const out_failureId);
+-
+ inline std::shared_ptr<EglDisplay> DefaultEglDisplay(
+     nsACString* const out_failureId) {
+-  const auto lib = DefaultEglLibrary(out_failureId);
++  const auto lib = GLLibraryEGL::Get(out_failureId);
+   if (!lib) {
+     return nullptr;
+   }
+diff -up firefox-99.0/gfx/gl/GLContextProviderEGL.cpp.D142257 firefox-99.0/gfx/gl/GLContextProviderEGL.cpp
+--- firefox-99.0/gfx/gl/GLContextProviderEGL.cpp.D142257	2022-03-31 01:24:50.000000000 +0200
++++ firefox-99.0/gfx/gl/GLContextProviderEGL.cpp	2022-04-06 10:34:20.468017966 +0200
+@@ -237,7 +237,7 @@ class GLContextEGLFactory {
+ already_AddRefed<GLContext> GLContextEGLFactory::CreateImpl(
+     EGLNativeWindowType aWindow, bool aHardwareWebRender, bool aUseGles) {
+   nsCString failureId;
+-  const auto lib = gl::DefaultEglLibrary(&failureId);
++  const auto lib = GLLibraryEGL::Get(&failureId);
+   if (!lib) {
+     gfxCriticalNote << "Failed[3] to load EGL library: " << failureId.get();
+     return nullptr;
+@@ -1209,32 +1209,8 @@ already_AddRefed<GLContext> GLContextPro
+ /*static*/
+ GLContext* GLContextProviderEGL::GetGlobalContext() { return nullptr; }
+ 
+-// -
+-
+-static StaticMutex sMutex;
+-static StaticRefPtr<GLLibraryEGL> gDefaultEglLibrary;
+-
+-RefPtr<GLLibraryEGL> DefaultEglLibrary(nsACString* const out_failureId) {
+-  StaticMutexAutoLock lock(sMutex);
+-  if (!gDefaultEglLibrary) {
+-    gDefaultEglLibrary = GLLibraryEGL::Create(out_failureId);
+-    if (!gDefaultEglLibrary) {
+-      NS_WARNING("GLLibraryEGL::Create failed");
+-    }
+-  }
+-  return gDefaultEglLibrary.get();
+-}
+-
+-// -
+-
+ /*static*/
+-void GLContextProviderEGL::Shutdown() {
+-  StaticMutexAutoLock lock(sMutex);
+-  if (!gDefaultEglLibrary) {
+-    return;
+-  }
+-  gDefaultEglLibrary = nullptr;
+-}
++void GLContextProviderEGL::Shutdown() { GLLibraryEGL::Shutdown(); }
+ 
+ } /* namespace gl */
+ } /* namespace mozilla */
+diff -up firefox-99.0/gfx/gl/GLLibraryEGL.cpp.D142257 firefox-99.0/gfx/gl/GLLibraryEGL.cpp
+--- firefox-99.0/gfx/gl/GLLibraryEGL.cpp.D142257	2022-03-31 01:24:45.000000000 +0200
++++ firefox-99.0/gfx/gl/GLLibraryEGL.cpp	2022-04-06 10:32:53.288145587 +0200
+@@ -48,6 +48,9 @@
+ namespace mozilla {
+ namespace gl {
+ 
++StaticMutex GLLibraryEGL::sMutex;
++StaticRefPtr<GLLibraryEGL> GLLibraryEGL::sInstance;
++
+ // should match the order of EGLExtensions, and be null-terminated.
+ static const char* sEGLLibraryExtensionNames[] = {
+     "EGL_ANDROID_get_native_client_buffer", "EGL_ANGLE_device_creation",
+@@ -140,15 +143,17 @@ static PRLibrary* LoadLibraryForEGLOnWin
+ 
+ #endif  // XP_WIN
+ 
+-static std::shared_ptr<EglDisplay> GetAndInitDisplay(GLLibraryEGL& egl,
+-                                                     void* displayType) {
++static std::shared_ptr<EglDisplay> GetAndInitDisplay(
++    GLLibraryEGL& egl, void* displayType,
++    const StaticMutexAutoLock& aProofOfLock) {
+   const auto display = egl.fGetDisplay(displayType);
+   if (!display) return nullptr;
+-  return EglDisplay::Create(egl, display, false);
++  return EglDisplay::Create(egl, display, false, aProofOfLock);
+ }
+ 
+-static std::shared_ptr<EglDisplay> GetAndInitWARPDisplay(GLLibraryEGL& egl,
+-                                                         void* displayType) {
++static std::shared_ptr<EglDisplay> GetAndInitWARPDisplay(
++    GLLibraryEGL& egl, void* displayType,
++    const StaticMutexAutoLock& aProofOfLock) {
+   const EGLAttrib attrib_list[] = {
+       LOCAL_EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE,
+       LOCAL_EGL_PLATFORM_ANGLE_DEVICE_TYPE_WARP_ANGLE,
+@@ -167,11 +172,12 @@ static std::shared_ptr<EglDisplay> GetAn
+     return nullptr;
+   }
+ 
+-  return EglDisplay::Create(egl, display, true);
++  return EglDisplay::Create(egl, display, true, aProofOfLock);
+ }
+ 
+ std::shared_ptr<EglDisplay> GLLibraryEGL::CreateDisplay(
+     ID3D11Device* const d3d11Device) {
++  StaticMutexAutoLock lock(sMutex);
+   EGLDeviceEXT eglDevice =
+       fCreateDeviceANGLE(LOCAL_EGL_D3D11_DEVICE_ANGLE, d3d11Device, nullptr);
+   if (!eglDevice) {
+@@ -199,7 +205,7 @@ std::shared_ptr<EglDisplay> GLLibraryEGL
+     return nullptr;
+   }
+ 
+-  const auto ret = EglDisplay::Create(*this, display, false);
++  const auto ret = EglDisplay::Create(*this, display, false, lock);
+ 
+   if (!ret) {
+     const EGLint err = fGetError();
+@@ -263,7 +269,8 @@ class AngleErrorReporting {
+ AngleErrorReporting gAngleErrorReporter;
+ 
+ static std::shared_ptr<EglDisplay> GetAndInitDisplayForAccelANGLE(
+-    GLLibraryEGL& egl, nsACString* const out_failureId) {
++    GLLibraryEGL& egl, nsACString* const out_failureId,
++    const StaticMutexAutoLock& aProofOfLock) {
+   gfx::FeatureState& d3d11ANGLE =
+       gfx::gfxConfig::GetFeature(gfx::Feature::D3D11_HW_ANGLE);
+ 
+@@ -285,16 +292,18 @@ static std::shared_ptr<EglDisplay> GetAn
+   });
+ 
+   if (gfx::gfxConfig::IsForcedOnByUser(gfx::Feature::D3D11_HW_ANGLE)) {
+-    return GetAndInitDisplay(egl, LOCAL_EGL_D3D11_ONLY_DISPLAY_ANGLE);
++    return GetAndInitDisplay(egl, LOCAL_EGL_D3D11_ONLY_DISPLAY_ANGLE,
++                             aProofOfLock);
+   }
+ 
+   std::shared_ptr<EglDisplay> ret;
+   if (d3d11ANGLE.IsEnabled()) {
+-    ret = GetAndInitDisplay(egl, LOCAL_EGL_D3D11_ELSE_D3D9_DISPLAY_ANGLE);
++    ret = GetAndInitDisplay(egl, LOCAL_EGL_D3D11_ELSE_D3D9_DISPLAY_ANGLE,
++                            aProofOfLock);
+   }
+ 
+   if (!ret) {
+-    ret = GetAndInitDisplay(egl, EGL_DEFAULT_DISPLAY);
++    ret = GetAndInitDisplay(egl, EGL_DEFAULT_DISPLAY, aProofOfLock);
+   }
+ 
+   if (!ret && out_failureId->IsEmpty()) {
+@@ -326,12 +335,20 @@ Maybe<SymbolLoader> GLLibraryEGL::GetSym
+ // -
+ 
+ /* static */
+-RefPtr<GLLibraryEGL> GLLibraryEGL::Create(nsACString* const out_failureId) {
+-  RefPtr<GLLibraryEGL> ret = new GLLibraryEGL;
+-  if (!ret->Init(out_failureId)) {
+-    return nullptr;
++RefPtr<GLLibraryEGL> GLLibraryEGL::Get(nsACString* const out_failureId) {
++  StaticMutexAutoLock lock(sMutex);
++  if (!sInstance) {
++    sInstance = new GLLibraryEGL;
++    if (NS_WARN_IF(!sInstance->Init(out_failureId))) {
++      sInstance = nullptr;
++    }
+   }
+-  return ret;
++  return sInstance;
++}
++
++/* static */ void GLLibraryEGL::Shutdown() {
++  StaticMutexAutoLock lock(sMutex);
++  sInstance = nullptr;
+ }
+ 
+ bool GLLibraryEGL::Init(nsACString* const out_failureId) {
+@@ -640,9 +657,9 @@ static void MarkExtensions(const char* r
+ // -
+ 
+ // static
+-std::shared_ptr<EglDisplay> EglDisplay::Create(GLLibraryEGL& lib,
+-                                               const EGLDisplay display,
+-                                               const bool isWarp) {
++std::shared_ptr<EglDisplay> EglDisplay::Create(
++    GLLibraryEGL& lib, const EGLDisplay display, const bool isWarp,
++    const StaticMutexAutoLock& aProofOfLock) {
+   // Retrieve the EglDisplay if it already exists
+   {
+     const auto itr = lib.mActiveDisplays.find(display);
+@@ -710,6 +727,7 @@ EglDisplay::EglDisplay(const PrivateUseO
+ }
+ 
+ EglDisplay::~EglDisplay() {
++  StaticMutexAutoLock lock(GLLibraryEGL::sMutex);
+   fTerminate();
+   mLib->mActiveDisplays.erase(mDisplay);
+ }
+@@ -718,16 +736,24 @@ EglDisplay::~EglDisplay() {
+ 
+ std::shared_ptr<EglDisplay> GLLibraryEGL::DefaultDisplay(
+     nsACString* const out_failureId) {
++  StaticMutexAutoLock lock(sMutex);
+   auto ret = mDefaultDisplay.lock();
+   if (ret) return ret;
+ 
+-  ret = CreateDisplay(false, out_failureId);
++  ret = CreateDisplayLocked(false, out_failureId, lock);
+   mDefaultDisplay = ret;
+   return ret;
+ }
+ 
+ std::shared_ptr<EglDisplay> GLLibraryEGL::CreateDisplay(
+     const bool forceAccel, nsACString* const out_failureId) {
++  StaticMutexAutoLock lock(sMutex);
++  return CreateDisplayLocked(forceAccel, out_failureId, lock);
++}
++
++std::shared_ptr<EglDisplay> GLLibraryEGL::CreateDisplayLocked(
++    const bool forceAccel, nsACString* const out_failureId,
++    const StaticMutexAutoLock& aProofOfLock) {
+   std::shared_ptr<EglDisplay> ret;
+ 
+   if (IsExtensionSupported(EGLLibExtension::ANGLE_platform_angle_d3d)) {
+@@ -747,7 +773,7 @@ std::shared_ptr<EglDisplay> GLLibraryEGL
+ 
+     // Hardware accelerated ANGLE path (supported or force accel)
+     if (shouldTryAccel) {
+-      ret = GetAndInitDisplayForAccelANGLE(*this, out_failureId);
++      ret = GetAndInitDisplayForAccelANGLE(*this, out_failureId, aProofOfLock);
+     }
+ 
+     // Report the acceleration status to telemetry
+@@ -766,7 +792,7 @@ std::shared_ptr<EglDisplay> GLLibraryEGL
+ 
+     // Fallback to a WARP display if ANGLE fails, or if WARP is forced
+     if (!ret && shouldTryWARP) {
+-      ret = GetAndInitWARPDisplay(*this, EGL_DEFAULT_DISPLAY);
++      ret = GetAndInitWARPDisplay(*this, EGL_DEFAULT_DISPLAY, aProofOfLock);
+       if (!ret) {
+         if (out_failureId->IsEmpty()) {
+           *out_failureId = "FEATURE_FAILURE_WARP_FALLBACK"_ns;
+@@ -788,7 +814,7 @@ std::shared_ptr<EglDisplay> GLLibraryEGL
+       }
+     }
+ #endif
+-    ret = GetAndInitDisplay(*this, nativeDisplay);
++    ret = GetAndInitDisplay(*this, nativeDisplay, aProofOfLock);
+   }
+ 
+   if (!ret) {
+diff -up firefox-99.0/gfx/gl/GLLibraryEGL.h.D142257 firefox-99.0/gfx/gl/GLLibraryEGL.h
+--- firefox-99.0/gfx/gl/GLLibraryEGL.h.D142257	2022-03-31 01:24:50.000000000 +0200
++++ firefox-99.0/gfx/gl/GLLibraryEGL.h	2022-04-06 10:32:53.288145587 +0200
+@@ -13,6 +13,8 @@
+ #include "mozilla/EnumTypeTraits.h"
+ #include "mozilla/Maybe.h"
+ #include "mozilla/RefPtr.h"
++#include "mozilla/StaticMutex.h"
++#include "mozilla/StaticPtr.h"
+ #include "nsISupports.h"
+ #include "prlink.h"
+ 
+@@ -125,14 +127,22 @@ class GLLibraryEGL final {
+   std::unordered_map<EGLDisplay, std::weak_ptr<EglDisplay>> mActiveDisplays;
+ 
+  public:
+-  static RefPtr<GLLibraryEGL> Create(nsACString* const out_failureId);
++  static RefPtr<GLLibraryEGL> Get(nsACString* const out_failureId);
++  static void Shutdown();
+ 
+  private:
+   ~GLLibraryEGL() = default;
+ 
++  static StaticMutex sMutex;
++  static StaticRefPtr<GLLibraryEGL> sInstance GUARDED_BY(sMutex);
++
+   bool Init(nsACString* const out_failureId);
+   void InitLibExtensions();
+ 
++  std::shared_ptr<EglDisplay> CreateDisplayLocked(
++      bool forceAccel, nsACString* const out_failureId,
++      const StaticMutexAutoLock& aProofOfLock);
++
+  public:
+   Maybe<SymbolLoader> GetSymbolLoader() const;
+ 
+@@ -599,8 +609,9 @@ class EglDisplay final {
+   struct PrivateUseOnly final {};
+ 
+  public:
+-  static std::shared_ptr<EglDisplay> Create(GLLibraryEGL&, EGLDisplay,
+-                                            bool isWarp);
++  static std::shared_ptr<EglDisplay> Create(
++      GLLibraryEGL&, EGLDisplay, bool isWarp,
++      const StaticMutexAutoLock& aProofOfLock);
+ 
+   // Only `public` for make_shared.
+   EglDisplay(const PrivateUseOnly&, GLLibraryEGL&, EGLDisplay, bool isWarp);
+diff -up firefox-99.0/gfx/webrender_bindings/RenderThread.cpp.D142257 firefox-99.0/gfx/webrender_bindings/RenderThread.cpp
+--- firefox-99.0/gfx/webrender_bindings/RenderThread.cpp.D142257	2022-03-31 01:24:51.000000000 +0200
++++ firefox-99.0/gfx/webrender_bindings/RenderThread.cpp	2022-04-06 10:32:53.288145587 +0200
+@@ -1163,7 +1163,7 @@ static already_AddRefed<gl::GLContext> C
+   }
+ 
+   nsCString failureId;
+-  const auto lib = gl::DefaultEglLibrary(&failureId);
++  const auto lib = gl::GLLibraryEGL::Get(&failureId);
+   if (!lib) {
+     aError.Assign(
+         nsPrintfCString("RcANGLE(load EGL lib failed: %s)", failureId.get()));

@@ -1,6 +1,6 @@
-diff -up firefox-88.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-88.0/dom/media/mp4/MP4Demuxer.cpp
---- firefox-88.0/dom/media/mp4/MP4Demuxer.cpp.1670333	2021-04-15 21:44:28.000000000 +0200
-+++ firefox-88.0/dom/media/mp4/MP4Demuxer.cpp	2021-04-19 13:36:44.101762211 +0200
+diff -up firefox-99.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-99.0/dom/media/mp4/MP4Demuxer.cpp
+--- firefox-99.0/dom/media/mp4/MP4Demuxer.cpp.1670333	2022-03-31 01:24:44.000000000 +0200
++++ firefox-99.0/dom/media/mp4/MP4Demuxer.cpp	2022-04-04 09:58:35.606351546 +0200
 @@ -31,6 +31,8 @@ mozilla::LogModule* GetDemuxerLog() { re
    DDMOZ_LOG(gMediaDemuxerLog, mozilla::LogLevel::Debug, "::%s: " arg, \
              __func__, ##__VA_ARGS__)
@@ -23,9 +23,9 @@ diff -up firefox-88.0/dom/media/mp4/MP4Demuxer.cpp.1670333 firefox-88.0/dom/medi
            if (sample->mKeyframe != keyframe) {
              NS_WARNING(nsPrintfCString("Frame incorrectly marked as %skeyframe "
                                         "@ pts:%" PRId64 " dur:%" PRId64
-diff -up firefox-88.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-88.0/dom/media/platforms/PDMFactory.cpp
---- firefox-88.0/dom/media/platforms/PDMFactory.cpp.1670333	2021-04-19 13:36:44.087761790 +0200
-+++ firefox-88.0/dom/media/platforms/PDMFactory.cpp	2021-04-19 13:39:52.676433734 +0200
+diff -up firefox-99.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-99.0/dom/media/platforms/PDMFactory.cpp
+--- firefox-99.0/dom/media/platforms/PDMFactory.cpp.1670333	2022-03-31 01:24:44.000000000 +0200
++++ firefox-99.0/dom/media/platforms/PDMFactory.cpp	2022-04-04 10:09:57.383419125 +0200
 @@ -58,6 +58,8 @@
  
  #include <functional>
@@ -35,22 +35,16 @@ diff -up firefox-88.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-88.0/do
  namespace mozilla {
  
  #define PDM_INIT_LOG(msg, ...) \
-@@ -572,10 +574,10 @@ void PDMFactory::CreateDefaultPDMs() {
-   }
- #endif
+@@ -495,7 +497,7 @@ void PDMFactory::CreateRddPDMs() {
  #ifdef MOZ_FFMPEG
--  if (StaticPrefs::media_ffmpeg_enabled() &&
+   if (StaticPrefs::media_ffmpeg_enabled() &&
+       StaticPrefs::media_rdd_ffmpeg_enabled() &&
 -      !CreateAndStartupPDM<FFmpegRuntimeLinker>()) {
--    mFailureFlags += GetFailureFlagBasedOnFFmpegStatus(
--        FFmpegRuntimeLinker::LinkStatusCode());
-+  if (StaticPrefs::media_ffmpeg_enabled()) {
-+    mFFmpegUsed = CreateAndStartupPDM<FFmpegRuntimeLinker>();
-+    if (!mFFmpegUsed) {
-+      mFailureFlags += GetFailureFlagBasedOnFFmpegStatus(FFmpegRuntimeLinker::LinkStatusCode()); }
++      !(mFFmpegUsed = CreateAndStartupPDM<FFmpegRuntimeLinker>())) {
+     mFailureFlags += GetFailureFlagBasedOnFFmpegStatus(
+         FFmpegRuntimeLinker::LinkStatusCode());
    }
- #endif
- #ifdef MOZ_FFVPX
-@@ -592,8 +594,9 @@ void PDMFactory::CreateDefaultPDMs() {
+@@ -602,8 +604,9 @@ void PDMFactory::CreateDefaultPDMs() {
  
    CreateAndStartupPDM<AgnosticDecoderModule>();
  
@@ -61,9 +55,9 @@ diff -up firefox-88.0/dom/media/platforms/PDMFactory.cpp.1670333 firefox-88.0/do
      mFailureFlags += DecoderDoctorDiagnostics::Flags::GMPPDMFailedToStartup;
    }
  }
-diff -up firefox-88.0/dom/media/platforms/PDMFactory.h.1670333 firefox-88.0/dom/media/platforms/PDMFactory.h
---- firefox-88.0/dom/media/platforms/PDMFactory.h.1670333	2021-04-15 21:44:28.000000000 +0200
-+++ firefox-88.0/dom/media/platforms/PDMFactory.h	2021-04-19 13:36:44.101762211 +0200
+diff -up firefox-99.0/dom/media/platforms/PDMFactory.h.1670333 firefox-99.0/dom/media/platforms/PDMFactory.h
+--- firefox-99.0/dom/media/platforms/PDMFactory.h.1670333	2022-03-31 01:24:44.000000000 +0200
++++ firefox-99.0/dom/media/platforms/PDMFactory.h	2022-04-04 09:58:35.606351546 +0200
 @@ -121,6 +121,7 @@ class PDMFactory final {
    RefPtr<PlatformDecoderModule> mNullPDM;
  

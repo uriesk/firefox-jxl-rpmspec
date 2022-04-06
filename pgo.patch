@@ -1,7 +1,7 @@
-diff -up firefox-96.0/build/moz.configure/lto-pgo.configure.pgo firefox-96.0/build/moz.configure/lto-pgo.configure
---- firefox-96.0/build/moz.configure/lto-pgo.configure.pgo	2022-01-06 19:32:35.000000000 +0100
-+++ firefox-96.0/build/moz.configure/lto-pgo.configure	2022-01-11 15:43:02.193378698 +0100
-@@ -248,8 +248,8 @@ def lto(
+diff -up firefox-99.0/build/moz.configure/lto-pgo.configure.pgo firefox-99.0/build/moz.configure/lto-pgo.configure
+--- firefox-99.0/build/moz.configure/lto-pgo.configure.pgo	2022-03-31 01:24:38.000000000 +0200
++++ firefox-99.0/build/moz.configure/lto-pgo.configure	2022-04-04 10:15:45.387694143 +0200
+@@ -247,8 +247,8 @@ def lto(
              cflags.append("-flto")
              ldflags.append("-flto")
          else:
@@ -12,7 +12,7 @@ diff -up firefox-96.0/build/moz.configure/lto-pgo.configure.pgo firefox-96.0/bui
  
          if target.os == "Android" and value == "cross":
              # Work around https://github.com/rust-lang/rust/issues/90088
-@@ -265,7 +265,7 @@ def lto(
+@@ -264,7 +264,7 @@ def lto(
          if value == "full":
              cflags.append("-flto")
          else:
@@ -21,9 +21,9 @@ diff -up firefox-96.0/build/moz.configure/lto-pgo.configure.pgo firefox-96.0/bui
          # With clang-cl, -flto can only be used with -c or -fuse-ld=lld.
          # AC_TRY_LINKs during configure don't have -c, so pass -fuse-ld=lld.
          cflags.append("-fuse-ld=lld")
-diff -up firefox-96.0/build/pgo/profileserver.py.pgo firefox-96.0/build/pgo/profileserver.py
---- firefox-96.0/build/pgo/profileserver.py.pgo	2022-01-06 16:56:23.000000000 +0100
-+++ firefox-96.0/build/pgo/profileserver.py	2022-01-11 15:43:02.193378698 +0100
+diff -up firefox-99.0/build/pgo/profileserver.py.pgo firefox-99.0/build/pgo/profileserver.py
+--- firefox-99.0/build/pgo/profileserver.py.pgo	2022-03-31 01:24:38.000000000 +0200
++++ firefox-99.0/build/pgo/profileserver.py	2022-04-04 10:15:45.387694143 +0200
 @@ -11,7 +11,7 @@ import glob
  import subprocess
  
@@ -70,9 +70,9 @@ diff -up firefox-96.0/build/pgo/profileserver.py.pgo firefox-96.0/build/pgo/prof
          llvm_profdata = env.get("LLVM_PROFDATA")
          if llvm_profdata:
              profraw_files = glob.glob("*.profraw")
-diff -up firefox-96.0/build/unix/mozconfig.unix.pgo firefox-96.0/build/unix/mozconfig.unix
---- firefox-96.0/build/unix/mozconfig.unix.pgo	2022-01-06 16:56:24.000000000 +0100
-+++ firefox-96.0/build/unix/mozconfig.unix	2022-01-11 15:43:02.193378698 +0100
+diff -up firefox-99.0/build/unix/mozconfig.unix.pgo firefox-99.0/build/unix/mozconfig.unix
+--- firefox-99.0/build/unix/mozconfig.unix.pgo	2022-03-31 01:24:38.000000000 +0200
++++ firefox-99.0/build/unix/mozconfig.unix	2022-04-04 10:15:45.387694143 +0200
 @@ -4,6 +4,15 @@ if [ -n "$FORCE_GCC" ]; then
      CC="$MOZ_FETCHES_DIR/gcc/bin/gcc"
      CXX="$MOZ_FETCHES_DIR/gcc/bin/g++"
@@ -89,18 +89,18 @@ diff -up firefox-96.0/build/unix/mozconfig.unix.pgo firefox-96.0/build/unix/mozc
      # We want to make sure we use binutils and other binaries in the tooltool
      # package.
      mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$PATH"
-diff -up firefox-96.0/extensions/spellcheck/src/moz.build.pgo firefox-96.0/extensions/spellcheck/src/moz.build
---- firefox-96.0/extensions/spellcheck/src/moz.build.pgo	2022-01-11 15:43:02.193378698 +0100
-+++ firefox-96.0/extensions/spellcheck/src/moz.build	2022-01-11 15:49:52.929362701 +0100
+diff -up firefox-99.0/extensions/spellcheck/src/moz.build.pgo firefox-99.0/extensions/spellcheck/src/moz.build
+--- firefox-99.0/extensions/spellcheck/src/moz.build.pgo	2022-03-31 01:24:50.000000000 +0200
++++ firefox-99.0/extensions/spellcheck/src/moz.build	2022-04-04 10:15:45.387694143 +0200
 @@ -28,3 +28,5 @@ EXPORTS.mozilla += [
      "mozInlineSpellChecker.h",
      "mozSpellChecker.h",
  ]
 +
 +CXXFLAGS += ['-fno-devirtualize']
-diff -up firefox-96.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-96.0/toolkit/components/terminator/nsTerminator.cpp
---- firefox-96.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2022-01-06 16:58:15.000000000 +0100
-+++ firefox-96.0/toolkit/components/terminator/nsTerminator.cpp	2022-01-11 15:43:02.193378698 +0100
+diff -up firefox-99.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-99.0/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-99.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2022-04-04 10:15:45.387694143 +0200
++++ firefox-99.0/toolkit/components/terminator/nsTerminator.cpp	2022-04-04 10:19:07.022239556 +0200
 @@ -466,6 +466,11 @@ void nsTerminator::StartWatchdog() {
    }
  #endif
@@ -111,5 +111,5 @@ diff -up firefox-96.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox
 +  crashAfterMS = INT32_MAX;
 +
    UniquePtr<Options> options(new Options());
-   const PRIntervalTime ticksDuration =
-       PR_MillisecondsToInterval(HEARTBEAT_INTERVAL_MS);
+   // crashAfterTicks is guaranteed to be > 0 as
+   // crashAfterMS >= ADDITIONAL_WAIT_BEFORE_CRASH_MS >> HEARTBEAT_INTERVAL_MS
