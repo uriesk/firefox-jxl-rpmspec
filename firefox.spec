@@ -241,7 +241,6 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-Patch416:        D142257.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -481,7 +480,6 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-%patch416 -p1 -b .D142257
 
 # PGO patches
 %if %{build_with_pgo}
