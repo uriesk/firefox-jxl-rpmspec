@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        99.0
+Version:        99.0.1
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220331.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220413.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1050,6 +1050,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Apr 13 2022 Martin Stransky <stransky@redhat.com> - 99.0.1-1
+- Updated to 99.0.1
+
 * Wed Apr 6 2022 Martin Stransky <stransky@redhat.com> - 99.0-1
 - Updated to 99.0
 
