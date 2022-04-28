@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        99.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -772,7 +772,7 @@ mkdir -p test_results
 
 # set up our default bookmarks
 %if !0%{?flatpak}
-%{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/en-US/locale/browser/bookmarks.html
+%{__cp} -p %{default_bookmarks_file} objdir/dist/bin/browser/chrome/browser/content/browser/default-bookmarks.html
 %endif
 
 # Make sure locale works for langpacks
@@ -1050,6 +1050,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 28 2022 Jan Horak <jhorak@redhat.com> - 99.0.1-2
+- Fixing bookmark install location - rhbz#2054953
+
 * Wed Apr 13 2022 Martin Stransky <stransky@redhat.com> - 99.0.1-1
 - Updated to 99.0.1
 
