@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        100.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -230,7 +230,6 @@ Patch102:       firefox-tests-xpcshell-freeze.patch
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
-Patch221:        firefox-fedora-ua.patch
 Patch224:        mozilla-1170092.patch
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
@@ -470,7 +469,6 @@ This package contains results of tests executed during build.
 # Fedora patches
 %patch215 -p1 -b .addons
 %patch219 -p1 -b .rhbz-1173156
-%patch221 -p1 -b .fedora-ua
 %patch224 -p1 -b .1170092
 #ARM run-time patch
 %ifarch aarch64
@@ -1050,6 +1048,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Thu May 5 2022 Martin Stransky <stransky@redhat.com>- 100.0-3
+- Removed Fedora user agent patch (rhbz#2081791).
+
 * Tue May 3 2022 Martin Stransky <stransky@redhat.com>- 100.0-2
 - Added fix for mozbz#1759137
 
