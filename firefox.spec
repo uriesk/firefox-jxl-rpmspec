@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        100.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -218,6 +218,7 @@ Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch72:        D142373.diff
+Patch73:        mozilla-1767916-multimonitor-crash.patch
 
 # Test patches
 # Generate without context by
@@ -243,6 +244,7 @@ Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch416:        D145094.diff
 Patch417:        D145541.diff
+Patch418:        mozilla-1767946-profilemanagersize.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -461,6 +463,7 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch72 -p1 -b .D142373
+%patch73 -p1 -b .mozilla-1767916-multimonitor-crash
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -484,6 +487,7 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 %patch416 -p1 -b .D145094
 %patch417 -p1 -b .D145541
+%patch418 -p1 -b .mozilla-1767946-profilemanagersize
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1050,6 +1054,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue May 10 2022 Jan Horak <jhorak@redhat.com> - 100.0-5
+- Fix crashes on f36 multimonitor setup and too big profile manager
+
 * Mon May 9 2022 Martin Stransky <stransky@redhat.com>- 100.0-4
 - Added fix for mozbz#1767916.
 
