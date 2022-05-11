@@ -218,7 +218,6 @@ Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch72:        D142373.diff
-Patch73:        mozilla-1767916-multimonitor-crash.patch
 
 # Test patches
 # Generate without context by
@@ -463,7 +462,6 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch72 -p1 -b .D142373
-%patch73 -p1 -b .mozilla-1767916-multimonitor-crash
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
