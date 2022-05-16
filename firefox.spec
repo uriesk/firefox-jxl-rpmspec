@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        100.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -905,6 +905,13 @@ ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
 # Default
 %{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 
+# Since Fedora 36 the location of dictionaries has changed to /usr/share/hunspell.
+# For backward spec compatibility we set the old path in previous versions.
+# TODO remove when Fedora 35 becomes obsolete
+%if 0%{?fedora} <= 35
+sed -ie 's|/usr/share/hunspell|/usr/share/myspell|g' %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
+%endif
+
 # Copy over run-mozilla.sh
 %{__cp} build/unix/run-mozilla.sh %{buildroot}%{mozappdir}
 
@@ -1052,6 +1059,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon May 16 2022 Jan Horak <jhorak@redhat.com> - 100.0-6
+- Fix spellchecker.dictionary_path of F36+
+
 * Tue May 10 2022 Jan Horak <jhorak@redhat.com> - 100.0-5
 - Fix crashes on f36 multimonitor setup and too big profile manager
 
