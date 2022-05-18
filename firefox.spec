@@ -243,6 +243,7 @@ Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch416:        D145094.diff
 Patch417:        D145541.diff
+Patch418:        mozilla-1767946-profilemanagersize.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -484,6 +485,7 @@ This package contains results of tests executed during build.
 %patch415 -p1 -b .1670333
 %patch416 -p1 -b .D145094
 %patch417 -p1 -b .D145541
+%patch418 -p1 -b .mozilla-1767946-profilemanagersize
 
 # PGO patches
 %if %{build_with_pgo}
@@ -903,6 +905,13 @@ ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
 # Default
 %{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 
+# Since Fedora 36 the location of dictionaries has changed to /usr/share/hunspell.
+# For backward spec compatibility we set the old path in previous versions.
+# TODO remove when Fedora 35 becomes obsolete
+%if 0%{?fedora} <= 35
+sed -ie 's|/usr/share/hunspell|/usr/share/myspell|g' %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
+%endif
+
 # Copy over run-mozilla.sh
 %{__cp} build/unix/run-mozilla.sh %{buildroot}%{mozappdir}
 
@@ -1052,6 +1061,12 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Wed May 18 2022 Martin Stransky <stransky@redhat.com>- 100.0.1-1
 - Updated to 100.0.1
+
+* Mon May 16 2022 Jan Horak <jhorak@redhat.com> - 100.0-6
+- Fix spellchecker.dictionary_path of F36+
+
+* Tue May 10 2022 Jan Horak <jhorak@redhat.com> - 100.0-5
+- Fix crashes on f36 multimonitor setup and too big profile manager
 
 * Mon May 9 2022 Martin Stransky <stransky@redhat.com>- 100.0-4
 - Added fix for mozbz#1767916.

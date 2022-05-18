@@ -26,7 +26,7 @@ pref("plugins.notifyMissingFlash", false);
 pref("browser.display.use_system_colors", false);
 /* Allow sending credetials to all https:// sites */
 pref("network.negotiate-auth.trusted-uris", "https://");
-pref("spellchecker.dictionary_path","/usr/share/myspell");
+pref("spellchecker.dictionary_path","/usr/share/hunspell");
 /* Disable DoH by default */
 pref("network.trr.mode",                    5);
 /* Enable per-user policy dir, see mozbz#1583466 */

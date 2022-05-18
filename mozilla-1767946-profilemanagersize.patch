@@ -1,0 +1,30 @@
+diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
+--- a/widget/gtk/nsWindow.cpp
++++ b/widget/gtk/nsWindow.cpp
+@@ -3787,11 +3787,12 @@
+     mPendingConfigures--;
+   }
+ 
+   // Don't fire configure event for scale changes, we handle that
+   // OnScaleChanged event. Skip that for toplevel windows only.
+-  if (mWindowType == eWindowType_toplevel) {
++  if (mWindowType == eWindowType_toplevel ||
++      mWindowType == eWindowType_dialog) {
+     MOZ_DIAGNOSTIC_ASSERT(mGdkWindow,
+                           "Getting configure for invisible window?");
+     if (mWindowScaleFactor != gdk_window_get_scale_factor(mGdkWindow)) {
+       LOG("  scale factor changed to %d,return early",
+           gdk_window_get_scale_factor(mGdkWindow));
+@@ -4864,10 +4865,11 @@
+   // Force scale factor recalculation
+   if (!mGdkWindow) {
+     mWindowScaleFactorChanged = true;
+     return;
+   }
++  LOG("OnScaleChanged -> %d\n", gdk_window_get_scale_factor(mGdkWindow));
+ 
+   // Gtk supply us sometimes with doubled events so stay calm in such case.
+   if (gdk_window_get_scale_factor(mGdkWindow) == mWindowScaleFactor) {
+     return;
+   }
+
