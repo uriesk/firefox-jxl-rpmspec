@@ -909,7 +909,7 @@ ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
 # For backward spec compatibility we set the old path in previous versions.
 # TODO remove when Fedora 35 becomes obsolete
 %if 0%{?fedora} <= 35
-sed -ie 's|/usr/share/hunspell|/usr/share/myspell|g' %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
+sed -i -e 's|/usr/share/hunspell|/usr/share/myspell|g' %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
 %endif
 
 # Copy over run-mozilla.sh
