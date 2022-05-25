@@ -1,0 +1,19 @@
+diff -up firefox-100.0.2/widget/gtk/nsWindow.cpp.D147267 firefox-100.0.2/widget/gtk/nsWindow.cpp
+--- firefox-100.0.2/widget/gtk/nsWindow.cpp.D147267	2022-05-25 11:46:48.291005415 +0200
++++ firefox-100.0.2/widget/gtk/nsWindow.cpp	2022-05-25 11:50:11.447736538 +0200
+@@ -2359,11 +2359,12 @@ void nsWindow::WaylandPopupMove() {
+   LOG(" popup use move to rect %d\n", mPopupUseMoveToRect);
+ 
+   if (!mPopupUseMoveToRect) {
+-    if (mNeedsShow && mPopupType != ePopupTypeTooltip) {
++    if (mPopupHint == ePopupTypeMenu) {
+       // Workaround for https://gitlab.gnome.org/GNOME/gtk/-/issues/4308
+-      // Tooltips are created as subsurfaces with relative position.
++      // Tooltips/Utility popus are created as subsurfaces with relative position.
++      // Menu uses absolute positions.
+       LOG("  use gtk_window_move(%d, %d) for hidden widget\n", mPopupPosition.x,
+-          mPopupPosition.y);
++            mPopupPosition.y);
+       gtk_window_move(GTK_WINDOW(mShell), mPopupPosition.x, mPopupPosition.y);
+     } else {
+       LOG("  use gtk_window_move(%d, %d) for visible widget\n",

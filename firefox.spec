@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        100.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -218,6 +218,8 @@ Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch72:        D142373.diff
+Patch73:        D147266.diff
+Patch74:        D147267.diff
 
 # Test patches
 # Generate without context by
@@ -462,6 +464,8 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch72 -p1 -b .D142373
+%patch73 -p1 -b .D147266
+%patch74 -p1 -b .D147267
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -1059,6 +1063,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 25 2022 Martin Stransky <stransky@redhat.com>- 100.0.2-2
+- Added fix for mzbz#1771104
+
 * Fri May 20 2022 Martin Stransky <stransky@redhat.com>- 100.0.2-1
 - Updated to 100.0.2
 
