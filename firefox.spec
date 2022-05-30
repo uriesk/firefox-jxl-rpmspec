@@ -124,9 +124,9 @@ ExcludeArch: aarch64
 %endif
 
 %if %{?system_nss}
-%global nspr_version 4.26
+%global nspr_version 4.32
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.76
+%global nss_version 3.78
 %global nss_build_version %{nss_version}
 %endif
 
@@ -162,13 +162,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        100.0.2
-Release:        2%{?pre_tag}%{?dist}
+Version:        101.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220520.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220530.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -217,7 +217,6 @@ Patch55:        firefox-testing.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
-Patch72:        D142373.diff
 Patch73:        D147266.diff
 Patch74:        D147267.diff
 
@@ -243,8 +242,6 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-Patch416:        D145094.diff
-Patch417:        D145541.diff
 Patch418:        mozilla-1767946-profilemanagersize.patch
 
 # PGO/LTO patches
@@ -463,7 +460,6 @@ This package contains results of tests executed during build.
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
-%patch72 -p1 -b .D142373
 %patch73 -p1 -b .D147266
 %patch74 -p1 -b .D147267
 
@@ -487,8 +483,6 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-%patch416 -p1 -b .D145094
-%patch417 -p1 -b .D145541
 %patch418 -p1 -b .mozilla-1767946-profilemanagersize
 
 # PGO patches
@@ -1063,6 +1057,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon May 30 2022 Martin Stransky <stransky@redhat.com>- 101.0-1
+- Updated to 101.0
+
 * Wed May 25 2022 Martin Stransky <stransky@redhat.com>- 100.0.2-2
 - Added fix for mzbz#1771104
 

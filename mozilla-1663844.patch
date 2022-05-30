@@ -1,6 +1,6 @@
-diff -up firefox-84.0/dom/media/gmp/GMPSharedMemManager.h.1663844 firefox-84.0/dom/media/gmp/GMPSharedMemManager.h
---- firefox-84.0/dom/media/gmp/GMPSharedMemManager.h.1663844	2020-12-07 23:32:59.000000000 +0100
-+++ firefox-84.0/dom/media/gmp/GMPSharedMemManager.h	2020-12-10 12:59:39.287832851 +0100
+diff -up firefox-101.0/dom/media/gmp/GMPSharedMemManager.h.1663844 firefox-101.0/dom/media/gmp/GMPSharedMemManager.h
+--- firefox-101.0/dom/media/gmp/GMPSharedMemManager.h.1663844	2022-05-27 01:16:53.000000000 +0200
++++ firefox-101.0/dom/media/gmp/GMPSharedMemManager.h	2022-05-30 21:15:20.989993419 +0200
 @@ -27,7 +27,7 @@ class GMPSharedMem {
    // returned to the parent pool (which is not included).  If more than
    // this are needed, we presume the client has either crashed or hung
@@ -10,22 +10,21 @@ diff -up firefox-84.0/dom/media/gmp/GMPSharedMemManager.h.1663844 firefox-84.0/d
  
    GMPSharedMem() {
      for (size_t i = 0; i < sizeof(mGmpAllocated) / sizeof(mGmpAllocated[0]);
-diff -up firefox-84.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844 firefox-84.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp
---- firefox-84.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844	2020-12-10 12:59:39.287832851 +0100
-+++ firefox-84.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp	2020-12-10 14:05:00.833685947 +0100
-@@ -82,7 +82,7 @@ bool GMPDecoderModule::SupportsMimeType(
+diff -up firefox-101.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844 firefox-101.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp
+--- firefox-101.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844	2022-05-30 21:15:20.989993419 +0200
++++ firefox-101.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp	2022-05-30 21:24:16.615282035 +0200
+@@ -66,6 +66,7 @@ media::DecodeSupportSet GMPDecoderModule
  
- bool GMPDecoderModule::SupportsMimeType(
-     const nsACString& aMimeType, DecoderDoctorDiagnostics* aDiagnostics) const {
--  return false;
-+  return MP4Decoder::IsH264(aMimeType);
- }
+   nsCString api = nsLiteralCString(CHROMIUM_CDM_API);
  
- /* static */
-diff -up firefox-84.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844 firefox-84.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp
---- firefox-84.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844	2020-12-08 00:35:04.000000000 +0100
-+++ firefox-84.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp	2020-12-10 12:59:39.287832851 +0100
-@@ -67,6 +67,8 @@ void GMPVideoDecoder::Decoded(GMPVideoi4
++  // TODO: Do we enable it here?
+   if (MP4Decoder::IsH264(aMimeType)) {
+     isSupported = HaveGMPFor(api, {"h264"_ns, aGMP.value()});
+   } else if (VPXDecoder::IsVP9(aMimeType)) {
+diff -up firefox-101.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844 firefox-101.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp
+--- firefox-101.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844	2022-05-27 01:16:53.000000000 +0200
++++ firefox-101.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp	2022-05-30 21:15:20.989993419 +0200
+@@ -70,6 +70,8 @@ void GMPVideoDecoder::Decoded(GMPVideoi4
    RefPtr<GMPVideoDecoder> self = this;
    if (v) {
      mDecodedData.AppendElement(std::move(v));
