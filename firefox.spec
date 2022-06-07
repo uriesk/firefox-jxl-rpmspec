@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        101.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -243,6 +243,24 @@ Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
 Patch418:        mozilla-1767946-profilemanagersize.patch
+
+# VA-API fixes
+Patch420:        D144284.diff
+Patch421:        D147420.diff
+Patch422:        D147720.diff
+Patch423:        D147874.diff
+Patch424:        D146084.diff
+Patch425:        D146085.diff
+Patch426:        D146086.diff
+Patch427:        D146087.diff
+Patch428:        D145725.diff
+Patch429:        D145966.diff
+Patch430:        D145871.diff
+
+# NVIDIA mzbz#1735929
+Patch440:        D147635.diff
+Patch441:        D147636.diff
+Patch442:        D147637.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -484,6 +502,26 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 %patch418 -p1 -b .mozilla-1767946-profilemanagersize
+
+# VA-API fixes
+%patch420 -p1 -b .D144284.diff
+%patch421 -p1 -b .D147420.diff
+%patch423 -p1 -b .D147874.diff
+%patch424 -p1 -b .D146084.diff
+%patch425 -p1 -b .D146085.diff
+%patch426 -p1 -b .D146086.diff
+%patch427 -p1 -b .D146087.diff
+%patch428 -p1 -b .D145725.diff
+%patch429 -p1 -b .D145966.diff
+%patch430 -p1 -b .D145871.diff
+
+# NVIDIA mzbz#1735929
+%patch440 -p1 -b .D147635.diff
+%patch441 -p1 -b .D147636.diff
+%patch442 -p1 -b .D147637.diff
+
+# More VA-API fixes
+%patch422 -p1 -b .D147720.diff
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1057,6 +1095,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jun 7 2022 Martin Stransky <stransky@redhat.com>- 101.0-2
+- Enabled VA-API by default (+ added VA-API fixes from upstream)
+- Fixed WebGL performance on NVIDIA drivers (mzbz#1735929)
+
 * Mon May 30 2022 Martin Stransky <stransky@redhat.com>- 101.0-1
 - Updated to 101.0
 
