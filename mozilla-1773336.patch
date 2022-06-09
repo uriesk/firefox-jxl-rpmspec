@@ -1,0 +1,12 @@
+diff -up firefox-101.0.1/gfx/webrender_bindings/webrender_ffi.h.old firefox-101.0.1/gfx/webrender_bindings/webrender_ffi.h
+--- firefox-101.0.1/gfx/webrender_bindings/webrender_ffi.h.old	2022-06-09 10:31:16.122495733 +0200
++++ firefox-101.0.1/gfx/webrender_bindings/webrender_ffi.h	2022-06-09 10:31:22.880724352 +0200
+@@ -72,8 +72,6 @@ struct WrPipelineInfo;
+ struct WrPipelineIdAndEpoch;
+ using WrPipelineIdEpochs = nsTArray<WrPipelineIdAndEpoch>;
+ 
+-const uint64_t ROOT_CLIP_CHAIN = ~0;
+-
+ }  // namespace wr
+ }  // namespace mozilla
+ 
