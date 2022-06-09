@@ -1111,6 +1111,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Thu Jun 9 2022 Martin Stransky <stransky@redhat.com>- 101.0.1-1
 - Updated to 101.0.1
 - More VA-API sandbox fixes (mzbz#1769182)
+- Adjust GMP plugin setting (rhbz#2094319)
 
 * Tue Jun 7 2022 Martin Stransky <stransky@redhat.com>- 101.0-2
 - Enabled VA-API by default (+ added VA-API fixes from upstream)
