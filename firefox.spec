@@ -486,7 +486,8 @@ This package contains results of tests executed during build.
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch73 -p1 -b .D147266
 %patch74 -p1 -b .D147267
-%patch75 -p1 -b .mzbz#1773336
+# Needs for new cbindgen only
+%patch75 -p1 -b .1773336
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
