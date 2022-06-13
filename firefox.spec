@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        101.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -267,6 +267,7 @@ Patch435:        D146275.diff
 Patch440:        D147635.diff
 Patch441:        D147636.diff
 Patch442:        D147637.diff
+Patch443:        D149135.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -532,6 +533,7 @@ This package contains results of tests executed during build.
 %patch440 -p1 -b .D147635.diff
 %patch441 -p1 -b .D147636.diff
 %patch442 -p1 -b .D147637.diff
+%patch443 -p1 -b .D149135.diff
 
 # More VA-API fixes
 %patch422 -p1 -b .D147720.diff
@@ -1108,6 +1110,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jun 13 2022 Martin Stransky <stransky@redhat.com>- 101.0.1-2
+- Fix WebGL mem leaks (mzbz#1773968)
+
 * Thu Jun 9 2022 Martin Stransky <stransky@redhat.com>- 101.0.1-1
 - Updated to 101.0.1
 - More VA-API sandbox fixes (mzbz#1769182)
