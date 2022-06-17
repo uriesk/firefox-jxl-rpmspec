@@ -163,7 +163,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        101.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -273,6 +273,7 @@ Patch443:        D149135.diff
 Patch444:        D148946.diff
 Patch445:        D149238.diff
 Patch446:        mozilla-1758948.patch
+Patch447:        mozilla-1774271.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -545,6 +546,7 @@ This package contains results of tests executed during build.
 %patch444 -p1 -b .D148946.diff
 %patch445 -p1 -b .D149238.diff
 %patch446 -p1 -b .mozbz#1758948
+%patch447 -p1 -b .mozbz#1774271
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1118,6 +1120,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jun 17 2022 Martin Stransky <stransky@redhat.com>- 101.0.1-6
+- Added fix for mozbz#1774271 - Intel/dmabuf export issues.
+
 * Wed Jun 15 2022 Martin Stransky <stransky@redhat.com>- 101.0.1-5
 - Added fix for mozbz#1758948 (AV1 VA-API playback shuttering)
 
