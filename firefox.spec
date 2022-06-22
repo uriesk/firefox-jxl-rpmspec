@@ -317,9 +317,8 @@ BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
-%if %{build_with_clang}
+# needed for wasm-ld
 BuildRequires:  lld
-%endif
 
 BuildRequires:  pipewire-devel
 
