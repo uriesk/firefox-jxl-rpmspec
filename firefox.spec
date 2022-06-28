@@ -1,6 +1,6 @@
 # Produce a build suitable for release, i.e. use PGO/LTO. You can turn it off
 # when building locally to reduce build time.
-%global release_build     0
+%global release_build     1
 
 # Run Mozilla test suite as a part of compile rpm section. Turn off when
 # building locally and don't want to spend 24 hours waiting for results.
@@ -171,7 +171,6 @@ Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pr
 Source1:        firefox-langpacks-%{version}%{?pre_version}-20220609.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
-Source3:        https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sysroot-16.0.tar.gz
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
 Source20:       firefox.desktop
@@ -318,7 +317,9 @@ BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
+%if %{build_with_clang}
 BuildRequires:  lld
+%endif
 
 BuildRequires:  pipewire-devel
 
@@ -645,10 +646,6 @@ echo "ac_add_options --with-google-location-service-api-keyfile=`pwd`/google-loc
 echo "ac_add_options --with-google-safebrowsing-api-keyfile=`pwd`/google-api-key" >> .mozconfig
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
-
-# Prepare wasi sdk:
-%{__tar} xf %{SOURCE3}
-echo "ac_add_options --with-wasi-sysroot=`pwd`/wasi-sysroot" >> .mozconfig
 
 # Remove executable bit to make brp-mangle-shebangs happy.
 chmod -x third_party/rust/itertools/src/lib.rs
