@@ -1,7 +1,11 @@
-diff -up firefox-101.0/gfx/gl/SharedSurfaceDMABUF.cpp.D147637.diff firefox-101.0/gfx/gl/SharedSurfaceDMABUF.cpp
---- firefox-101.0/gfx/gl/SharedSurfaceDMABUF.cpp.D147637.diff	2022-05-27 01:16:54.000000000 +0200
-+++ firefox-101.0/gfx/gl/SharedSurfaceDMABUF.cpp	2022-06-07 09:37:29.361992695 +0200
-@@ -12,22 +12,37 @@
+diff -up firefox-102.0/gfx/gl/SharedSurfaceDMABUF.cpp.D147637.diff firefox-102.0/gfx/gl/SharedSurfaceDMABUF.cpp
+--- firefox-102.0/gfx/gl/SharedSurfaceDMABUF.cpp.D147637.diff	2022-06-23 09:08:46.000000000 +0200
++++ firefox-102.0/gfx/gl/SharedSurfaceDMABUF.cpp	2022-06-28 16:37:52.264835137 +0200
+@@ -9,25 +9,58 @@
+ #include "GLContextEGL.h"
+ #include "MozFramebuffer.h"
+ #include "mozilla/layers/LayersSurfaces.h"  // for SurfaceDescriptor, etc
++#include "mozilla/gfx/gfxVars.h"
  
  namespace mozilla::gl {
  
@@ -21,33 +25,54 @@ diff -up firefox-101.0/gfx/gl/SharedSurfaceDMABUF.cpp.D147637.diff firefox-101.0
 -  const RefPtr<DMABufSurface> surface = DMABufSurfaceRGBA::CreateDMABufSurface(
 -      desc.size.width, desc.size.height, flags);
 -  if (!surface || !surface->CreateTexture(desc.gl)) {
+-    return nullptr;
 +  const auto& gle = GLContextEGL::Cast(desc.gl);
 +  const auto& context = gle->mContext;
 +  const auto& egl = *(gle->mEgl);
 +
-+  if (!HasDmaBufExtensions(gle)) {
-     return nullptr;
++  RefPtr<DMABufSurface> surface;
++  UniquePtr<MozFramebuffer> fb;
++
++  if (!HasDmaBufExtensions(gle) || !gfx::gfxVars::UseDMABufSurfaceExport()) {
++    // Use MESA_image_dma_buf_export is not supported or it's broken.
++    // Create dmabuf surface directly via. GBM and create
++    // EGLImage/framebuffer over it.
++    const auto flags = static_cast<DMABufSurfaceFlags>(
++        DMABUF_TEXTURE | DMABUF_USE_MODIFIERS | DMABUF_ALPHA);
++    surface = DMABufSurfaceRGBA::CreateDMABufSurface(desc.size.width,
++                                                     desc.size.height, flags);
++    if (!surface || !surface->CreateTexture(desc.gl)) {
++      return nullptr;
++    }
++    const auto tex = surface->GetTexture();
++    fb = MozFramebuffer::CreateForBacking(desc.gl, desc.size, 0, false,
++                                          LOCAL_GL_TEXTURE_2D, tex);
++    if (!fb) return nullptr;
++  } else {
++    // Use MESA_image_dma_buf_export so create EGLImage/framebuffer directly
++    // and derive dmabuf from it.
++    fb = MozFramebuffer::Create(desc.gl, desc.size, 0, false);
++    if (!fb) return nullptr;
++
++    const auto buffer = reinterpret_cast<EGLClientBuffer>(fb->ColorTex());
++    const auto image =
++        egl.fCreateImage(context, LOCAL_EGL_GL_TEXTURE_2D, buffer, nullptr);
++    if (!image) return nullptr;
++
++    surface = DMABufSurfaceRGBA::CreateDMABufSurface(
++        desc.gl, image, desc.size.width, desc.size.height);
++    if (!surface) return nullptr;
    }
- 
+-
 -  const auto tex = surface->GetTexture();
 -  auto fb = MozFramebuffer::CreateForBacking(desc.gl, desc.size, 0, false,
 -                                             LOCAL_GL_TEXTURE_2D, tex);
-+  auto fb = MozFramebuffer::Create(desc.gl, desc.size, 0, false);
-   if (!fb) return nullptr;
- 
-+  const auto buffer = reinterpret_cast<EGLClientBuffer>(fb->ColorTex());
-+  const auto image =
-+      egl.fCreateImage(context, LOCAL_EGL_GL_TEXTURE_2D, buffer, nullptr);
-+  if (!image) return nullptr;
-+
-+  const RefPtr<DMABufSurface> surface = DMABufSurfaceRGBA::CreateDMABufSurface(
-+      desc.gl, image, desc.size.width, desc.size.height);
-+  if (!surface) return nullptr;
-+
+-  if (!fb) return nullptr;
+-
    return AsUnique(new SharedSurface_DMABUF(desc, std::move(fb), surface));
  }
  
-@@ -61,7 +76,7 @@ UniquePtr<SurfaceFactory_DMABUF> Surface
+@@ -61,7 +94,7 @@ UniquePtr<SurfaceFactory_DMABUF> Surface
    }
  
    auto dmabufFactory = MakeUnique<SurfaceFactory_DMABUF>(gl);
@@ -56,13 +81,13 @@ diff -up firefox-101.0/gfx/gl/SharedSurfaceDMABUF.cpp.D147637.diff firefox-101.0
      return dmabufFactory;
    }
  
-@@ -71,8 +86,38 @@ UniquePtr<SurfaceFactory_DMABUF> Surface
+@@ -71,8 +104,38 @@ UniquePtr<SurfaceFactory_DMABUF> Surface
    return nullptr;
  }
  
 +bool SurfaceFactory_DMABUF::CanCreateSurface(GLContext& gl) {
 +  UniquePtr<SharedSurface> test =
-+      CreateShared(gfx::IntSize(1, 1));
++      CreateShared(gfx::IntSize(1, 1), gfx::ColorSpace2::SRGB);
 +  if (!test) {
 +    LOGDMABUF((
 +        "SurfaceFactory_DMABUF::CanCreateSurface() failed to create surface."));
@@ -96,15 +121,16 @@ diff -up firefox-101.0/gfx/gl/SharedSurfaceDMABUF.cpp.D147637.diff firefox-101.0
                        layers::TextureType::DMABUF, true}) {}
 -
  }  // namespace mozilla::gl
-diff -up firefox-101.0/gfx/gl/SharedSurfaceDMABUF.h.D147637.diff firefox-101.0/gfx/gl/SharedSurfaceDMABUF.h
---- firefox-101.0/gfx/gl/SharedSurfaceDMABUF.h.D147637.diff	2022-06-07 09:31:23.678228010 +0200
-+++ firefox-101.0/gfx/gl/SharedSurfaceDMABUF.h	2022-06-07 09:36:39.691512555 +0200
-@@ -59,10 +59,7 @@ class SurfaceFactory_DMABUF : public Sur
+diff -up firefox-102.0/gfx/gl/SharedSurfaceDMABUF.h.D147637.diff firefox-102.0/gfx/gl/SharedSurfaceDMABUF.h
+--- firefox-102.0/gfx/gl/SharedSurfaceDMABUF.h.D147637.diff	2022-06-23 09:08:47.000000000 +0200
++++ firefox-102.0/gfx/gl/SharedSurfaceDMABUF.h	2022-06-28 15:00:20.339991965 +0200
+@@ -59,11 +59,7 @@ class SurfaceFactory_DMABUF : public Sur
      return SharedSurface_DMABUF::Create(desc);
    }
  
 -  bool CanCreateSurface() {
--    UniquePtr<SharedSurface> test = CreateShared(gfx::IntSize(1, 1));
+-    UniquePtr<SharedSurface> test =
+-        CreateShared(gfx::IntSize(1, 1), gfx::ColorSpace2::SRGB);
 -    return test != nullptr;
 -  }
 +  bool CanCreateSurface(GLContext& gl);

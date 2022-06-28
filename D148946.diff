@@ -1,7 +1,7 @@
-diff -up firefox-101.0.1/gfx/gl/GLContextProviderEGL.cpp.D148946.diff firefox-101.0.1/gfx/gl/GLContextProviderEGL.cpp
---- firefox-101.0.1/gfx/gl/GLContextProviderEGL.cpp.D148946.diff	2022-06-14 14:25:07.290229683 +0200
-+++ firefox-101.0.1/gfx/gl/GLContextProviderEGL.cpp	2022-06-14 14:25:07.313230450 +0200
-@@ -1190,42 +1190,16 @@ RefPtr<GLContextEGL> GLContextEGL::Creat
+diff -up firefox-102.0/gfx/gl/GLContextProviderEGL.cpp.D148946.diff firefox-102.0/gfx/gl/GLContextProviderEGL.cpp
+--- firefox-102.0/gfx/gl/GLContextProviderEGL.cpp.D148946.diff	2022-06-23 09:08:47.000000000 +0200
++++ firefox-102.0/gfx/gl/GLContextProviderEGL.cpp	2022-06-28 14:47:40.904700050 +0200
+@@ -1182,42 +1182,16 @@ RefPtr<GLContextEGL> GLContextEGL::Creat
  }
  
  /*static*/
@@ -48,9 +48,9 @@ diff -up firefox-101.0.1/gfx/gl/GLContextProviderEGL.cpp.D148946.diff firefox-10
  }
  
  // Don't want a global context on Android as 1) share groups across 2 threads
-diff -up firefox-101.0.1/gfx/gl/GLDefs.h.D148946.diff firefox-101.0.1/gfx/gl/GLDefs.h
---- firefox-101.0.1/gfx/gl/GLDefs.h.D148946.diff	2022-06-14 14:25:07.290229683 +0200
-+++ firefox-101.0.1/gfx/gl/GLDefs.h	2022-06-14 14:25:07.313230450 +0200
+diff -up firefox-102.0/gfx/gl/GLDefs.h.D148946.diff firefox-102.0/gfx/gl/GLDefs.h
+--- firefox-102.0/gfx/gl/GLDefs.h.D148946.diff	2022-06-23 09:08:47.000000000 +0200
++++ firefox-102.0/gfx/gl/GLDefs.h	2022-06-28 14:47:40.904700050 +0200
 @@ -104,9 +104,6 @@ bool CheckContextLost(const GLContext* g
  // EGL_ANGLE_image_d3d11_texture
  #define LOCAL_EGL_D3D11_TEXTURE_ANGLE                   0x3484
@@ -61,10 +61,10 @@ diff -up firefox-101.0.1/gfx/gl/GLDefs.h.D148946.diff firefox-101.0.1/gfx/gl/GLD
  // clang-format on
  
  #endif
-diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp
---- firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff	2022-06-14 14:25:07.307230250 +0200
-+++ firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp	2022-06-14 14:27:03.477110994 +0200
-@@ -53,9 +53,15 @@ StaticRefPtr<GLLibraryEGL> GLLibraryEGL:
+diff -up firefox-102.0/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-102.0/gfx/gl/GLLibraryEGL.cpp
+--- firefox-102.0/gfx/gl/GLLibraryEGL.cpp.D148946.diff	2022-06-28 14:47:40.900699918 +0200
++++ firefox-102.0/gfx/gl/GLLibraryEGL.cpp	2022-06-28 14:49:47.810911199 +0200
+@@ -54,9 +54,15 @@ StaticRefPtr<GLLibraryEGL> GLLibraryEGL:
  
  // should match the order of EGLExtensions, and be null-terminated.
  static const char* sEGLLibraryExtensionNames[] = {
@@ -83,7 +83,7 @@ diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-101.0.1/gf
  
  // should match the order of EGLExtensions, and be null-terminated.
  static const char* sEGLExtensionNames[] = {
-@@ -83,7 +89,6 @@ static const char* sEGLExtensionNames[]
+@@ -84,7 +90,6 @@ static const char* sEGLExtensionNames[]
      "EGL_EXT_buffer_age",
      "EGL_KHR_partial_update",
      "EGL_NV_robustness_video_memory_purge",
@@ -91,7 +91,7 @@ diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-101.0.1/gf
      "EGL_EXT_image_dma_buf_import",
      "EGL_EXT_image_dma_buf_import_modifiers",
      "EGL_MESA_image_dma_buf_export"};
-@@ -156,8 +161,52 @@ static std::shared_ptr<EglDisplay> GetAn
+@@ -157,8 +162,52 @@ static std::shared_ptr<EglDisplay> GetAn
  }
  
  #ifdef MOZ_WAYLAND
@@ -144,7 +144,7 @@ diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-101.0.1/gf
    const EGLAttrib attrib_list[] = {LOCAL_EGL_NONE};
    const EGLDisplay display = egl.fGetPlatformDisplay(
        LOCAL_EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, attrib_list);
-@@ -610,9 +659,9 @@ bool GLLibraryEGL::Init(nsACString* cons
+@@ -611,9 +660,9 @@ bool GLLibraryEGL::Init(nsACString* cons
      (void)fnLoadSymbols(symbols);
    }
    {
@@ -157,7 +157,7 @@ diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-101.0.1/gf
      (void)fnLoadSymbols(symbols);
    }
    {
-@@ -657,6 +706,10 @@ bool GLLibraryEGL::Init(nsACString* cons
+@@ -658,6 +707,10 @@ bool GLLibraryEGL::Init(nsACString* cons
                                       END_OF_SYMBOLS};
      (void)fnLoadSymbols(symbols);
    }
@@ -169,7 +169,7 @@ diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-101.0.1/gf
    return true;
  }
 @@ -835,7 +888,10 @@ std::shared_ptr<EglDisplay> GLLibraryEGL
-     // Some drivers doesn't support EGL_DEFAULT_DISPLAY
+ #ifdef MOZ_WAYLAND
      GdkDisplay* gdkDisplay = gdk_display_get_default();
      if (!gdkDisplay) {
 -      ret = GetAndInitSurfacelessDisplay(*this, aProofOfLock);
@@ -178,11 +178,11 @@ diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.cpp.D148946.diff firefox-101.0.1/gf
 +        ret = GetAndInitSurfacelessDisplay(*this, aProofOfLock);
 +      }
      } else if (widget::GdkIsWaylandDisplay(gdkDisplay)) {
+       // Wayland does not support EGL_DEFAULT_DISPLAY
        nativeDisplay = widget::WaylandDisplayGetWLDisplay(gdkDisplay);
-       if (!nativeDisplay) {
-diff -up firefox-101.0.1/gfx/gl/GLLibraryEGL.h.D148946.diff firefox-101.0.1/gfx/gl/GLLibraryEGL.h
---- firefox-101.0.1/gfx/gl/GLLibraryEGL.h.D148946.diff	2022-06-14 14:25:07.307230250 +0200
-+++ firefox-101.0.1/gfx/gl/GLLibraryEGL.h	2022-06-14 14:25:07.313230450 +0200
+diff -up firefox-102.0/gfx/gl/GLLibraryEGL.h.D148946.diff firefox-102.0/gfx/gl/GLLibraryEGL.h
+--- firefox-102.0/gfx/gl/GLLibraryEGL.h.D148946.diff	2022-06-28 14:47:40.899699885 +0200
++++ firefox-102.0/gfx/gl/GLLibraryEGL.h	2022-06-28 14:47:40.904700050 +0200
 @@ -71,7 +71,10 @@ enum class EGLLibExtension {
    ANGLE_device_creation_d3d11,
    ANGLE_platform_angle,

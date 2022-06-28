@@ -139,6 +139,12 @@ ExcludeArch: aarch64
 
 %bcond_without langpacks
 
+%if %{with langpacks}
+%if 0%{?fedora} >= 37
+%bcond_without langpacks_subpkg
+%endif
+%endif
+
 %if !%{release_build}
 %global pre_tag .npgo
 %endif
@@ -162,13 +168,13 @@ ExcludeArch: aarch64
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        101.0.1
-Release:        7%{?pre_tag}%{?dist}
+Version:        102.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220609.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220628.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -217,8 +223,6 @@ Patch55:        firefox-testing.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
-Patch73:        D147266.diff
-Patch74:        D147267.diff
 Patch75:        mozilla-1773336.patch
 
 # Test patches
@@ -243,25 +247,9 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-Patch418:        mozilla-1767946-profilemanagersize.patch
 
 # VA-API fixes
-Patch420:        D144284.diff
-Patch421:        D147420.diff
-Patch422:        D147720.diff
 Patch423:        D147874.diff
-Patch424:        D146084.diff
-Patch425:        D146085.diff
-Patch426:        D146086.diff
-Patch427:        D146087.diff
-Patch428:        D145725.diff
-Patch429:        D145966.diff
-Patch430:        D145871.diff
-Patch431:        D146271.diff
-Patch432:        D146272.diff
-Patch433:        D146273.diff
-Patch434:        D146274.diff
-Patch435:        D146275.diff
 
 # NVIDIA mzbz#1735929
 Patch440:        D147635.diff
@@ -336,6 +324,11 @@ BuildRequires:  icu
 
 Requires:       mozilla-filesystem
 Recommends:     mozilla-openh264 >= 2.1.1
+%if %{with langpacks_subpkg}
+Recommends:     firefox-langpacks = %{version}-%{release}
+%else
+Obsoletes:      firefox-langpacks < %{version}-%{release}
+%endif
 Recommends:     libva
 Requires:       p11-kit-trust
 Requires:       pciutils-libs
@@ -436,6 +429,17 @@ Provides:       webclient
 Mozilla Firefox is an open-source web browser, designed for standards
 compliance, performance and portability.
 
+%if %{with langpacks_subpkg}
+%package langpacks
+Summary: Firefox langpacks
+Requires: %{name} = %{version}-%{release}
+%description langpacks
+The firefox-langpacks package contains all the localization
+and translations langpack add-ons.
+%files langpacks -f %{name}.lang
+%dir %{langpackdir}
+%endif
+
 %package x11
 Summary: Firefox X11 launcher.
 Requires: %{name}
@@ -491,8 +495,6 @@ This package contains results of tests executed during build.
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
-%patch73 -p1 -b .D147266
-%patch74 -p1 -b .D147267
 # Needs for new cbindgen only
 %patch75 -p1 -b .1773336
 
@@ -516,24 +518,9 @@ This package contains results of tests executed during build.
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
-%patch418 -p1 -b .mozilla-1767946-profilemanagersize
 
 # VA-API fixes
-%patch420 -p1 -b .D144284.diff
-%patch421 -p1 -b .D147420.diff
 %patch423 -p1 -b .D147874.diff
-%patch424 -p1 -b .D146084.diff
-%patch425 -p1 -b .D146085.diff
-%patch426 -p1 -b .D146086.diff
-%patch427 -p1 -b .D146087.diff
-%patch428 -p1 -b .D145725.diff
-%patch429 -p1 -b .D145966.diff
-%patch430 -p1 -b .D145871.diff
-%patch431 -p1 -b .D146271.diff
-%patch432 -p1 -b .D146272.diff
-%patch433 -p1 -b .D146273.diff
-%patch434 -p1 -b .D146274.diff
-%patch435 -p1 -b .D146275.diff
 
 # NVIDIA mzbz#1735929
 %patch440 -p1 -b .D147635.diff
@@ -542,7 +529,6 @@ This package contains results of tests executed during build.
 %patch443 -p1 -b .D149135.diff
 
 # More VA-API fixes
-%patch422 -p1 -b .D147720.diff
 %patch444 -p1 -b .D148946.diff
 %patch445 -p1 -b .D149238.diff
 %patch446 -p1 -b .mozbz#1758948
@@ -1055,7 +1041,11 @@ fi
 %posttrans
 gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
+%if %{with langpacks_subpkg}
+%files
+%else
 %files -f %{name}.lang
+%endif
 %{_bindir}/firefox
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
@@ -1075,8 +1065,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{mozappdir}/distribution/distribution.ini
 # That's Windows only
 %ghost %{mozappdir}/browser/features/aushelper@mozilla.org.xpi
+%if %{without langpacks_subpkg}
 %if %{with langpacks}
 %dir %{langpackdir}
+%endif
 %endif
 %{mozappdir}/browser/omni.ja
 %{mozappdir}/run-mozilla.sh
@@ -1120,6 +1112,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jun 28 2022 Martin Stransky <stransky@redhat.com>- 102.0-1
+- Updated to 102.0
+- Applied patch from https://src.fedoraproject.org/rpms/firefox/pull-request/43
+
 * Mon Jun 27 2022 Martin Stransky <stransky@redhat.com>- 101.0.1-7
 - Rebuild
 
