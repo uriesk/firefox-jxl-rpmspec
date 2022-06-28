@@ -1,6 +1,6 @@
 # Produce a build suitable for release, i.e. use PGO/LTO. You can turn it off
 # when building locally to reduce build time.
-%global release_build     0
+%global release_build     1
 
 # Run Mozilla test suite as a part of compile rpm section. Turn off when
 # building locally and don't want to spend 24 hours waiting for results.
