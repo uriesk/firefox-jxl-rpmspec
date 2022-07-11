@@ -1,25 +1,25 @@
-From e0e925da71abb97a60d02716b18faa19a29fada6 Mon Sep 17 00:00:00 2001
+From 60b164944e5dd2151cf3fcf959899e430cb57c47 Mon Sep 17 00:00:00 2001
 From: Jan Grulich <jgrulich@redhat.com>
-Date: Mon, 21 Feb 2022 15:34:52 +0100
+Date: Wed, 22 Jun 2022 13:49:07 +0200
 Subject: WebRTC - screen cast sync
 
 
 diff --git a/dom/media/webrtc/third_party_build/moz.build b/dom/media/webrtc/third_party_build/moz.build
-index e4c7ba7..a42f913 100644
+index e4c7ba736e..a42f9138aa 100644
 --- a/dom/media/webrtc/third_party_build/moz.build
 +++ b/dom/media/webrtc/third_party_build/moz.build
 @@ -63,6 +63,8 @@ webrtc_non_unified_sources = [
- 
+
  if CONFIG["MOZ_WIDGET_TOOLKIT"] == "gtk":
      DIRS += ["../../../../third_party/pipewire/libpipewire"]
 +    DIRS += ["../../../../third_party/drm/libdrm"]
 +    DIRS += ["../../../../third_party/gbm/libgbm"]
- 
+
  GN_DIRS += ["../../../../third_party/libwebrtc"]
- 
+
 diff --git a/third_party/drm/README b/third_party/drm/README
 new file mode 100644
-index 0000000..f68ed10
+index 0000000000..f68ed100bb
 --- /dev/null
 +++ b/third_party/drm/README
 @@ -0,0 +1,4 @@
@@ -29,7 +29,7 @@ index 0000000..f68ed10
 +libdrm directory stores headers of libdrm needed for build only.
 diff --git a/third_party/drm/drm/drm.h b/third_party/drm/drm/drm.h
 new file mode 100644
-index 0000000..5e54c3a
+index 0000000000..5e54c3aa4c
 --- /dev/null
 +++ b/third_party/drm/drm/drm.h
 @@ -0,0 +1,1193 @@
@@ -1228,7 +1228,7 @@ index 0000000..5e54c3a
 +#endif
 diff --git a/third_party/drm/drm/drm_fourcc.h b/third_party/drm/drm/drm_fourcc.h
 new file mode 100644
-index 0000000..4ececa8
+index 0000000000..4ececa84ba
 --- /dev/null
 +++ b/third_party/drm/drm/drm_fourcc.h
 @@ -0,0 +1,1377 @@
@@ -2611,7 +2611,7 @@ index 0000000..4ececa8
 +#endif /* DRM_FOURCC_H */
 diff --git a/third_party/drm/drm/drm_mode.h b/third_party/drm/drm/drm_mode.h
 new file mode 100644
-index 0000000..e1e3516
+index 0000000000..e1e3516828
 --- /dev/null
 +++ b/third_party/drm/drm/drm_mode.h
 @@ -0,0 +1,1217 @@
@@ -3834,17 +3834,17 @@ index 0000000..e1e3516
 +#endif
 diff --git a/third_party/drm/drm/xf86drm.h b/third_party/drm/drm/xf86drm.h
 new file mode 100644
-index 0000000..58d66f1
+index 0000000000..58d66f1a6b
 --- /dev/null
 +++ b/third_party/drm/drm/xf86drm.h
 @@ -0,0 +1,966 @@
 +/**
-+ * \file xf86drm.h 
++ * \file xf86drm.h
 + * OS-independent header for DRM user-level library interface.
 + *
 + * \author Rickard E. (Rik) Faith <faith@valinux.com>
 + */
-+ 
++
 +/*
 + * Copyright 1999, 2000 Precision Insight, Inc., Cedar Park, Texas.
 + * Copyright 2000 VA Linux Systems, Inc., Sunnyvale, California.
@@ -4037,9 +4037,9 @@ index 0000000..58d66f1
 +typedef enum {
 +    /** \name Flags for DMA buffer dispatch */
 +    /*@{*/
-+    DRM_DMA_BLOCK        = 0x01, /**< 
++    DRM_DMA_BLOCK        = 0x01, /**<
 +				  * Block until buffer dispatched.
-+				  * 
++				  *
 +				  * \note the buffer may not yet have been
 +				  * processed by the hardware -- getting a
 +				  * hardware lock with the hardware quiescent
@@ -4533,7 +4533,7 @@ index 0000000..58d66f1
 +			        drmLockFlags flags);
 +extern int           drmUnlock(int fd, drm_context_t context);
 +extern int           drmFinish(int fd, int context, drmLockFlags flags);
-+extern int	     drmGetContextPrivateMapping(int fd, drm_context_t ctx_id, 
++extern int	     drmGetContextPrivateMapping(int fd, drm_context_t ctx_id,
 +						 drm_handle_t * handle);
 +
 +/* AGP/GART support: X server (root) only */
@@ -4619,7 +4619,7 @@ index 0000000..58d66f1
 +	int version;
 +
 +	void (*vblank_handler)(int fd,
-+			       unsigned int sequence, 
++			       unsigned int sequence,
 +			       unsigned int tv_sec,
 +			       unsigned int tv_usec,
 +			       void *user_data);
@@ -4806,7 +4806,7 @@ index 0000000..58d66f1
 +#endif
 diff --git a/third_party/drm/libdrm/moz.build b/third_party/drm/libdrm/moz.build
 new file mode 100644
-index 0000000..3b37b91
+index 0000000000..3b37b913e8
 --- /dev/null
 +++ b/third_party/drm/libdrm/moz.build
 @@ -0,0 +1,16 @@
@@ -4828,7 +4828,7 @@ index 0000000..3b37b91
 +FINAL_LIBRARY = 'xul'
 diff --git a/third_party/drm/libdrm/mozdrm.cpp b/third_party/drm/libdrm/mozdrm.cpp
 new file mode 100644
-index 0000000..b2fb59b
+index 0000000000..b2fb59be64
 --- /dev/null
 +++ b/third_party/drm/libdrm/mozdrm.cpp
 @@ -0,0 +1,66 @@
@@ -4900,7 +4900,7 @@ index 0000000..b2fb59b
 +}
 diff --git a/third_party/gbm/README b/third_party/gbm/README
 new file mode 100644
-index 0000000..4b6e2e8
+index 0000000000..4b6e2e8e02
 --- /dev/null
 +++ b/third_party/gbm/README
 @@ -0,0 +1,4 @@
@@ -4910,7 +4910,7 @@ index 0000000..4b6e2e8
 +libgbm directory stores headers of libgbm needed for build only.
 diff --git a/third_party/gbm/gbm/gbm.h b/third_party/gbm/gbm/gbm.h
 new file mode 100644
-index 0000000..a963ed7
+index 0000000000..a963ed78e4
 --- /dev/null
 +++ b/third_party/gbm/gbm/gbm.h
 @@ -0,0 +1,452 @@
@@ -4988,7 +4988,7 @@ index 0000000..a963ed7
 +/** Format of the allocated buffer */
 +enum gbm_bo_format {
 +   /** RGB with 8 bits per channel in a 32 bit value */
-+   GBM_BO_FORMAT_XRGB8888, 
++   GBM_BO_FORMAT_XRGB8888,
 +   /** ARGB with 8 bits per channel in a 32 bit value */
 +   GBM_BO_FORMAT_ARGB8888
 +};
@@ -5368,7 +5368,7 @@ index 0000000..a963ed7
 +#endif
 diff --git a/third_party/gbm/libgbm/moz.build b/third_party/gbm/libgbm/moz.build
 new file mode 100644
-index 0000000..0953d2f
+index 0000000000..0953d2f17a
 --- /dev/null
 +++ b/third_party/gbm/libgbm/moz.build
 @@ -0,0 +1,16 @@
@@ -5390,7 +5390,7 @@ index 0000000..0953d2f
 +FINAL_LIBRARY = 'xul'
 diff --git a/third_party/gbm/libgbm/mozgbm.cpp b/third_party/gbm/libgbm/mozgbm.cpp
 new file mode 100644
-index 0000000..bc024a1
+index 0000000000..bc024a11c0
 --- /dev/null
 +++ b/third_party/gbm/libgbm/mozgbm.cpp
 @@ -0,0 +1,66 @@
@@ -5460,8 +5460,81 @@ index 0000000..bc024a1
 +  }
 +  return gbm_device_destroy_fn(gbm);
 +}
+diff --git a/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build b/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
+index d961d726d4..93c901364f 100644
+--- a/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
++++ b/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
+@@ -76,6 +76,8 @@ if CONFIG["OS_TARGET"] == "Darwin":
+     LOCAL_INCLUDES += [
+         "/media/libyuv/libyuv/include/",
+         "/media/libyuv/libyuv/include/",
++        "/third_party/drm/",
++        "/third_party/gbm/",
+         "/third_party/pipewire/"
+     ]
+
+@@ -105,7 +107,8 @@ if CONFIG["OS_TARGET"] == "Linux":
+     LOCAL_INCLUDES += [
+         "/media/libyuv/libyuv/include/",
+         "/media/libyuv/libyuv/include/",
+-        "/third_party/pipewire/",
++        "/third_party/drm/",
++        "/third_party/gbm/",
+         "/third_party/pipewire/"
+     ]
+
+@@ -115,12 +118,16 @@ if CONFIG["OS_TARGET"] == "Linux":
+     ]
+
+     SOURCES += [
+-        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc"
++        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc"
++
+     ]
+
+     UNIFIED_SOURCES += [
+-        "/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc",
+-        "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc"
+@@ -156,15 +163,18 @@ if CONFIG["OS_TARGET"] == "OpenBSD":
+     ]
+
+     SOURCES += [
+-        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc"
++        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc"
+     ]
+
+     UNIFIED_SOURCES += [
+         "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_x11.cc",
+-        "/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_x11.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/linux/shared_x_display.cc",
+-        "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_x11.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/linux/window_finder_x11.cc",
+         "/third_party/libwebrtc/modules/desktop_capture/linux/window_list_utils.cc",
+@@ -206,6 +216,7 @@ if CONFIG["OS_TARGET"] == "WINNT":
+     LOCAL_INCLUDES += [
+         "/media/libyuv/libyuv/include/",
+         "/media/libyuv/libyuv/include/",
++        "/third_party/drm/"
+         "/third_party/pipewire/"
+     ]
+
 diff --git a/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc b/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc
-index c89896d..c8ef822 100644
+index c89896d5fd..c8ef822938 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc
 +++ b/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc
 @@ -14,6 +14,9 @@
@@ -5471,9 +5544,9 @@ index c89896d..c8ef822 100644
 +#if defined(WEBRTC_USE_PIPEWIRE)
 +#include "modules/desktop_capture/linux/shared_screencast_stream.h"
 +#endif
- 
+
  namespace webrtc {
- 
+
 @@ -35,6 +38,9 @@ DesktopCaptureOptions DesktopCaptureOptions::CreateDefault() {
  #if defined(WEBRTC_USE_X11)
    result.set_x_display(SharedXDisplay::CreateDefault());
@@ -5485,13 +5558,13 @@ index c89896d..c8ef822 100644
    result.set_configuration_monitor(new DesktopConfigurationMonitor());
    result.set_full_screen_window_detector(
 diff --git a/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h b/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h
-index ee0dd3a..ac56c8c 100644
+index ee0dd3ab40..ac56c8c1c1 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h
 +++ b/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h
 @@ -17,6 +17,10 @@
  #include "modules/desktop_capture/linux/shared_x_display.h"
  #endif
- 
+
 +#if defined(WEBRTC_USE_PIPEWIRE)
 +#include "modules/desktop_capture/linux/shared_screencast_stream.h"
 +#endif
@@ -5512,7 +5585,7 @@ index ee0dd3a..ac56c8c 100644
 +    screencast_stream_ = stream;
 +  }
  #endif
- 
+
   private:
  #if defined(WEBRTC_USE_X11)
    rtc::scoped_refptr<SharedXDisplay> x_display_;
@@ -5528,13 +5601,13 @@ index ee0dd3a..ac56c8c 100644
    rtc::scoped_refptr<DesktopConfigurationMonitor> configuration_monitor_;
    bool allow_iosurface_ = false;
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc b/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
-index 2fd3b1a..e4685fc 100644
+index 2fd3b1a575..e4685fc814 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 @@ -10,937 +10,67 @@
- 
+
  #include "modules/desktop_capture/linux/base_capturer_pipewire.h"
- 
+
 -#include <gio/gunixfdlist.h>
 -#include <glib-object.h>
 -#include <spa/param/format-utils.h>
@@ -5553,7 +5626,7 @@ index 2fd3b1a..e4685fc 100644
  #include "modules/desktop_capture/desktop_capturer.h"
  #include "rtc_base/checks.h"
  #include "rtc_base/logging.h"
- 
+
 -#if defined(WEBRTC_DLOPEN_PIPEWIRE)
 -#include "modules/desktop_capture/linux/pipewire_stubs.h"
 -
@@ -5563,7 +5636,7 @@ index 2fd3b1a..e4685fc 100644
 -#endif  // defined(WEBRTC_DLOPEN_PIPEWIRE)
 -
  namespace webrtc {
- 
+
 -const char kDesktopBusName[] = "org.freedesktop.portal.Desktop";
 -const char kDesktopObjectPath[] = "/org/freedesktop/portal/desktop";
 -const char kDesktopRequestObjectPath[] =
@@ -5639,7 +5712,7 @@ index 2fd3b1a..e4685fc 100644
 +  screencast_portal_ = std::make_unique<ScreenCastPortal>(
 +      ScreenCastPortal::CaptureSourceType::kAnyScreenContent, this);
  }
- 
+
 -// static
 -void BaseCapturerPipeWire::OnStreamParamChanged(void *data, uint32_t id,
 -                                                const struct spa_pod *format) {
@@ -5694,7 +5767,7 @@ index 2fd3b1a..e4685fc 100644
 -  struct pw_buffer *next_buffer;
 -  struct pw_buffer *buffer = nullptr;
 +BaseCapturerPipeWire::~BaseCapturerPipeWire() {}
- 
+
 -  next_buffer = pw_stream_dequeue_buffer(that->pw_stream_);
 -  while (next_buffer) {
 -    buffer = next_buffer;
@@ -5723,7 +5796,7 @@ index 2fd3b1a..e4685fc 100644
 -
 -  pw_stream_queue_buffer(that->pw_stream_, buffer);
  }
- 
+
 -BaseCapturerPipeWire::BaseCapturerPipeWire(CaptureSourceType source_type)
 -    : capture_source_type_(source_type) {}
 -
@@ -6444,25 +6517,25 @@ index 2fd3b1a..e4685fc 100644
 -
 -  that->InitPipeWire();
  }
- 
+
  void BaseCapturerPipeWire::Start(Callback* callback) {
    RTC_DCHECK(!callback_);
    RTC_DCHECK(callback);
- 
+
 -  InitPortal();
 -
    callback_ = callback;
 +
 +  screencast_portal_->Start();
  }
- 
+
  void BaseCapturerPipeWire::CaptureFrame() {
 -  if (portal_init_failed_) {
 +  if (capturer_failed_) {
      callback_->OnCaptureResult(Result::ERROR_PERMANENT, nullptr);
      return;
    }
- 
+
 -  webrtc::MutexLock lock(&current_frame_lock_);
 -  if (!current_frame_) {
 -    callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
@@ -6475,7 +6548,7 @@ index 2fd3b1a..e4685fc 100644
 -  }
 +  std::unique_ptr<DesktopFrame> frame =
 +      options_.screencast_stream()->CaptureFrame();
- 
+
 -  std::unique_ptr<DesktopFrame> result(new BasicDesktopFrame(frame_size));
 -  result->CopyPixelsFrom(
 -      current_frame_.get(), (frame_size.width() * BasicDesktopFrame::kBytesPerPixel),
@@ -6485,31 +6558,31 @@ index 2fd3b1a..e4685fc 100644
      callback_->OnCaptureResult(Result::ERROR_TEMPORARY, nullptr);
      return;
    }
- 
+
 -  // TODO(julien.isorce): http://crbug.com/945468. Set the icc profile on the
 -  // frame, see ScreenCapturerX11::CaptureFrame.
 +  // TODO(julien.isorce): http://crbug.com/945468. Set the icc profile on
 +  // the frame, see ScreenCapturerX11::CaptureFrame.
- 
+
 -  callback_->OnCaptureResult(Result::SUCCESS, std::move(result));
 +  callback_->OnCaptureResult(Result::SUCCESS, std::move(frame));
  }
- 
+
  // Keep in sync with defines at browser/actors/WebRTCParent.jsm
 @@ -953,31 +83,13 @@ void BaseCapturerPipeWire::CaptureFrame() {
  #define PIPEWIRE_NAME "####_PIPEWIRE_PORTAL_####"
- 
+
  bool BaseCapturerPipeWire::GetSourceList(SourceList* sources) {
 +  RTC_DCHECK(sources->size() == 0);
    sources->push_back({PIPEWIRE_ID, 0, PIPEWIRE_NAME});
    return true;
  }
- 
+
  bool BaseCapturerPipeWire::SelectSource(SourceId id) {
 -  // Screen selection is handled by the xdg-desktop-portal.
    return id == PIPEWIRE_ID;
  }
- 
+
 -// static
 -std::unique_ptr<DesktopCapturer>
 -BaseCapturerPipeWire::CreateRawScreenCapturer(
@@ -6530,13 +6603,13 @@ index 2fd3b1a..e4685fc 100644
 -
  }  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h b/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
-index af8e20c..5db09e0 100644
+index af8e20c84c..5db09e0244 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
 @@ -11,160 +11,39 @@
  #ifndef MODULES_DESKTOP_CAPTURE_LINUX_BASE_CAPTURER_PIPEWIRE_H_
  #define MODULES_DESKTOP_CAPTURE_LINUX_BASE_CAPTURER_PIPEWIRE_H_
- 
+
 -#include <gio/gio.h>
 -#define typeof __typeof__
 -#include <pipewire/pipewire.h>
@@ -6547,9 +6620,9 @@ index af8e20c..5db09e0 100644
 -#include "rtc_base/synchronization/mutex.h"
 +#include "modules/desktop_capture/linux/screencast_portal.h"
 +#include "modules/desktop_capture/linux/shared_screencast_stream.h"
- 
+
  namespace webrtc {
- 
+
 -class BaseCapturerPipeWire : public DesktopCapturer {
 +class BaseCapturerPipeWire : public DesktopCapturer,
 +                             public ScreenCastPortal::PortalNotifier {
@@ -6563,7 +6636,7 @@ index af8e20c..5db09e0 100644
 -  explicit BaseCapturerPipeWire(CaptureSourceType source_type);
 +  BaseCapturerPipeWire(const DesktopCaptureOptions& options);
    ~BaseCapturerPipeWire() override;
- 
+
 +  BaseCapturerPipeWire(const BaseCapturerPipeWire&) = delete;
 +  BaseCapturerPipeWire& operator=(const BaseCapturerPipeWire&) = delete;
 +
@@ -6572,7 +6645,7 @@ index af8e20c..5db09e0 100644
    void CaptureFrame() override;
    bool GetSourceList(SourceList* sources) override;
    bool SelectSource(SourceId id) override;
- 
+
 -  static std::unique_ptr<DesktopCapturer> CreateRawScreenCapturer(
 -      const DesktopCaptureOptions& options);
 -
@@ -6583,7 +6656,7 @@ index af8e20c..5db09e0 100644
 +                                 uint32_t stream_node_id,
 +                                 int fd) override;
 +  void OnScreenCastSessionClosed() override;
- 
+
   private:
 -  // PipeWire types -->
 -  pw_context* pw_context_ = nullptr;
@@ -6707,11 +6780,11 @@ index af8e20c..5db09e0 100644
 +  bool capturer_failed_ = false;
 +  std::unique_ptr<ScreenCastPortal> screencast_portal_;
  };
- 
+
  }  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs b/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs
 new file mode 100644
-index 0000000..226979f
+index 0000000000..226979fe16
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs
 @@ -0,0 +1,11 @@
@@ -6728,7 +6801,7 @@ index 0000000..226979f
 +void drmFreeDevices(drmDevicePtr devices[], int count);
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc b/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc
 new file mode 100644
-index 0000000..de63c2a
+index 0000000000..de63c2a0b8
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc
 @@ -0,0 +1,695 @@
@@ -7429,7 +7502,7 @@ index 0000000..de63c2a
 +}  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h b/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h
 new file mode 100644
-index 0000000..b755d8b
+index 0000000000..b755d8ba37
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h
 @@ -0,0 +1,68 @@
@@ -7503,7 +7576,7 @@ index 0000000..b755d8b
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_EGL_DMABUF_H_
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc b/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc
 new file mode 100644
-index 0000000..09dea24
+index 0000000000..09dea242b3
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc
 @@ -0,0 +1,56 @@
@@ -7565,7 +7638,7 @@ index 0000000..09dea24
 +}  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h b/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h
 new file mode 100644
-index 0000000..9b9ccf7
+index 0000000000..9b9ccf74f8
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h
 @@ -0,0 +1,41 @@
@@ -7611,31 +7684,31 @@ index 0000000..9b9ccf7
 +
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_MOUSE_CURSOR_MONITOR_PIPEWIRE_H_
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs b/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs
-index 3e21e9d..06a97b8 100644
+index 3e21e9dc07..06a97b8f29 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs
 @@ -7,38 +7,44 @@
  //------------------------------------------------
- 
+
  // core.h
 -void pw_core_destroy(pw_core *core);
 -pw_type *pw_core_get_type(pw_core *core);
 -pw_core * pw_core_new(pw_loop *main_loop, pw_properties *props);
 +int pw_core_disconnect(pw_core *core);
- 
+
  // loop.h
  void pw_loop_destroy(pw_loop *loop);
 -pw_loop * pw_loop_new(pw_properties *properties);
 +pw_loop * pw_loop_new(const spa_dict *props);
 +
- 
+
  // pipewire.h
  void pw_init(int *argc, char **argv[]);
 +const char* pw_get_library_version();
- 
+
  // properties.h
  pw_properties * pw_properties_new_string(const char *args);
- 
+
 -// remote.h
 -void pw_remote_add_listener(pw_remote *remote, spa_hook *listener, const pw_remote_events *events, void *data);
 -int pw_remote_connect_fd(pw_remote *remote, int fd);
@@ -7655,7 +7728,7 @@ index 3e21e9d..06a97b8 100644
  int pw_stream_queue_buffer(pw_stream *stream, pw_buffer *buffer);
  int pw_stream_set_active(pw_stream *stream, bool active);
 +int pw_stream_update_params(pw_stream *stream, const spa_pod **params, uint32_t n_params);
- 
+
  // thread-loop.h
  void pw_thread_loop_destroy(pw_thread_loop *loop);
 -pw_thread_loop * pw_thread_loop_new(pw_loop *loop, const char *name);
@@ -7674,18 +7747,18 @@ index 3e21e9d..06a97b8 100644
 +pw_core * pw_context_connect(pw_context *context, pw_properties *properties, size_t user_data_size);
 +pw_core * pw_context_connect_fd(pw_context *context, int fd, pw_properties *properties, size_t user_data_size);
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment b/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment
-index 9d7dbd2..06ae18d 100644
+index 9d7dbd27c5..06ae18dfd4 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment
 @@ -5,4 +5,5 @@ extern "C" {
- 
+
  #include <pipewire/pipewire.h>
- 
+
 +#include <xf86drm.h>
  }
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc b/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc
 new file mode 100644
-index 0000000..51ca57a
+index 0000000000..51ca57adc1
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc
 @@ -0,0 +1,57 @@
@@ -7748,7 +7821,7 @@ index 0000000..51ca57a
 +}  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h b/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h
 new file mode 100644
-index 0000000..bf77855
+index 0000000000..bf77855f95
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h
 @@ -0,0 +1,65 @@
@@ -7819,7 +7892,7 @@ index 0000000..bf77855
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SCOPED_GLIB_H_
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc b/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc
 deleted file mode 100644
-index 3813d69..0000000
+index 3813d697bb..0000000000
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc
 +++ /dev/null
 @@ -1,28 +0,0 @@
@@ -7853,7 +7926,7 @@ index 3813d69..0000000
 -}  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.h b/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.h
 deleted file mode 100644
-index 66dcd68..0000000
+index 66dcd680e0..0000000000
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.h
 +++ /dev/null
 @@ -1,33 +0,0 @@
@@ -7892,7 +7965,7 @@ index 66dcd68..0000000
 -#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SCREEN_CAPTURER_PIPEWIRE_H_
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc b/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc
 new file mode 100644
-index 0000000..306e984
+index 0000000000..306e984207
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc
 @@ -0,0 +1,532 @@
@@ -8430,7 +8503,7 @@ index 0000000..306e984
 +}  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h b/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h
 new file mode 100644
-index 0000000..7da218e
+index 0000000000..7da218ed78
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h
 @@ -0,0 +1,169 @@
@@ -8605,10 +8678,10 @@ index 0000000..7da218e
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SCREENCAST_PORTAL_H_
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc b/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc
 new file mode 100644
-index 0000000..c6ba661
+index 0000000000..04284ebcb7
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc
-@@ -0,0 +1,872 @@
+@@ -0,0 +1,892 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
 + *
@@ -9318,6 +9391,16 @@ index 0000000..c6ba661
 +      plane_datas.push_back(data);
 +    }
 +
++    // When importing DMA-BUFs, we use the stride (number of bytes from one row
++    // of pixels in the buffer) provided by PipeWire. The stride from PipeWire
++    // is given by the graphics driver and some drivers might add some
++    // additional padding for memory layout optimizations so not everytime the
++    // stride is equal to BYTES_PER_PIXEL x WIDTH. This is fine, because during
++    // the import we will use OpenGL and same graphics driver so it will be able
++    // to work with the stride it provided, but later on when we work with
++    // images we get from DMA-BUFs we will need to update the stride to be equal
++    // to BYTES_PER_PIXEL x WIDTH as that's the size of the DesktopFrame we
++    // allocate for each captured frame.
 +    src_unique_ptr = egl_dmabuf_->ImageFromDmaBuf(
 +        desktop_size_, spa_video_format_.format, plane_datas, modifier_);
 +    if (src_unique_ptr) {
@@ -9326,7 +9409,7 @@ index 0000000..c6ba661
 +      RTC_LOG(LS_ERROR) << "Dropping DMA-BUF modifier: " << modifier_
 +                        << " and trying to renegotiate stream parameters";
 +
-+      if (pw_client_version_ >= kDropSingleModifierMinVersion) {
++      if (pw_server_version_ >= kDropSingleModifierMinVersion) {
 +        modifiers_.erase(
 +            std::remove(modifiers_.begin(), modifiers_.end(), modifier_),
 +            modifiers_.end());
@@ -9392,8 +9475,19 @@ index 0000000..c6ba661
 +                          ? video_metadata->region.position.x
 +                          : 0;
 +
-+  uint8_t* updated_src = src + (spa_buffer->datas[0].chunk->stride * y_offset) +
-+                         (kBytesPerPixel * x_offset);
++  const uint32_t frame_stride = kBytesPerPixel * desktop_size_.width();
++  uint32_t stride = spa_buffer->datas[0].chunk->stride;
++
++  if (spa_buffer->datas[0].type == SPA_DATA_DmaBuf && stride > frame_stride) {
++    // When DMA-BUFs are used, sometimes spa_buffer->stride we get might
++    // contain additional padding, but after we import the buffer, the stride
++    // we used is no longer relevant and we should just calculate it based on
++    // width. For more context see https://crbug.com/1333304.
++    stride = frame_stride;
++  }
++
++  uint8_t* updated_src =
++      src + (stride * y_offset) + (kBytesPerPixel * x_offset);
 +
 +  webrtc::MutexLock lock(&queue_lock_);
 +
@@ -9415,8 +9509,7 @@ index 0000000..c6ba661
 +  }
 +
 +  queue_.current_frame()->CopyPixelsFrom(
-+      updated_src,
-+      (spa_buffer->datas[0].chunk->stride - (kBytesPerPixel * x_offset)),
++      updated_src, (stride - (kBytesPerPixel * x_offset)),
 +      DesktopRect::MakeWH(video_size_.width(), video_size_.height()));
 +
 +  if (spa_video_format_.format == SPA_VIDEO_FORMAT_RGBx ||
@@ -9483,7 +9576,7 @@ index 0000000..c6ba661
 +}  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h b/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h
 new file mode 100644
-index 0000000..72411e5
+index 0000000000..72411e5607
 --- /dev/null
 +++ b/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h
 @@ -0,0 +1,71 @@
@@ -9560,7 +9653,7 @@ index 0000000..72411e5
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SHARED_SCREENCAST_STREAM_H_
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc b/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc
 deleted file mode 100644
-index c43a1f1..0000000
+index c43a1f1a0c..0000000000
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc
 +++ /dev/null
 @@ -1,28 +0,0 @@
@@ -9594,7 +9687,7 @@ index c43a1f1..0000000
 -}  // namespace webrtc
 diff --git a/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.h b/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.h
 deleted file mode 100644
-index 7f184ef..0000000
+index 7f184ef299..0000000000
 --- a/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.h
 +++ /dev/null
 @@ -1,33 +0,0 @@
@@ -9632,19 +9725,19 @@ index 7f184ef..0000000
 -
 -#endif  // MODULES_DESKTOP_CAPTURE_LINUX_WINDOW_CAPTURER_PIPEWIRE_H_
 diff --git a/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc b/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc
-index e569f6e..3bb51e8 100644
+index e569f6ef35..4a23ba59b2 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc
 +++ b/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc
 @@ -17,6 +17,10 @@
  #include "modules/desktop_capture/linux/mouse_cursor_monitor_x11.h"
  #endif  // defined(WEBRTC_USE_X11)
- 
+
 +#if defined(WEBRTC_USE_PIPEWIRE)
 +#include "modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h"
 +#endif  // defined(WEBRTC_USE_PIPEWIRE)
 +
  namespace webrtc {
- 
+
  // static
 @@ -44,6 +48,13 @@ MouseCursorMonitor* MouseCursorMonitor::CreateForScreen(
  // static
@@ -9661,17 +9754,17 @@ index e569f6e..3bb51e8 100644
    return MouseCursorMonitorX11::Create(options);
  #else
 diff --git a/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc b/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc
-index 57a2002..b44ae35 100644
+index 57a2002ac7..b44ae35292 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc
 +++ b/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc
 @@ -14,7 +14,7 @@
  #include "modules/desktop_capture/desktop_capturer.h"
- 
+
  #if defined(WEBRTC_USE_PIPEWIRE)
 -#include "modules/desktop_capture/linux/screen_capturer_pipewire.h"
 +#include "modules/desktop_capture/linux/base_capturer_pipewire.h"
  #endif  // defined(WEBRTC_USE_PIPEWIRE)
- 
+
  #if defined(WEBRTC_USE_X11)
 @@ -28,7 +28,7 @@ std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawScreenCapturer(
      const DesktopCaptureOptions& options) {
@@ -9681,19 +9774,19 @@ index 57a2002..b44ae35 100644
 +    return std::make_unique<BaseCapturerPipeWire>(options);
    }
  #endif  // defined(WEBRTC_USE_PIPEWIRE)
- 
+
 diff --git a/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc b/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc
-index ed03ba0..3bc6577 100644
+index ed03ba0291..3bc6577ca5 100644
 --- a/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc
 +++ b/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc
 @@ -14,7 +14,7 @@
  #include "modules/desktop_capture/desktop_capturer.h"
- 
+
  #if defined(WEBRTC_USE_PIPEWIRE)
 -#include "modules/desktop_capture/linux/window_capturer_pipewire.h"
 +#include "modules/desktop_capture/linux/base_capturer_pipewire.h"
  #endif  // defined(WEBRTC_USE_PIPEWIRE)
- 
+
  #if defined(WEBRTC_USE_X11)
 @@ -28,7 +28,7 @@ std::unique_ptr<DesktopCapturer> DesktopCapturer::CreateRawWindowCapturer(
      const DesktopCaptureOptions& options) {
@@ -9703,15 +9796,15 @@ index ed03ba0..3bc6577 100644
 +    return std::make_unique<BaseCapturerPipeWire>(options);
    }
  #endif  // defined(WEBRTC_USE_PIPEWIRE)
- 
+
 diff --git a/third_party/moz.build b/third_party/moz.build
-index 1941c11..f804531 100644
+index 8cf6f5d9f6..33d4dc29c7 100644
 --- a/third_party/moz.build
 +++ b/third_party/moz.build
-@@ -49,6 +49,12 @@ with Files("libwebrtc/**"):
+@@ -58,6 +58,12 @@ with Files("libwebrtc/**"):
  with Files("pipewire/**"):
      BUG_COMPONENT = ("Core", "WebRTC")
- 
+
 +with Files("drm/**"):
 +    BUG_COMPONENT = ("Core", "WebRTC")
 +
@@ -9720,9 +9813,9 @@ index 1941c11..f804531 100644
 +
  with Files('rlbox_wasm2c_sandbox/**'):
      BUG_COMPONENT = ('Firefox Build System', 'General')
- 
+
 diff --git a/third_party/pipewire/libpipewire/mozpipewire.cpp b/third_party/pipewire/libpipewire/mozpipewire.cpp
-index 1ecfc31..fbeeb8e 100644
+index 1ecfc3196a..fbeeb8e5a7 100644
 --- a/third_party/pipewire/libpipewire/mozpipewire.cpp
 +++ b/third_party/pipewire/libpipewire/mozpipewire.cpp
 @@ -69,11 +69,13 @@ static int (*pw_stream_connect_fn)(struct pw_stream *stream,
@@ -9747,7 +9840,7 @@ index 1ecfc31..fbeeb8e 100644
 +static void (*pw_thread_loop_signal_fn)(struct pw_thread_loop *loop, bool wait_for_accept);
  static struct pw_properties* (*pw_properties_new_string_fn)(const char *str);
 +static const char* (*pw_get_library_version_fn)();
- 
+
  bool IsPwLibraryLoaded() {
    static bool isLoaded =
 @@ -99,6 +104,7 @@ bool IsPwLibraryLoaded() {
@@ -9767,7 +9860,7 @@ index 1ecfc31..fbeeb8e 100644
 +          IS_FUNC_LOADED(pw_thread_loop_wait_fn) &&
 +          IS_FUNC_LOADED(pw_properties_new_string_fn) &&
 +          IS_FUNC_LOADED(pw_get_library_version_fn));
- 
+
    return isLoaded;
  }
 @@ -136,6 +145,7 @@ bool LoadPWLibrary() {
@@ -9787,12 +9880,12 @@ index 1ecfc31..fbeeb8e 100644
      GET_FUNC(pw_properties_new_string, pwLib);
 +    GET_FUNC(pw_get_library_version, pwLib);
    }
- 
+
    return IsPwLibraryLoaded();
 @@ -242,6 +255,15 @@ pw_stream_connect(struct pw_stream *stream,
                                params, n_params);
  }
- 
+
 +int
 +pw_stream_disconnect(struct pw_stream *stream)
 +{
@@ -9808,7 +9901,7 @@ index 1ecfc31..fbeeb8e 100644
 @@ -356,6 +378,23 @@ pw_thread_loop_unlock(struct pw_thread_loop *loop)
    return pw_thread_loop_unlock_fn(loop);
  }
- 
+
 +void
 +pw_thread_loop_signal(struct pw_thread_loop *loop, bool wait_for_accept)
 +{
@@ -9826,13 +9919,13 @@ index 1ecfc31..fbeeb8e 100644
 +  }
 +  return pw_thread_loop_wait_fn(loop);
 +}
- 
+
  struct pw_properties *
  pw_properties_new_string(const char *str)
 @@ -366,3 +405,12 @@ pw_properties_new_string(const char *str)
    return pw_properties_new_string_fn(str);
  }
- 
+
 +const char*
 +pw_get_library_version()
 +{
@@ -9842,75 +9935,3 @@ index 1ecfc31..fbeeb8e 100644
 +  return pw_get_library_version_fn();
 +}
 +
-diff -up firefox-101.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build.libwebrtc-screen-cast-sync firefox-101.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
---- firefox-101.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build.libwebrtc-screen-cast-sync	2022-05-27 01:17:03.000000000 +0200
-+++ firefox-101.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build	2022-06-02 12:48:28.316640076 +0200
-@@ -76,6 +76,8 @@ if CONFIG["OS_TARGET"] == "Darwin":
-     LOCAL_INCLUDES += [
-         "/media/libyuv/libyuv/include/",
-         "/media/libyuv/libyuv/include/",
-+        "/third_party/drm/",
-+        "/third_party/gbm/",
-         "/third_party/pipewire/"
-     ]
-
-@@ -105,7 +107,8 @@ if CONFIG["OS_TARGET"] == "Linux":
-     LOCAL_INCLUDES += [
-         "/media/libyuv/libyuv/include/",
-         "/media/libyuv/libyuv/include/",
--        "/third_party/pipewire/",
-+        "/third_party/drm/",
-+        "/third_party/gbm/",
-         "/third_party/pipewire/"
-     ]
-
-@@ -115,12 +118,16 @@ if CONFIG["OS_TARGET"] == "Linux":
-     ]
-
-     SOURCES += [
--        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc"
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc"
-+
-     ]
-
-     UNIFIED_SOURCES += [
--        "/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc",
--        "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc"
-@@ -156,15 +163,18 @@ if CONFIG["OS_TARGET"] == "OpenBSD":
-     ]
-
-     SOURCES += [
--        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc"
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc",
-+        "/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc"
-     ]
-
-     UNIFIED_SOURCES += [
-         "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_x11.cc",
--        "/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_x11.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/linux/shared_x_display.cc",
--        "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_x11.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/linux/window_finder_x11.cc",
-         "/third_party/libwebrtc/modules/desktop_capture/linux/window_list_utils.cc",
-@@ -206,6 +216,7 @@ if CONFIG["OS_TARGET"] == "WINNT":
-     LOCAL_INCLUDES += [
-         "/media/libyuv/libyuv/include/",
-         "/media/libyuv/libyuv/include/",
-+        "/third_party/drm/"
-         "/third_party/pipewire/"
-     ]
-

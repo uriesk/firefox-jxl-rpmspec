@@ -169,7 +169,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        102.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1112,6 +1112,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jul 11 2022 Jan Grulich <jgrulich@redhat.com> - 102.0-2
+- Backport upstream fixes to WebRTC for screensharing on Wayland
+
 * Tue Jun 28 2022 Martin Stransky <stransky@redhat.com>- 102.0-1
 - Updated to 102.0
 - Applied patch from https://src.fedoraproject.org/rpms/firefox/pull-request/43
