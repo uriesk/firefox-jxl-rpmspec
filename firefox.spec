@@ -225,6 +225,7 @@ Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch75:        mozilla-1773336.patch
+Patch76:        D147721-python3.11.diff
 
 # Test patches
 # Generate without context by
@@ -505,6 +506,7 @@ This package contains results of tests executed during build.
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 # Needs for new cbindgen only
 %patch75 -p1 -b .1773336
+%patch76 -p1 -b .D147721-python3.11.diff
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
