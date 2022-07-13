@@ -18,6 +18,7 @@
 %global debug_build       0
 
 %global system_nss        1
+%global system_libevent   1
 %global build_with_asan   0
 %global test_on_wayland   1
 
@@ -34,7 +35,7 @@ ExcludeArch: s390x
 
 # Disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1966949
-%if 0%{?fedora} > 33
+%if 0%{?fedora} > 36
 ExcludeArch: armv7hl
 %endif
 
@@ -169,7 +170,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        102.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -262,10 +263,14 @@ Patch444:        D148946.diff
 Patch445:        D149238.diff
 Patch446:        mozilla-1758948.patch
 Patch447:        mozilla-1774271.patch
+Patch448:        firefox-102.0-pref-print.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
 Patch602:        mozilla-1516803.patch
+
+# a patch for compiling with gcc on arm (from debian)
+Patch990:        work-around-GCC-ICE-on-arm.patch
 
 # Backported WebRTC changes for PipeWire/Wayland screen sharing support
 Patch1000:       libwebrtc-screen-cast-sync.patch
@@ -335,6 +340,9 @@ Requires:       pciutils-libs
 %if %{?system_nss}
 Requires:       nspr >= %{nspr_build_version}
 Requires:       nss >= %{nss_build_version}
+%endif
+%if %{?system_libevent}
+BuildRequires:  pkgconfig(libevent)
 %endif
 BuildRequires:  python3-devel
 BuildRequires:  python3-setuptools
@@ -533,6 +541,7 @@ This package contains results of tests executed during build.
 %patch445 -p1 -b .D149238.diff
 %patch446 -p1 -b .mozbz#1758948
 %patch447 -p1 -b .mozbz#1774271
+%patch448 -p1 -b .pref-print
 
 # PGO patches
 %if %{build_with_pgo}
@@ -541,6 +550,8 @@ This package contains results of tests executed during build.
 %patch602 -p1 -b .1516803
 %endif
 %endif
+
+%patch990 -p1 -b .work-around-GCC-ICE-on-arm
 
 %patch1000 -p1 -b .libwebrtc-screen-cast-sync
 
@@ -563,6 +574,10 @@ echo "ac_add_options --with-system-nss" >> .mozconfig
 %else
 echo "ac_add_options --without-system-nspr" >> .mozconfig
 echo "ac_add_options --without-system-nss" >> .mozconfig
+%endif
+
+%if %{?system_libevent}
+echo "ac_add_options --with-system-libevent" >> .mozconfig
 %endif
 
 %if %{?system_ffi}
@@ -722,6 +737,27 @@ export RUSTFLAGS="-Cdebuginfo=0"
 %if %{build_with_asan}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fsanitize=address -Dxmalloc=myxmalloc"
 MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address -ldl"
+%endif
+
+%ifarch %{arm}
+# disable hard-coded LTO due to RAM constraints
+%{__sed} -i '/cargo_rustc_flags += -Clto/d' config/makefiles/rust.mk
+%{__sed} -i '/RUSTFLAGS += -Cembed-bitcode=yes/d' config/makefiles/rust.mk
+%{__sed} -i 's/codegen-units=1/codegen-units=16/' config/makefiles/rust.mk
+
+# make sure "-g0" is the last flag so there's no debug info
+MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -g0"
+
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1738845
+# should not be needed anymore with firefox 103
+echo "ac_add_options --disable-webrtc" >> .mozconfig
+
+# personal preferences
+echo "ac_add_options --disable-webspeech" >> .mozconfig
+echo "ac_add_options --disable-synth-speechd" >> .mozconfig
+echo "ac_add_options --disable-accessibility" >> .mozconfig
+echo "ac_add_options --disable-parental-controls" >> .mozconfig
+echo "ac_add_options --disable-printing" >> .mozconfig
 %endif
 
 # We don't wantfirefox to use CK_GCM_PARAMS_V3 in nss
@@ -1112,6 +1148,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Jul 13 2022 Martin Stransky <stransky@redhat.com>- 102.0-3
+- Update preference logging.
+- Added ARM fixes by Gabriel Hojda.
+
 * Mon Jul 11 2022 Jan Grulich <jgrulich@redhat.com> - 102.0-2
 - Backport upstream fixes to WebRTC for screensharing on Wayland
 
