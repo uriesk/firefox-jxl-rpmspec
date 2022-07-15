@@ -35,7 +35,7 @@ ExcludeArch: s390x
 
 # Disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1966949
-%if 0%{?fedora} > 36
+%if 0%{?fedora} > 35
 ExcludeArch: armv7hl
 %endif
 
