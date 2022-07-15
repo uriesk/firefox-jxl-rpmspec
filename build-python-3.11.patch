@@ -1,7 +1,7 @@
-diff -up firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py.python-311 firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py
---- firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py.python-311	2022-07-15 14:23:10.890868155 +0200
-+++ firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py	2022-07-15 14:42:17.308836813 +0200
-@@ -1572,7 +1572,7 @@ class IDLParser(object):
+diff -up firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py.build-python-3.11 firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py
+--- firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py.build-python-3.11	2022-06-23 09:10:31.000000000 +0200
++++ firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py	2022-07-15 15:56:52.101296928 +0200
+@@ -1572,13 +1572,13 @@ class IDLParser(object):
      t_ignore = " \t"
  
      def t_multilinecomment(self, t):
@@ -10,3 +10,10 @@ diff -up firefox-102.0/xpcom/idl-parser/xpidl/xpidl.py.python-311 firefox-102.0/
          t.lexer.lineno += t.value.count("\n")
          if t.value.startswith("/**"):
              self._doccomments.append(t.value)
+ 
+     def t_singlelinecomment(self, t):
+-        r"(?m)//.*?$"
++        r"(?m://.*?$)"
+ 
+     def t_IID(self, t):
+         return t
