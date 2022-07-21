@@ -224,7 +224,6 @@ Patch55:        firefox-testing.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
-Patch76:        D147721-python3.11.diff
 Patch77:        build-python-3.11.patch
 
 # Test patches
@@ -504,7 +503,6 @@ This package contains results of tests executed during build.
 %patch53 -p1 -b .firefox-gcc-build
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
-%patch76 -p1 -b .D147721-python3.11.diff
 %patch77 -p1 -b .build-python-3.11
 
 # Test patches
