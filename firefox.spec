@@ -248,21 +248,6 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        mozilla-1663844.patch
 Patch415:        mozilla-1670333.patch
-
-# VA-API fixes
-Patch423:        D147874.diff
-
-# NVIDIA mzbz#1735929
-Patch440:        D147635.diff
-Patch441:        D147636.diff
-Patch442:        D147637.diff
-
-# More upstream fixes
-Patch443:        D149135.diff
-Patch444:        D148946.diff
-Patch445:        D149238.diff
-Patch446:        mozilla-1758948.patch
-Patch447:        mozilla-1774271.patch
 Patch448:        firefox-102.0-pref-print.patch
 
 # PGO/LTO patches
@@ -273,7 +258,7 @@ Patch602:        mozilla-1516803.patch
 Patch990:        work-around-GCC-ICE-on-arm.patch
 
 # Backported WebRTC changes for PipeWire/Wayland screen sharing support
-Patch1000:       libwebrtc-screen-cast-sync.patch
+Patch1000:       libwebrtc-screen-cast-sync-1.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -526,20 +511,6 @@ This package contains results of tests executed during build.
 %patch408 -p1 -b .1663844
 %patch415 -p1 -b .1670333
 
-# VA-API fixes
-%patch423 -p1 -b .D147874.diff
-
-# NVIDIA mzbz#1735929
-%patch440 -p1 -b .D147635.diff
-%patch441 -p1 -b .D147636.diff
-%patch442 -p1 -b .D147637.diff
-%patch443 -p1 -b .D149135.diff
-
-# More VA-API fixes
-%patch444 -p1 -b .D148946.diff
-%patch445 -p1 -b .D149238.diff
-%patch446 -p1 -b .mozbz#1758948
-%patch447 -p1 -b .mozbz#1774271
 %patch448 -p1 -b .pref-print
 
 # PGO patches
@@ -1147,6 +1118,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul 26 2022 Martin Stransky <stransky@redhat.com>- 103.0-1
+- Update to 103.0
+
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 102.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
