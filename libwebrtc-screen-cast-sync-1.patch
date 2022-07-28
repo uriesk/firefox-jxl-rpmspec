@@ -9740,3 +9740,15 @@ diff -up firefox-103.0/third_party/pipewire/libpipewire/mozpipewire.cpp.libwebrt
 +  return pw_get_library_version_fn();
 +}
 +
+diff -up firefox-103.0/dom/media/webrtc/moz.build.webrtc firefox-103.0/dom/media/webrtc/moz.build
+--- firefox-103.0/dom/media/webrtc/moz.build.webrtc	2022-07-28 11:41:19.923012830 +0200
++++ firefox-103.0/dom/media/webrtc/moz.build	2022-07-28 11:41:56.314779745 +0200
+@@ -85,6 +85,8 @@ if CONFIG["MOZ_WEBRTC_SIGNALING"]:
+ 
+     if CONFIG["MOZ_WIDGET_TOOLKIT"] == "gtk":
+         DIRS += ["/third_party/pipewire/libpipewire"]
++        DIRS += ["/third_party/drm/libdrm"]
++        DIRS += ["/third_party/gbm/libgbm"]
+ 
+     # Avoid warnings from third-party code that we can not modify.
+     if CONFIG["CC_TYPE"] == "clang-cl":
