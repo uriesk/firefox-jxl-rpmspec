@@ -1,6 +1,18 @@
+diff -up firefox-103.0/dom/media/webrtc/moz.build.libwebrtc-screen-cast-sync firefox-103.0/dom/media/webrtc/moz.build
+--- firefox-103.0/dom/media/webrtc/moz.build.libwebrtc-screen-cast-sync	2022-07-18 20:44:03.000000000 +0200
++++ firefox-103.0/dom/media/webrtc/moz.build	2022-07-28 11:45:30.321408998 +0200
+@@ -85,6 +85,8 @@ if CONFIG["MOZ_WEBRTC_SIGNALING"]:
+ 
+     if CONFIG["MOZ_WIDGET_TOOLKIT"] == "gtk":
+         DIRS += ["/third_party/pipewire/libpipewire"]
++        DIRS += ["/third_party/drm/libdrm"]
++        DIRS += ["/third_party/gbm/libgbm"]
+ 
+     # Avoid warnings from third-party code that we can not modify.
+     if CONFIG["CC_TYPE"] == "clang-cl":
 diff -up firefox-103.0/third_party/drm/drm/drm_fourcc.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/drm/drm/drm_fourcc.h
---- firefox-103.0/third_party/drm/drm/drm_fourcc.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.428095335 +0200
-+++ firefox-103.0/third_party/drm/drm/drm_fourcc.h	2022-07-26 16:30:19.428095335 +0200
+--- firefox-103.0/third_party/drm/drm/drm_fourcc.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.317409023 +0200
++++ firefox-103.0/third_party/drm/drm/drm_fourcc.h	2022-07-28 11:45:30.317409023 +0200
 @@ -0,0 +1,1377 @@
 +/*
 + * Copyright 2011 Intel Corporation
@@ -1380,8 +1392,8 @@ diff -up firefox-103.0/third_party/drm/drm/drm_fourcc.h.libwebrtc-screen-cast-sy
 +
 +#endif /* DRM_FOURCC_H */
 diff -up firefox-103.0/third_party/drm/drm/drm.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/drm/drm/drm.h
---- firefox-103.0/third_party/drm/drm/drm.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.427095302 +0200
-+++ firefox-103.0/third_party/drm/drm/drm.h	2022-07-26 16:30:19.427095302 +0200
+--- firefox-103.0/third_party/drm/drm/drm.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.317409023 +0200
++++ firefox-103.0/third_party/drm/drm/drm.h	2022-07-28 11:45:30.317409023 +0200
 @@ -0,0 +1,1193 @@
 +/*
 + * Header for the Direct Rendering Manager
@@ -2577,8 +2589,8 @@ diff -up firefox-103.0/third_party/drm/drm/drm.h.libwebrtc-screen-cast-sync fire
 +
 +#endif
 diff -up firefox-103.0/third_party/drm/drm/drm_mode.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/drm/drm/drm_mode.h
---- firefox-103.0/third_party/drm/drm/drm_mode.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.428095335 +0200
-+++ firefox-103.0/third_party/drm/drm/drm_mode.h	2022-07-26 16:30:19.428095335 +0200
+--- firefox-103.0/third_party/drm/drm/drm_mode.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/drm/drm/drm_mode.h	2022-07-28 11:45:30.317409023 +0200
 @@ -0,0 +1,1217 @@
 +/*
 + * Copyright (c) 2007 Dave Airlie <airlied@linux.ie>
@@ -3798,8 +3810,8 @@ diff -up firefox-103.0/third_party/drm/drm/drm_mode.h.libwebrtc-screen-cast-sync
 +
 +#endif
 diff -up firefox-103.0/third_party/drm/drm/xf86drm.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/drm/drm/xf86drm.h
---- firefox-103.0/third_party/drm/drm/xf86drm.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.428095335 +0200
-+++ firefox-103.0/third_party/drm/drm/xf86drm.h	2022-07-26 16:30:19.428095335 +0200
+--- firefox-103.0/third_party/drm/drm/xf86drm.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/drm/drm/xf86drm.h	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,966 @@
 +/**
 + * \file xf86drm.h
@@ -4768,8 +4780,8 @@ diff -up firefox-103.0/third_party/drm/drm/xf86drm.h.libwebrtc-screen-cast-sync 
 +
 +#endif
 diff -up firefox-103.0/third_party/drm/libdrm/moz.build.libwebrtc-screen-cast-sync firefox-103.0/third_party/drm/libdrm/moz.build
---- firefox-103.0/third_party/drm/libdrm/moz.build.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.428095335 +0200
-+++ firefox-103.0/third_party/drm/libdrm/moz.build	2022-07-26 16:30:19.428095335 +0200
+--- firefox-103.0/third_party/drm/libdrm/moz.build.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/drm/libdrm/moz.build	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,16 @@
 +# -*- Mode: python; indent-tabs-mode: nil; tab-width: 40 -*-
 +# vim: set filetype=python:
@@ -4788,8 +4800,8 @@ diff -up firefox-103.0/third_party/drm/libdrm/moz.build.libwebrtc-screen-cast-sy
 +
 +FINAL_LIBRARY = 'xul'
 diff -up firefox-103.0/third_party/drm/libdrm/mozdrm.cpp.libwebrtc-screen-cast-sync firefox-103.0/third_party/drm/libdrm/mozdrm.cpp
---- firefox-103.0/third_party/drm/libdrm/mozdrm.cpp.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.428095335 +0200
-+++ firefox-103.0/third_party/drm/libdrm/mozdrm.cpp	2022-07-26 16:30:19.428095335 +0200
+--- firefox-103.0/third_party/drm/libdrm/mozdrm.cpp.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/drm/libdrm/mozdrm.cpp	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,66 @@
 +/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* vim:expandtab:shiftwidth=4:tabstop=4:
@@ -4858,16 +4870,16 @@ diff -up firefox-103.0/third_party/drm/libdrm/mozdrm.cpp.libwebrtc-screen-cast-s
 +  return drmFreeDevices_fn(devices, count);
 +}
 diff -up firefox-103.0/third_party/drm/README.libwebrtc-screen-cast-sync firefox-103.0/third_party/drm/README
---- firefox-103.0/third_party/drm/README.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.427095302 +0200
-+++ firefox-103.0/third_party/drm/README	2022-07-26 16:30:19.427095302 +0200
+--- firefox-103.0/third_party/drm/README.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/drm/README	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,4 @@
 +Libdrm is a drm library wrapper needed to build and run Firefox with
 +Pipewire support on Linux (https://gitlab.freedesktop.org/mesa/drm).
 +
 +libdrm directory stores headers of libdrm needed for build only.
 diff -up firefox-103.0/third_party/gbm/gbm/gbm.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/gbm/gbm/gbm.h
---- firefox-103.0/third_party/gbm/gbm/gbm.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.429095367 +0200
-+++ firefox-103.0/third_party/gbm/gbm/gbm.h	2022-07-26 16:30:19.429095367 +0200
+--- firefox-103.0/third_party/gbm/gbm/gbm.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/gbm/gbm/gbm.h	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,452 @@
 +/*
 + * Copyright © 2011 Intel Corporation
@@ -5322,8 +5334,8 @@ diff -up firefox-103.0/third_party/gbm/gbm/gbm.h.libwebrtc-screen-cast-sync fire
 +
 +#endif
 diff -up firefox-103.0/third_party/gbm/libgbm/moz.build.libwebrtc-screen-cast-sync firefox-103.0/third_party/gbm/libgbm/moz.build
---- firefox-103.0/third_party/gbm/libgbm/moz.build.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.429095367 +0200
-+++ firefox-103.0/third_party/gbm/libgbm/moz.build	2022-07-26 16:30:19.429095367 +0200
+--- firefox-103.0/third_party/gbm/libgbm/moz.build.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/gbm/libgbm/moz.build	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,16 @@
 +# -*- Mode: python; indent-tabs-mode: nil; tab-width: 40 -*-
 +# vim: set filetype=python:
@@ -5342,8 +5354,8 @@ diff -up firefox-103.0/third_party/gbm/libgbm/moz.build.libwebrtc-screen-cast-sy
 +
 +FINAL_LIBRARY = 'xul'
 diff -up firefox-103.0/third_party/gbm/libgbm/mozgbm.cpp.libwebrtc-screen-cast-sync firefox-103.0/third_party/gbm/libgbm/mozgbm.cpp
---- firefox-103.0/third_party/gbm/libgbm/mozgbm.cpp.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.429095367 +0200
-+++ firefox-103.0/third_party/gbm/libgbm/mozgbm.cpp	2022-07-26 16:30:19.429095367 +0200
+--- firefox-103.0/third_party/gbm/libgbm/mozgbm.cpp.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/gbm/libgbm/mozgbm.cpp	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,66 @@
 +/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* vim:expandtab:shiftwidth=4:tabstop=4:
@@ -5412,8 +5424,8 @@ diff -up firefox-103.0/third_party/gbm/libgbm/mozgbm.cpp.libwebrtc-screen-cast-s
 +  return gbm_device_destroy_fn(gbm);
 +}
 diff -up firefox-103.0/third_party/gbm/README.libwebrtc-screen-cast-sync firefox-103.0/third_party/gbm/README
---- firefox-103.0/third_party/gbm/README.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.428095335 +0200
-+++ firefox-103.0/third_party/gbm/README	2022-07-26 16:30:19.428095335 +0200
+--- firefox-103.0/third_party/gbm/README.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.318409017 +0200
++++ firefox-103.0/third_party/gbm/README	2022-07-28 11:45:30.318409017 +0200
 @@ -0,0 +1,4 @@
 +Libgbm is a gbm library wrapper needed to build and run Firefox with
 +Pipewire support on Linux (https://gitlab.freedesktop.org/mesa/gbm).
@@ -5421,7 +5433,7 @@ diff -up firefox-103.0/third_party/gbm/README.libwebrtc-screen-cast-sync firefox
 +libgbm directory stores headers of libgbm needed for build only.
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build.libwebrtc-screen-cast-sync	2022-07-18 20:44:36.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build	2022-07-26 16:34:44.176870636 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_generic_gn/moz.build	2022-07-29 11:28:39.473827919 +0200
 @@ -26,6 +26,8 @@ LOCAL_INCLUDES += [
      "/ipc/chromium/src",
      "/media/libyuv/",
@@ -5453,7 +5465,21 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_cap
          "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_x11.cc",
          "/third_party/libwebrtc/modules/desktop_capture/linux/window_finder_x11.cc",
          "/third_party/libwebrtc/modules/desktop_capture/linux/window_list_utils.cc",
-@@ -300,12 +305,12 @@ if CONFIG["CPU_ARCH"] == "aarch64" and C
+@@ -241,7 +246,12 @@ if CONFIG["CPU_ARCH"] == "arm":
+     DEFINES["_GNU_SOURCE"] = True
+ 
+     SOURCES += [
+-        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc"
++        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc"
+     ]
+ 
+     UNIFIED_SOURCES += [
+@@ -300,12 +310,12 @@ if CONFIG["CPU_ARCH"] == "aarch64" and C
      DEFINES["_GNU_SOURCE"] = True
  
      SOURCES += [
@@ -5472,7 +5498,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_cap
      ]
  
  if CONFIG["CPU_ARCH"] == "x86" and CONFIG["OS_TARGET"] == "Linux":
-@@ -318,12 +323,12 @@ if CONFIG["CPU_ARCH"] == "x86" and CONFI
+@@ -318,12 +328,12 @@ if CONFIG["CPU_ARCH"] == "x86" and CONFI
      DEFINES["_GNU_SOURCE"] = True
  
      SOURCES += [
@@ -5491,16 +5517,28 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_cap
      ]
  
  if CONFIG["CPU_ARCH"] == "x86_64" and CONFIG["OS_TARGET"] == "Linux":
-@@ -332,12 +337,12 @@ if CONFIG["CPU_ARCH"] == "x86_64" and CO
+@@ -332,12 +342,26 @@ if CONFIG["CPU_ARCH"] == "x86_64" and CO
      DEFINES["_GNU_SOURCE"] = True
  
      SOURCES += [
 -        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc"
--    ]
--
++        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc",
++        "/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc"
+     ]
+ 
 -    UNIFIED_SOURCES += [
 -        "/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc",
 -        "/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc"
++if CONFIG["CPU_ARCH"] == "ppc64le" and CONFIG["OS_TARGET"] == "Linux":
++
++    DEFINES["WEBRTC_USE_PIPEWIRE"] = True
++    DEFINES["_GNU_SOURCE"] = True
++
++    SOURCES += [
 +        "/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc",
 +        "/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc",
 +        "/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc",
@@ -5512,7 +5550,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_cap
  if CONFIG["CPU_ARCH"] == "aarch64" and CONFIG["MOZ_X11"] == "1" and CONFIG["OS_TARGET"] == "Linux":
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc.libwebrtc-screen-cast-sync	2022-07-18 20:44:36.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc	2022-07-26 16:30:19.429095367 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.cc	2022-07-28 11:45:30.318409017 +0200
 @@ -14,6 +14,9 @@
  #elif defined(WEBRTC_WIN)
  #include "modules/desktop_capture/win/full_screen_win_application_handler.h"
@@ -5535,7 +5573,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_cap
    result.set_full_screen_window_detector(
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h.libwebrtc-screen-cast-sync	2022-07-18 20:44:32.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h	2022-07-26 16:30:19.429095367 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_capture_options.h	2022-07-28 11:45:30.319409011 +0200
 @@ -17,6 +17,10 @@
  #include "modules/desktop_capture/linux/shared_x_display.h"
  #endif
@@ -5577,7 +5615,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/desktop_cap
    bool allow_iosurface_ = false;
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc.libwebrtc-screen-cast-sync	2022-07-18 20:44:26.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc	2022-07-26 16:30:19.429095367 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.cc	2022-07-28 11:45:30.319409011 +0200
 @@ -10,937 +10,67 @@
  
  #include "modules/desktop_capture/linux/base_capturer_pipewire.h"
@@ -6581,7 +6619,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_
  }  // namespace webrtc
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h.libwebrtc-screen-cast-sync	2022-07-18 20:44:26.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h	2022-07-26 16:30:19.429095367 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_capturer_pipewire.h	2022-07-28 11:45:30.319409011 +0200
 @@ -11,160 +11,39 @@
  #ifndef MODULES_DESKTOP_CAPTURE_LINUX_BASE_CAPTURER_PIPEWIRE_H_
  #define MODULES_DESKTOP_CAPTURE_LINUX_BASE_CAPTURER_PIPEWIRE_H_
@@ -6759,8 +6797,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/base_
  
  }  // namespace webrtc
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.429095367 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs	2022-07-26 16:30:19.429095367 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.319409011 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/drm.sigs	2022-07-28 11:45:30.319409011 +0200
 @@ -0,0 +1,11 @@
 +// Copyright 2021 The WebRTC project authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can be
@@ -6774,8 +6812,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/drm.s
 +int drmGetDevices2(uint32_t flags, drmDevicePtr devices[], int max_devices);
 +void drmFreeDevices(drmDevicePtr devices[], int count);
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.319409011 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.cc	2022-07-28 11:45:30.319409011 +0200
 @@ -0,0 +1,695 @@
 +/*
 + *  Copyright 2021 The WebRTC project authors. All Rights Reserved.
@@ -7473,8 +7511,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_d
 +
 +}  // namespace webrtc
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.319409011 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_dmabuf.h	2022-07-28 11:45:30.319409011 +0200
 @@ -0,0 +1,68 @@
 +/*
 + *  Copyright 2021 The WebRTC project authors. All Rights Reserved.
@@ -7545,8 +7583,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/egl_d
 +
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_EGL_DMABUF_H_
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.319409011 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.cc	2022-07-28 11:45:30.319409011 +0200
 @@ -0,0 +1,56 @@
 +/*
 + *  Copyright (c) 2022 The WebRTC project authors. All Rights Reserved.
@@ -7605,8 +7643,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse
 +
 +}  // namespace webrtc
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.319409011 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse_cursor_monitor_pipewire.h	2022-07-28 11:45:30.319409011 +0200
 @@ -0,0 +1,41 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
@@ -7651,7 +7689,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/mouse
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_MOUSE_CURSOR_MONITOR_PIPEWIRE_H_
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs.libwebrtc-screen-cast-sync	2022-07-18 20:44:36.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs	2022-07-26 16:30:19.430095401 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire.sigs	2022-07-28 11:45:30.319409011 +0200
 @@ -7,38 +7,44 @@
  //------------------------------------------------
  
@@ -7713,7 +7751,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipew
 +pw_core * pw_context_connect_fd(pw_context *context, int fd, pw_properties *properties, size_t user_data_size);
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment.libwebrtc-screen-cast-sync	2022-07-18 20:44:36.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment	2022-07-26 16:30:19.430095401 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipewire_stub_header.fragment	2022-07-28 11:45:30.320409004 +0200
 @@ -5,4 +5,5 @@ extern "C" {
  
  #include <pipewire/pipewire.h>
@@ -7721,8 +7759,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/pipew
 +#include <xf86drm.h>
  }
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.320409004 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.cc	2022-07-28 11:45:30.320409004 +0200
 @@ -0,0 +1,57 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
@@ -7782,8 +7820,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scope
 +
 +}  // namespace webrtc
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.320409004 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scoped_glib.h	2022-07-28 11:45:30.320409004 +0200
 @@ -0,0 +1,65 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
@@ -7850,11 +7888,9 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scope
 +}  // namespace webrtc
 +
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SCOPED_GLIB_H_
-diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.cc
-diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screen_capturer_pipewire.h
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.320409004 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.cc	2022-07-28 11:45:30.320409004 +0200
 @@ -0,0 +1,532 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
@@ -8389,8 +8425,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scree
 +
 +}  // namespace webrtc
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.430095401 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.320409004 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/screencast_portal.h	2022-07-28 11:45:30.320409004 +0200
 @@ -0,0 +1,169 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
@@ -8562,8 +8598,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scree
 +
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SCREENCAST_PORTAL_H_
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.431095434 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc	2022-07-26 16:30:19.430095401 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.320409004 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.cc	2022-07-28 11:45:30.320409004 +0200
 @@ -0,0 +1,892 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
@@ -9458,8 +9494,8 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/share
 +
 +}  // namespace webrtc
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h
---- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h.libwebrtc-screen-cast-sync	2022-07-26 16:30:19.431095434 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h	2022-07-26 16:30:19.431095434 +0200
+--- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h.libwebrtc-screen-cast-sync	2022-07-28 11:45:30.320409004 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/shared_screencast_stream.h	2022-07-28 11:45:30.320409004 +0200
 @@ -0,0 +1,71 @@
 +/*
 + *  Copyright 2022 The WebRTC project authors. All Rights Reserved.
@@ -9532,11 +9568,9 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/share
 +}  // namespace webrtc
 +
 +#endif  // MODULES_DESKTOP_CAPTURE_LINUX_SHARED_SCREENCAST_STREAM_H_
-diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.cc
-diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.h.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/window_capturer_pipewire.h
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc.libwebrtc-screen-cast-sync	2022-07-18 20:44:26.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc	2022-07-26 16:30:19.431095434 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/mouse_cursor_monitor_linux.cc	2022-07-28 11:45:30.320409004 +0200
 @@ -17,6 +17,10 @@
  #include "modules/desktop_capture/linux/mouse_cursor_monitor_x11.h"
  #endif  // defined(WEBRTC_USE_X11)
@@ -9564,7 +9598,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/mouse_curso
  #else
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc.libwebrtc-screen-cast-sync	2022-07-18 20:44:33.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc	2022-07-26 16:30:19.431095434 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/screen_capturer_linux.cc	2022-07-28 11:45:30.320409004 +0200
 @@ -14,7 +14,7 @@
  #include "modules/desktop_capture/desktop_capturer.h"
  
@@ -9585,7 +9619,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/screen_capt
  
 diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc.libwebrtc-screen-cast-sync firefox-103.0/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc
 --- firefox-103.0/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc.libwebrtc-screen-cast-sync	2022-07-18 20:44:26.000000000 +0200
-+++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc	2022-07-26 16:30:19.431095434 +0200
++++ firefox-103.0/third_party/libwebrtc/modules/desktop_capture/window_capturer_linux.cc	2022-07-28 11:45:30.320409004 +0200
 @@ -14,7 +14,7 @@
  #include "modules/desktop_capture/desktop_capturer.h"
  
@@ -9606,7 +9640,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/window_capt
  
 diff -up firefox-103.0/third_party/moz.build.libwebrtc-screen-cast-sync firefox-103.0/third_party/moz.build
 --- firefox-103.0/third_party/moz.build.libwebrtc-screen-cast-sync	2022-07-18 20:44:36.000000000 +0200
-+++ firefox-103.0/third_party/moz.build	2022-07-26 16:30:19.431095434 +0200
++++ firefox-103.0/third_party/moz.build	2022-07-28 11:45:30.321408998 +0200
 @@ -61,6 +61,12 @@ with Files("libwebrtc/**"):
  with Files("pipewire/**"):
      BUG_COMPONENT = ("Core", "WebRTC")
@@ -9622,7 +9656,7 @@ diff -up firefox-103.0/third_party/moz.build.libwebrtc-screen-cast-sync firefox-
  
 diff -up firefox-103.0/third_party/pipewire/libpipewire/mozpipewire.cpp.libwebrtc-screen-cast-sync firefox-103.0/third_party/pipewire/libpipewire/mozpipewire.cpp
 --- firefox-103.0/third_party/pipewire/libpipewire/mozpipewire.cpp.libwebrtc-screen-cast-sync	2022-07-18 20:44:36.000000000 +0200
-+++ firefox-103.0/third_party/pipewire/libpipewire/mozpipewire.cpp	2022-07-26 16:30:19.431095434 +0200
++++ firefox-103.0/third_party/pipewire/libpipewire/mozpipewire.cpp	2022-07-28 11:45:30.321408998 +0200
 @@ -69,11 +69,13 @@ static int (*pw_stream_connect_fn)(struc
                                  enum pw_stream_flags flags,
                                  const struct spa_pod **params,
@@ -9740,15 +9774,3 @@ diff -up firefox-103.0/third_party/pipewire/libpipewire/mozpipewire.cpp.libwebrt
 +  return pw_get_library_version_fn();
 +}
 +
-diff -up firefox-103.0/dom/media/webrtc/moz.build.webrtc firefox-103.0/dom/media/webrtc/moz.build
---- firefox-103.0/dom/media/webrtc/moz.build.webrtc	2022-07-28 11:41:19.923012830 +0200
-+++ firefox-103.0/dom/media/webrtc/moz.build	2022-07-28 11:41:56.314779745 +0200
-@@ -85,6 +85,8 @@ if CONFIG["MOZ_WEBRTC_SIGNALING"]:
- 
-     if CONFIG["MOZ_WIDGET_TOOLKIT"] == "gtk":
-         DIRS += ["/third_party/pipewire/libpipewire"]
-+        DIRS += ["/third_party/drm/libdrm"]
-+        DIRS += ["/third_party/gbm/libgbm"]
- 
-     # Avoid warnings from third-party code that we can not modify.
-     if CONFIG["CC_TYPE"] == "clang-cl":
