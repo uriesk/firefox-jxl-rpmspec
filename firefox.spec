@@ -523,7 +523,9 @@ This package contains results of tests executed during build.
 
 %patch990 -p1 -b .work-around-GCC-ICE-on-arm
 
+%ifnarch ppc64le
 %patch1000 -p1 -b .libwebrtc-screen-cast-sync
+%endif
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
