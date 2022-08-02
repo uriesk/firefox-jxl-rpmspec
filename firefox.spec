@@ -33,6 +33,10 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
+# Temporary disabled due to webrtc build failures
+# https://bugzilla.redhat.com/show_bug.cgi?id=2113850
+ExcludeArch: ppc64le
+
 # Disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1966949
 %if 0%{?fedora} > 35
@@ -1122,6 +1126,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Jul 26 2022 Martin Stransky <stransky@redhat.com>- 103.0-1
 - Update to 103.0
+- Disabled ppc64le due to webrtc build failures (rhbz#2113850)
 
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 102.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
