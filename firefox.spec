@@ -1117,7 +1117,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Aug 4 2022 Martin Stransky <stransky@redhat.com>- 103.0.1-2
+* Thu Aug 4 2022 Martin Stransky <stransky@redhat.com>- 103.0.1-2
 - Added arm build fixes by Gabriel Hojda
 
 * Tue Aug 2 2022 Martin Stransky <stransky@redhat.com>- 103.0.1-1
