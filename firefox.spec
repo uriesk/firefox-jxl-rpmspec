@@ -250,6 +250,7 @@ Patch224:        mozilla-1170092.patch
 Patch226:        rhbz-1354671.patch
 Patch228:        disable-openh264-download.patch
 Patch229:        firefox-nss-addon-hack.patch
+Patch230:        firefox-enable-vaapi.patch
 
 # Upstream patches
 Patch402:        mozilla-1196777.patch
@@ -513,6 +514,7 @@ This package contains results of tests executed during build.
 %endif
 %patch228 -p1 -b .disable-openh264-download
 %patch229 -p1 -b .firefox-nss-addon-hack
+%patch230 -p1 -b .firefox-enable-vaapi
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
@@ -1119,6 +1121,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Thu Aug 4 2022 Martin Stransky <stransky@redhat.com>- 103.0.1-2
 - Added arm build fixes by Gabriel Hojda
+- Enable VA-API (rhbz#2115253)
 
 * Tue Aug 2 2022 Martin Stransky <stransky@redhat.com>- 103.0.1-1
 - Update to 103.0.1
