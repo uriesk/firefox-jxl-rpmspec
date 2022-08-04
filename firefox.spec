@@ -39,7 +39,7 @@ ExcludeArch: ppc64le
 
 # Disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1966949
-%if 0%{?fedora} > 35
+%if 0%{?fedora} > 36
 ExcludeArch: armv7hl
 %endif
 
@@ -51,6 +51,10 @@ ExcludeArch: aarch64
 
 %ifarch armv7hl
 %global create_debuginfo  0
+
+# always use clang for arm builds
+%global toolchain         clang
+%global build_with_clang  1
 %endif
 
 # Temporary disabled due to
@@ -174,7 +178,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        103.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -527,7 +531,7 @@ This package contains results of tests executed during build.
 
 %patch990 -p1 -b .work-around-GCC-ICE-on-arm
 
-%ifnarch ppc64le
+%ifnarch ppc64le %{arm}
 %patch1000 -p1 -b .libwebrtc-screen-cast-sync
 %endif
 
@@ -723,17 +727,6 @@ MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address -ldl"
 
 # make sure "-g0" is the last flag so there's no debug info
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -g0"
-
-# https://bugzilla.mozilla.org/show_bug.cgi?id=1738845
-# should not be needed anymore with firefox 103
-echo "ac_add_options --disable-webrtc" >> .mozconfig
-
-# personal preferences
-echo "ac_add_options --disable-webspeech" >> .mozconfig
-echo "ac_add_options --disable-synth-speechd" >> .mozconfig
-echo "ac_add_options --disable-accessibility" >> .mozconfig
-echo "ac_add_options --disable-parental-controls" >> .mozconfig
-echo "ac_add_options --disable-printing" >> .mozconfig
 %endif
 
 # We don't wantfirefox to use CK_GCM_PARAMS_V3 in nss
@@ -1124,6 +1117,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Aug 4 2022 Martin Stransky <stransky@redhat.com>- 103.0.1-2
+- Added arm build fixes by Gabriel Hojda
+
 * Tue Aug 2 2022 Martin Stransky <stransky@redhat.com>- 103.0.1-1
 - Update to 103.0.1
 

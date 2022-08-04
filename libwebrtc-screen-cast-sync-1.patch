@@ -7847,7 +7847,7 @@ diff -up firefox-103.0/third_party/libwebrtc/modules/desktop_capture/linux/scope
 + public:
 +  Scoped() {}
 +  explicit Scoped(T* val) { ptr_ = val; }
-+  ~Scoped() { RTC_DCHECK_NOTREACHED(); }
++  ~Scoped() { RTC_NOTREACHED(); }
 +
 +  T* operator->() const { return ptr_; }
 +
