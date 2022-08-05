@@ -157,8 +157,11 @@ ExcludeArch: aarch64
 %if !%{release_build}
 %global pre_tag .npgo
 %endif
+# Don't use 'clang' suffix on arm
+%ifnarch %{arm}
 %if %{build_with_clang}
 %global pre_tag .clang
+%endif
 %endif
 %if %{build_with_asan}
 %global pre_tag .asan
