@@ -28,11 +28,6 @@
 %global build_with_clang 0
 %endif
 
-# There are still build problems on s390x, see
-# https://koji.fedoraproject.org/koji/taskinfo?taskID=55048351
-# https://bugzilla.redhat.com/show_bug.cgi?id=1897522
-ExcludeArch: s390x
-
 %ifarch armv7hl
 %global create_debuginfo  0
 
@@ -1071,6 +1066,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 - Drop unused patches
 - Use build_ldflags
 - Drop hardened_build option
+- Re-enable s390x builds
 
 * Tue Aug 23 2022 Jan Horak <jhorak@redhat.com> - 104.0-4
 - Rebuild due to ppc64le fixes
