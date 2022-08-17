@@ -177,7 +177,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        104.0
-Release:        4%{?pre_tag}%{?dist}
+Release:        5%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -760,27 +760,10 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 export CCACHE_DISABLE=1
 %endif
 
-MOZ_SMP_FLAGS=-j1
-# On x86_64 architectures, Mozilla can build up to 4 jobs at once in parallel,
-# however builds tend to fail on other arches when building in parallel.
-%ifarch %{ix86} s390x %{arm} aarch64
-[ -z "$RPM_BUILD_NCPUS" ] && \
-     RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
-[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
-%endif
-%ifarch x86_64 ppc ppc64 ppc64le
-[ -z "$RPM_BUILD_NCPUS" ] && \
-     RPM_BUILD_NCPUS="`/usr/bin/getconf _NPROCESSORS_ONLN`"
-[ "$RPM_BUILD_NCPUS" -ge 2 ] && MOZ_SMP_FLAGS=-j2
-[ "$RPM_BUILD_NCPUS" -ge 4 ] && MOZ_SMP_FLAGS=-j4
-[ "$RPM_BUILD_NCPUS" -ge 8 ] && MOZ_SMP_FLAGS=-j8
-[ "$RPM_BUILD_NCPUS" -ge 16 ] && MOZ_SMP_FLAGS=-j16
-[ "$RPM_BUILD_NCPUS" -ge 24 ] && MOZ_SMP_FLAGS=-j24
-[ "$RPM_BUILD_NCPUS" -ge 32 ] && MOZ_SMP_FLAGS=-j32
-[ "$RPM_BUILD_NCPUS" -ge 64 ] && MOZ_SMP_FLAGS=-j64
-%endif
+# Require 2 GB of RAM per CPU core
+%constrain_build -m 2048
 
-echo "mk_add_options MOZ_MAKE_FLAGS=\"$MOZ_SMP_FLAGS\"" >> .mozconfig
+echo "mk_add_options MOZ_MAKE_FLAGS=\"-j%{_smp_build_ncpus}\"" >> .mozconfig
 echo "mk_add_options MOZ_SERVICES_SYNC=1" >> .mozconfig
 echo "export STRIP=/bin/true" >> .mozconfig
 #export MACH_USE_SYSTEM_PYTHON=1
@@ -1122,6 +1105,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Aug 23 2022 Kalev Lember <klember@redhat.com> - 104.0-5
+- Use constrain_build macro to simplify parallel make handling
+
 * Tue Aug 23 2022 Jan Horak <jhorak@redhat.com> - 104.0-4
 - Rebuild due to ppc64le fixes
 
