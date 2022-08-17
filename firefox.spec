@@ -33,18 +33,6 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
-# Disabled due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=1966949
-%if 0%{?fedora} > 36
-ExcludeArch: armv7hl
-%endif
-
-# Disabled due to
-# https://bugzilla.redhat.com/show_bug.cgi?id=2019160
-%if 0%{?fedora} == 33
-ExcludeArch: aarch64
-%endif
-
 %ifarch armv7hl
 %global create_debuginfo  0
 
@@ -96,7 +84,7 @@ ExcludeArch: aarch64
 %global build_with_pgo    0
 %endif
 # Big endian platforms
-%ifarch ppc64 s390x
+%ifarch s390x
 %global big_endian        1
 %endif
 
@@ -214,7 +202,6 @@ Source45:       run-wayland-compositor
 
 # Build patches
 Patch3:         mozilla-build-arm.patch
-Patch25:        rhbz-1219542-s390-build.patch
 Patch32:        build-rust-ppc64le.patch
 Patch35:        build-ppc-jit.patch
 # Fixing missing cacheFlush when JS_CODEGEN_NONE is used (s390x)
@@ -391,10 +378,7 @@ BuildRequires:  liberation-mono-fonts
 BuildRequires:  liberation-sans-fonts
 BuildRequires:  liberation-serif-fonts
 # ----------------------------------
-# Missing on f32
-%if 0%{?fedora} > 33
 BuildRequires:  google-carlito-fonts
-%endif
 BuildRequires:  google-droid-sans-fonts
 BuildRequires:  google-noto-fonts-common
 BuildRequires:  google-noto-cjk-fonts-common
@@ -413,10 +397,7 @@ BuildRequires:  lohit-tamil-fonts
 BuildRequires:  lohit-telugu-fonts
 # ----------------------------------
 BuildRequires:  paktype-naskh-basic-fonts
-# faild to build in Koji / f32
-%if 0%{?fedora} > 33
 BuildRequires:  pt-sans-fonts
-%endif
 BuildRequires:  smc-meera-fonts
 BuildRequires:  stix-fonts
 BuildRequires:  abattis-cantarell-fonts
@@ -485,9 +466,6 @@ This package contains results of tests executed during build.
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
 
-%ifarch s390
-%patch25 -p1 -b .rhbz-1219542-s390
-%endif
 %patch40 -p1 -b .aarch64-skia
 %if 0%{?disable_elfhack}
 %patch41 -p1 -b .disable-elfhack
@@ -612,7 +590,7 @@ echo "ac_add_options --with-system-libvpx" >> .mozconfig
 echo "ac_add_options --without-system-libvpx" >> .mozconfig
 %endif
 
-%ifarch s390 s390x
+%ifarch s390x
 echo "ac_add_options --disable-jit" >> .mozconfig
 %endif
 
@@ -676,34 +654,24 @@ MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 # for some sources
 # Explicitly force the hardening flags for Firefox so it passes the checksec test;
 # See also https://fedoraproject.org/wiki/Changes/Harden_All_Packages
-%if 0%{?fedora} < 30
-MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -Wformat-security -Wformat -Werror=format-security"
-%else
 # Workaround for mozbz#1531309
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-Werror=format-security//')
-%endif
-%if 0%{?fedora} > 30
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fpermissive"
-%endif
 %if %{?hardened_build}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
 %endif
 %if %{?debug_build}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-O2//')
 %endif
-%ifarch s390
-MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g1/')
 # If MOZ_DEBUG_FLAGS is empty, firefox's build will default it to "-g" which
 # overrides the -g1 from line above and breaks building on s390/arm
 # (OOM when linking, rhbz#1238225)
-export MOZ_DEBUG_FLAGS=" "
-%endif
 %ifarch %{arm} %{ix86}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g0/')
 export MOZ_DEBUG_FLAGS=" "
 %endif
 %if !%{build_with_clang}
-%ifarch s390 ppc aarch64 %{ix86}
+%ifarch aarch64 %{ix86}
 MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
 %ifarch %{arm}
@@ -1107,6 +1075,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Tue Aug 23 2022 Kalev Lember <klember@redhat.com> - 104.0-5
 - Use constrain_build macro to simplify parallel make handling
+- Drop obsolete build conditionals
 
 * Tue Aug 23 2022 Jan Horak <jhorak@redhat.com> - 104.0-4
 - Rebuild due to ppc64le fixes
