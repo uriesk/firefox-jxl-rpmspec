@@ -181,7 +181,7 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        104.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -236,6 +236,7 @@ Patch61:        firefox-glibc-dynstack.patch
 Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch77:        build-python-3.11.patch
+Patch78:        D154024.diff
 
 # Test patches
 # Generate without context by
@@ -500,6 +501,7 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch77 -p1 -b .build-python-3.11
+%patch78 -p1 -b .D154024
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -1119,6 +1121,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Aug 17 2022 Martin Stransky <stransky@redhat.com>- 104.0-2
+- Added build fixes
+
 * Tue Aug 16 2022 Martin Stransky <stransky@redhat.com>- 104.0-1
 - Updated to 104.0
 
