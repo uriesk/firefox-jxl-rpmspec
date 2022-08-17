@@ -65,7 +65,6 @@ ExcludeArch: s390x
 %else
 %global system_libvpx     0
 %endif
-%global hardened_build    1
 %global system_jpeg       1
 %global disable_elfhack   1
 %global use_bundled_cbindgen  1
@@ -657,9 +656,6 @@ MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 # Workaround for mozbz#1531309
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-Werror=format-security//')
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fpermissive"
-%if %{?hardened_build}
-MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fPIC -Wl,-z,relro -Wl,-z,now"
-%endif
 %if %{?debug_build}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-O2//')
 %endif
@@ -1074,6 +1070,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 - Drop obsolete build conditionals
 - Drop unused patches
 - Use build_ldflags
+- Drop hardened_build option
 
 * Tue Aug 23 2022 Jan Horak <jhorak@redhat.com> - 104.0-4
 - Rebuild due to ppc64le fixes
