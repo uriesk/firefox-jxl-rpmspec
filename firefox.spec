@@ -670,19 +670,15 @@ MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-O2//')
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-g/-g0/')
 export MOZ_DEBUG_FLAGS=" "
 %endif
+MOZ_LINK_FLAGS="%{build_ldflags}"
 %if !%{build_with_clang}
 %ifarch aarch64 %{ix86}
-MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
+MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
 %ifarch %{arm}
-MOZ_LINK_FLAGS="-Wl,--no-keep-memory -Wl,--strip-debug"
+MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -Wl,--no-keep-memory -Wl,--strip-debug"
 echo "ac_add_options --enable-linker=gold" >> .mozconfig
 %endif
-%endif
-%if 0%{?flatpak}
-# Make sure the linker can find libraries in /app/lib64 as we don't use
-# __global_ldflags that normally sets this.
-MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -L%{_libdir}"
 %endif
 %ifarch %{arm} %{ix86} %{s390x}
 export RUSTFLAGS="-Cdebuginfo=0"
@@ -1077,6 +1073,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 - Use constrain_build macro to simplify parallel make handling
 - Drop obsolete build conditionals
 - Drop unused patches
+- Use build_ldflags
 
 * Tue Aug 23 2022 Jan Horak <jhorak@redhat.com> - 104.0-4
 - Rebuild due to ppc64le fixes
