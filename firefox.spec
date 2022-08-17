@@ -1076,6 +1076,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 * Tue Aug 23 2022 Kalev Lember <klember@redhat.com> - 104.0-5
 - Use constrain_build macro to simplify parallel make handling
 - Drop obsolete build conditionals
+- Drop unused patches
 
 * Tue Aug 23 2022 Jan Horak <jhorak@redhat.com> - 104.0-4
 - Rebuild due to ppc64le fixes
