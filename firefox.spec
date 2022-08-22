@@ -181,12 +181,12 @@ ExcludeArch: aarch64
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        104.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220816.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220822.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1121,6 +1121,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Aug 22 2022 Eike Rathke <erack@redhat.com> - 104.0-3
+- Update to 104.0 respin
+
 * Wed Aug 17 2022 Martin Stransky <stransky@redhat.com>- 104.0-2
 - Added build fixes
 
