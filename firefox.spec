@@ -33,10 +33,6 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=1897522
 ExcludeArch: s390x
 
-# Temporary disabled due to webrtc build failures
-# https://bugzilla.redhat.com/show_bug.cgi?id=2113850
-ExcludeArch: ppc64le
-
 # Disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1966949
 %if 0%{?fedora} > 36
@@ -271,6 +267,9 @@ Patch990:        work-around-GCC-ICE-on-arm.patch
 
 # Backported WebRTC changes for PipeWire/Wayland screen sharing support
 Patch1000:       libwebrtc-screen-cast-sync-1.patch
+
+# Work around broken moz.build file on ppc64le (mozb#1779545, mozb#1775202)
+Patch1100:       mozilla-1775202.patch
 
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
@@ -538,6 +537,8 @@ This package contains results of tests executed during build.
 %ifnarch ppc64le %{arm}
 %patch1000 -p1 -b .libwebrtc-screen-cast-sync
 %endif
+
+%patch1100 -p1 -b .ppc-mobzuild
 
 %{__rm} -f .mozconfig
 %{__cp} %{SOURCE10} .mozconfig
