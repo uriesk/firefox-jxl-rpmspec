@@ -671,7 +671,7 @@ MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -Wl,--no-keep-memory -Wl,--strip-debug"
 echo "ac_add_options --enable-linker=gold" >> .mozconfig
 %endif
 %endif
-%ifarch %{arm} %{ix86} %{s390x}
+%ifarch %{arm} %{ix86} s390x
 export RUSTFLAGS="-Cdebuginfo=0"
 %endif
 %if %{build_with_asan}
