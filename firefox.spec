@@ -158,13 +158,13 @@
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        104.0
-Release:        5%{?pre_tag}%{?dist}
+Version:        104.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20220822.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20220830.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1084,6 +1084,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Aug 30 2022 Martin Stransky <stransky@redhat.com>- 104.0.1-1
+- Updated to 104.0.1
+
 * Tue Aug 23 2022 Kalev Lember <klember@redhat.com> - 104.0-5
 - Use constrain_build macro to simplify parallel make handling
 - Drop obsolete build conditionals
