@@ -272,4 +272,5 @@ Exec=firefox --private-window %u
 Name=Open the Profile Manager
 Name[cs]=Správa profilů
 Name[de]=Profilverwaltung öffnen
+Name[fr]=Ouvrir le gestionnaire de profils
 Exec=firefox --ProfileManager
