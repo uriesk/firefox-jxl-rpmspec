@@ -1084,7 +1084,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Sep 22 2022 Martin Stransky <stransky@redhat.com>- 105.0.1-1
+* Thu Sep 22 2022 Martin Stransky <stransky@redhat.com>- 105.0.1-1
 - Updated to 105.0.1
 
 * Tue Sep 20 2022 Martin Stransky <stransky@redhat.com>- 105.0-1
