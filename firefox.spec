@@ -1090,7 +1090,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Fri Sep 30 Martin Stransky <stransky@redhat.com>- 105.0.1-2
+* Fri Sep 30 2022 Martin Stransky <stransky@redhat.com>- 105.0.1-2
 - Added fix for mozilla#1791856 / rhbz#2130087
 
 * Thu Sep 22 2022 Martin Stransky <stransky@redhat.com>- 105.0.1-1
