@@ -75,7 +75,8 @@ ExcludeArch: i686
 %global build_with_pgo    0
 %ifarch x86_64
 %if %{release_build}
-%global build_with_pgo    1
+#Disabled PGO build due to rhbz#2136401
+%global build_with_pgo    0
 %endif
 %endif
 %if 0%{?flatpak}
@@ -656,6 +657,7 @@ MOZ_OPT_FLAGS=$(echo "%{optflags}" | %{__sed} -e 's/-Wall//')
 # See also https://fedoraproject.org/wiki/Changes/Harden_All_Packages
 # Workaround for mozbz#1531309
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-Werror=format-security//')
+# More Fedora specific build flags
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fpermissive"
 %if %{?debug_build}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | %{__sed} -e 's/-O2//')
@@ -1092,6 +1094,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Fri Oct 14 2022 Martin Stransky <stransky@redhat.com>- 106.0-1
 - Updated to 106.0
+- Disabled PGO build due to rhbz#2136401
 
 * Fri Oct 14 2022 Martin Stransky <stransky@redhat.com>- 105.0.2-2
 - Fixed crashes on multi-monitor systems (mzbz#1793922)
