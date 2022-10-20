@@ -932,6 +932,11 @@ ln -s %{_datadir}/myspell %{buildroot}%{mozappdir}/dictionaries
 # Default
 %{__cp} %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 
+# rhbz#2134527 - Use portal Gtk file dialog on Fedora 37+
+%if 0%{?fedora} > 36
+echo 'pref("widget.use-xdg-desktop-portal.file-picker", 1);' >> %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
+%endif
+
 # Since Fedora 36 the location of dictionaries has changed to /usr/share/hunspell.
 # For backward spec compatibility we set the old path in previous versions.
 # TODO remove when Fedora 35 becomes obsolete
