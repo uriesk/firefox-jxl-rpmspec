@@ -219,6 +219,7 @@ Patch62:        build-python.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch77:        build-python-3.11.patch
 Patch78:        firefox-i686-build.patch
+Patch79:        firefox-aarch64-sysctl.patch
 
 # Test patches
 # Generate without context by
@@ -479,6 +480,7 @@ This package contains results of tests executed during build.
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch77 -p1 -b .build-python-3.11
 %patch78 -p1 -b .firefox-i686
+%patch79 -p1 -b .aarch64-sysctl
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
