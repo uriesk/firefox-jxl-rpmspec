@@ -52,7 +52,7 @@ ExcludeArch: i686
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
-%global enable_mozilla_crashreporter 1
+%global enable_mozilla_crashreporter 0
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -172,7 +172,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        107.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1125,6 +1125,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Nov 21 2022 Martin Stransky <stransky@redhat.com>- 107.0-3
+- Disabled crashreporter
+
 * Mon Nov 21 2022 Jan Horak <jhorak@redhat.com> - 107.0-2
 - Enabled mozilla crashreporter again
 
