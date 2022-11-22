@@ -600,6 +600,10 @@ echo "ac_add_options --disable-debug" >> .mozconfig
 echo "ac_add_options --disable-jemalloc" >> .mozconfig
 %endif
 
+%if !%{enable_mozilla_crashreporter}
+echo "ac_add_options --disable-crashreporter" >> .mozconfig
+%endif
+
 %if 0%{?build_tests}
 echo "ac_add_options --enable-tests" >> .mozconfig
 %else
@@ -1101,11 +1105,13 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %{_datadir}/icons/hicolor/32x32/apps/firefox.png
 %{_datadir}/icons/hicolor/48x48/apps/firefox.png
 %{_datadir}/icons/hicolor/symbolic/apps/firefox-symbolic.svg
+%if %{enable_mozilla_crashreporter}
 %{mozappdir}/crashreporter
 %{mozappdir}/crashreporter.ini
 %{mozappdir}/minidump-analyzer
 %{mozappdir}/Throbber-small.gif
 %{mozappdir}/browser/crashreporter-override.ini
+%endif
 %{mozappdir}/*.so
 %{mozappdir}/defaults/pref/channel-prefs.js
 %{mozappdir}/dependentlibs.list
