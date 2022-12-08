@@ -1,0 +1,4558 @@
+diff --git a/python/l10n/mozxchannel/__init__.py b/python/l10n/mozxchannel/__init__.py
+--- a/python/l10n/mozxchannel/__init__.py
++++ b/python/l10n/mozxchannel/__init__.py
+@@ -46,25 +46,6 @@ def get_default_config(topsrcdir, string
+                     "mobile/android/locales/l10n.toml",
+                 ],
+             },
+-            "comm-central": {
+-                "path": topsrcdir / "comm",
+-                "post-clobber": True,
+-                "url": "https://hg.mozilla.org/comm-central/",
+-                "heads": {
+-                    # This list of repositories is ordered, starting with the
+-                    # one with the most recent content (central) to the oldest
+-                    # (ESR). In case two ESR versions are supported, the oldest
+-                    # ESR goes last (e.g. esr78 goes after esr91).
+-                    "comm": "comm-central",
+-                    "comm-beta": "releases/comm-beta",
+-                    "comm-esr102": "releases/comm-esr102",
+-                },
+-                "config_files": [
+-                    "comm/calendar/locales/l10n.toml",
+-                    "comm/mail/locales/l10n.toml",
+-                    "comm/suite/locales/l10n.toml",
+-                ],
+-            },
+         },
+     }
+ 
+diff --git a/python/mach/docs/windows-usage-outside-mozillabuild.rst b/python/mach/docs/windows-usage-outside-mozillabuild.rst
+--- a/python/mach/docs/windows-usage-outside-mozillabuild.rst
++++ b/python/mach/docs/windows-usage-outside-mozillabuild.rst
+@@ -117,3 +117,8 @@ Success!
+ 
+ At this point, you should be able to invoke Mach and manage your version control system outside
+ of MozillaBuild.
++
++.. tip::
++
++  `See here <https://crisal.io/words/2022/11/22/msys2-firefox-development.html>`__ for a detailed guide on
++  installing and customizing a development environment with MSYS2, zsh, and Windows Terminal.
+diff --git a/python/mach/mach/site.py b/python/mach/mach/site.py
+--- a/python/mach/mach/site.py
++++ b/python/mach/mach/site.py
+@@ -18,10 +18,10 @@ import site
+ import subprocess
+ import sys
+ import sysconfig
+-from pathlib import Path
+ import tempfile
+ from contextlib import contextmanager
+-from typing import Optional, Callable
++from pathlib import Path
++from typing import Callable, Optional
+ 
+ from mach.requirements import (
+     MachEnvRequirements,
+@@ -663,6 +663,58 @@ class CommandSiteManager:
+             stderr=subprocess.STDOUT,
+             universal_newlines=True,
+         )
++
++        if not check_result.returncode:
++            return
++
++        """
++        Some commands may use the "setup.py" script of first-party modules. This causes
++        a "*.egg-info" dir to be created for that module (which pip can then detect as
++        a package). Since we add all first-party module directories to the .pthfile for
++        the "mach" venv, these first-party modules are then detected by all venvs after
++        they are created. The problem is that these .egg-info directories can become
++        stale (since if the first-party module is updated it's not guaranteed that the
++        command that runs the "setup.py" was ran afterwards). This can cause
++        incompatibilities with the pip check (since the dependencies can change between
++        different versions).
++
++        These .egg-info dirs are in our VCS ignore lists (eg: ".hgignore") because they
++        are necessary to run some commands, so we don't want to always purge them, and we
++        also don't want to accidentally commit them. Given this, we can leverage our VCS
++        to find all the current first-party .egg-info dirs.
++
++        If we're in the case where 'pip check' fails, then we can try purging the
++        first-party .egg-info dirs, then run the 'pip check' again afterwards. If it's
++        still failing, then we know the .egg-info dirs weren't the problem. If that's
++        the case we can just raise the error encountered, which is the same as before.
++        """
++
++        def _delete_ignored_egg_info_dirs():
++            from pathlib import Path
++
++            from mozversioncontrol import get_repository_from_env
++
++            with get_repository_from_env() as repo:
++                ignored_file_finder = repo.get_ignored_files_finder().find(
++                    "**/*.egg-info"
++                )
++
++                unique_egg_info_dirs = {
++                    Path(found[0]).parent for found in ignored_file_finder
++                }
++
++                for egg_info_dir in unique_egg_info_dirs:
++                    shutil.rmtree(egg_info_dir)
++
++        _delete_ignored_egg_info_dirs()
++
++        check_result = subprocess.run(
++            [self.python_path, "-m", "pip", "check"],
++            stdout=subprocess.PIPE,
++            stderr=subprocess.STDOUT,
++            universal_newlines=True,
++        )
++
+         if check_result.returncode:
+             if quiet:
+                 # If "quiet" was specified, then the "pip install" output wasn't printed
+@@ -763,7 +815,7 @@ class PythonVirtualenv:
+         else:
+             self.bin_path = os.path.join(prefix, "bin")
+             self.python_path = os.path.join(self.bin_path, "python")
+-        self.prefix = prefix
++        self.prefix = os.path.realpath(prefix)
+ 
+     @functools.lru_cache(maxsize=None)
+     def resolve_sysconfig_packages_path(self, sysconfig_path):
+@@ -783,16 +835,12 @@ class PythonVirtualenv:
+         relative_path = path.relative_to(data_path)
+ 
+         # Path to virtualenv's "site-packages" directory for provided sysconfig path
+-        return os.path.normpath(
+-            os.path.normcase(os.path.realpath(Path(self.prefix) / relative_path))
+-        )
++        return os.path.normpath(os.path.normcase(Path(self.prefix) / relative_path))
+ 
+     def site_packages_dirs(self):
+         dirs = []
+         if sys.platform.startswith("win"):
+-            dirs.append(
+-                os.path.normpath(os.path.normcase(os.path.realpath(self.prefix)))
+-            )
++            dirs.append(os.path.normpath(os.path.normcase(self.prefix)))
+         purelib = self.resolve_sysconfig_packages_path("purelib")
+         platlib = self.resolve_sysconfig_packages_path("platlib")
+ 
+diff --git a/python/mozboot/bin/bootstrap.py b/python/mozboot/bin/bootstrap.py
+--- a/python/mozboot/bin/bootstrap.py
++++ b/python/mozboot/bin/bootstrap.py
+@@ -11,8 +11,6 @@
+ # Python environment (except that it's run with a sufficiently recent version of
+ # Python 3), so we are restricted to stdlib modules.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import sys
+ 
+ major, minor = sys.version_info[:2]
+@@ -23,14 +21,13 @@ if (major < 3) or (major == 3 and minor 
+     )
+     sys.exit(1)
+ 
++import ctypes
+ import os
+ import shutil
+ import subprocess
+ import tempfile
+-import ctypes
+-
++from optparse import OptionParser
+ from pathlib import Path
+-from optparse import OptionParser
+ 
+ CLONE_MERCURIAL_PULL_FAIL = """
+ Failed to pull from hg.mozilla.org.
+@@ -55,7 +52,7 @@ def which(name):
+     search_dirs = os.environ["PATH"].split(os.pathsep)
+     potential_names = [name]
+     if WINDOWS:
+-        potential_names.append(name + ".exe")
++        potential_names.insert(0, name + ".exe")
+ 
+     for path in search_dirs:
+         for executable_name in potential_names:
+@@ -105,7 +102,7 @@ def input_clone_dest(vcs, no_interactive
+             return None
+ 
+ 
+-def hg_clone_firefox(hg: Path, dest: Path):
++def hg_clone_firefox(hg: Path, dest: Path, head_repo, head_rev):
+     # We create an empty repo then modify the config before adding data.
+     # This is necessary to ensure storage settings are optimally
+     # configured.
+@@ -139,16 +136,28 @@ def hg_clone_firefox(hg: Path, dest: Pat
+         fh.write("# This is necessary to keep performance in check\n")
+         fh.write("maxchainlen = 10000\n")
+ 
++    # Pulling a specific revision into an empty repository induces a lot of
++    # load on the Mercurial server, so we always pull from mozilla-unified (which,
++    # when done from an empty repository, is equivalent to a clone), and then pull
++    # the specific revision we want (if we want a specific one, otherwise we just
++    # use the "central" bookmark), at which point it will be an incremental pull,
++    # that the server can process more easily.
++    # This is the same thing that robustcheckout does on automation.
+     res = subprocess.call(
+         [str(hg), "pull", "https://hg.mozilla.org/mozilla-unified"], cwd=str(dest)
+     )
++    if not res and head_repo:
++        res = subprocess.call(
++            [str(hg), "pull", head_repo, "-r", head_rev], cwd=str(dest)
++        )
+     print("")
+     if res:
+         print(CLONE_MERCURIAL_PULL_FAIL % dest)
+         return None
+ 
+-    print('updating to "central" - the development head of Gecko and Firefox')
+-    res = subprocess.call([str(hg), "update", "-r", "central"], cwd=str(dest))
++    head_rev = head_rev or "central"
++    print(f'updating to "{head_rev}" - the development head of Gecko and Firefox')
++    res = subprocess.call([str(hg), "update", "-r", head_rev], cwd=str(dest))
+     if res:
+         print(
+             f"error updating; you will need to `cd {dest} && hg update -r central` "
+@@ -157,7 +166,7 @@ def hg_clone_firefox(hg: Path, dest: Pat
+     return dest
+ 
+ 
+-def git_clone_firefox(git: Path, dest: Path, watchman: Path):
++def git_clone_firefox(git: Path, dest: Path, watchman: Path, head_repo, head_rev):
+     tempdir = None
+     cinnabar = None
+     env = dict(os.environ)
+@@ -196,8 +205,7 @@ def git_clone_firefox(git: Path, dest: P
+             [
+                 str(git),
+                 "clone",
+-                "-b",
+-                "bookmarks/central",
++                "--no-checkout",
+                 "hg::https://hg.mozilla.org/mozilla-unified",
+                 str(dest),
+             ],
+@@ -210,6 +218,19 @@ def git_clone_firefox(git: Path, dest: P
+             [str(git), "config", "pull.ff", "only"], cwd=str(dest), env=env
+         )
+ 
++        if head_repo:
++            subprocess.check_call(
++                [str(git), "cinnabar", "fetch", f"hg::{head_repo}", head_rev],
++                cwd=str(dest),
++                env=env,
++            )
++
++        subprocess.check_call(
++            [str(git), "checkout", "FETCH_HEAD" if head_rev else "bookmarks/central"],
++            cwd=str(dest),
++            env=env,
++        )
++
+         watchman_sample = dest / ".git/hooks/fsmonitor-watchman.sample"
+         # Older versions of git didn't include fsmonitor-watchman.sample.
+         if watchman and watchman_sample.exists():
+@@ -233,12 +254,6 @@ def git_clone_firefox(git: Path, dest: P
+             subprocess.check_call(config_args, cwd=str(dest), env=env)
+         return dest
+     finally:
+-        if not cinnabar:
+-            print(
+-                "Failed to install git-cinnabar. Try performing a manual "
+-                "installation: https://github.com/glandium/git-cinnabar/wiki/"
+-                "Mozilla:-A-git-workflow-for-Gecko-development"
+-            )
+         if tempdir:
+             shutil.rmtree(str(tempdir))
+ 
+@@ -326,11 +341,15 @@ def clone(options):
+     add_microsoft_defender_antivirus_exclusions(dest, no_system_changes)
+ 
+     print(f"Cloning Firefox {VCS_HUMAN_READABLE[vcs]} repository to {dest}")
++
++    head_repo = os.environ.get("GECKO_HEAD_REPOSITORY")
++    head_rev = os.environ.get("GECKO_HEAD_REV")
++
+     if vcs == "hg":
+-        return hg_clone_firefox(binary, dest)
++        return hg_clone_firefox(binary, dest, head_repo, head_rev)
+     else:
+         watchman = which("watchman")
+-        return git_clone_firefox(binary, dest, watchman)
++        return git_clone_firefox(binary, dest, watchman, head_repo, head_rev)
+ 
+ 
+ def bootstrap(srcdir: Path, application_choice, no_interactive, no_system_changes):
+diff --git a/python/mozboot/mozboot/android.py b/python/mozboot/mozboot/android.py
+--- a/python/mozboot/mozboot/android.py
++++ b/python/mozboot/mozboot/android.py
+@@ -2,8 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this,
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import errno
+ import json
+ import os
+@@ -11,15 +9,16 @@ import stat
+ import subprocess
+ import sys
+ import time
+-import requests
++from pathlib import Path
+ from typing import Optional, Union
+-from pathlib import Path
+-from tqdm import tqdm
++
++import requests
+ 
+ # We need the NDK version in multiple different places, and it's inconvenient
+ # to pass down the NDK version to all relevant places, so we have this global
+ # variable.
+ from mozboot.bootstrap import MOZCONFIG_SUGGESTION_TEMPLATE
++from tqdm import tqdm
+ 
+ NDK_VERSION = "r21d"
+ CMDLINE_TOOLS_VERSION_STRING = "7.0"
+@@ -74,7 +73,7 @@ output as packages are downloaded and in
+ 
+ MOBILE_ANDROID_MOZCONFIG_TEMPLATE = """
+ # Build GeckoView/Firefox for Android:
+-ac_add_options --enable-application=mobile/android
++ac_add_options --enable-project=mobile/android
+ 
+ # Targeting the following architecture.
+ # For regular phones, no --target is needed.
+@@ -90,8 +89,7 @@ ac_add_options --enable-application=mobi
+ 
+ MOBILE_ANDROID_ARTIFACT_MODE_MOZCONFIG_TEMPLATE = """
+ # Build GeckoView/Firefox for Android Artifact Mode:
+-ac_add_options --enable-application=mobile/android
+-ac_add_options --target=arm-linux-androideabi
++ac_add_options --enable-project=mobile/android
+ ac_add_options --enable-artifact-builds
+ 
+ {extra_lines}
+@@ -162,18 +160,19 @@ def download(
+     download_file_path: Path,
+ ):
+     with requests.Session() as session:
+-        request = session.head(url)
++        request = session.head(url, allow_redirects=True)
++        request.raise_for_status()
+         remote_file_size = int(request.headers["content-length"])
+ 
+         if download_file_path.is_file():
+             local_file_size = download_file_path.stat().st_size
+ 
+             if local_file_size == remote_file_size:
+-                print(f"{download_file_path} already downloaded. Skipping download...")
++                print(
++                    f"{download_file_path.name} already downloaded. Skipping download..."
++                )
+             else:
+-                print(
+-                    f"Partial download detected. Resuming download of {download_file_path}..."
+-                )
++                print(f"Partial download detected. Resuming download of {url}...")
+                 download_internal(
+                     download_file_path,
+                     session,
+@@ -182,7 +181,7 @@ def download(
+                     local_file_size,
+                 )
+         else:
+-            print(f"Downloading {download_file_path}...")
++            print(f"Downloading {url}...")
+             download_internal(download_file_path, session, url, remote_file_size)
+ 
+ 
+diff --git a/python/mozboot/mozboot/archlinux.py b/python/mozboot/mozboot/archlinux.py
+--- a/python/mozboot/mozboot/archlinux.py
++++ b/python/mozboot/mozboot/archlinux.py
+@@ -2,120 +2,27 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+-import os
+ import sys
+-import tempfile
+-import subprocess
+-
+-from pathlib import Path
+ 
+ from mozboot.base import BaseBootstrapper
+ from mozboot.linux_common import LinuxBootstrapper
+ 
+-# NOTE: This script is intended to be run with a vanilla Python install.  We
+-# have to rely on the standard library instead of Python 2+3 helpers like
+-# the six module.
+-if sys.version_info < (3,):
+-    input = raw_input  # noqa
+-
+-
+-AUR_URL_TEMPLATE = "https://aur.archlinux.org/cgit/aur.git/snapshot/{}.tar.gz"
+-
+ 
+ class ArchlinuxBootstrapper(LinuxBootstrapper, BaseBootstrapper):
+     """Archlinux experimental bootstrapper."""
+ 
+-    SYSTEM_PACKAGES = ["base-devel", "unzip", "zip"]
+-
+-    BROWSER_PACKAGES = [
+-        "alsa-lib",
+-        "dbus-glib",
+-        "gtk3",
+-        "libevent",
+-        "libvpx",
+-        "libxt",
+-        "mime-types",
+-        "startup-notification",
+-        "gst-plugins-base-libs",
+-        "libpulse",
+-        "xorg-server-xvfb",
+-        "gst-libav",
+-        "gst-plugins-good",
+-    ]
+-
+-    BROWSER_AUR_PACKAGES = [
+-        "uuid",
+-    ]
+-
+-    MOBILE_ANDROID_COMMON_PACKAGES = [
+-        # See comment about 32 bit binaries and multilib below.
+-        "multilib/lib32-ncurses",
+-        "multilib/lib32-readline",
+-        "multilib/lib32-zlib",
+-    ]
+-
+     def __init__(self, version, dist_id, **kwargs):
+         print("Using an experimental bootstrapper for Archlinux.", file=sys.stderr)
+         BaseBootstrapper.__init__(self, **kwargs)
+ 
+-    def install_system_packages(self):
+-        self.pacman_install(*self.SYSTEM_PACKAGES)
+-
+-    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+-        # TODO: Figure out what not to install for artifact mode
+-        self.aur_install(*self.BROWSER_AUR_PACKAGES)
+-        self.pacman_install(*self.BROWSER_PACKAGES)
+-
+-    def install_browser_artifact_mode_packages(self, mozconfig_builder):
+-        self.install_browser_packages(mozconfig_builder, artifact_mode=True)
+-
+-    def ensure_nasm_packages(self):
+-        # installed via install_browser_packages
+-        pass
+-
+-    def install_mobile_android_packages(self, mozconfig_builder, artifact_mode=False):
+-        # Multi-part process:
+-        # 1. System packages.
+-        # 2. Android SDK. Android NDK only if we are not in artifact mode. Android packages.
+-
+-        # 1. This is hard to believe, but the Android SDK binaries are 32-bit
+-        # and that conflicts with 64-bit Arch installations out of the box.  The
+-        # solution is to add the multilibs repository; unfortunately, this
+-        # requires manual intervention.
+-        try:
+-            self.pacman_install(*self.MOBILE_ANDROID_COMMON_PACKAGES)
+-        except Exception as e:
+-            print(
+-                "Failed to install all packages.  The Android developer "
+-                "toolchain requires 32 bit binaries be enabled (see "
+-                "https://wiki.archlinux.org/index.php/Android).  You may need to "
+-                "manually enable the multilib repository following the instructions "
+-                "at https://wiki.archlinux.org/index.php/Multilib.",
+-                file=sys.stderr,
+-            )
+-            raise e
+-
+-        # 2. Android pieces.
+-        super().install_mobile_android_packages(
+-            mozconfig_builder, artifact_mode=artifact_mode
+-        )
++    def install_packages(self, packages):
++        # watchman is not available via pacman
++        packages = [p for p in packages if p != "watchman"]
++        self.pacman_install(*packages)
+ 
+     def upgrade_mercurial(self, current):
+         self.pacman_install("mercurial")
+ 
+-    def pacman_is_installed(self, package):
+-        command = ["pacman", "-Q", package]
+-        return (
+-            subprocess.run(
+-                command,
+-                stdout=subprocess.DEVNULL,
+-                stderr=subprocess.DEVNULL,
+-            ).returncode
+-            == 0
+-        )
+-
+     def pacman_install(self, *packages):
+         command = ["pacman", "-S", "--needed"]
+         if self.no_interactive:
+@@ -124,71 +31,3 @@ class ArchlinuxBootstrapper(LinuxBootstr
+         command.extend(packages)
+ 
+         self.run_as_root(command)
+-
+-    def run(self, command, env=None):
+-        subprocess.check_call(command, stdin=sys.stdin, env=env)
+-
+-    def download(self, uri):
+-        command = ["curl", "-L", "-O", uri]
+-        self.run(command)
+-
+-    def unpack(self, path: Path, name, ext):
+-        if ext == ".gz":
+-            compression = "-z"
+-        else:
+-            print(f"unsupported compression extension: {ext}", file=sys.stderr)
+-            sys.exit(1)
+-
+-        name = path / (name + ".tar" + ext)
+-        command = ["tar", "-x", compression, "-f", str(name), "-C", str(path)]
+-        self.run(command)
+-
+-    def makepkg(self, name):
+-        command = ["makepkg", "-sri"]
+-        if self.no_interactive:
+-            command.append("--noconfirm")
+-        makepkg_env = os.environ.copy()
+-        makepkg_env["PKGDEST"] = "."
+-        self.run(command, env=makepkg_env)
+-
+-    def aur_install(self, *packages):
+-        needed = []
+-
+-        for package in packages:
+-            if self.pacman_is_installed(package):
+-                print(
+-                    f"warning: AUR package {package} is installed -- skipping",
+-                    file=sys.stderr,
+-                )
+-            else:
+-                needed.append(package)
+-
+-        # all required AUR packages are already installed!
+-        if not needed:
+-            return
+-
+-        path = Path(tempfile.mkdtemp(prefix="mozboot-"))
+-        if not self.no_interactive:
+-            print(
+-                "WARNING! This script requires to install packages from the AUR "
+-                "This is potentially insecure so I recommend that you carefully "
+-                "read each package description and check the sources."
+-                f"These packages will be built in {path}: " + ", ".join(needed),
+-                file=sys.stderr,
+-            )
+-            choice = input("Do you want to continue? (yes/no) [no]")
+-            if choice != "yes":
+-                sys.exit(1)
+-
+-        base_dir = Path.cwd()
+-        os.chdir(path)
+-        for name in needed:
+-            url = AUR_URL_TEMPLATE.format(package)
+-            ext = Path(url).suffix
+-            directory = path / name
+-            self.download(url)
+-            self.unpack(path, name, ext)
+-            os.chdir(directory)
+-            self.makepkg(name)
+-
+-        os.chdir(base_dir)
+diff --git a/python/mozboot/mozboot/base.py b/python/mozboot/mozboot/base.py
+--- a/python/mozboot/mozboot/base.py
++++ b/python/mozboot/mozboot/base.py
+@@ -2,25 +2,22 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import os
+ import re
+ import subprocess
+ import sys
+-
+ from pathlib import Path
+ 
+-from packaging.version import Version
++from mach.util import to_optional_path, win_to_msys_path
+ from mozboot import rust
+ from mozboot.util import (
++    MINIMUM_RUST_VERSION,
+     get_mach_virtualenv_binary,
+-    MINIMUM_RUST_VERSION,
+     http_download_and_save,
+ )
++from mozbuild.bootstrap import bootstrap_all_toolchains_for, bootstrap_toolchain
+ from mozfile import which
+-from mozbuild.bootstrap import bootstrap_toolchain
+-from mach.util import to_optional_path, win_to_msys_path
++from packaging.version import Version
+ 
+ NO_MERCURIAL = """
+ Could not find Mercurial (hg) in the current shell's path. Try starting a new
+@@ -143,7 +140,7 @@ ac_add_options --enable-artifact-builds
+ 
+ JS_MOZCONFIG_TEMPLATE = """\
+ # Build only the SpiderMonkey JS test shell
+-ac_add_options --enable-application=js
++ac_add_options --enable-project=js
+ """
+ 
+ # Upgrade Mercurial older than this.
+@@ -344,47 +341,12 @@ class BaseBootstrapper(object):
+             % __name__
+         )
+ 
+-    def ensure_stylo_packages(self):
+-        """
+-        Install any necessary packages needed for Stylo development.
+-        """
+-        raise NotImplementedError(
+-            "%s does not yet implement ensure_stylo_packages()" % __name__
+-        )
+-
+-    def ensure_nasm_packages(self):
+-        """
+-        Install nasm.
+-        """
+-        raise NotImplementedError(
+-            "%s does not yet implement ensure_nasm_packages()" % __name__
+-        )
+-
+     def ensure_sccache_packages(self):
+         """
+         Install sccache.
+         """
+         pass
+ 
+-    def ensure_node_packages(self):
+-        """
+-        Install any necessary packages needed to supply NodeJS"""
+-        raise NotImplementedError(
+-            "%s does not yet implement ensure_node_packages()" % __name__
+-        )
+-
+-    def ensure_fix_stacks_packages(self):
+-        """
+-        Install fix-stacks.
+-        """
+-        pass
+-
+-    def ensure_minidump_stackwalk_packages(self):
+-        """
+-        Install minidump-stackwalk.
+-        """
+-        pass
+-
+     def install_toolchain_static_analysis(self, toolchain_job):
+         clang_tools_path = self.state_dir / "clang-tools"
+         if not clang_tools_path.exists():
+@@ -428,9 +390,17 @@ class BaseBootstrapper(object):
+ 
+         subprocess.check_call(cmd, cwd=str(install_dir))
+ 
+-    def run_as_root(self, command):
++    def auto_bootstrap(self, application):
++        args = ["--with-ccache=sccache"]
++        if application.endswith("_artifact_mode"):
++            args.append("--enable-artifact-builds")
++            application = application[: -len("_artifact_mode")]
++        args.append("--enable-project={}".format(application.replace("_", "/")))
++        bootstrap_all_toolchains_for(args)
++
++    def run_as_root(self, command, may_use_sudo=True):
+         if os.geteuid() != 0:
+-            if which("sudo"):
++            if may_use_sudo and which("sudo"):
+                 command.insert(0, "sudo")
+             else:
+                 command = ["su", "root", "-c", " ".join(command)]
+@@ -439,107 +409,6 @@ class BaseBootstrapper(object):
+ 
+         subprocess.check_call(command, stdin=sys.stdin)
+ 
+-    def dnf_install(self, *packages):
+-        if which("dnf"):
+-
+-            def not_installed(package):
+-                # We could check for "Error: No matching Packages to list", but
+-                # checking `dnf`s exit code is sufficent.
+-                # Ideally we'd invoke dnf with '--cacheonly', but there's:
+-                # https://bugzilla.redhat.com/show_bug.cgi?id=2030255
+-                is_installed = subprocess.run(
+-                    ["dnf", "list", "--installed", package],
+-                    stdout=subprocess.PIPE,
+-                    stderr=subprocess.STDOUT,
+-                )
+-                if is_installed.returncode not in [0, 1]:
+-                    stdout = is_installed.stdout
+-                    raise Exception(
+-                        f'Failed to determine whether package "{package}" is installed: "{stdout}"'
+-                    )
+-                return is_installed.returncode != 0
+-
+-            packages = list(filter(not_installed, packages))
+-            if len(packages) == 0:
+-                # avoid sudo prompt (support unattended re-bootstrapping)
+-                return
+-
+-            command = ["dnf", "install"]
+-        else:
+-            command = ["yum", "install"]
+-
+-        if self.no_interactive:
+-            command.append("-y")
+-        command.extend(packages)
+-
+-        self.run_as_root(command)
+-
+-    def dnf_groupinstall(self, *packages):
+-        if which("dnf"):
+-            installed = subprocess.run(
+-                # Ideally we'd invoke dnf with '--cacheonly', but there's:
+-                # https://bugzilla.redhat.com/show_bug.cgi?id=2030255
+-                # Ideally we'd use `--installed` instead of the undocumented
+-                # `installed` subcommand, but that doesn't currently work:
+-                # https://bugzilla.redhat.com/show_bug.cgi?id=1884616#c0
+-                ["dnf", "group", "list", "installed", "--hidden"],
+-                universal_newlines=True,
+-                stdout=subprocess.PIPE,
+-                stderr=subprocess.STDOUT,
+-            )
+-            if installed.returncode != 0:
+-                raise Exception(
+-                    f'Failed to determine currently-installed package groups: "{installed.stdout}"'
+-                )
+-            installed_packages = (pkg.strip() for pkg in installed.stdout.split("\n"))
+-            packages = list(filter(lambda p: p not in installed_packages, packages))
+-            if len(packages) == 0:
+-                # avoid sudo prompt (support unattended re-bootstrapping)
+-                return
+-
+-            command = ["dnf", "groupinstall"]
+-        else:
+-            command = ["yum", "groupinstall"]
+-
+-        if self.no_interactive:
+-            command.append("-y")
+-        command.extend(packages)
+-
+-        self.run_as_root(command)
+-
+-    def dnf_update(self, *packages):
+-        if which("dnf"):
+-            command = ["dnf", "update"]
+-        else:
+-            command = ["yum", "update"]
+-
+-        if self.no_interactive:
+-            command.append("-y")
+-        command.extend(packages)
+-
+-        self.run_as_root(command)
+-
+-    def apt_install(self, *packages):
+-        command = ["apt-get", "install"]
+-        if self.no_interactive:
+-            command.append("-y")
+-        command.extend(packages)
+-
+-        self.run_as_root(command)
+-
+-    def apt_update(self):
+-        command = ["apt-get", "update"]
+-        if self.no_interactive:
+-            command.append("-y")
+-
+-        self.run_as_root(command)
+-
+-    def apt_add_architecture(self, arch):
+-        command = ["dpkg", "--add-architecture"]
+-        command.extend(arch)
+-
+-        self.run_as_root(command)
+-
+     def prompt_int(self, prompt, low, high, default=None):
+         """Prompts the user with prompt and requires an integer between low and high.
+ 
+@@ -757,14 +626,10 @@ class BaseBootstrapper(object):
+         if modern:
+             print("Your version of Rust (%s) is new enough." % version)
+ 
+-            if rustup:
+-                self.ensure_rust_targets(rustup, version)
+-            return
+-
+-        if version:
++        elif version:
+             print("Your version of Rust (%s) is too old." % version)
+ 
+-        if rustup:
++        if rustup and not modern:
+             rustup_version = self._parse_version(rustup)
+             if not rustup_version:
+                 print(RUSTUP_OLD)
+@@ -776,10 +641,16 @@ class BaseBootstrapper(object):
+             if not modern:
+                 print(RUST_UPGRADE_FAILED % (MODERN_RUST_VERSION, after))
+                 sys.exit(1)
+-        else:
++        elif not rustup:
+             # No rustup. Download and run the installer.
+             print("Will try to install Rust.")
+             self.install_rust()
++            modern, version = self.is_rust_modern(cargo_bin)
++            rustup = to_optional_path(
++                which("rustup", extra_search_dirs=[str(cargo_bin)])
++            )
++
++        self.ensure_rust_targets(rustup, version)
+ 
+     def ensure_rust_targets(self, rustup: Path, rust_version):
+         """Make sure appropriate cross target libraries are installed."""
+diff --git a/python/mozboot/mozboot/bootstrap.py b/python/mozboot/mozboot/bootstrap.py
+--- a/python/mozboot/mozboot/bootstrap.py
++++ b/python/mozboot/mozboot/bootstrap.py
+@@ -2,48 +2,46 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+-from collections import OrderedDict
+-
+ import os
+ import platform
+ import re
+ import shutil
+-import sys
++import stat
+ import subprocess
++import sys
+ import time
+-from typing import Optional
++from collections import OrderedDict
+ from pathlib import Path
+-from packaging.version import Version
++from typing import Optional
++
++# Use distro package to retrieve linux platform information
++import distro
++from mach.site import MachSiteManager
++from mach.telemetry import initialize_telemetry_setting
+ from mach.util import (
++    UserError,
+     get_state_dir,
+-    UserError,
+     to_optional_path,
+     to_optional_str,
+     win_to_msys_path,
+ )
+-from mach.telemetry import initialize_telemetry_setting
+-from mach.site import MachSiteManager
++from mozboot.archlinux import ArchlinuxBootstrapper
+ from mozboot.base import MODERN_RUST_VERSION
+ from mozboot.centosfedora import CentOSFedoraBootstrapper
+-from mozboot.opensuse import OpenSUSEBootstrapper
+ from mozboot.debian import DebianBootstrapper
+ from mozboot.freebsd import FreeBSDBootstrapper
+ from mozboot.gentoo import GentooBootstrapper
+-from mozboot.osx import OSXBootstrapper, OSXBootstrapperLight
++from mozboot.mozconfig import MozconfigBuilder
++from mozboot.mozillabuild import MozillaBuildBootstrapper
+ from mozboot.openbsd import OpenBSDBootstrapper
+-from mozboot.archlinux import ArchlinuxBootstrapper
++from mozboot.opensuse import OpenSUSEBootstrapper
++from mozboot.osx import OSXBootstrapper, OSXBootstrapperLight
+ from mozboot.solus import SolusBootstrapper
+ from mozboot.void import VoidBootstrapper
+ from mozboot.windows import WindowsBootstrapper
+-from mozboot.mozillabuild import MozillaBuildBootstrapper
+-from mozboot.mozconfig import MozconfigBuilder
++from mozbuild.base import MozbuildObject
+ from mozfile import which
+-from mozbuild.base import MozbuildObject
+-
+-# Use distro package to retrieve linux platform information
+-import distro
++from packaging.version import Version
+ 
+ APPLICATION_CHOICE = """
+ Note on Artifact Mode:
+@@ -123,6 +121,7 @@ DEBIAN_DISTROS = (
+     "devuan",
+     "pureos",
+     "deepin",
++    "tuxedo",
+ )
+ 
+ ADD_GIT_CINNABAR_PATH = """
+@@ -250,13 +249,11 @@ class Bootstrapper(object):
+         # Also install the clang static-analysis package by default
+         # The best place to install our packages is in the state directory
+         # we have.  We should have created one above in non-interactive mode.
+-        self.instance.ensure_node_packages()
+-        self.instance.ensure_fix_stacks_packages()
+-        self.instance.ensure_minidump_stackwalk_packages()
++        self.instance.auto_bootstrap(application)
++        self.instance.install_toolchain_artifact("fix-stacks")
++        self.instance.install_toolchain_artifact("minidump-stackwalk")
+         if not self.instance.artifact_mode:
+-            self.instance.ensure_stylo_packages()
+             self.instance.ensure_clang_static_analysis_package()
+-            self.instance.ensure_nasm_packages()
+             self.instance.ensure_sccache_packages()
+         # Like 'ensure_browser_packages' or 'ensure_mobile_android_packages'
+         getattr(self.instance, "ensure_%s_packages" % application)()
+@@ -325,7 +322,6 @@ class Bootstrapper(object):
+         state_dir = Path(get_state_dir())
+         self.instance.state_dir = state_dir
+ 
+-        hg_installed, hg_modern = self.instance.ensure_mercurial_modern()
+         hg = to_optional_path(which("hg"))
+ 
+         # We need to enable the loading of hgrc in case extensions are
+@@ -355,6 +351,10 @@ class Bootstrapper(object):
+ 
+         # Possibly configure Mercurial, but not if the current checkout or repo
+         # type is Git.
++        hg_installed = bool(hg)
++        if checkout_type == "hg":
++            hg_installed, hg_modern = self.instance.ensure_mercurial_modern()
++
+         if hg_installed and checkout_type == "hg":
+             if not self.instance.no_interactive:
+                 configure_hg = self.instance.prompt_yesno(prompt=CONFIGURE_MERCURIAL)
+@@ -485,8 +485,8 @@ class Bootstrapper(object):
+             # distutils is singled out here because some distros (namely Ubuntu)
+             # include it in a separate package outside of the main Python
+             # installation.
++            import distutils.spawn
+             import distutils.sysconfig
+-            import distutils.spawn
+ 
+             assert distutils.sysconfig is not None and distutils.spawn is not None
+         except ImportError as e:
+@@ -610,11 +610,11 @@ def current_firefox_checkout(env, hg: Op
+         # Just check for known-good files in the checkout, to prevent attempted
+         # foot-shootings.  Determining a canonical git checkout of mozilla-unified
+         # is...complicated
+-        elif git_dir.exists():
++        elif git_dir.exists() or hg_dir.exists():
+             moz_configure = path / "moz.configure"
+             if moz_configure.exists():
+                 _warn_if_risky_revision(path)
+-                return "git", path
++                return ("git" if git_dir.exists() else "hg"), path
+ 
+         if not len(path.parents):
+             break
+@@ -639,13 +639,23 @@ def update_git_tools(git: Optional[Path]
+     # repository. It now only downloads prebuilt binaries, so if we are
+     # updating from an old setup, remove the repository and start over.
+     if (cinnabar_dir / ".git").exists():
+-        shutil.rmtree(str(cinnabar_dir))
++        # git sets pack files read-only, which causes problems removing
++        # them on Windows. To work around that, we use an error handler
++        # on rmtree that retries to remove the file after chmod'ing it.
++        def onerror(func, path, exc):
++            if func == os.unlink:
++                os.chmod(path, stat.S_IRWXU)
++                func(path)
++            else:
++                raise
++
++        shutil.rmtree(str(cinnabar_dir), onerror=onerror)
+ 
+     # If we already have an executable, ask it to update itself.
+     exists = cinnabar_exe.exists()
+     if exists:
+         try:
+-            subprocess.check_call([cinnabar_exe, "self-update"])
++            subprocess.check_call([str(cinnabar_exe), "self-update"])
+         except subprocess.CalledProcessError as e:
+             print(e)
+ 
+diff --git a/python/mozboot/mozboot/centosfedora.py b/python/mozboot/mozboot/centosfedora.py
+--- a/python/mozboot/mozboot/centosfedora.py
++++ b/python/mozboot/mozboot/centosfedora.py
+@@ -2,10 +2,11 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
++import subprocess
+ 
+ from mozboot.base import BaseBootstrapper
+ from mozboot.linux_common import LinuxBootstrapper
++from mozfile import which
+ 
+ 
+ class CentOSFedoraBootstrapper(LinuxBootstrapper, BaseBootstrapper):
+@@ -16,79 +17,63 @@ class CentOSFedoraBootstrapper(LinuxBoot
+         self.version = int(version.split(".")[0])
+         self.dist_id = dist_id
+ 
+-        self.group_packages = []
+-
+-        self.packages = ["which"]
+-
+-        self.browser_group_packages = ["GNOME Software Development"]
+-
+-        self.browser_packages = [
+-            "alsa-lib-devel",
+-            "dbus-glib-devel",
+-            "glibc-static",
+-            # Development group.
+-            "libstdc++-static",
+-            "libXt-devel",
+-            "pulseaudio-libs-devel",
+-            "gcc-c++",
+-        ]
+-
+-        self.mobile_android_packages = []
+-
++    def install_packages(self, packages):
++        if self.version >= 33 and "perl" in packages:
++            packages.append("perl-FindBin")
++        # watchman is not available on centos/rocky
+         if self.distro in ("centos", "rocky"):
+-            self.group_packages += ["Development Tools"]
+-
+-            self.packages += ["curl-devel"]
+-
+-            self.browser_packages += ["gtk3-devel"]
+-
+-            if self.version == 6:
+-                self.group_packages += [
+-                    "Development Libraries",
+-                    "GNOME Software Development",
+-                ]
+-
+-            else:
+-                self.packages += ["redhat-rpm-config"]
+-
+-                self.browser_group_packages = ["Development Tools"]
+-
+-        elif self.distro == "fedora":
+-            self.group_packages += ["C Development Tools and Libraries"]
+-
+-            self.packages += [
+-                "redhat-rpm-config",
+-                "watchman",
+-            ]
+-            if self.version >= 33:
+-                self.packages.append("perl-FindBin")
+-
+-            self.mobile_android_packages += ["ncurses-compat-libs"]
+-
+-        self.packages += ["python3-devel"]
+-
+-    def install_system_packages(self):
+-        self.dnf_groupinstall(*self.group_packages)
+-        self.dnf_install(*self.packages)
+-
+-    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+-        # TODO: Figure out what not to install for artifact mode
+-        self.dnf_groupinstall(*self.browser_group_packages)
+-        self.dnf_install(*self.browser_packages)
+-
+-    def install_browser_artifact_mode_packages(self, mozconfig_builder):
+-        self.install_browser_packages(mozconfig_builder, artifact_mode=True)
+-
+-    def install_mobile_android_packages(self, mozconfig_builder, artifact_mode=False):
+-        # Install Android specific packages.
+-        self.dnf_install(*self.mobile_android_packages)
+-
+-        super().install_mobile_android_packages(
+-            mozconfig_builder, artifact_mode=artifact_mode
+-        )
++            packages = [p for p in packages if p != "watchman"]
++        self.dnf_install(*packages)
+ 
+     def upgrade_mercurial(self, current):
+         if current is None:
+             self.dnf_install("mercurial")
+         else:
+             self.dnf_update("mercurial")
++
++    def dnf_install(self, *packages):
++        if which("dnf"):
++
++            def not_installed(package):
++                # We could check for "Error: No matching Packages to list", but
++                # checking `dnf`s exit code is sufficent.
++                # Ideally we'd invoke dnf with '--cacheonly', but there's:
++                # https://bugzilla.redhat.com/show_bug.cgi?id=2030255
++                is_installed = subprocess.run(
++                    ["dnf", "list", "--installed", package],
++                    stdout=subprocess.PIPE,
++                    stderr=subprocess.STDOUT,
++                )
++                if is_installed.returncode not in [0, 1]:
++                    stdout = is_installed.stdout
++                    raise Exception(
++                        f'Failed to determine whether package "{package}" is installed: "{stdout}"'
++                    )
++                return is_installed.returncode != 0
++
++            packages = list(filter(not_installed, packages))
++            if len(packages) == 0:
++                # avoid sudo prompt (support unattended re-bootstrapping)
++                return
++
++            command = ["dnf", "install"]
++        else:
++            command = ["yum", "install"]
++
++        if self.no_interactive:
++            command.append("-y")
++        command.extend(packages)
++
++        self.run_as_root(command)
++
++    def dnf_update(self, *packages):
++        if which("dnf"):
++            command = ["dnf", "update"]
++        else:
++            command = ["yum", "update"]
++
++        if self.no_interactive:
++            command.append("-y")
++        command.extend(packages)
++
++        self.run_as_root(command)
+diff --git a/python/mozboot/mozboot/debian.py b/python/mozboot/mozboot/debian.py
+--- a/python/mozboot/mozboot/debian.py
++++ b/python/mozboot/mozboot/debian.py
+@@ -2,48 +2,13 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
++import sys
+ 
+-from mozboot.base import BaseBootstrapper, MERCURIAL_INSTALL_PROMPT
++from mozboot.base import MERCURIAL_INSTALL_PROMPT, BaseBootstrapper
+ from mozboot.linux_common import LinuxBootstrapper
+ 
+-import sys
+-
+ 
+ class DebianBootstrapper(LinuxBootstrapper, BaseBootstrapper):
+-
+-    # These are common packages for all Debian-derived distros (such as
+-    # Ubuntu).
+-    COMMON_PACKAGES = [
+-        "build-essential",
+-        "libpython3-dev",
+-        "m4",
+-        "unzip",
+-        "uuid",
+-        "zip",
+-    ]
+-
+-    # These are common packages for building Firefox for Desktop
+-    # (browser) for all Debian-derived distros (such as Ubuntu).
+-    BROWSER_COMMON_PACKAGES = [
+-        "libasound2-dev",
+-        "libcurl4-openssl-dev",
+-        "libdbus-1-dev",
+-        "libdbus-glib-1-dev",
+-        "libdrm-dev",
+-        "libgtk-3-dev",
+-        "libpulse-dev",
+-        "libx11-xcb-dev",
+-        "libxt-dev",
+-        "xvfb",
+-    ]
+-
+-    # These are common packages for building Firefox for Android
+-    # (mobile/android) for all Debian-derived distros (such as Ubuntu).
+-    MOBILE_ANDROID_COMMON_PACKAGES = [
+-        "libncurses5",  # For native debugging in Android Studio
+-    ]
+-
+     def __init__(self, distro, version, dist_id, codename, **kwargs):
+         BaseBootstrapper.__init__(self, **kwargs)
+ 
+@@ -52,16 +17,6 @@ class DebianBootstrapper(LinuxBootstrapp
+         self.dist_id = dist_id
+         self.codename = codename
+ 
+-        self.packages = list(self.COMMON_PACKAGES)
+-
+-        try:
+-            version_number = int(version)
+-        except ValueError:
+-            version_number = None
+-
+-        if (version_number and (version_number >= 11)) or version == "unstable":
+-            self.packages += ["watchman"]
+-
+     def suggest_install_distutils(self):
+         print(
+             "HINT: Try installing distutils with "
+@@ -75,26 +30,15 @@ class DebianBootstrapper(LinuxBootstrapp
+             file=sys.stderr,
+         )
+ 
+-    def install_system_packages(self):
+-        self.apt_install(*self.packages)
+-
+-    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+-        # TODO: Figure out what not to install for artifact mode
+-        self.apt_install(*self.BROWSER_COMMON_PACKAGES)
+-
+-    def install_browser_artifact_mode_packages(self, mozconfig_builder):
+-        self.install_browser_packages(mozconfig_builder, artifact_mode=True)
++    def install_packages(self, packages):
++        try:
++            if int(self.version) < 11:
++                # watchman is only available starting from Debian 11.
++                packages = [p for p in packages if p != "watchman"]
++        except ValueError:
++            pass
+ 
+-    def install_mobile_android_packages(self, mozconfig_builder, artifact_mode=False):
+-        # Multi-part process:
+-        # 1. System packages.
+-        # 2. Android SDK. Android NDK only if we are not in artifact mode. Android packages.
+-        self.apt_install(*self.MOBILE_ANDROID_COMMON_PACKAGES)
+-
+-        # 2. Android pieces.
+-        super().install_mobile_android_packages(
+-            mozconfig_builder, artifact_mode=artifact_mode
+-        )
++        self.apt_install(*packages)
+ 
+     def _update_package_manager(self):
+         self.apt_update()
+@@ -122,3 +66,18 @@ class DebianBootstrapper(LinuxBootstrapp
+         # pip.
+         assert res == 1
+         self.run_as_root(["pip3", "install", "--upgrade", "Mercurial"])
++
++    def apt_install(self, *packages):
++        command = ["apt-get", "install"]
++        if self.no_interactive:
++            command.append("-y")
++        command.extend(packages)
++
++        self.run_as_root(command)
++
++    def apt_update(self):
++        command = ["apt-get", "update"]
++        if self.no_interactive:
++            command.append("-y")
++
++        self.run_as_root(command)
+diff --git a/python/mozboot/mozboot/freebsd.py b/python/mozboot/mozboot/freebsd.py
+--- a/python/mozboot/mozboot/freebsd.py
++++ b/python/mozboot/mozboot/freebsd.py
+@@ -2,7 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+ import sys
+ 
+ from mozboot.base import BaseBootstrapper
+@@ -19,11 +18,11 @@ class FreeBSDBootstrapper(BaseBootstrapp
+             "gmake",
+             "gtar",
+             "m4",
++            "npm",
+             "pkgconf",
+             "py%d%d-sqlite3" % sys.version_info[0:2],
+             "rust",
+             "watchman",
+-            "zip",
+         ]
+ 
+         self.browser_packages = [
+@@ -56,10 +55,11 @@ class FreeBSDBootstrapper(BaseBootstrapp
+     def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+         # TODO: Figure out what not to install for artifact mode
+         packages = self.browser_packages.copy()
+-        if sys.platform.startswith("netbsd"):
+-            packages.extend(["brotli", "gtk3+", "libv4l"])
+-        else:
+-            packages.extend(["gtk3", "mesa-dri", "v4l_compat"])
++        if not artifact_mode:
++            if sys.platform.startswith("netbsd"):
++                packages.extend(["brotli", "gtk3+", "libv4l", "cbindgen"])
++            else:
++                packages.extend(["gtk3", "mesa-dri", "v4l_compat", "rust-cbindgen"])
+         self.pkg_install(*packages)
+ 
+     def install_browser_artifact_mode_packages(self, mozconfig_builder):
+@@ -69,19 +69,5 @@ class FreeBSDBootstrapper(BaseBootstrapp
+         # TODO: we don't ship clang base static analysis for this platform
+         pass
+ 
+-    def ensure_stylo_packages(self):
+-        # Clang / llvm already installed as browser package
+-        if sys.platform.startswith("netbsd"):
+-            self.pkg_install("cbindgen")
+-        else:
+-            self.pkg_install("rust-cbindgen")
+-
+-    def ensure_nasm_packages(self):
+-        # installed via install_browser_packages
+-        pass
+-
+-    def ensure_node_packages(self):
+-        self.pkg_install("npm")
+-
+     def upgrade_mercurial(self, current):
+         self.pkg_install("mercurial")
+diff --git a/python/mozboot/mozboot/gentoo.py b/python/mozboot/mozboot/gentoo.py
+--- a/python/mozboot/mozboot/gentoo.py
++++ b/python/mozboot/mozboot/gentoo.py
+@@ -2,8 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ from mozboot.base import BaseBootstrapper
+ from mozboot.linux_common import LinuxBootstrapper
+ 
+@@ -15,32 +13,13 @@ class GentooBootstrapper(LinuxBootstrapp
+         self.version = version
+         self.dist_id = dist_id
+ 
+-    def install_system_packages(self):
+-        self.ensure_system_packages()
+-
+-    def ensure_system_packages(self):
+-        self.run_as_root(
+-            ["emerge", "--noreplace", "--quiet", "app-arch/zip", "dev-util/watchman"]
+-        )
+-
+-    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+-        # TODO: Figure out what not to install for artifact mode
+-        self.run_as_root(
+-            [
+-                "emerge",
+-                "--oneshot",
+-                "--noreplace",
+-                "--quiet",
+-                "--newuse",
+-                "dev-libs/dbus-glib",
+-                "media-sound/pulseaudio",
+-                "x11-libs/gtk+:3",
+-                "x11-libs/libXt",
+-            ]
+-        )
+-
+-    def install_browser_artifact_mode_packages(self, mozconfig_builder):
+-        self.install_browser_packages(mozconfig_builder, artifact_mode=True)
++    def install_packages(self, packages):
++        DISAMBIGUATE = {
++            "tar": "app-arch/tar",
++        }
++        # watchman is available but requires messing with USEs.
++        packages = [DISAMBIGUATE.get(p, p) for p in packages if p != "watchman"]
++        self.run_as_root(["emerge", "--noreplace"] + packages)
+ 
+     def _update_package_manager(self):
+         self.run_as_root(["emerge", "--sync"])
+diff --git a/python/mozboot/mozboot/linux_common.py b/python/mozboot/mozboot/linux_common.py
+--- a/python/mozboot/mozboot/linux_common.py
++++ b/python/mozboot/mozboot/linux_common.py
+@@ -6,8 +6,6 @@
+ # needed to install Stylo and Node dependencies.  This class must come before
+ # BaseBootstrapper in the inheritance list.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import platform
+ 
+ 
+@@ -15,68 +13,6 @@ def is_non_x86_64():
+     return platform.machine() != "x86_64"
+ 
+ 
+-class SccacheInstall(object):
+-    def __init__(self, **kwargs):
+-        pass
+-
+-    def ensure_sccache_packages(self):
+-        self.install_toolchain_artifact("sccache")
+-
+-
+-class FixStacksInstall(object):
+-    def __init__(self, **kwargs):
+-        pass
+-
+-    def ensure_fix_stacks_packages(self):
+-        self.install_toolchain_artifact("fix-stacks")
+-
+-
+-class StyloInstall(object):
+-    def __init__(self, **kwargs):
+-        pass
+-
+-    def ensure_stylo_packages(self):
+-        if is_non_x86_64():
+-            print(
+-                "Cannot install bindgen clang and cbindgen packages from taskcluster.\n"
+-                "Please install these packages manually."
+-            )
+-            return
+-
+-        self.install_toolchain_artifact("clang")
+-        self.install_toolchain_artifact("cbindgen")
+-
+-
+-class NasmInstall(object):
+-    def __init__(self, **kwargs):
+-        pass
+-
+-    def ensure_nasm_packages(self):
+-        if is_non_x86_64():
+-            print(
+-                "Cannot install nasm from taskcluster.\n"
+-                "Please install this package manually."
+-            )
+-            return
+-
+-        self.install_toolchain_artifact("nasm")
+-
+-
+-class NodeInstall(object):
+-    def __init__(self, **kwargs):
+-        pass
+-
+-    def ensure_node_packages(self):
+-        if is_non_x86_64():
+-            print(
+-                "Cannot install node package from taskcluster.\n"
+-                "Please install this package manually."
+-            )
+-            return
+-
+-        self.install_toolchain_artifact("node")
+-
+-
+ class ClangStaticAnalysisInstall(object):
+     def __init__(self, **kwargs):
+         pass
+@@ -94,14 +30,6 @@ class ClangStaticAnalysisInstall(object)
+         self.install_toolchain_static_analysis(static_analysis.LINUX_CLANG_TIDY)
+ 
+ 
+-class MinidumpStackwalkInstall(object):
+-    def __init__(self, **kwargs):
+-        pass
+-
+-    def ensure_minidump_stackwalk_packages(self):
+-        self.install_toolchain_artifact("minidump-stackwalk")
+-
+-
+ class MobileAndroidBootstrapper(object):
+     def __init__(self, **kwargs):
+         pass
+@@ -154,13 +82,32 @@ class MobileAndroidBootstrapper(object):
+ 
+ class LinuxBootstrapper(
+     ClangStaticAnalysisInstall,
+-    FixStacksInstall,
+-    MinidumpStackwalkInstall,
+     MobileAndroidBootstrapper,
+-    NasmInstall,
+-    NodeInstall,
+-    SccacheInstall,
+-    StyloInstall,
+ ):
+     def __init__(self, **kwargs):
+         pass
++
++    def ensure_sccache_packages(self):
++        pass
++
++    def install_system_packages(self):
++        self.install_packages(
++            [
++                "bash",
++                "findutils",  # contains xargs
++                "gzip",
++                "libxml2",  # used by bootstrapped clang
++                "m4",
++                "make",
++                "perl",
++                "tar",
++                "unzip",
++                "watchman",
++            ]
++        )
++
++    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
++        pass
++
++    def install_browser_artifact_mode_packages(self, mozconfig_builder):
++        pass
+diff --git a/python/mozboot/mozboot/mach_commands.py b/python/mozboot/mozboot/mach_commands.py
+--- a/python/mozboot/mozboot/mach_commands.py
++++ b/python/mozboot/mozboot/mach_commands.py
+@@ -2,13 +2,11 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this,
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import errno
+ import sys
++from pathlib import Path
+ 
+-from pathlib import Path
+-from mach.decorators import CommandArgument, Command
++from mach.decorators import Command, CommandArgument
+ from mozboot.bootstrap import APPLICATIONS
+ 
+ 
+@@ -71,8 +69,8 @@ def vcs_setup(command_context, update_on
+     """
+     import mozboot.bootstrap as bootstrap
+     import mozversioncontrol
++    from mach.util import to_optional_path
+     from mozfile import which
+-    from mach.util import to_optional_path
+ 
+     repo = mozversioncontrol.get_repository_object(command_context._mach_context.topdir)
+     tool = "hg"
+diff --git a/python/mozboot/mozboot/mozconfig.py b/python/mozboot/mozboot/mozconfig.py
+--- a/python/mozboot/mozboot/mozconfig.py
++++ b/python/mozboot/mozboot/mozconfig.py
+@@ -2,15 +2,11 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import
+-
+ import filecmp
+ import os
+-
+ from pathlib import Path
+ from typing import Union
+ 
+-
+ MOZ_MYCONFIG_ERROR = """
+ The MOZ_MYCONFIG environment variable to define the location of mozconfigs
+ is deprecated. If you wish to define the mozconfig path via an environment
+diff --git a/python/mozboot/mozboot/mozillabuild.py b/python/mozboot/mozboot/mozillabuild.py
+--- a/python/mozboot/mozboot/mozillabuild.py
++++ b/python/mozboot/mozboot/mozillabuild.py
+@@ -2,8 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import ctypes
+ import os
+ import platform
+@@ -231,35 +229,9 @@ class MozillaBuildBootstrapper(BaseBoots
+     def ensure_sccache_packages(self):
+         from mozboot import sccache
+ 
+-        self.install_toolchain_artifact("sccache")
+         self.install_toolchain_artifact(sccache.RUSTC_DIST_TOOLCHAIN, no_unpack=True)
+         self.install_toolchain_artifact(sccache.CLANG_DIST_TOOLCHAIN, no_unpack=True)
+ 
+-    def ensure_stylo_packages(self):
+-        # On-device artifact builds are supported; on-device desktop builds are not.
+-        if is_aarch64_host():
+-            raise Exception(
+-                "You should not be performing desktop builds on an "
+-                "AArch64 device.  If you want to do artifact builds "
+-                "instead, please choose the appropriate artifact build "
+-                "option when beginning bootstrap."
+-            )
+-
+-        self.install_toolchain_artifact("clang")
+-        self.install_toolchain_artifact("cbindgen")
+-
+-    def ensure_nasm_packages(self):
+-        self.install_toolchain_artifact("nasm")
+-
+-    def ensure_node_packages(self):
+-        self.install_toolchain_artifact("node")
+-
+-    def ensure_fix_stacks_packages(self):
+-        self.install_toolchain_artifact("fix-stacks")
+-
+-    def ensure_minidump_stackwalk_packages(self):
+-        self.install_toolchain_artifact("minidump-stackwalk")
+-
+     def _update_package_manager(self):
+         pass
+ 
+diff --git a/python/mozboot/mozboot/openbsd.py b/python/mozboot/mozboot/openbsd.py
+--- a/python/mozboot/mozboot/openbsd.py
++++ b/python/mozboot/mozboot/openbsd.py
+@@ -2,8 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ from mozboot.base import BaseBootstrapper
+ 
+ 
+@@ -11,9 +9,17 @@ class OpenBSDBootstrapper(BaseBootstrapp
+     def __init__(self, version, **kwargs):
+         BaseBootstrapper.__init__(self, **kwargs)
+ 
+-        self.packages = ["gmake", "gtar", "rust", "unzip", "zip"]
++        self.packages = ["gmake", "gtar", "rust", "unzip"]
+ 
+-        self.browser_packages = ["llvm", "nasm", "gtk+3", "dbus-glib", "pulseaudio"]
++        self.browser_packages = [
++            "llvm",
++            "cbindgen",
++            "nasm",
++            "node",
++            "gtk+3",
++            "dbus-glib",
++            "pulseaudio",
++        ]
+ 
+     def install_system_packages(self):
+         # we use -z because there's no other way to say "any autoconf-2.13"
+@@ -30,14 +36,3 @@ class OpenBSDBootstrapper(BaseBootstrapp
+     def ensure_clang_static_analysis_package(self):
+         # TODO: we don't ship clang base static analysis for this platform
+         pass
+-
+-    def ensure_stylo_packages(self):
+-        # Clang / llvm already installed as browser package
+-        self.run_as_root(["pkg_add", "cbindgen"])
+-
+-    def ensure_nasm_packages(self):
+-        # installed via install_browser_packages
+-        pass
+-
+-    def ensure_node_packages(self):
+-        self.run_as_root(["pkg_add", "node"])
+diff --git a/python/mozboot/mozboot/opensuse.py b/python/mozboot/mozboot/opensuse.py
+--- a/python/mozboot/mozboot/opensuse.py
++++ b/python/mozboot/mozboot/opensuse.py
+@@ -2,107 +2,24 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+-from mozboot.base import BaseBootstrapper, MERCURIAL_INSTALL_PROMPT
++from mozboot.base import MERCURIAL_INSTALL_PROMPT, BaseBootstrapper
+ from mozboot.linux_common import LinuxBootstrapper
+ 
+-import distro
+-import subprocess
+-
+ 
+ class OpenSUSEBootstrapper(LinuxBootstrapper, BaseBootstrapper):
+     """openSUSE experimental bootstrapper."""
+ 
+-    SYSTEM_PACKAGES = [
+-        "libcurl-devel",
+-        "libpulse-devel",
+-        "rpmconf",
+-        "which",
+-        "unzip",
+-    ]
+-
+-    BROWSER_PACKAGES = [
+-        "alsa-devel",
+-        "gcc-c++",
+-        "gtk3-devel",
+-        "dbus-1-glib-devel",
+-        "glibc-devel-static",
+-        "libstdc++-devel",
+-        "libXt-devel",
+-        "libproxy-devel",
+-        "libuuid-devel",
+-        "clang-devel",
+-        "patterns-gnome-devel_gnome",
+-    ]
+-
+-    OPTIONAL_BROWSER_PACKAGES = [
+-        "gconf2-devel",  # https://bugzilla.mozilla.org/show_bug.cgi?id=1779931
+-    ]
+-
+-    BROWSER_GROUP_PACKAGES = ["devel_C_C++", "devel_gnome"]
+-
+-    MOBILE_ANDROID_COMMON_PACKAGES = ["java-1_8_0-openjdk"]
+-
+     def __init__(self, version, dist_id, **kwargs):
+         print("Using an experimental bootstrapper for openSUSE.")
+         BaseBootstrapper.__init__(self, **kwargs)
+ 
+-    def install_system_packages(self):
+-        self.zypper_install(*self.SYSTEM_PACKAGES)
+-
+-    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+-        # TODO: Figure out what not to install for artifact mode
+-        packages_to_install = self.BROWSER_PACKAGES.copy()
+-
+-        for package in self.OPTIONAL_BROWSER_PACKAGES:
+-            if self.zypper_can_install(package):
+-                packages_to_install.append(package)
+-            else:
+-                print(
+-                    f"WARNING! zypper cannot find a package for '{package}' for "
+-                    f"{distro.name(True)}. It will not be automatically installed."
+-                )
+-
+-        self.zypper_install(*packages_to_install)
+-
+-    def install_browser_group_packages(self):
+-        self.ensure_browser_group_packages()
+-
+-    def install_browser_artifact_mode_packages(self, mozconfig_builder):
+-        self.install_browser_packages(mozconfig_builder, artifact_mode=True)
+-
+-    def ensure_clang_static_analysis_package(self):
+-        from mozboot import static_analysis
+-
+-        self.install_toolchain_static_analysis(static_analysis.LINUX_CLANG_TIDY)
+-
+-    def ensure_browser_group_packages(self, artifact_mode=False):
+-        # TODO: Figure out what not to install for artifact mode
+-        self.zypper_patterninstall(*self.BROWSER_GROUP_PACKAGES)
+-
+-    def install_mobile_android_packages(self, mozconfig_builder, artifact_mode=False):
+-        # Multi-part process:
+-        # 1. System packages.
+-        # 2. Android SDK. Android NDK only if we are not in artifact mode. Android packages.
+-
+-        # 1. This is hard to believe, but the Android SDK binaries are 32-bit
+-        # and that conflicts with 64-bit Arch installations out of the box.  The
+-        # solution is to add the multilibs repository; unfortunately, this
+-        # requires manual intervention.
+-        try:
+-            self.zypper_install(*self.MOBILE_ANDROID_COMMON_PACKAGES)
+-        except Exception as e:
+-            print(
+-                "Failed to install all packages.  The Android developer "
+-                "toolchain requires 32 bit binaries be enabled"
+-            )
+-            raise e
+-
+-        # 2. Android pieces.
+-        super().install_mobile_android_packages(
+-            mozconfig_builder, artifact_mode=artifact_mode
+-        )
++    def install_packages(self, packages):
++        ALTERNATIVE_NAMES = {
++            "libxml2": "libxml2-2",
++        }
++        # watchman is not available
++        packages = [ALTERNATIVE_NAMES.get(p, p) for p in packages if p != "watchman"]
++        self.zypper_install(*packages)
+ 
+     def _update_package_manager(self):
+         self.zypper_update()
+@@ -142,14 +59,5 @@ class OpenSUSEBootstrapper(LinuxBootstra
+     def zypper_install(self, *packages):
+         self.zypper("install", *packages)
+ 
+-    def zypper_can_install(self, package):
+-        return (
+-            subprocess.call(["zypper", "search", package], stdout=subprocess.DEVNULL)
+-            == 0
+-        )
+-
+     def zypper_update(self, *packages):
+         self.zypper("update", *packages)
+-
+-    def zypper_patterninstall(self, *packages):
+-        self.zypper("install", "-t", "pattern", *packages)
+diff --git a/python/mozboot/mozboot/osx.py b/python/mozboot/mozboot/osx.py
+--- a/python/mozboot/mozboot/osx.py
++++ b/python/mozboot/mozboot/osx.py
+@@ -2,8 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import platform
+ import subprocess
+ import sys
+@@ -14,11 +12,10 @@ try:
+ except ImportError:
+     from urllib.request import urlopen
+ 
+-from packaging.version import Version
+-
++from mach.util import to_optional_path, to_optional_str
+ from mozboot.base import BaseBootstrapper
+ from mozfile import which
+-from mach.util import to_optional_path, to_optional_str
++from packaging.version import Version
+ 
+ HOMEBREW_BOOTSTRAP = (
+     "https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
+@@ -166,21 +163,9 @@ class OSXBootstrapperLight(OSXAndroidBoo
+     def install_browser_artifact_mode_packages(self, mozconfig_builder):
+         pass
+ 
+-    def ensure_node_packages(self):
+-        pass
+-
+-    def ensure_stylo_packages(self):
+-        pass
+-
+     def ensure_clang_static_analysis_package(self):
+         pass
+ 
+-    def ensure_nasm_packages(self):
+-        pass
+-
+-    def ensure_minidump_stackwalk_packages(self):
+-        self.install_toolchain_artifact("minidump-stackwalk")
+-
+ 
+ class OSXBootstrapper(OSXAndroidBootstrapper, BaseBootstrapper):
+     def __init__(self, version, **kwargs):
+@@ -299,26 +284,9 @@ class OSXBootstrapper(OSXAndroidBootstra
+     def ensure_sccache_packages(self):
+         from mozboot import sccache
+ 
+-        self.install_toolchain_artifact("sccache")
+         self.install_toolchain_artifact(sccache.RUSTC_DIST_TOOLCHAIN, no_unpack=True)
+         self.install_toolchain_artifact(sccache.CLANG_DIST_TOOLCHAIN, no_unpack=True)
+ 
+-    def ensure_fix_stacks_packages(self):
+-        self.install_toolchain_artifact("fix-stacks")
+-
+-    def ensure_stylo_packages(self):
+-        self.install_toolchain_artifact("clang")
+-        self.install_toolchain_artifact("cbindgen")
+-
+-    def ensure_nasm_packages(self):
+-        self.install_toolchain_artifact("nasm")
+-
+-    def ensure_node_packages(self):
+-        self.install_toolchain_artifact("node")
+-
+-    def ensure_minidump_stackwalk_packages(self):
+-        self.install_toolchain_artifact("minidump-stackwalk")
+-
+     def install_homebrew(self):
+         print(BREW_INSTALL)
+         bootstrap = urlopen(url=HOMEBREW_BOOTSTRAP, timeout=20).read()
+diff --git a/python/mozboot/mozboot/rust.py b/python/mozboot/mozboot/rust.py
+--- a/python/mozboot/mozboot/rust.py
++++ b/python/mozboot/mozboot/rust.py
+@@ -2,16 +2,11 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this,
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import platform as platform_mod
+ import sys
+ 
+-
+ # Base url for pulling the rustup installer.
+-# Use the no-CNAME host for compatibilty with Python 2.7
+-# which doesn't support SNI.
+-RUSTUP_URL_BASE = "https://static-rust-lang-org.s3.amazonaws.com/rustup"
++RUSTUP_URL_BASE = "https://static.rust-lang.org/rustup"
+ 
+ # Pull this to get the lastest stable version number.
+ RUSTUP_MANIFEST = RUSTUP_URL_BASE + "/release-stable.toml"
+@@ -123,6 +118,7 @@ def rustup_latest_version():
+ 
+ def http_download_and_hash(url):
+     import hashlib
++
+     import requests
+ 
+     h = hashlib.sha256()
+diff --git a/python/mozboot/mozboot/sccache.py b/python/mozboot/mozboot/sccache.py
+--- a/python/mozboot/mozboot/sccache.py
++++ b/python/mozboot/mozboot/sccache.py
+@@ -2,8 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ # sccache-dist currently expects clients to provide toolchains when
+ # distributing from macOS or Windows, so we download linux binaries capable
+ # of cross-compiling for these cases.
+diff --git a/python/mozboot/mozboot/solus.py b/python/mozboot/mozboot/solus.py
+--- a/python/mozboot/mozboot/solus.py
++++ b/python/mozboot/mozboot/solus.py
+@@ -2,73 +2,19 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+-import sys
+-import subprocess
+-
+ from mozboot.base import BaseBootstrapper
+ from mozboot.linux_common import LinuxBootstrapper
+ 
+-# NOTE: This script is intended to be run with a vanilla Python install.  We
+-# have to rely on the standard library instead of Python 2+3 helpers like
+-# the six module.
+-if sys.version_info < (3,):
+-    input = raw_input  # noqa
+-
+ 
+ class SolusBootstrapper(LinuxBootstrapper, BaseBootstrapper):
+     """Solus experimental bootstrapper."""
+ 
+-    SYSTEM_PACKAGES = ["unzip", "zip"]
+-    SYSTEM_COMPONENTS = ["system.devel"]
+-
+-    BROWSER_PACKAGES = [
+-        "alsa-lib",
+-        "dbus",
+-        "libgtk-3",
+-        "libevent",
+-        "libvpx",
+-        "libxt",
+-        "libstartup-notification",
+-        "gst-plugins-base",
+-        "gst-plugins-good",
+-        "pulseaudio",
+-        "xorg-server-xvfb",
+-    ]
+-
+-    MOBILE_ANDROID_COMMON_PACKAGES = [
+-        # See comment about 32 bit binaries and multilib below.
+-        "ncurses-32bit",
+-        "readline-32bit",
+-        "zlib-32bit",
+-    ]
+-
+     def __init__(self, version, dist_id, **kwargs):
+         print("Using an experimental bootstrapper for Solus.")
+         BaseBootstrapper.__init__(self, **kwargs)
+ 
+-    def install_system_packages(self):
+-        self.package_install(*self.SYSTEM_PACKAGES)
+-        self.component_install(*self.SYSTEM_COMPONENTS)
+-
+-    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+-        self.package_install(*self.BROWSER_PACKAGES)
+-
+-    def install_browser_artifact_mode_packages(self, mozconfig_builder):
+-        self.install_browser_packages(mozconfig_builder, artifact_mode=True)
+-
+-    def install_mobile_android_packages(self, mozconfig_builder, artifact_mode=False):
+-        try:
+-            self.package_install(*self.MOBILE_ANDROID_COMMON_PACKAGES)
+-        except Exception as e:
+-            print("Failed to install all packages!")
+-            raise e
+-
+-        # 2. Android pieces.
+-        super().install_mobile_android_packages(
+-            mozconfig_builder, artifact_mode=artifact_mode
+-        )
++    def install_packages(self, packages):
++        self.package_install(*packages)
+ 
+     def _update_package_manager(self):
+         pass
+@@ -84,15 +30,3 @@ class SolusBootstrapper(LinuxBootstrappe
+         command.extend(packages)
+ 
+         self.run_as_root(command)
+-
+-    def component_install(self, *components):
+-        command = ["eopkg", "install", "-c"]
+-        if self.no_interactive:
+-            command.append("--yes-all")
+-
+-        command.extend(components)
+-
+-        self.run_as_root(command)
+-
+-    def run(self, command, env=None):
+-        subprocess.check_call(command, stdin=sys.stdin, env=env)
+diff --git a/python/mozboot/mozboot/static_analysis.py b/python/mozboot/mozboot/static_analysis.py
+--- a/python/mozboot/mozboot/static_analysis.py
++++ b/python/mozboot/mozboot/static_analysis.py
+@@ -2,8 +2,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ WINDOWS_CLANG_TIDY = "win64-clang-tidy"
+ LINUX_CLANG_TIDY = "linux64-clang-tidy"
+ MACOS_CLANG_TIDY = "macosx64-clang-tidy"
+diff --git a/python/mozboot/mozboot/util.py b/python/mozboot/mozboot/util.py
+--- a/python/mozboot/mozboot/util.py
++++ b/python/mozboot/mozboot/util.py
+@@ -2,27 +2,14 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import hashlib
+ import os
+-import sys
+-
+ from pathlib import Path
++from urllib.request import urlopen
+ 
+ from mach.site import PythonVirtualenv
+ from mach.util import get_state_dir
+ 
+-# NOTE: This script is intended to be run with a vanilla Python install.  We
+-# have to rely on the standard library instead of Python 2+3 helpers like
+-# the six module.
+-if sys.version_info < (3,):
+-    from urllib2 import urlopen
+-
+-    input = raw_input  # noqa
+-else:
+-    from urllib.request import urlopen
+-
+ MINIMUM_RUST_VERSION = "1.63.0"
+ 
+ 
+diff --git a/python/mozboot/mozboot/void.py b/python/mozboot/mozboot/void.py
+--- a/python/mozboot/mozboot/void.py
++++ b/python/mozboot/mozboot/void.py
+@@ -2,31 +2,11 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+-import os
+-import subprocess
+-import sys
+-
+ from mozboot.base import BaseBootstrapper
+ from mozboot.linux_common import LinuxBootstrapper
+ 
+ 
+ class VoidBootstrapper(LinuxBootstrapper, BaseBootstrapper):
+-
+-    PACKAGES = ["clang", "make", "mercurial", "watchman", "unzip", "zip"]
+-
+-    BROWSER_PACKAGES = [
+-        "dbus-devel",
+-        "dbus-glib-devel",
+-        "gtk+3-devel",
+-        "pulseaudio",
+-        "pulseaudio-devel",
+-        "libcurl-devel",
+-        "libxcb-devel",
+-        "libXt-devel",
+-    ]
+-
+     def __init__(self, version, dist_id, **kwargs):
+         BaseBootstrapper.__init__(self, **kwargs)
+ 
+@@ -34,18 +14,10 @@ class VoidBootstrapper(LinuxBootstrapper
+         self.version = version
+         self.dist_id = dist_id
+ 
+-        self.packages = self.PACKAGES
+-        self.browser_packages = self.BROWSER_PACKAGES
+-
+     def run_as_root(self, command):
+         # VoidLinux doesn't support users sudo'ing most commands by default because of the group
+         # configuration.
+-        if os.geteuid() != 0:
+-            command = ["su", "root", "-c", " ".join(command)]
+-
+-        print("Executing as root:", subprocess.list2cmdline(command))
+-
+-        subprocess.check_call(command, stdin=sys.stdin)
++        super().run_as_root(command, may_use_sudo=False)
+ 
+     def xbps_install(self, *packages):
+         command = ["xbps-install"]
+@@ -62,14 +34,8 @@ class VoidBootstrapper(LinuxBootstrapper
+ 
+         self.run_as_root(command)
+ 
+-    def install_system_packages(self):
+-        self.xbps_install(*self.packages)
+-
+-    def install_browser_packages(self, mozconfig_builder, artifact_mode=False):
+-        self.xbps_install(*self.browser_packages)
+-
+-    def install_browser_artifact_mode_packages(self, mozconfig_builder):
+-        self.install_browser_packages(mozconfig_builder, artifact_mode=True)
++    def install_packages(self, packages):
++        self.xbps_install(*packages)
+ 
+     def _update_package_manager(self):
+         self.xbps_update()
+diff --git a/python/mozboot/mozboot/windows.py b/python/mozboot/mozboot/windows.py
+--- a/python/mozboot/mozboot/windows.py
++++ b/python/mozboot/mozboot/windows.py
+@@ -2,12 +2,10 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+ import ctypes
+ import os
++import subprocess
+ import sys
+-import subprocess
+ 
+ from mozboot.base import BaseBootstrapper
+ from mozfile import which
+@@ -50,7 +48,6 @@ class WindowsBootstrapper(BaseBootstrapp
+         "patchutils",
+         "diffutils",
+         "tar",
+-        "zip",
+         "unzip",
+         "mingw-w64-x86_64-toolchain",  # TODO: Remove when Mercurial is installable from a wheel.
+         "mingw-w64-i686-toolchain",
+@@ -106,25 +103,6 @@ class WindowsBootstrapper(BaseBootstrapp
+ 
+         self.install_toolchain_static_analysis(static_analysis.WINDOWS_CLANG_TIDY)
+ 
+-    def ensure_stylo_packages(self):
+-        # On-device artifact builds are supported; on-device desktop builds are not.
+-        if is_aarch64_host():
+-            raise Exception(
+-                "You should not be performing desktop builds on an "
+-                "AArch64 device.  If you want to do artifact builds "
+-                "instead, please choose the appropriate artifact build "
+-                "option when beginning bootstrap."
+-            )
+-
+-        self.install_toolchain_artifact("clang")
+-        self.install_toolchain_artifact("cbindgen")
+-
+-    def ensure_nasm_packages(self):
+-        self.install_toolchain_artifact("nasm")
+-
+-    def ensure_node_packages(self):
+-        self.install_toolchain_artifact("node")
+-
+     def _update_package_manager(self):
+         self.pacman_update()
+ 
+diff --git a/python/mozbuild/mozbuild/action/langpack_manifest.py b/python/mozbuild/mozbuild/action/langpack_manifest.py
+--- a/python/mozbuild/mozbuild/action/langpack_manifest.py
++++ b/python/mozbuild/mozbuild/action/langpack_manifest.py
+@@ -4,28 +4,30 @@
+ 
+ ###
+ # This script generates a web manifest JSON file based on the xpi-stage
+-# directory structure. It extracts the data from defines.inc files from
+-# the locale directory, chrome registry entries and other information
+-# necessary to produce the complete manifest file for a language pack.
++# directory structure. It extracts data necessary to produce the complete
++# manifest file for a language pack:
++# from the `langpack-manifest.ftl` file in the locale directory;
++# from chrome registry entries;
++# and from other information in the `xpi-stage` directory.
+ ###
++
+ from __future__ import absolute_import, print_function, unicode_literals
+ 
+ import argparse
+-import sys
+-import os
+-import json
++import datetime
+ import io
+-import datetime
+-import requests
+-import mozversioncontrol
++import json
++import logging
++import os
++import sys
++
++import fluent.syntax.ast as FTL
+ import mozpack.path as mozpath
+-from mozpack.chrome.manifest import (
+-    Manifest,
+-    ManifestLocale,
+-    parse_manifest,
+-)
++import mozversioncontrol
++import requests
++from fluent.syntax.parser import FluentParser
+ from mozbuild.configure.util import Version
+-from mozbuild.preprocessor import Preprocessor
++from mozpack.chrome.manifest import Manifest, ManifestLocale, parse_manifest
+ 
+ 
+ def write_file(path, content):
+@@ -112,53 +114,89 @@ def get_timestamp_for_locale(path):
+ 
+ 
+ ###
+-# Parses multiple defines files into a single key-value pair object.
++# Parses an FTL file into a key-value pair object.
++# Does not support attributes, terms, variables, functions or selectors;
++# only messages with values consisting of text elements and literals.
+ #
+ # Args:
+-#    paths (str) - a comma separated list of paths to defines files
++#    path (str) - a path to an FTL file
+ #
+ # Returns:
+-#    (dict) - a key-value dict with defines
++#    (dict) - A mapping of message keys to formatted string values.
++#             Empty if the file at `path` was not found.
+ #
+ # Example:
+-#    res = parse_defines('./toolkit/defines.inc,./browser/defines.inc')
++#    res = parse_flat_ftl('./browser/langpack-metadata.ftl')
+ #    res == {
+-#        'MOZ_LANG_TITLE': 'Polski',
+-#        'MOZ_LANGPACK_CREATOR': 'Aviary.pl',
+-#        'MOZ_LANGPACK_CONTRIBUTORS': 'Marek Stepien, Marek Wawoczny'
++#        'langpack-title': 'Polski',
++#        'langpack-creator': 'mozilla.org',
++#        'langpack-contributors': 'Joe Solon, Suzy Solon'
+ #    }
+ ###
+-def parse_defines(paths):
+-    pp = Preprocessor()
+-    for path in paths:
+-        pp.do_include(path)
++def parse_flat_ftl(path):
++    parser = FluentParser(with_spans=False)
++    try:
++        with open(path, encoding="utf-8") as file:
++            res = parser.parse(file.read())
++    except FileNotFoundError as err:
++        logging.warning(err)
++        return {}
+ 
+-    return pp.context
++    result = {}
++    for entry in res.body:
++        if isinstance(entry, FTL.Message) and isinstance(entry.value, FTL.Pattern):
++            flat = ""
++            for elem in entry.value.elements:
++                if isinstance(elem, FTL.TextElement):
++                    flat += elem.value
++                elif isinstance(elem.expression, FTL.Literal):
++                    flat += elem.expression.parse()["value"]
++                else:
++                    name = type(elem.expression).__name__
++                    raise Exception(f"Unsupported {name} for {entry.id.name} in {path}")
++            result[entry.id.name] = flat.strip()
++    return result
+ 
+ 
+-###
+-# Converts the list of contributors from the old RDF based list
+-# of entries, into a comma separated list.
++##
++# Generates the title and description for the langpack.
++#
++# Uses data stored in a JSON file next to this source,
++# which is expected to have the following format:
++#   Record<string, { native: string, english?: string }>
++#
++# If an English name is given and is different from the native one,
++# it will be included parenthetically in the title.
++#
++# NOTE: If you're updating the native locale names,
++#       you should also update the data in
++#       toolkit/components/mozintl/mozIntl.sys.mjs.
+ #
+ # Args:
+-#    str (str) - a string with an RDF list of contributors entries
++#    app    (str) - Application name
++#    locale (str) - Locale identifier
+ #
+ # Returns:
+-#    (str) - a comma separated list of contributors
++#    (str, str) - Tuple of title and description
+ #
+-# Example:
+-#    s = convert_contributors('
+-#        <em:contributor>Marek Wawoczny</em:contributor>
+-#        <em:contributor>Marek Stepien</em:contributor>
+-#    ')
+-#    s == 'Marek Wawoczny, Marek Stepien'
+ ###
+-def convert_contributors(str):
+-    str = str.replace("<em:contributor>", "")
+-    tokens = str.split("</em:contributor>")
+-    tokens = map(lambda t: t.strip(), tokens)
+-    tokens = filter(lambda t: t != "", tokens)
+-    return ", ".join(tokens)
++def get_title_and_description(app, locale):
++    dir = os.path.dirname(__file__)
++    with open(os.path.join(dir, "langpack_localeNames.json"), encoding="utf-8") as nf:
++        names = json.load(nf)
++    if locale in names:
++        data = names[locale]
++        native = data["native"]
++        english = data["english"] if "english" in data else native
++        titleName = f"{native} ({english})" if english != native else native
++        descName = f"{native} ({locale})"
++    else:
++        titleName = locale
++        descName = locale
++
++    title = f"Language Pack: {titleName}"
++    description = f"{app} Language Pack for {descName}"
++    return title, description
+ 
+ 
+ ###
+@@ -166,26 +204,25 @@ def convert_contributors(str):
+ # and optionally adding the list of contributors, if provided.
+ #
+ # Args:
+-#    author (str)       - a string with the name of the author
+-#    contributors (str) - RDF based list of contributors from a chrome manifest
++#    ftl (dict) - a key-value mapping of locale-specific strings
+ #
+ # Returns:
+ #    (str) - a string to be placed in the author field of the manifest.json
+ #
+ # Example:
+-#    s = build_author_string(
+-#    'Aviary.pl',
+-#    '
+-#        <em:contributor>Marek Wawoczny</em:contributor>
+-#        <em:contributor>Marek Stepien</em:contributor>
+-#    ')
+-#    s == 'Aviary.pl (contributors: Marek Wawoczny, Marek Stepien)'
++#    s = get_author({
++#      'langpack-creator': 'mozilla.org',
++#      'langpack-contributors': 'Joe Solon, Suzy Solon'
++#    })
++#    s == 'mozilla.org (contributors: Joe Solon, Suzy Solon)'
+ ###
+-def build_author_string(author, contributors):
+-    contrib = convert_contributors(contributors)
+-    if len(contrib) == 0:
++def get_author(ftl):
++    author = ftl["langpack-creator"] if "langpack-creator" in ftl else "mozilla.org"
++    contrib = ftl["langpack-contributors"] if "langpack-contributors" in ftl else ""
++    if contrib:
++        return f"{author} (contributors: {contrib})"
++    else:
+         return author
+-    return "{0} (contributors: {1})".format(author, contrib)
+ 
+ 
+ ##
+@@ -333,7 +370,7 @@ def get_version_maybe_buildid(version):
+ #                            resources are for
+ #    app_name       (str)  - The name of the application the language
+ #                            resources are for
+-#    defines        (dict) - A dictionary of defines entries
++#    ftl            (dict) - A dictionary of locale-specific strings
+ #    chrome_entries (dict) - A dictionary of chrome registry entries
+ #
+ # Returns:
+@@ -346,7 +383,7 @@ def get_version_maybe_buildid(version):
+ #      '57.0.*',
+ #      'Firefox',
+ #      '/var/vcs/l10n-central',
+-#      {'MOZ_LANG_TITLE': 'Polski'},
++#      {'langpack-title': 'Polski'},
+ #      chrome_entries
+ #    )
+ #    manifest == {
+@@ -392,18 +429,13 @@ def create_webmanifest(
+     app_name,
+     l10n_basedir,
+     langpack_eid,
+-    defines,
++    ftl,
+     chrome_entries,
+ ):
+     locales = list(map(lambda loc: loc.strip(), locstr.split(",")))
+     main_locale = locales[0]
+-
+-    author = build_author_string(
+-        defines["MOZ_LANGPACK_CREATOR"],
+-        defines["MOZ_LANGPACK_CONTRIBUTORS"]
+-        if "MOZ_LANGPACK_CONTRIBUTORS" in defines
+-        else "",
+-    )
++    title, description = get_title_and_description(app_name, main_locale)
++    author = get_author(ftl)
+ 
+     manifest = {
+         "langpack_id": main_locale,
+@@ -415,8 +447,8 @@ def create_webmanifest(
+                 "strict_max_version": max_app_ver,
+             }
+         },
+-        "name": "{0} Language Pack".format(defines["MOZ_LANG_TITLE"]),
+-        "description": "Language pack for {0} for {1}".format(app_name, main_locale),
++        "name": title,
++        "description": description,
+         "version": get_version_maybe_buildid(version),
+         "languages": {},
+         "sources": {"browser": {"base_path": "browser/"}},
+@@ -466,10 +498,8 @@ def main(args):
+         "--langpack-eid", help="Language pack id to use for this locale"
+     )
+     parser.add_argument(
+-        "--defines",
+-        default=[],
+-        nargs="+",
+-        help="List of defines files to load data from",
++        "--metadata",
++        help="FTL file defining langpack metadata",
+     )
+     parser.add_argument("--input", help="Langpack directory.")
+ 
+@@ -480,7 +510,7 @@ def main(args):
+         os.path.join(args.input, "chrome.manifest"), args.input, chrome_entries
+     )
+ 
+-    defines = parse_defines(args.defines)
++    ftl = parse_flat_ftl(args.metadata)
+ 
+     # Mangle the app version to set min version (remove patch level)
+     min_app_version = args.app_version
+@@ -502,7 +532,7 @@ def main(args):
+         args.app_name,
+         args.l10n_basedir,
+         args.langpack_eid,
+-        defines,
++        ftl,
+         chrome_entries,
+     )
+     write_file(os.path.join(args.input, "manifest.json"), res)
+diff --git a/python/mozbuild/mozbuild/action/make_dmg.py b/python/mozbuild/mozbuild/action/make_dmg.py
+--- a/python/mozbuild/mozbuild/action/make_dmg.py
++++ b/python/mozbuild/mozbuild/action/make_dmg.py
+@@ -2,13 +2,16 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function
++import argparse
++import platform
++import sys
++from pathlib import Path
+ 
++from mozbuild.bootstrap import bootstrap_toolchain
+ from mozbuild.repackaging.application_ini import get_application_ini_value
+ from mozpack import dmg
+ 
+-import argparse
+-import sys
++is_linux = platform.system() == "Linux"
+ 
+ 
+ def main(args):
+@@ -41,7 +44,20 @@ def main(args):
+             options.inpath, "App", "CodeName", fallback="Name"
+         )
+ 
+-    dmg.create_dmg(options.inpath, options.dmgfile, volume_name, extra_files)
++    # Resolve required tools
++    dmg_tool = bootstrap_toolchain("dmg/dmg")
++    hfs_tool = bootstrap_toolchain("dmg/hfsplus")
++    mkfshfs_tool = bootstrap_toolchain("hfsplus/newfs_hfs")
++
++    dmg.create_dmg(
++        source_directory=Path(options.inpath),
++        output_dmg=Path(options.dmgfile),
++        volume_name=volume_name,
++        extra_files=extra_files,
++        dmg_tool=dmg_tool,
++        hfs_tool=hfs_tool,
++        mkfshfs_tool=mkfshfs_tool,
++    )
+ 
+     return 0
+ 
+diff --git a/python/mozbuild/mozbuild/action/unpack_dmg.py b/python/mozbuild/mozbuild/action/unpack_dmg.py
+--- a/python/mozbuild/mozbuild/action/unpack_dmg.py
++++ b/python/mozbuild/mozbuild/action/unpack_dmg.py
+@@ -2,12 +2,18 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function
++import argparse
++import sys
++from pathlib import Path
+ 
++from mozbuild.bootstrap import bootstrap_toolchain
+ from mozpack import dmg
+ 
+-import argparse
+-import sys
++
++def _path_or_none(input: str):
++    if not input:
++        return None
++    return Path(input)
+ 
+ 
+ def main(args):
+@@ -26,12 +32,17 @@ def main(args):
+ 
+     options = parser.parse_args(args)
+ 
++    dmg_tool = bootstrap_toolchain("dmg/dmg")
++    hfs_tool = bootstrap_toolchain("dmg/hfsplus")
++
+     dmg.extract_dmg(
+-        dmgfile=options.dmgfile,
+-        output=options.outpath,
+-        dsstore=options.dsstore,
+-        background=options.background,
+-        icon=options.icon,
++        dmgfile=Path(options.dmgfile),
++        output=Path(options.outpath),
++        dmg_tool=Path(dmg_tool),
++        hfs_tool=Path(hfs_tool),
++        dsstore=_path_or_none(options.dsstore),
++        background=_path_or_none(options.background),
++        icon=_path_or_none(options.icon),
+     )
+     return 0
+ 
+diff --git a/python/mozbuild/mozbuild/artifacts.py b/python/mozbuild/mozbuild/artifacts.py
+--- a/python/mozbuild/mozbuild/artifacts.py
++++ b/python/mozbuild/mozbuild/artifacts.py
+@@ -129,7 +129,6 @@ class ArtifactJob(object):
+         ("bin/http3server", ("bin", "bin")),
+         ("bin/plugins/gmp-*/*/*", ("bin/plugins", "bin")),
+         ("bin/plugins/*", ("bin/plugins", "plugins")),
+-        ("bin/components/*.xpt", ("bin/components", "bin/components")),
+     }
+ 
+     # We can tell our input is a test archive by this suffix, which happens to
+@@ -137,6 +136,32 @@ class ArtifactJob(object):
+     _test_zip_archive_suffix = ".common.tests.zip"
+     _test_tar_archive_suffix = ".common.tests.tar.gz"
+ 
++    # A map of extra archives to fetch and unpack.  An extra archive might
++    # include optional build output to incorporate into the local artifact
++    # build.  Test archives and crashreporter symbols could be extra archives
++    # but they require special handling; this mechanism is generic and intended
++    # only for the simplest cases.
++    #
++    # Each suffix key matches a candidate archive (i.e., an artifact produced by
++    # an upstream build).  Each value is itself a dictionary that must contain
++    # the following keys:
++    #
++    # - `description`: a purely informational string description.
++    # - `src_prefix`: entry names in the archive with leading `src_prefix` will
++    #   have the prefix stripped.
++    # - `dest_prefix`: entry names in the archive will have `dest_prefix`
++    #   prepended.
++    #
++    # The entries in the archive, suitably renamed, will be extracted into `dist`.
++    _extra_archives = {
++        ".xpt_artifacts.zip": {
++            "description": "XPT Artifacts",
++            "src_prefix": "",
++            "dest_prefix": "xpt_artifacts",
++        },
++    }
++    _extra_archive_suffixes = tuple(sorted(_extra_archives.keys()))
++
+     def __init__(
+         self,
+         log=None,
+@@ -190,6 +215,8 @@ class ArtifactJob(object):
+                 self._symbols_archive_suffix
+             ):
+                 yield name
++            elif name.endswith(ArtifactJob._extra_archive_suffixes):
++                yield name
+             else:
+                 self.log(
+                     logging.DEBUG,
+@@ -222,6 +249,8 @@ class ArtifactJob(object):
+             self._symbols_archive_suffix
+         ):
+             return self.process_symbols_archive(filename, processed_filename)
++        if filename.endswith(ArtifactJob._extra_archive_suffixes):
++            return self.process_extra_archive(filename, processed_filename)
+         return self.process_package_artifact(filename, processed_filename)
+ 
+     def process_package_artifact(self, filename, processed_filename):
+@@ -373,6 +402,43 @@ class ArtifactJob(object):
+                 )
+                 writer.add(destpath.encode("utf-8"), entry)
+ 
++    def process_extra_archive(self, filename, processed_filename):
++        for suffix, extra_archive in ArtifactJob._extra_archives.items():
++            if filename.endswith(suffix):
++                self.log(
++                    logging.INFO,
++                    "artifact",
++                    {"filename": filename, "description": extra_archive["description"]},
++                    '"{filename}" is a recognized extra archive ({description})',
++                )
++                break
++        else:
++            raise ValueError('"{}" is not a recognized extra archive!'.format(filename))
++
++        src_prefix = extra_archive["src_prefix"]
++        dest_prefix = extra_archive["dest_prefix"]
++
++        with self.get_writer(file=processed_filename, compress_level=5) as writer:
++            for filename, entry in self.iter_artifact_archive(filename):
++                if not filename.startswith(src_prefix):
++                    self.log(
++                        logging.DEBUG,
++                        "artifact",
++                        {"filename": filename, "src_prefix": src_prefix},
++                        "Skipping extra archive item {filename} "
++                        "that does not start with {src_prefix}",
++                    )
++                    continue
++                destpath = mozpath.relpath(filename, src_prefix)
++                destpath = mozpath.join(dest_prefix, destpath)
++                self.log(
++                    logging.INFO,
++                    "artifact",
++                    {"destpath": destpath},
++                    "Adding {destpath} to processed archive",
++                )
++                writer.add(destpath.encode("utf-8"), entry)
++
+     def iter_artifact_archive(self, filename):
+         if filename.endswith(".zip"):
+             reader = JarReader(filename)
+@@ -1392,7 +1458,15 @@ https://firefox-source-docs.mozilla.org/
+                 {"processed_filename": processed_filename},
+                 "Writing processed {processed_filename}",
+             )
+-            self._artifact_job.process_artifact(filename, processed_filename)
++            try:
++                self._artifact_job.process_artifact(filename, processed_filename)
++            except Exception as e:
++                # Delete the partial output of failed processing.
++                try:
++                    os.remove(processed_filename)
++                except FileNotFoundError:
++                    pass
++                raise e
+ 
+         self._artifact_cache._persist_limit.register_file(processed_filename)
+ 
+diff --git a/python/mozbuild/mozbuild/backend/base.py b/python/mozbuild/mozbuild/backend/base.py
+--- a/python/mozbuild/mozbuild/backend/base.py
++++ b/python/mozbuild/mozbuild/backend/base.py
+@@ -215,8 +215,8 @@ class BuildBackend(LoggingMixin):
+         invalidate the XUL cache (which includes some JS) at application
+         startup-time.  The application checks for .purgecaches in the
+         application directory, which varies according to
+-        --enable-application.  There's a further wrinkle on macOS, where
+-        the real application directory is part of a Cocoa bundle
++        --enable-application/--enable-project.  There's a further wrinkle on
++        macOS, where the real application directory is part of a Cocoa bundle
+         produced from the regular application directory by the build
+         system.  In this case, we write to both locations, since the
+         build system recreates the Cocoa bundle from the contents of the
+diff --git a/python/mozbuild/mozbuild/backend/recursivemake.py b/python/mozbuild/mozbuild/backend/recursivemake.py
+--- a/python/mozbuild/mozbuild/backend/recursivemake.py
++++ b/python/mozbuild/mozbuild/backend/recursivemake.py
+@@ -8,26 +8,24 @@ import io
+ import logging
+ import os
+ import re
+-import six
+-
+ from collections import defaultdict, namedtuple
+ from itertools import chain
+ from operator import itemgetter
+-from six import StringIO
+ 
+-from mozpack.manifests import InstallManifest
+ import mozpack.path as mozpath
+-
++import six
+ from mozbuild import frontend
+ from mozbuild.frontend.context import (
+     AbsolutePath,
++    ObjDirPath,
+     Path,
+     RenamedSourcePath,
+     SourcePath,
+-    ObjDirPath,
+ )
+-from .common import CommonBackend
+-from .make import MakeBackend
++from mozbuild.shellutil import quote as shell_quote
++from mozpack.manifests import InstallManifest
++from six import StringIO
++
+ from ..frontend.data import (
+     BaseLibrary,
+     BaseProgram,
+@@ -46,6 +44,7 @@ from ..frontend.data import (
+     HostLibrary,
+     HostProgram,
+     HostRustProgram,
++    HostSharedLibrary,
+     HostSimpleProgram,
+     HostSources,
+     InstallationTarget,
+@@ -58,7 +57,6 @@ from ..frontend.data import (
+     ObjdirPreprocessedFiles,
+     PerSourceFlag,
+     Program,
+-    HostSharedLibrary,
+     RustProgram,
+     RustTests,
+     SandboxedWasmLibrary,
+@@ -71,9 +69,10 @@ from ..frontend.data import (
+     WasmSources,
+     XPIDLModule,
+ )
+-from ..util import ensureParentDir, FileAvoidWrite, OrderedDefaultDict, pairwise
+ from ..makeutil import Makefile
+-from mozbuild.shellutil import quote as shell_quote
++from ..util import FileAvoidWrite, OrderedDefaultDict, ensureParentDir, pairwise
++from .common import CommonBackend
++from .make import MakeBackend
+ 
+ # To protect against accidentally adding logic to Makefiles that belong in moz.build,
+ # we check if moz.build-like variables are defined in Makefiles. If they are, we throw
+@@ -367,7 +366,6 @@ class RecursiveMakeBackend(MakeBackend):
+         self._traversal = RecursiveMakeTraversal()
+         self._compile_graph = OrderedDefaultDict(set)
+         self._rust_targets = set()
+-        self._rust_lib_targets = set()
+         self._gkrust_target = None
+         self._pre_compile = set()
+ 
+@@ -611,7 +609,6 @@ class RecursiveMakeBackend(MakeBackend):
+             build_target = self._build_target_for_obj(obj)
+             self._compile_graph[build_target]
+             self._rust_targets.add(build_target)
+-            self._rust_lib_targets.add(build_target)
+             if obj.is_gkrust:
+                 self._gkrust_target = build_target
+ 
+@@ -774,7 +771,6 @@ class RecursiveMakeBackend(MakeBackend):
+             # on other directories in the tree, so putting them first here will
+             # start them earlier in the build.
+             rust_roots = sorted(r for r in roots if r in self._rust_targets)
+-            rust_libs = sorted(r for r in roots if r in self._rust_lib_targets)
+             if category == "compile" and rust_roots:
+                 rust_rule = root_deps_mk.create_rule(["recurse_rust"])
+                 rust_rule.add_dependencies(rust_roots)
+@@ -786,7 +782,7 @@ class RecursiveMakeBackend(MakeBackend):
+                 # builds.
+                 for prior_target, target in pairwise(
+                     sorted(
+-                        [t for t in rust_libs], key=lambda t: t != self._gkrust_target
++                        [t for t in rust_roots], key=lambda t: t != self._gkrust_target
+                     )
+                 ):
+                     r = root_deps_mk.create_rule([target])
+@@ -1201,8 +1197,9 @@ class RecursiveMakeBackend(MakeBackend):
+         self, obj, backend_file, target_variable, target_cargo_variable
+     ):
+         backend_file.write_once("CARGO_FILE := %s\n" % obj.cargo_file)
+-        backend_file.write_once("CARGO_TARGET_DIR := .\n")
+-        backend_file.write("%s += %s\n" % (target_variable, obj.location))
++        target_dir = mozpath.normpath(backend_file.environment.topobjdir)
++        backend_file.write_once("CARGO_TARGET_DIR := %s\n" % target_dir)
++        backend_file.write("%s += $(DEPTH)/%s\n" % (target_variable, obj.location))
+         backend_file.write("%s += %s\n" % (target_cargo_variable, obj.name))
+ 
+     def _process_rust_program(self, obj, backend_file):
+diff --git a/python/mozbuild/mozbuild/bootstrap.py b/python/mozbuild/mozbuild/bootstrap.py
+--- a/python/mozbuild/mozbuild/bootstrap.py
++++ b/python/mozbuild/mozbuild/bootstrap.py
+@@ -2,16 +2,16 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from mozbuild.configure import ConfigureSandbox
+-from pathlib import Path
+ import functools
+ import io
+ import logging
+ import os
++from pathlib import Path
++
++from mozbuild.configure import ConfigureSandbox
+ 
+ 
+-@functools.lru_cache(maxsize=None)
+-def _bootstrap_sandbox():
++def _raw_sandbox(extra_args=[]):
+     # Here, we don't want an existing mozconfig to interfere with what we
+     # do, neither do we want the default for --enable-bootstrap (which is not
+     # always on) to prevent this from doing something.
+@@ -22,9 +22,17 @@ def _bootstrap_sandbox():
+     logger.propagate = False
+     sandbox = ConfigureSandbox(
+         {},
+-        argv=["configure", "--enable-bootstrap", f"MOZCONFIG={os.devnull}"],
++        argv=["configure"]
++        + extra_args
++        + ["--enable-bootstrap", f"MOZCONFIG={os.devnull}"],
+         logger=logger,
+     )
++    return sandbox
++
++
++@functools.lru_cache(maxsize=None)
++def _bootstrap_sandbox():
++    sandbox = _raw_sandbox()
+     moz_configure = (
+         Path(__file__).parent.parent.parent.parent / "build" / "moz.configure"
+     )
+@@ -42,3 +50,12 @@ def bootstrap_toolchain(toolchain_job):
+     # Returns the path to the toolchain.
+     sandbox = _bootstrap_sandbox()
+     return sandbox._value_for(sandbox["bootstrap_path"](toolchain_job))
++
++
++def bootstrap_all_toolchains_for(configure_args=[]):
++    sandbox = _raw_sandbox(configure_args)
++    moz_configure = Path(__file__).parent.parent.parent.parent / "moz.configure"
++    sandbox.include_file(str(moz_configure))
++    for depend in sandbox._depends.values():
++        if depend.name == "bootstrap_path":
++            depend.result()
+diff --git a/python/mozbuild/mozbuild/controller/building.py b/python/mozbuild/mozbuild/controller/building.py
+--- a/python/mozbuild/mozbuild/controller/building.py
++++ b/python/mozbuild/mozbuild/controller/building.py
+@@ -765,11 +765,11 @@ class StaticAnalysisFooter(Footer):
+         processed = monitor.num_files_processed
+         percent = "(%.2f%%)" % (processed * 100.0 / total)
+         parts = [
+-            ("dim", "Processing"),
++            ("bright_black", "Processing"),
+             ("yellow", str(processed)),
+-            ("dim", "of"),
++            ("bright_black", "of"),
+             ("yellow", str(total)),
+-            ("dim", "files"),
++            ("bright_black", "files"),
+             ("green", percent),
+         ]
+         if monitor.current_file:
+diff --git a/python/mozbuild/mozbuild/frontend/gyp_reader.py b/python/mozbuild/mozbuild/frontend/gyp_reader.py
+--- a/python/mozbuild/mozbuild/frontend/gyp_reader.py
++++ b/python/mozbuild/mozbuild/frontend/gyp_reader.py
+@@ -4,18 +4,20 @@
+ 
+ from __future__ import absolute_import, print_function, unicode_literals
+ 
++import os
++import sys
++import time
++
+ import gyp
+ import gyp.msvs_emulation
++import mozpack.path as mozpath
+ import six
+-import sys
+-import os
+-import time
++from mozbuild import shellutil
++from mozbuild.util import expand_variables
++from mozpack.files import FileFinder
+ 
+-import mozpack.path as mozpath
+-from mozpack.files import FileFinder
++from .context import VARIABLES, ObjDirPath, SourcePath, TemplateContext
+ from .sandbox import alphabetical_sorted
+-from .context import ObjDirPath, SourcePath, TemplateContext, VARIABLES
+-from mozbuild.util import expand_variables
+ 
+ # Define this module as gyp.generator.mozbuild so that gyp can use it
+ # as a generator under the name "mozbuild".
+@@ -443,6 +445,12 @@ class GypProcessor(object):
+             "build_files": [path],
+             "root_targets": None,
+         }
++        # The NSS gyp configuration uses CC and CFLAGS to determine the
++        # floating-point ABI on arm.
++        os.environ.update(
++            CC=config.substs["CC"],
++            CFLAGS=shellutil.quote(*config.substs["CC_BASE_FLAGS"]),
++        )
+ 
+         if gyp_dir_attrs.no_chromium:
+             includes = []
+diff --git a/python/mozbuild/mozbuild/generated_sources.py b/python/mozbuild/mozbuild/generated_sources.py
+--- a/python/mozbuild/mozbuild/generated_sources.py
++++ b/python/mozbuild/mozbuild/generated_sources.py
+@@ -8,8 +8,10 @@ import hashlib
+ import json
+ import os
+ 
++import mozpack.path as mozpath
+ from mozpack.files import FileFinder
+-import mozpack.path as mozpath
++
++GENERATED_SOURCE_EXTS = (".rs", ".c", ".h", ".cc", ".cpp")
+ 
+ 
+ def sha512_digest(data):
+@@ -56,7 +58,7 @@ def get_generated_sources():
+     base = mozpath.join(buildconfig.substs["RUST_TARGET"], rust_build_kind, "build")
+     finder = FileFinder(mozpath.join(buildconfig.topobjdir, base))
+     for p, f in finder:
+-        if p.endswith((".rs", ".c", ".h", ".cc", ".cpp")):
++        if p.endswith(GENERATED_SOURCE_EXTS):
+             yield mozpath.join(base, p), f
+ 
+ 
+diff --git a/python/mozbuild/mozbuild/mach_commands.py b/python/mozbuild/mozbuild/mach_commands.py
+--- a/python/mozbuild/mozbuild/mach_commands.py
++++ b/python/mozbuild/mozbuild/mach_commands.py
+@@ -5,6 +5,7 @@
+ from __future__ import absolute_import, print_function, unicode_literals
+ 
+ import argparse
++import errno
+ import itertools
+ import json
+ import logging
+@@ -17,26 +18,20 @@ import subprocess
+ import sys
+ import tempfile
+ import time
+-import errno
++from pathlib import Path
+ 
+ import mozbuild.settings  # noqa need @SettingsProvider hook to execute
+ import mozpack.path as mozpath
+-
+-from pathlib import Path
+ from mach.decorators import (
++    Command,
+     CommandArgument,
+     CommandArgumentGroup,
+-    Command,
+     SettingsProvider,
+     SubCommand,
+ )
+-
+-from mozbuild.base import (
+-    BinaryNotFoundException,
+-    BuildEnvironmentNotFoundException,
+-    MachCommandConditions as conditions,
+-    MozbuildObject,
+-)
++from mozbuild.base import BinaryNotFoundException, BuildEnvironmentNotFoundException
++from mozbuild.base import MachCommandConditions as conditions
++from mozbuild.base import MozbuildObject
+ from mozbuild.util import MOZBUILD_METRICS_PATH
+ 
+ here = os.path.abspath(os.path.dirname(__file__))
+@@ -217,6 +212,114 @@ def check(
+ 
+ @SubCommand(
+     "cargo",
++    "udeps",
++    description="Run `cargo udeps` on a given crate.  Defaults to gkrust.",
++    metrics_path=MOZBUILD_METRICS_PATH,
++)
++@CommandArgument(
++    "--all-crates",
++    action="store_true",
++    help="Check all of the crates in the tree.",
++)
++@CommandArgument("crates", default=None, nargs="*", help="The crate name(s) to check.")
++@CommandArgument(
++    "--jobs",
++    "-j",
++    default="0",
++    nargs="?",
++    metavar="jobs",
++    type=int,
++    help="Run the tests in parallel using multiple processes.",
++)
++@CommandArgument("-v", "--verbose", action="store_true", help="Verbose output.")
++@CommandArgument(
++    "--message-format-json",
++    action="store_true",
++    help="Emit error messages as JSON.",
++)
++@CommandArgument(
++    "--expect-unused",
++    action="store_true",
++    help="Do not return an error exit code if udeps detects unused dependencies.",
++)
++def udeps(
++    command_context,
++    all_crates=None,
++    crates=None,
++    jobs=0,
++    verbose=False,
++    message_format_json=False,
++    expect_unused=False,
++):
++    from mozbuild.controller.building import BuildDriver
++
++    command_context.log_manager.enable_all_structured_loggers()
++
++    try:
++        command_context.config_environment
++    except BuildEnvironmentNotFoundException:
++        build = command_context._spawn(BuildDriver)
++        ret = build.build(
++            command_context.metrics,
++            what=["pre-export", "export"],
++            jobs=jobs,
++            verbose=verbose,
++            mach_context=command_context._mach_context,
++        )
++        if ret != 0:
++            return ret
++    # XXX duplication with `mach vendor rust`
++    crates_and_roots = {
++        "gkrust": "toolkit/library/rust",
++        "gkrust-gtest": "toolkit/library/gtest/rust",
++        "geckodriver": "testing/geckodriver",
++    }
++
++    if all_crates:
++        crates = crates_and_roots.keys()
++    elif not crates:
++        crates = ["gkrust"]
++
++    for crate in crates:
++        root = crates_and_roots.get(crate, None)
++        if not root:
++            print(
++                "Cannot locate crate %s.  Please check your spelling or "
++                "add the crate information to the list." % crate
++            )
++            return 1
++
++        udeps_targets = [
++            "force-cargo-library-udeps",
++            "force-cargo-host-library-udeps",
++            "force-cargo-program-udeps",
++            "force-cargo-host-program-udeps",
++        ]
++
++        append_env = {}
++        if message_format_json:
++            append_env["USE_CARGO_JSON_MESSAGE_FORMAT"] = "1"
++        if expect_unused:
++            append_env["CARGO_UDEPS_EXPECT_ERR"] = "1"
++
++        ret = command_context._run_make(
++            srcdir=False,
++            directory=root,
++            ensure_exit_code=0,
++            silent=not verbose,
++            print_directory=False,
++            target=udeps_targets,
++            num_jobs=jobs,
++            append_env=append_env,
++        )
++        if ret != 0:
++            return ret
++
++    return 0
++
++
++@SubCommand(
++    "cargo",
+     "vet",
+     description="Run `cargo vet`.",
+ )
+@@ -278,6 +381,209 @@ def cargo_vet(command_context, arguments
+     return res if stdout else res.returncode
+ 
+ 
++@SubCommand(
++    "cargo",
++    "clippy",
++    description="Run `cargo clippy` on a given crate.  Defaults to gkrust.",
++    metrics_path=MOZBUILD_METRICS_PATH,
++)
++@CommandArgument(
++    "--all-crates",
++    default=None,
++    action="store_true",
++    help="Check all of the crates in the tree.",
++)
++@CommandArgument("crates", default=None, nargs="*", help="The crate name(s) to check.")
++@CommandArgument(
++    "--jobs",
++    "-j",
++    default="0",
++    nargs="?",
++    metavar="jobs",
++    type=int,
++    help="Run the tests in parallel using multiple processes.",
++)
++@CommandArgument("-v", "--verbose", action="store_true", help="Verbose output.")
++@CommandArgument(
++    "--message-format-json",
++    action="store_true",
++    help="Emit error messages as JSON.",
++)
++def clippy(
++    command_context,
++    all_crates=None,
++    crates=None,
++    jobs=0,
++    verbose=False,
++    message_format_json=False,
++):
++    from mozbuild.controller.building import BuildDriver
++
++    command_context.log_manager.enable_all_structured_loggers()
++
++    try:
++        command_context.config_environment
++    except BuildEnvironmentNotFoundException:
++        build = command_context._spawn(BuildDriver)
++        ret = build.build(
++            command_context.metrics,
++            what=["pre-export", "export"],
++            jobs=jobs,
++            verbose=verbose,
++            mach_context=command_context._mach_context,
++        )
++        if ret != 0:
++            return ret
++    # XXX duplication with `mach vendor rust`
++    crates_and_roots = {
++        "gkrust": "toolkit/library/rust",
++        "gkrust-gtest": "toolkit/library/gtest/rust",
++        "geckodriver": "testing/geckodriver",
++    }
++
++    if all_crates:
++        crates = crates_and_roots.keys()
++    elif crates is None or crates == []:
++        crates = ["gkrust"]
++
++    final_ret = 0
++
++    for crate in crates:
++        root = crates_and_roots.get(crate, None)
++        if not root:
++            print(
++                "Cannot locate crate %s.  Please check your spelling or "
++                "add the crate information to the list." % crate
++            )
++            return 1
++
++        check_targets = [
++            "force-cargo-library-clippy",
++            "force-cargo-host-library-clippy",
++            "force-cargo-program-clippy",
++            "force-cargo-host-program-clippy",
++        ]
++
++        append_env = {}
++        if message_format_json:
++            append_env["USE_CARGO_JSON_MESSAGE_FORMAT"] = "1"
++
++        ret = 2
++
++        try:
++            ret = command_context._run_make(
++                srcdir=False,
++                directory=root,
++                ensure_exit_code=0,
++                silent=not verbose,
++                print_directory=False,
++                target=check_targets,
++                num_jobs=jobs,
++                append_env=append_env,
++            )
++        except Exception as e:
++            print("%s" % e)
++        if ret != 0:
++            final_ret = ret
++
++    return final_ret
++
++
++@SubCommand(
++    "cargo",
++    "audit",
++    description="Run `cargo audit` on a given crate.  Defaults to gkrust.",
++)
++@CommandArgument(
++    "--all-crates",
++    action="store_true",
++    help="Run `cargo audit` on all the crates in the tree.",
++)
++@CommandArgument(
++    "crates",
++    default=None,
++    nargs="*",
++    help="The crate name(s) to run `cargo audit` on.",
++)
++@CommandArgument(
++    "--jobs",
++    "-j",
++    default="0",
++    nargs="?",
++    metavar="jobs",
++    type=int,
++    help="Run `audit` in parallel using multiple processes.",
++)
++@CommandArgument("-v", "--verbose", action="store_true", help="Verbose output.")
++@CommandArgument(
++    "--message-format-json",
++    action="store_true",
++    help="Emit error messages as JSON.",
++)
++def audit(
++    command_context,
++    all_crates=None,
++    crates=None,
++    jobs=0,
++    verbose=False,
++    message_format_json=False,
++):
++    # XXX duplication with `mach vendor rust`
++    crates_and_roots = {
++        "gkrust": "toolkit/library/rust",
++        "gkrust-gtest": "toolkit/library/gtest/rust",
++        "geckodriver": "testing/geckodriver",
++    }
++
++    if all_crates:
++        crates = crates_and_roots.keys()
++    elif not crates:
++        crates = ["gkrust"]
++
++    final_ret = 0
++
++    for crate in crates:
++        root = crates_and_roots.get(crate, None)
++        if not root:
++            print(
++                "Cannot locate crate %s.  Please check your spelling or "
++                "add the crate information to the list." % crate
++            )
++            return 1
++
++        check_targets = [
++            "force-cargo-library-audit",
++            "force-cargo-host-library-audit",
++            "force-cargo-program-audit",
++            "force-cargo-host-program-audit",
++        ]
++
++        append_env = {}
++        if message_format_json:
++            append_env["USE_CARGO_JSON_MESSAGE_FORMAT"] = "1"
++
++        ret = 2
++
++        try:
++            ret = command_context._run_make(
++                srcdir=False,
++                directory=root,
++                ensure_exit_code=0,
++                silent=not verbose,
++                print_directory=False,
++                target=check_targets
++                + ["cargo_build_flags=-f %s/Cargo.lock" % command_context.topsrcdir],
++                num_jobs=jobs,
++                append_env=append_env,
++            )
++        except Exception as e:
++            print("%s" % e)
++        if ret != 0:
++            final_ret = ret
++
++    return final_ret
++
++
+ @Command(
+     "doctor",
+     category="devenv",
+@@ -891,8 +1197,9 @@ def gtest(
+             pass_thru=True,
+         )
+ 
++    import functools
++
+     from mozprocess import ProcessHandlerMixin
+-    import functools
+ 
+     def handle_line(job_id, line):
+         # Prepend the jobId
+@@ -946,7 +1253,7 @@ def android_gtest(
+     setup_logging("mach-gtest", {}, {default_format: sys.stdout}, format_args)
+ 
+     # ensure that a device is available and test app is installed
+-    from mozrunner.devices.android_device import verify_android_device, get_adb_path
++    from mozrunner.devices.android_device import get_adb_path, verify_android_device
+ 
+     verify_android_device(
+         command_context, install=install, app=package, device_serial=device_serial
+@@ -1046,8 +1353,8 @@ def install(command_context, **kwargs):
+     """Install a package."""
+     if conditions.is_android(command_context):
+         from mozrunner.devices.android_device import (
++            InstallIntent,
+             verify_android_device,
+-            InstallIntent,
+         )
+ 
+         ret = (
+@@ -1386,9 +1693,9 @@ def _run_android(
+     use_existing_process=False,
+ ):
+     from mozrunner.devices.android_device import (
+-        verify_android_device,
++        InstallIntent,
+         _get_device,
+-        InstallIntent,
++        verify_android_device,
+     )
+     from six.moves import shlex_quote
+ 
+@@ -1782,7 +2089,7 @@ def _run_desktop(
+     stacks,
+     show_dump_stats,
+ ):
+-    from mozprofile import Profile, Preferences
++    from mozprofile import Preferences, Profile
+ 
+     try:
+         if packaged:
+@@ -2106,7 +2413,34 @@ def repackage(command_context):
+     scriptworkers in order to bundle things up into shippable formats, such as a
+     .dmg on OSX or an installer exe on Windows.
+     """
+-    print("Usage: ./mach repackage [dmg|installer|mar] [args...]")
++    print("Usage: ./mach repackage [dmg|pkg|installer|mar] [args...]")
++
++
++@SubCommand(
++    "repackage", "deb", description="Repackage a tar file into a .deb for Linux"
++)
++@CommandArgument("--input", "-i", type=str, required=True, help="Input filename")
++@CommandArgument("--output", "-o", type=str, required=True, help="Output filename")
++@CommandArgument("--arch", type=str, required=True, help="One of ['x86', 'x86_64']")
++@CommandArgument(
++    "--templates",
++    type=str,
++    required=True,
++    help="Location of the templates used to generate the debian/ directory files",
++)
++def repackage_deb(command_context, input, output, arch, templates):
++    if not os.path.exists(input):
++        print("Input file does not exist: %s" % input)
++        return 1
++
++    template_dir = os.path.join(
++        command_context.topsrcdir,
++        templates,
++    )
++
++    from mozbuild.repackaging.deb import repackage_deb
++
++    repackage_deb(input, output, template_dir, arch)
+ 
+ 
+ @SubCommand("repackage", "dmg", description="Repackage a tar file into a .dmg for OSX")
+@@ -2117,18 +2451,24 @@ def repackage_dmg(command_context, input
+         print("Input file does not exist: %s" % input)
+         return 1
+ 
+-    if not os.path.exists(os.path.join(command_context.topobjdir, "config.status")):
+-        print(
+-            "config.status not found.  Please run |mach configure| "
+-            "prior to |mach repackage|."
+-        )
+-        return 1
+-
+     from mozbuild.repackaging.dmg import repackage_dmg
+ 
+     repackage_dmg(input, output)
+ 
+ 
++@SubCommand("repackage", "pkg", description="Repackage a tar file into a .pkg for OSX")
++@CommandArgument("--input", "-i", type=str, required=True, help="Input filename")
++@CommandArgument("--output", "-o", type=str, required=True, help="Output filename")
++def repackage_pkg(command_context, input, output):
++    if not os.path.exists(input):
++        print("Input file does not exist: %s" % input)
++        return 1
++
++    from mozbuild.repackaging.pkg import repackage_pkg
++
++    repackage_pkg(input, output)
++
++
+ @SubCommand(
+     "repackage", "installer", description="Repackage into a Windows installer exe"
+ )
+diff --git a/python/mozbuild/mozbuild/repackaging/dmg.py b/python/mozbuild/mozbuild/repackaging/dmg.py
+--- a/python/mozbuild/mozbuild/repackaging/dmg.py
++++ b/python/mozbuild/mozbuild/repackaging/dmg.py
+@@ -2,16 +2,13 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ # You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function
++import tarfile
++from pathlib import Path
+ 
+-import errno
+-import os
+-import tempfile
+-import tarfile
+-import shutil
+-import mozpack.path as mozpath
++import mozfile
++from mozbuild.bootstrap import bootstrap_toolchain
++from mozbuild.repackaging.application_ini import get_application_ini_value
+ from mozpack.dmg import create_dmg
+-from mozbuild.repackaging.application_ini import get_application_ini_value
+ 
+ 
+ def repackage_dmg(infile, output):
+@@ -19,27 +16,41 @@ def repackage_dmg(infile, output):
+     if not tarfile.is_tarfile(infile):
+         raise Exception("Input file %s is not a valid tarfile." % infile)
+ 
+-    tmpdir = tempfile.mkdtemp()
+-    try:
++    # Resolve required tools
++    dmg_tool = bootstrap_toolchain("dmg/dmg")
++    if not dmg_tool:
++        raise Exception("DMG tool not found")
++    hfs_tool = bootstrap_toolchain("dmg/hfsplus")
++    if not hfs_tool:
++        raise Exception("HFS tool not found")
++    mkfshfs_tool = bootstrap_toolchain("hfsplus/newfs_hfs")
++    if not mkfshfs_tool:
++        raise Exception("MKFSHFS tool not found")
++
++    with mozfile.TemporaryDirectory() as tmp:
++        tmpdir = Path(tmp)
+         with tarfile.open(infile) as tar:
+             tar.extractall(path=tmpdir)
+ 
+         # Remove the /Applications symlink. If we don't, an rsync command in
+         # create_dmg() will break, and create_dmg() re-creates the symlink anyway.
+-        try:
+-            os.remove(mozpath.join(tmpdir, " "))
+-        except OSError as e:
+-            if e.errno != errno.ENOENT:
+-                raise
++        symlink = tmpdir / " "
++        if symlink.is_file():
++            symlink.unlink()
+ 
+         volume_name = get_application_ini_value(
+-            tmpdir, "App", "CodeName", fallback="Name"
++            str(tmpdir), "App", "CodeName", fallback="Name"
+         )
+ 
+         # The extra_files argument is empty [] because they are already a part
+         # of the original dmg produced by the build, and they remain in the
+         # tarball generated by the signing task.
+-        create_dmg(tmpdir, output, volume_name, [])
+-
+-    finally:
+-        shutil.rmtree(tmpdir)
++        create_dmg(
++            source_directory=tmpdir,
++            output_dmg=Path(output),
++            volume_name=volume_name,
++            extra_files=[],
++            dmg_tool=Path(dmg_tool),
++            hfs_tool=Path(hfs_tool),
++            mkfshfs_tool=Path(mkfshfs_tool),
++        )
+diff --git a/python/mozbuild/mozbuild/test/action/test_langpack_manifest.py b/python/mozbuild/mozbuild/test/action/test_langpack_manifest.py
+--- a/python/mozbuild/mozbuild/test/action/test_langpack_manifest.py
++++ b/python/mozbuild/mozbuild/test/action/test_langpack_manifest.py
+@@ -5,14 +5,13 @@
+ 
+ from __future__ import absolute_import, print_function
+ 
+-import unittest
+ import json
+ import os
+-
+-import mozunit
++import tempfile
++import unittest
+ 
+ import mozbuild.action.langpack_manifest as langpack_manifest
+-from mozbuild.preprocessor import Context
++import mozunit
+ 
+ 
+ class TestGenerateManifest(unittest.TestCase):
+@@ -20,16 +19,30 @@ class TestGenerateManifest(unittest.Test
+     Unit tests for langpack_manifest.py.
+     """
+ 
++    def test_parse_flat_ftl(self):
++        src = """
++langpack-creator = bar {"bar"}
++langpack-contributors = { "" }
++"""
++        tmp = tempfile.NamedTemporaryFile(mode="wt", suffix=".ftl", delete=False)
++        try:
++            tmp.write(src)
++            tmp.close()
++            ftl = langpack_manifest.parse_flat_ftl(tmp.name)
++            self.assertEqual(ftl["langpack-creator"], "bar bar")
++            self.assertEqual(ftl["langpack-contributors"], "")
++        finally:
++            os.remove(tmp.name)
++
++    def test_parse_flat_ftl_missing(self):
++        ftl = langpack_manifest.parse_flat_ftl("./does-not-exist.ftl")
++        self.assertEqual(len(ftl), 0)
++
+     def test_manifest(self):
+-        ctx = Context()
+-        ctx["MOZ_LANG_TITLE"] = "Finnish"
+-        ctx["MOZ_LANGPACK_CREATOR"] = "Suomennosprojekti"
+-        ctx[
+-            "MOZ_LANGPACK_CONTRIBUTORS"
+-        ] = """
+-            <em:contributor>Joe Smith</em:contributor>
+-            <em:contributor>Mary White</em:contributor>
+-        """
++        ctx = {
++            "langpack-creator": "Suomennosprojekti",
++            "langpack-contributors": "Joe Smith, Mary White",
++        }
+         os.environ["MOZ_BUILD_DATE"] = "20210928100000"
+         manifest = langpack_manifest.create_webmanifest(
+             "fi",
+@@ -44,16 +57,17 @@ class TestGenerateManifest(unittest.Test
+         )
+ 
+         data = json.loads(manifest)
+-        self.assertEqual(data["name"], "Finnish Language Pack")
++        self.assertEqual(data["name"], "Language Pack: Suomi (Finnish)")
+         self.assertEqual(
+             data["author"], "Suomennosprojekti (contributors: Joe Smith, Mary White)"
+         )
+         self.assertEqual(data["version"], "57.0.1buildid20210928.100000")
+ 
+     def test_manifest_without_contributors(self):
+-        ctx = Context()
+-        ctx["MOZ_LANG_TITLE"] = "Finnish"
+-        ctx["MOZ_LANGPACK_CREATOR"] = "Suomennosprojekti"
++        ctx = {
++            "langpack-creator": "Suomennosprojekti",
++            "langpack-contributors": "",
++        }
+         manifest = langpack_manifest.create_webmanifest(
+             "fi",
+             "57.0.1",
+@@ -67,7 +81,7 @@ class TestGenerateManifest(unittest.Test
+         )
+ 
+         data = json.loads(manifest)
+-        self.assertEqual(data["name"], "Finnish Language Pack")
++        self.assertEqual(data["name"], "Language Pack: Suomi (Finnish)")
+         self.assertEqual(data["author"], "Suomennosprojekti")
+ 
+ 
+diff --git a/python/mozbuild/mozbuild/test/backend/test_recursivemake.py b/python/mozbuild/mozbuild/test/backend/test_recursivemake.py
+--- a/python/mozbuild/mozbuild/test/backend/test_recursivemake.py
++++ b/python/mozbuild/mozbuild/test/backend/test_recursivemake.py
+@@ -6,21 +6,18 @@ from __future__ import absolute_import, 
+ 
+ import io
+ import os
+-import six.moves.cPickle as pickle
+-import six
+ import unittest
+ 
+-from mozpack.manifests import InstallManifest
+-from mozunit import main
+-
++import mozpack.path as mozpath
++import six
++import six.moves.cPickle as pickle
+ from mozbuild.backend.recursivemake import RecursiveMakeBackend, RecursiveMakeTraversal
+ from mozbuild.backend.test_manifest import TestManifestBackend
+ from mozbuild.frontend.emitter import TreeMetadataEmitter
+ from mozbuild.frontend.reader import BuildReader
+-
+ from mozbuild.test.backend.common import BackendTester
+-
+-import mozpack.path as mozpath
++from mozpack.manifests import InstallManifest
++from mozunit import main
+ 
+ 
+ class TestRecursiveMakeTraversal(unittest.TestCase):
+@@ -1011,10 +1008,10 @@ class TestRecursiveMakeBackend(BackendTe
+ 
+         expected = [
+             "CARGO_FILE := %s/code/Cargo.toml" % env.topsrcdir,
+-            "CARGO_TARGET_DIR := .",
+-            "RUST_PROGRAMS += i686-pc-windows-msvc/release/target.exe",
++            "CARGO_TARGET_DIR := %s" % env.topobjdir,
++            "RUST_PROGRAMS += $(DEPTH)/i686-pc-windows-msvc/release/target.exe",
+             "RUST_CARGO_PROGRAMS += target",
+-            "HOST_RUST_PROGRAMS += i686-pc-windows-msvc/release/host.exe",
++            "HOST_RUST_PROGRAMS += $(DEPTH)/i686-pc-windows-msvc/release/host.exe",
+             "HOST_RUST_CARGO_PROGRAMS += host",
+         ]
+ 
+diff --git a/python/mozbuild/mozbuild/vendor/moz_yaml.py b/python/mozbuild/mozbuild/vendor/moz_yaml.py
+--- a/python/mozbuild/mozbuild/vendor/moz_yaml.py
++++ b/python/mozbuild/mozbuild/vendor/moz_yaml.py
+@@ -104,6 +104,10 @@ origin:
+   # optional
+   license-file: COPYING
+ 
++  # If there are any mozilla-specific notes you want to put
++  # about a library, they can be put here.
++  notes: Notes about the library
++
+ # Configuration for the automated vendoring system.
+ # optional
+ vendoring:
+@@ -379,6 +383,7 @@ def _schema_1():
+             "origin": {
+                 Required("name"): All(str, Length(min=1)),
+                 Required("description"): All(str, Length(min=1)),
++                "notes": All(str, Length(min=1)),
+                 Required("url"): FqdnUrl(),
+                 Required("license"): Msg(License(), msg="Unsupported License"),
+                 "license-file": All(str, Length(min=1)),
+diff --git a/python/mozbuild/mozbuild/vendor/vendor_manifest.py b/python/mozbuild/mozbuild/vendor/vendor_manifest.py
+--- a/python/mozbuild/mozbuild/vendor/vendor_manifest.py
++++ b/python/mozbuild/mozbuild/vendor/vendor_manifest.py
+@@ -25,7 +25,7 @@ from mozbuild.vendor.rewrite_mozbuild im
+     MozBuildRewriteException,
+ )
+ 
+-DEFAULT_EXCLUDE_FILES = [".git*"]
++DEFAULT_EXCLUDE_FILES = [".git*", ".git*/**"]
+ DEFAULT_KEEP_FILES = ["**/moz.build", "**/moz.yaml"]
+ DEFAULT_INCLUDE_FILES = []
+ 
+diff --git a/python/mozbuild/mozbuild/vendor/vendor_rust.py b/python/mozbuild/mozbuild/vendor/vendor_rust.py
+--- a/python/mozbuild/mozbuild/vendor/vendor_rust.py
++++ b/python/mozbuild/mozbuild/vendor/vendor_rust.py
+@@ -196,6 +196,7 @@ class VendorRust(MozbuildObject):
+             f
+             for f in self.repository.get_changed_files("M")
+             if os.path.basename(f) not in ("Cargo.toml", "Cargo.lock")
++            and not f.startswith("supply-chain/")
+         ]
+         if modified:
+             self.log(
+diff --git a/python/mozbuild/mozpack/dmg.py b/python/mozbuild/mozpack/dmg.py
+--- a/python/mozbuild/mozpack/dmg.py
++++ b/python/mozbuild/mozpack/dmg.py
+@@ -2,28 +2,18 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-from __future__ import absolute_import, print_function, unicode_literals
+-
+-import buildconfig
+-import errno
+-import mozfile
+ import os
+ import platform
+ import shutil
+ import subprocess
++from pathlib import Path
++from typing import List
+ 
++import mozfile
+ from mozbuild.util import ensureParentDir
+ 
+ is_linux = platform.system() == "Linux"
+-
+-
+-def mkdir(dir):
+-    if not os.path.isdir(dir):
+-        try:
+-            os.makedirs(dir)
+-        except OSError as e:
+-            if e.errno != errno.EEXIST:
+-                raise
++is_osx = platform.system() == "Darwin"
+ 
+ 
+ def chmod(dir):
+@@ -31,48 +21,50 @@ def chmod(dir):
+     subprocess.check_call(["chmod", "-R", "a+rX,a-st,u+w,go-w", dir])
+ 
+ 
+-def rsync(source, dest):
++def rsync(source: Path, dest: Path):
+     "rsync the contents of directory source into directory dest"
+     # Ensure a trailing slash on directories so rsync copies the *contents* of source.
+-    if not source.endswith("/") and os.path.isdir(source):
+-        source += "/"
+-    subprocess.check_call(["rsync", "-a", "--copy-unsafe-links", source, dest])
++    raw_source = str(source)
++    if source.is_dir():
++        raw_source = str(source) + "/"
++    subprocess.check_call(["rsync", "-a", "--copy-unsafe-links", raw_source, dest])
+ 
+ 
+-def set_folder_icon(dir, tmpdir):
++def set_folder_icon(dir: Path, tmpdir: Path, hfs_tool: Path = None):
+     "Set HFS attributes of dir to use a custom icon"
+-    if not is_linux:
++    if is_linux:
++        hfs = tmpdir / "staged.hfs"
++        subprocess.check_call([hfs_tool, hfs, "attr", "/", "C"])
++    elif is_osx:
+         subprocess.check_call(["SetFile", "-a", "C", dir])
+-    else:
+-        hfs = os.path.join(tmpdir, "staged.hfs")
+-        subprocess.check_call([buildconfig.substs["HFS_TOOL"], hfs, "attr", "/", "C"])
+ 
+ 
+-def generate_hfs_file(stagedir, tmpdir, volume_name):
++def generate_hfs_file(
++    stagedir: Path, tmpdir: Path, volume_name: str, mkfshfs_tool: Path
++):
+     """
+     When cross compiling, we zero fill an hfs file, that we will turn into
+     a DMG. To do so we test the size of the staged dir, and add some slight
+     padding to that.
+     """
+-    if is_linux:
+-        hfs = os.path.join(tmpdir, "staged.hfs")
+-        output = subprocess.check_output(["du", "-s", stagedir])
+-        size = int(output.split()[0]) / 1000  # Get in MB
+-        size = int(size * 1.02)  # Bump the used size slightly larger.
+-        # Setup a proper file sized out with zero's
+-        subprocess.check_call(
+-            [
+-                "dd",
+-                "if=/dev/zero",
+-                "of={}".format(hfs),
+-                "bs=1M",
+-                "count={}".format(size),
+-            ]
+-        )
+-        subprocess.check_call([buildconfig.substs["MKFSHFS"], "-v", volume_name, hfs])
++    hfs = tmpdir / "staged.hfs"
++    output = subprocess.check_output(["du", "-s", stagedir])
++    size = int(output.split()[0]) / 1000  # Get in MB
++    size = int(size * 1.02)  # Bump the used size slightly larger.
++    # Setup a proper file sized out with zero's
++    subprocess.check_call(
++        [
++            "dd",
++            "if=/dev/zero",
++            "of={}".format(hfs),
++            "bs=1M",
++            "count={}".format(size),
++        ]
++    )
++    subprocess.check_call([mkfshfs_tool, "-v", volume_name, hfs])
+ 
+ 
+-def create_app_symlink(stagedir, tmpdir):
++def create_app_symlink(stagedir: Path, tmpdir: Path, hfs_tool: Path = None):
+     """
+     Make a symlink to /Applications. The symlink name is a space
+     so we don't have to localize it. The Applications folder icon
+@@ -80,18 +72,34 @@ def create_app_symlink(stagedir, tmpdir)
+     """
+     if is_linux:
+         hfs = os.path.join(tmpdir, "staged.hfs")
+-        subprocess.check_call(
+-            [buildconfig.substs["HFS_TOOL"], hfs, "symlink", "/ ", "/Applications"]
+-        )
+-    else:
+-        os.symlink("/Applications", os.path.join(stagedir, " "))
++        subprocess.check_call([hfs_tool, hfs, "symlink", "/ ", "/Applications"])
++    elif is_osx:
++        os.symlink("/Applications", stagedir / " ")
+ 
+ 
+-def create_dmg_from_staged(stagedir, output_dmg, tmpdir, volume_name):
++def create_dmg_from_staged(
++    stagedir: Path,
++    output_dmg: Path,
++    tmpdir: Path,
++    volume_name: str,
++    hfs_tool: Path = None,
++    dmg_tool: Path = None,
++):
+     "Given a prepared directory stagedir, produce a DMG at output_dmg."
+-    if not is_linux:
+-        # Running on OS X
+-        hybrid = os.path.join(tmpdir, "hybrid.dmg")
++    if is_linux:
++        # The dmg tool doesn't create the destination directories, and silently
++        # returns success if the parent directory doesn't exist.
++        ensureParentDir(output_dmg)
++
++        hfs = os.path.join(tmpdir, "staged.hfs")
++        subprocess.check_call([hfs_tool, hfs, "addall", stagedir])
++        subprocess.check_call(
++            [dmg_tool, "build", hfs, output_dmg],
++            # dmg is seriously chatty
++            stdout=subprocess.DEVNULL,
++        )
++    elif is_osx:
++        hybrid = tmpdir / "hybrid.dmg"
+         subprocess.check_call(
+             [
+                 "hdiutil",
+@@ -121,37 +129,17 @@ def create_dmg_from_staged(stagedir, out
+                 output_dmg,
+             ]
+         )
+-    else:
+-        # The dmg tool doesn't create the destination directories, and silently
+-        # returns success if the parent directory doesn't exist.
+-        ensureParentDir(output_dmg)
+-
+-        hfs = os.path.join(tmpdir, "staged.hfs")
+-        subprocess.check_call([buildconfig.substs["HFS_TOOL"], hfs, "addall", stagedir])
+-        subprocess.check_call(
+-            [buildconfig.substs["DMG_TOOL"], "build", hfs, output_dmg],
+-            # dmg is seriously chatty
+-            stdout=open(os.devnull, "wb"),
+-        )
+ 
+ 
+-def check_tools(*tools):
+-    """
+-    Check that each tool named in tools exists in SUBSTS and is executable.
+-    """
+-    for tool in tools:
+-        path = buildconfig.substs[tool]
+-        if not path:
+-            raise Exception('Required tool "%s" not found' % tool)
+-        if not os.path.isfile(path):
+-            raise Exception('Required tool "%s" not found at path "%s"' % (tool, path))
+-        if not os.access(path, os.X_OK):
+-            raise Exception(
+-                'Required tool "%s" at path "%s" is not executable' % (tool, path)
+-            )
+-
+-
+-def create_dmg(source_directory, output_dmg, volume_name, extra_files):
++def create_dmg(
++    source_directory: Path,
++    output_dmg: Path,
++    volume_name: str,
++    extra_files: List[tuple],
++    dmg_tool: Path,
++    hfs_tool: Path,
++    mkfshfs_tool: Path,
++):
+     """
+     Create a DMG disk image at the path output_dmg from source_directory.
+ 
+@@ -162,73 +150,80 @@ def create_dmg(source_directory, output_
+     if platform.system() not in ("Darwin", "Linux"):
+         raise Exception("Don't know how to build a DMG on '%s'" % platform.system())
+ 
+-    if is_linux:
+-        check_tools("DMG_TOOL", "MKFSHFS", "HFS_TOOL")
+-    with mozfile.TemporaryDirectory() as tmpdir:
+-        stagedir = os.path.join(tmpdir, "stage")
+-        os.mkdir(stagedir)
++    with mozfile.TemporaryDirectory() as tmp:
++        tmpdir = Path(tmp)
++        stagedir = tmpdir / "stage"
++        stagedir.mkdir()
++
+         # Copy the app bundle over using rsync
+         rsync(source_directory, stagedir)
+         # Copy extra files
+         for source, target in extra_files:
+-            full_target = os.path.join(stagedir, target)
+-            mkdir(os.path.dirname(full_target))
++            full_target = stagedir / target
++            full_target.parent.mkdir(parents=True, exist_ok=True)
+             shutil.copyfile(source, full_target)
+-        generate_hfs_file(stagedir, tmpdir, volume_name)
+-        create_app_symlink(stagedir, tmpdir)
++        if is_linux:
++            # Not needed in osx
++            generate_hfs_file(stagedir, tmpdir, volume_name, mkfshfs_tool)
++        create_app_symlink(stagedir, tmpdir, hfs_tool)
+         # Set the folder attributes to use a custom icon
+-        set_folder_icon(stagedir, tmpdir)
++        set_folder_icon(stagedir, tmpdir, hfs_tool)
+         chmod(stagedir)
+-        create_dmg_from_staged(stagedir, output_dmg, tmpdir, volume_name)
++        create_dmg_from_staged(
++            stagedir, output_dmg, tmpdir, volume_name, hfs_tool, dmg_tool
++        )
+ 
+ 
+-def extract_dmg_contents(dmgfile, destdir):
+-    import buildconfig
+-
++def extract_dmg_contents(
++    dmgfile: Path,
++    destdir: Path,
++    dmg_tool: Path = None,
++    hfs_tool: Path = None,
++):
+     if is_linux:
+         with mozfile.TemporaryDirectory() as tmpdir:
+             hfs_file = os.path.join(tmpdir, "firefox.hfs")
+             subprocess.check_call(
+-                [buildconfig.substs["DMG_TOOL"], "extract", dmgfile, hfs_file],
++                [dmg_tool, "extract", dmgfile, hfs_file],
+                 # dmg is seriously chatty
+-                stdout=open(os.devnull, "wb"),
+-            )
+-            subprocess.check_call(
+-                [buildconfig.substs["HFS_TOOL"], hfs_file, "extractall", "/", destdir]
++                stdout=subprocess.DEVNULL,
+             )
++            subprocess.check_call([hfs_tool, hfs_file, "extractall", "/", destdir])
+     else:
+-        unpack_diskimage = os.path.join(
+-            buildconfig.topsrcdir, "build", "package", "mac_osx", "unpack-diskimage"
+-        )
+-        unpack_mountpoint = os.path.join(
+-            "/tmp", "{}-unpack".format(buildconfig.substs["MOZ_APP_NAME"])
+-        )
++        # TODO: find better way to resolve topsrcdir (checkout directory)
++        topsrcdir = Path(__file__).parent.parent.parent.parent.resolve()
++        unpack_diskimage = topsrcdir / "build/package/mac_osx/unpack-diskimage"
++        unpack_mountpoint = Path("/tmp/app-unpack")
+         subprocess.check_call([unpack_diskimage, dmgfile, unpack_mountpoint, destdir])
+ 
+ 
+-def extract_dmg(dmgfile, output, dsstore=None, icon=None, background=None):
++def extract_dmg(
++    dmgfile: Path,
++    output: Path,
++    dmg_tool: Path = None,
++    hfs_tool: Path = None,
++    dsstore: Path = None,
++    icon: Path = None,
++    background: Path = None,
++):
+     if platform.system() not in ("Darwin", "Linux"):
+         raise Exception("Don't know how to extract a DMG on '%s'" % platform.system())
+ 
+-    if is_linux:
+-        check_tools("DMG_TOOL", "MKFSHFS", "HFS_TOOL")
+-
+-    with mozfile.TemporaryDirectory() as tmpdir:
+-        extract_dmg_contents(dmgfile, tmpdir)
+-        if os.path.islink(os.path.join(tmpdir, " ")):
++    with mozfile.TemporaryDirectory() as tmp:
++        tmpdir = Path(tmp)
++        extract_dmg_contents(dmgfile, tmpdir, dmg_tool, hfs_tool)
++        applications_symlink = tmpdir / " "
++        if applications_symlink.is_symlink():
+             # Rsync will fail on the presence of this symlink
+-            os.remove(os.path.join(tmpdir, " "))
++            applications_symlink.unlink()
+         rsync(tmpdir, output)
+ 
+         if dsstore:
+-            mkdir(os.path.dirname(dsstore))
+-            rsync(os.path.join(tmpdir, ".DS_Store"), dsstore)
++            dsstore.parent.mkdir(parents=True, exist_ok=True)
++            rsync(tmpdir / ".DS_Store", dsstore)
+         if background:
+-            mkdir(os.path.dirname(background))
+-            rsync(
+-                os.path.join(tmpdir, ".background", os.path.basename(background)),
+-                background,
+-            )
++            background.parent.mkdir(parents=True, exist_ok=True)
++            rsync(tmpdir / ".background" / background.name, background)
+         if icon:
+-            mkdir(os.path.dirname(icon))
+-            rsync(os.path.join(tmpdir, ".VolumeIcon.icns"), icon)
++            icon.parent.mkdir(parents=True, exist_ok=True)
++            rsync(tmpdir / ".VolumeIcon.icns", icon)
+diff --git a/python/mozbuild/mozpack/mozjar.py b/python/mozbuild/mozpack/mozjar.py
+--- a/python/mozbuild/mozpack/mozjar.py
++++ b/python/mozbuild/mozpack/mozjar.py
+@@ -287,12 +287,22 @@ class JarFileReader(object):
+         self.compressed = header["compression"] != JAR_STORED
+         self.compress = header["compression"]
+ 
++    def readable(self):
++        return True
++
+     def read(self, length=-1):
+         """
+         Read some amount of uncompressed data.
+         """
+         return self.uncompressed_data.read(length)
+ 
++    def readinto(self, b):
++        """
++        Read bytes into a pre-allocated, writable bytes-like object `b` and return
++        the number of bytes read.
++        """
++        return self.uncompressed_data.readinto(b)
++
+     def readlines(self):
+         """
+         Return a list containing all the lines of data in the uncompressed
+@@ -320,6 +330,10 @@ class JarFileReader(object):
+         self.uncompressed_data.close()
+ 
+     @property
++    def closed(self):
++        return self.uncompressed_data.closed
++
++    @property
+     def compressed_data(self):
+         """
+         Return the raw compressed data.
+diff --git a/python/mozbuild/mozpack/test/python.ini b/python/mozbuild/mozpack/test/python.ini
+--- a/python/mozbuild/mozpack/test/python.ini
++++ b/python/mozbuild/mozpack/test/python.ini
+@@ -14,4 +14,5 @@ subsuite = mozbuild
+ [test_packager_l10n.py]
+ [test_packager_unpack.py]
+ [test_path.py]
++[test_pkg.py]
+ [test_unify.py]
+diff --git a/python/mozlint/mozlint/cli.py b/python/mozlint/mozlint/cli.py
+--- a/python/mozlint/mozlint/cli.py
++++ b/python/mozlint/mozlint/cli.py
+@@ -46,10 +46,13 @@ class MozlintParser(ArgumentParser):
+         [
+             ["-W", "--warnings"],
+             {
++                "const": True,
++                "nargs": "?",
++                "choices": ["soft"],
+                 "dest": "show_warnings",
+-                "default": False,
+-                "action": "store_true",
+-                "help": "Display and fail on warnings in addition to errors.",
++                "help": "Display and fail on warnings in addition to errors. "
++                "--warnings=soft can be used to report warnings but only fail "
++                "on errors.",
+             },
+         ],
+         [
+diff --git a/python/mozlint/mozlint/result.py b/python/mozlint/mozlint/result.py
+--- a/python/mozlint/mozlint/result.py
++++ b/python/mozlint/mozlint/result.py
+@@ -3,6 +3,7 @@
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+ from collections import defaultdict
++from itertools import chain
+ from json import JSONEncoder
+ import os
+ import mozpack.path as mozpath
+@@ -15,7 +16,8 @@ class ResultSummary(object):
+ 
+     root = None
+ 
+-    def __init__(self, root):
++    def __init__(self, root, fail_on_warnings=True):
++        self.fail_on_warnings = fail_on_warnings
+         self.reset()
+ 
+         # Store the repository root folder to be able to build
+@@ -30,9 +32,19 @@ class ResultSummary(object):
+         self.suppressed_warnings = defaultdict(int)
+         self.fixed = 0
+ 
++    def has_issues_failure(self):
++        """Returns true in case issues were detected during the lint run. Do not
++        consider warning issues in case `self.fail_on_warnings` is set to False.
++        """
++        if self.fail_on_warnings is False:
++            return any(
++                result.level != "warning" for result in chain(*self.issues.values())
++            )
++        return len(self.issues) >= 1
++
+     @property
+     def returncode(self):
+-        if self.issues or self.failed:
++        if self.has_issues_failure() or self.failed:
+             return 1
+         return 0
+ 
+diff --git a/python/mozlint/mozlint/roller.py b/python/mozlint/mozlint/roller.py
+--- a/python/mozlint/mozlint/roller.py
++++ b/python/mozlint/mozlint/roller.py
+@@ -177,7 +177,11 @@ class LintRoller(object):
+         self._setupargs = setupargs or {}
+ 
+         # result state
+-        self.result = ResultSummary(root)
++        self.result = ResultSummary(
++            root,
++            # Prevent failing on warnings when the --warnings parameter is set to "soft"
++            fail_on_warnings=lintargs.get("show_warnings") != "soft",
++        )
+ 
+         self.root = root
+         self.exclude = exclude or []
+diff --git a/python/mozlint/mozlint/types.py b/python/mozlint/mozlint/types.py
+--- a/python/mozlint/mozlint/types.py
++++ b/python/mozlint/mozlint/types.py
+@@ -87,40 +87,6 @@ class BaseType(object):
+         pass
+ 
+ 
+-class FileType(BaseType):
+-    """Abstract base class for linter types that check each file
+-
+-    Subclasses of this linter type will read each file and check the file contents
+-    """
+-
+-    __metaclass__ = ABCMeta
+-
+-    @abstractmethod
+-    def lint_single_file(payload, line, config):
+-        """Run linter defined by `config` against `paths` with `lintargs`.
+-
+-        :param path: Path to the file to lint.
+-        :param config: Linter config the paths are being linted against.
+-        :param lintargs: External arguments to the linter not defined in
+-                         the definition, but passed in by a consumer.
+-        :returns: An error message or None
+-        """
+-        pass
+-
+-    def _lint(self, path, config, **lintargs):
+-        if os.path.isdir(path):
+-            return self._lint_dir(path, config, **lintargs)
+-
+-        payload = config["payload"]
+-
+-        errors = []
+-        message = self.lint_single_file(payload, path, config)
+-        if message:
+-            errors.append(result.from_config(config, message=message, path=path))
+-
+-        return errors
+-
+-
+ class LineType(BaseType):
+     """Abstract base class for linter types that check each line individually.
+ 
+@@ -182,6 +148,10 @@ class ExternalType(BaseType):
+         return func(files, config, **lintargs)
+ 
+ 
++class ExternalFileType(ExternalType):
++    batch = False
++
++
+ class GlobalType(ExternalType):
+     """Linter type that runs an external global linting function just once.
+ 
+@@ -237,6 +207,7 @@ supported_types = {
+     "string": StringType(),
+     "regex": RegexType(),
+     "external": ExternalType(),
++    "external-file": ExternalFileType(),
+     "global": GlobalType(),
+     "structured_log": StructuredLogType(),
+ }
+diff --git a/python/mozlint/test/test_roller.py b/python/mozlint/test/test_roller.py
+--- a/python/mozlint/test/test_roller.py
++++ b/python/mozlint/test/test_roller.py
+@@ -14,6 +14,7 @@ import pytest
+ 
+ from mozlint.errors import LintersNotConfigured, NoValidLinter
+ from mozlint.result import Issue, ResultSummary
++from mozlint.roller import LintRoller
+ from itertools import chain
+ 
+ 
+@@ -152,26 +153,41 @@ def test_roll_warnings(lint, linters, fi
+     assert result.total_suppressed_warnings == 0
+ 
+ 
+-def test_roll_code_review(monkeypatch, lint, linters, files):
++def test_roll_code_review(monkeypatch, linters, files):
+     monkeypatch.setenv("CODE_REVIEW", "1")
+-    lint.lintargs["show_warnings"] = False
++    lint = LintRoller(root=here, show_warnings=False)
+     lint.read(linters("warning"))
+     result = lint.roll(files)
+     assert len(result.issues) == 1
+     assert result.total_issues == 2
+     assert len(result.suppressed_warnings) == 0
+     assert result.total_suppressed_warnings == 0
++    assert result.returncode == 1
+ 
+ 
+-def test_roll_code_review_warnings_disabled(monkeypatch, lint, linters, files):
++def test_roll_code_review_warnings_disabled(monkeypatch, linters, files):
+     monkeypatch.setenv("CODE_REVIEW", "1")
+-    lint.lintargs["show_warnings"] = False
++    lint = LintRoller(root=here, show_warnings=False)
+     lint.read(linters("warning_no_code_review"))
+     result = lint.roll(files)
+     assert len(result.issues) == 0
+     assert result.total_issues == 0
++    assert lint.result.fail_on_warnings is True
+     assert len(result.suppressed_warnings) == 1
+     assert result.total_suppressed_warnings == 2
++    assert result.returncode == 0
++
++
++def test_roll_code_review_warnings_soft(linters, files):
++    lint = LintRoller(root=here, show_warnings="soft")
++    lint.read(linters("warning_no_code_review"))
++    result = lint.roll(files)
++    assert len(result.issues) == 1
++    assert result.total_issues == 2
++    assert lint.result.fail_on_warnings is False
++    assert len(result.suppressed_warnings) == 0
++    assert result.total_suppressed_warnings == 0
++    assert result.returncode == 0
+ 
+ 
+ def fake_run_worker(config, paths, **lintargs):
+diff --git a/python/mozperftest/mozperftest/test/webpagetest.py b/python/mozperftest/mozperftest/test/webpagetest.py
+--- a/python/mozperftest/mozperftest/test/webpagetest.py
++++ b/python/mozperftest/mozperftest/test/webpagetest.py
+@@ -29,6 +29,7 @@ ACCEPTED_CONNECTIONS = [
+ 
+ ACCEPTED_STATISTICS = ["average", "median", "standardDeviation"]
+ WPT_KEY_FILE = "WPT_key.txt"
++WPT_API_EXPIRED_MESSAGE = "API key expired"
+ 
+ 
+ class WPTTimeOutError(Exception):
+@@ -112,6 +113,14 @@ class WPTInvalidStatisticsError(Exceptio
+     pass
+ 
+ 
++class WPTExpiredAPIKeyError(Exception):
++    """
++    This error is raised if we get a notification from WPT that our API key has expired
++    """
++
++    pass
++
++
+ class PropagatingErrorThread(Thread):
+     def run(self):
+         self.exc = None
+@@ -244,6 +253,11 @@ class WebPageTest(Layer):
+         requested_results = requests.get(url)
+         results_of_request = json.loads(requested_results.text)
+         start = time.time()
++        if (
++            "statusText" in results_of_request.keys()
++            and results_of_request["statusText"] == WPT_API_EXPIRED_MESSAGE
++        ):
++            raise WPTExpiredAPIKeyError("The API key has expired")
+         while (
+             requested_results.status_code == 200
+             and time.time() - start < self.timeout_limit
+diff --git a/python/mozperftest/mozperftest/tests/test_webpagetest.py b/python/mozperftest/mozperftest/tests/test_webpagetest.py
+--- a/python/mozperftest/mozperftest/tests/test_webpagetest.py
++++ b/python/mozperftest/mozperftest/tests/test_webpagetest.py
+@@ -13,10 +13,12 @@ from mozperftest.test.webpagetest import
+     WPTBrowserSelectionError,
+     WPTInvalidURLError,
+     WPTLocationSelectionError,
+-    WPTInvalidConnectionSelection,
+-    ACCEPTED_STATISTICS,
+     WPTInvalidStatisticsError,
+     WPTDataProcessingError,
++    WPTExpiredAPIKeyError,
++    WPTInvalidConnectionSelection,
++    WPT_API_EXPIRED_MESSAGE,
++    ACCEPTED_STATISTICS,
+ )
+ 
+ WPT_METRICS = [
+@@ -82,7 +84,9 @@ def init_placeholder_wpt_data(fvonly=Fal
+     return placeholder_data
+ 
+ 
+-def init_mocked_request(status_code, WPT_test_status_code=200, **kwargs):
++def init_mocked_request(
++    status_code, WPT_test_status_code=200, WPT_test_status_text="Ok", **kwargs
++):
+     mock_data = {
+         "data": {
+             "ec2-us-east-1": {"PendingTests": {"Queued": 3}, "Label": "California"},
+@@ -92,6 +96,7 @@ def init_mocked_request(status_code, WPT
+             "remaining": 2000,
+         },
+         "statusCode": WPT_test_status_code,
++        "statusText": WPT_test_status_text,
+     }
+     for key, value in kwargs.items():
+         mock_data["data"][key] = value
+@@ -245,3 +250,23 @@ def test_webpagetest_test_metric_not_fou
+     test = webpagetest.WebPageTest(env, mach_cmd)
+     with pytest.raises(WPTDataProcessingError):
+         test.run(metadata)
++
++
++@mock.patch("mozperftest.utils.get_tc_secret", return_value={"wpt_key": "fake_key"})
++@mock.patch(
++    "mozperftest.test.webpagetest.WebPageTest.location_queue", return_value=None
++)
++@mock.patch(
++    "requests.get",
++    return_value=init_mocked_request(
++        200, WPT_test_status_code=400, WPT_test_status_text=WPT_API_EXPIRED_MESSAGE
++    ),
++)
++@mock.patch("mozperftest.test.webpagetest.WPT_KEY_FILE", "tests/data/WPT_fakekey.txt")
++def test_webpagetest_test_expired_api_key(*mocked):
++    mach_cmd, metadata, env = running_env(tests=[str(EXAMPLE_WPT_TEST)])
++    metadata.script["options"]["test_list"] = ["google.ca"]
++    metadata.script["options"]["test_parameters"]["wait_between_requests"] = 1
++    test = webpagetest.WebPageTest(env, mach_cmd)
++    with pytest.raises(WPTExpiredAPIKeyError):
++        test.run(metadata)
+diff --git a/python/mozterm/mozterm/widgets.py b/python/mozterm/mozterm/widgets.py
+--- a/python/mozterm/mozterm/widgets.py
++++ b/python/mozterm/mozterm/widgets.py
+@@ -6,6 +6,8 @@ from __future__ import absolute_import, 
+ 
+ from .terminal import Terminal
+ 
++DEFAULT = "\x1b(B\x1b[m"
++
+ 
+ class BaseWidget(object):
+     def __init__(self, terminal=None):
+@@ -39,7 +41,16 @@ class Footer(BaseWidget):
+         for part in parts:
+             try:
+                 func, part = part
+-                encoded = getattr(self.term, func)(part)
++                attribute = getattr(self.term, func)
++                # In Blessed, these attributes aren't always callable
++                if callable(attribute):
++                    encoded = attribute(part)
++                else:
++                    # If it's not callable, assume it's just the raw
++                    # ANSI Escape Sequence and prepend it ourselves.
++                    # Append DEFAULT to stop text that comes afterwards
++                    # from inheriting the formatting we prepended.
++                    encoded = attribute + part + DEFAULT
+             except ValueError:
+                 encoded = part
+ 
+diff --git a/python/mozterm/test/test_terminal.py b/python/mozterm/test/test_terminal.py
+--- a/python/mozterm/test/test_terminal.py
++++ b/python/mozterm/test/test_terminal.py
+@@ -9,32 +9,17 @@ import sys
+ 
+ import mozunit
+ import pytest
+-
+-from mozterm import Terminal, NullTerminal
++from mozterm import NullTerminal, Terminal
+ 
+ 
+ def test_terminal():
+-    blessings = pytest.importorskip("blessings")
++    blessed = pytest.importorskip("blessed")
+     term = Terminal()
+-    assert isinstance(term, blessings.Terminal)
++    assert isinstance(term, blessed.Terminal)
+ 
+     term = Terminal(disable_styling=True)
+     assert isinstance(term, NullTerminal)
+ 
+-    del sys.modules["blessings"]
+-    orig = sys.path[:]
+-    for path in orig:
+-        if "blessings" in path:
+-            sys.path.remove(path)
+-
+-    term = Terminal()
+-    assert isinstance(term, NullTerminal)
+-
+-    with pytest.raises(ImportError):
+-        term = Terminal(raises=True)
+-
+-    sys.path = orig
+-
+ 
+ def test_null_terminal():
+     term = NullTerminal()
+diff --git a/python/mozterm/test/test_widgets.py b/python/mozterm/test/test_widgets.py
+--- a/python/mozterm/test/test_widgets.py
++++ b/python/mozterm/test/test_widgets.py
+@@ -4,41 +4,42 @@
+ 
+ from __future__ import absolute_import, unicode_literals
+ 
++import sys
+ from io import StringIO
+ 
+ import mozunit
+ import pytest
+-
+ from mozterm import Terminal
+ from mozterm.widgets import Footer
+ 
+ 
+ @pytest.fixture
+-def terminal(monkeypatch):
+-    blessings = pytest.importorskip("blessings")
++def terminal():
++    blessed = pytest.importorskip("blessed")
+ 
+     kind = "xterm-256color"
+     try:
+         term = Terminal(stream=StringIO(), force_styling=True, kind=kind)
+-    except blessings.curses.error:
++    except blessed.curses.error:
+         pytest.skip("terminal '{}' not found".format(kind))
+ 
+-    # For some reason blessings returns None for width/height though a comment
+-    # says that shouldn't ever happen.
+-    monkeypatch.setattr(term, "_height_and_width", lambda: (100, 100))
+     return term
+ 
+ 
++@pytest.mark.skipif(
++    not sys.platform.startswith("win"),
++    reason="Only do ANSI Escape Sequence comparisons on Windows.",
++)
+ def test_footer(terminal):
+     footer = Footer(terminal=terminal)
+     footer.write(
+         [
+-            ("dim", "foo"),
++            ("bright_black", "foo"),
+             ("green", "bar"),
+         ]
+     )
+     value = terminal.stream.getvalue()
+-    expected = "\x1b7\x1b[2mfoo\x1b(B\x1b[m \x1b[32mbar\x1b(B\x1b[m\x1b8"
++    expected = "\x1b7\x1b[90mfoo\x1b(B\x1b[m \x1b[32mbar\x1b(B\x1b[m\x1b8"
+     assert value == expected
+ 
+     footer.clear()
+diff --git a/python/mozversioncontrol/mozversioncontrol/__init__.py b/python/mozversioncontrol/mozversioncontrol/__init__.py
+--- a/python/mozversioncontrol/mozversioncontrol/__init__.py
++++ b/python/mozversioncontrol/mozversioncontrol/__init__.py
+@@ -222,6 +222,16 @@ class Repository(object):
+         """
+ 
+     @abc.abstractmethod
++    def get_ignored_files_finder(self):
++        """Obtain a mozpack.files.BaseFinder of ignored files in the working
++        directory.
++
++        The Finder will have its list of all files in the repo cached for its
++        entire lifetime, so operations on the Finder will not track with, for
++        example, changes to the repo during the Finder's lifetime.
++        """
++
++    @abc.abstractmethod
+     def working_directory_clean(self, untracked=False, ignored=False):
+         """Determine if the working directory is free of modifications.
+ 
+@@ -501,6 +511,15 @@ class HgRepository(Repository):
+         )
+         return FileListFinder(files)
+ 
++    def get_ignored_files_finder(self):
++        # Can return backslashes on Windows. Normalize to forward slashes.
++        files = list(
++            p.replace("\\", "/").split(" ")[-1]
++            for p in self._run("status", "-i").split("\n")
++            if p
++        )
++        return FileListFinder(files)
++
+     def working_directory_clean(self, untracked=False, ignored=False):
+         args = ["status", "--modified", "--added", "--removed", "--deleted"]
+         if untracked:
+@@ -675,6 +694,16 @@ class GitRepository(Repository):
+         files = [p for p in self._run("ls-files", "-z").split("\0") if p]
+         return FileListFinder(files)
+ 
++    def get_ignored_files_finder(self):
++        files = [
++            p
++            for p in self._run(
++                "ls-files", "-i", "-o", "-z", "--exclude-standard"
++            ).split("\0")
++            if p
++        ]
++        return FileListFinder(files)
++
+     def working_directory_clean(self, untracked=False, ignored=False):
+         args = ["status", "--porcelain"]
+ 
+diff --git a/python/sites/mach.txt b/python/sites/mach.txt
+--- a/python/sites/mach.txt
++++ b/python/sites/mach.txt
+@@ -42,10 +42,10 @@ pth:testing/mozbase/mozsystemmonitor
+ pth:testing/mozbase/mozscreenshot
+ pth:testing/mozbase/moztest
+ pth:testing/mozbase/mozversion
++pth:testing/mozharness
+ pth:testing/raptor
+ pth:testing/talos
+ pth:testing/web-platform
+-vendored:testing/web-platform/tests/tools/third_party/funcsigs
+ vendored:testing/web-platform/tests/tools/third_party/h2
+ vendored:testing/web-platform/tests/tools/third_party/hpack
+ vendored:testing/web-platform/tests/tools/third_party/html5lib
+@@ -139,5 +139,5 @@ pypi-optional:glean-sdk==51.8.2:telemetr
+ # Mach gracefully handles the case where `psutil` is unavailable.
+ # We aren't (yet) able to pin packages in automation, so we have to
+ # support down to the oldest locally-installed version (5.4.2).
+-pypi-optional:psutil>=5.4.2,<=5.8.0:telemetry will be missing some data
+-pypi-optional:zstandard>=0.11.1,<=0.17.0:zstd archives will not be possible to extract
++pypi-optional:psutil>=5.4.2,<=5.9.4:telemetry will be missing some data
++pypi-optional:zstandard>=0.11.1,<=0.19.0:zstd archives will not be possible to extract

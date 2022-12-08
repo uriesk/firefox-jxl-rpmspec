@@ -1,0 +1,57 @@
+diff --git a/python/mach/mach/site.py b/python/mach/mach/site.py
+--- a/python/mach/mach/site.py
++++ b/python/mach/mach/site.py
+@@ -16,14 +16,14 @@
+ import shutil
+ import site
+ import subprocess
+ import sys
+ import sysconfig
+-from pathlib import Path
+ import tempfile
+ from contextlib import contextmanager
+-from typing import Optional, Callable
++from pathlib import Path
++from typing import Callable, Optional
+ 
+ from mach.requirements import (
+     MachEnvRequirements,
+     UnexpectedFlexibleRequirementException,
+ )
+@@ -761,11 +761,11 @@
+             self.bin_path = os.path.join(prefix, "Scripts")
+             self.python_path = os.path.join(self.bin_path, "python.exe")
+         else:
+             self.bin_path = os.path.join(prefix, "bin")
+             self.python_path = os.path.join(self.bin_path, "python")
+-        self.prefix = prefix
++        self.prefix = os.path.realpath(prefix)
+ 
+     @functools.lru_cache(maxsize=None)
+     def resolve_sysconfig_packages_path(self, sysconfig_path):
+         # macOS uses a different default sysconfig scheme based on whether it's using the
+         # system Python or running in a virtualenv.
+@@ -781,20 +781,16 @@
+         data_path = Path(sysconfig_paths["data"])
+         path = Path(sysconfig_paths[sysconfig_path])
+         relative_path = path.relative_to(data_path)
+ 
+         # Path to virtualenv's "site-packages" directory for provided sysconfig path
+-        return os.path.normpath(
+-            os.path.normcase(os.path.realpath(Path(self.prefix) / relative_path))
+-        )
++        return os.path.normpath(os.path.normcase(Path(self.prefix) / relative_path))
+ 
+     def site_packages_dirs(self):
+         dirs = []
+         if sys.platform.startswith("win"):
+-            dirs.append(
+-                os.path.normpath(os.path.normcase(os.path.realpath(self.prefix)))
+-            )
++            dirs.append(os.path.normpath(os.path.normcase(self.prefix)))
+         purelib = self.resolve_sysconfig_packages_path("purelib")
+         platlib = self.resolve_sysconfig_packages_path("platlib")
+ 
+         dirs.append(purelib)
+         if platlib != purelib:
+
