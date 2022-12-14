@@ -178,12 +178,12 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        108.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20221206.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20221214.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1132,6 +1132,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Dec 14 2022 Martin Stransky <stransky@redhat.com>- 108.0-2
+- Update to 108.0 Build 2
+
 * Tue Dec 6 2022 Martin Stransky <stransky@redhat.com>- 108.0-1
 - Update to 108.0
 
