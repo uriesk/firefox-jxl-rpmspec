@@ -575,7 +575,7 @@ echo "ac_add_options --with-system-libevent" >> .mozconfig
 echo "ac_add_options --enable-system-ffi" >> .mozconfig
 %endif
 
-%ifarch %{arm}
+%ifarch %{arm} aarch64
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
 %endif
 
