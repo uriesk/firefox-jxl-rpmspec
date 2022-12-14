@@ -6,6 +6,10 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=2129720
 ExcludeArch: i686
 
+# Disabled due to build failures:
+# https://bugzilla.redhat.com/show_bug.cgi?id=2153213
+ExcludeArch: s390x
+
 # Run Mozilla test suite as a part of compile rpm section. Turn off when
 # building locally and don't want to spend 24 hours waiting for results.
 %global run_firefox_tests 0
