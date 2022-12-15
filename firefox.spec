@@ -230,7 +230,6 @@ Patch55:        firefox-testing.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch78:        firefox-i686-build.patch
-Patch80:        D162136.diff
 
 # Test patches
 # Generate without context by
@@ -507,7 +506,6 @@ This package contains results of tests executed during build.
 %patch54 -p1 -b .1669639
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch78 -p1 -b .firefox-i686
-%patch80 -p1 -b .D162136
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -1132,7 +1130,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Dec 14 2022 Martin Stransky <stransky@redhat.com>- 108.0-2
+* Wed Dec 14 2022 Martin Stransky <stransky@redhat.com>- 108.0-2
 - Update to 108.0 Build 2
 
 * Tue Dec 6 2022 Martin Stransky <stransky@redhat.com>- 108.0-1
