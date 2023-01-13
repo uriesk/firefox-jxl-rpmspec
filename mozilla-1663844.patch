@@ -1,7 +1,7 @@
-diff -up firefox-101.0.1/dom/media/gmp/GMPSharedMemManager.h.1663844 firefox-101.0.1/dom/media/gmp/GMPSharedMemManager.h
---- firefox-101.0.1/dom/media/gmp/GMPSharedMemManager.h.1663844	2022-06-08 23:06:36.000000000 +0200
-+++ firefox-101.0.1/dom/media/gmp/GMPSharedMemManager.h	2022-06-09 17:17:04.775008085 +0200
-@@ -27,7 +27,7 @@ class GMPSharedMem {
+diff -up firefox-109.0/dom/media/gmp/GMPSharedMemManager.h.1663844 firefox-109.0/dom/media/gmp/GMPSharedMemManager.h
+--- firefox-109.0/dom/media/gmp/GMPSharedMemManager.h.1663844	2023-01-09 20:34:10.000000000 +0100
++++ firefox-109.0/dom/media/gmp/GMPSharedMemManager.h	2023-01-12 09:28:56.035741438 +0100
+@@ -26,7 +26,7 @@ class GMPSharedMem {
    // returned to the parent pool (which is not included).  If more than
    // this are needed, we presume the client has either crashed or hung
    // (perhaps temporarily).
@@ -10,9 +10,9 @@ diff -up firefox-101.0.1/dom/media/gmp/GMPSharedMemManager.h.1663844 firefox-101
  
    GMPSharedMem() {
      for (size_t i = 0; i < sizeof(mGmpAllocated) / sizeof(mGmpAllocated[0]);
-diff -up firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844 firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp
---- firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844	2022-06-08 16:10:21.000000000 +0200
-+++ firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp	2022-06-09 20:31:25.120035588 +0200
+diff -up firefox-109.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844 firefox-109.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp
+--- firefox-109.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1663844	2023-01-09 20:34:10.000000000 +0100
++++ firefox-109.0/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp	2023-01-12 09:28:56.036741473 +0100
 @@ -84,6 +84,9 @@ media::DecodeSupportSet GMPDecoderModule
  
  media::DecodeSupportSet GMPDecoderModule::SupportsMimeType(
@@ -23,12 +23,12 @@ diff -up firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPDecoderModule.cpp.1
    return media::DecodeSupport::Unsupported;
  }
  
-diff -up firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844 firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp
---- firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844	2022-06-08 16:10:21.000000000 +0200
-+++ firefox-101.0.1/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp	2022-06-09 17:17:04.776008117 +0200
-@@ -70,6 +70,8 @@ void GMPVideoDecoder::Decoded(GMPVideoi4
-   RefPtr<GMPVideoDecoder> self = this;
-   if (v) {
+diff -up firefox-109.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844 firefox-109.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp
+--- firefox-109.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp.1663844	2023-01-12 09:28:56.036741473 +0100
++++ firefox-109.0/dom/media/platforms/agnostic/gmp/GMPVideoDecoder.cpp	2023-01-12 14:18:12.354866405 +0100
+@@ -81,6 +81,8 @@ void GMPVideoDecoder::Decoded(GMPVideoi4
+                                 });
+ 
      mDecodedData.AppendElement(std::move(v));
 +    mDecodePromise.ResolveIfExists(std::move(mDecodedData), __func__);
 +    mDecodedData = DecodedData();
