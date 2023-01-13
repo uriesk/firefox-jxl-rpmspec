@@ -1079,6 +1079,9 @@ fi
 * Wed Jan 11 2023 Martin Stransky <stransky@redhat.com>- 109.0-1
 - Update to 109.0
 
+* Thu Jan 12 2023 Jan Horak <jhorak@redhat.com> - 108.0.2-1
+- Update to 108.0.2
+
 * Mon Jan 09 2023 Kalev Lember <klember@redhat.com> - 108.0.1-4
 - Drop conditionals for F35
 
