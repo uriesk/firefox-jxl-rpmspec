@@ -172,13 +172,13 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        108.0.1
-Release:        4%{?pre_tag}%{?dist}
+Version:        108.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20221218.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20230112.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -253,7 +253,6 @@ Patch415:        mozilla-1670333.patch
 Patch416:        D163696.diff
 Patch417:        D163697.diff
 Patch418:        D163698.diff
-Patch419:        D164896.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -532,7 +531,6 @@ This package contains results of tests executed during build.
 %patch416 -p1 -b .D163696
 %patch417 -p1 -b .D163697
 %patch418 -p1 -b .D163698
-%patch419 -p1 -b .D164896
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1086,6 +1084,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jan 12 2023 Jan Horak <jhorak@redhat.com> - 108.0.2-1
+- Update to 108.0.2
+
 * Mon Jan 09 2023 Kalev Lember <klember@redhat.com> - 108.0.1-4
 - Drop conditionals for F35
 
