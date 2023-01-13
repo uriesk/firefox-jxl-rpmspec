@@ -534,7 +534,7 @@ This package contains results of tests executed during build.
 
 %patch990 -p1 -b .work-around-GCC-ICE-on-arm
 
-%ifnarch ppc64le %{arm}
+%ifnarch ppc64le %{arm} aarch64
 %patch1000 -p1 -b .libwebrtc-screen-cast-sync
 %endif
 
