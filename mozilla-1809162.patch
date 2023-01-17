@@ -1,6 +1,6 @@
 diff -up firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp.1809162 firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp
 --- firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp.1809162	2023-01-12 21:02:00.000000000 +0100
-+++ firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp	2023-01-17 14:23:30.004040571 +0100
++++ firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp	2023-01-17 21:12:16.926871788 +0100
 @@ -9,6 +9,7 @@
  #include "FFmpegLog.h"
  #include "mozilla/widget/DMABufLibWrapper.h"
@@ -21,12 +21,13 @@ diff -up firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp.18091
  
  VideoFramePool<LIBAV_VER>::~VideoFramePool() {
    MutexAutoLock lock(mSurfaceLock);
-@@ -129,32 +133,31 @@ VideoFramePool<LIBAV_VER>::GetVideoFrame
+@@ -127,34 +131,34 @@ VideoFramePool<LIBAV_VER>::GetVideoFrame
+   }
+ 
    MutexAutoLock lock(mSurfaceLock);
++  RefPtr<DMABufSurfaceYUV> surface;
    RefPtr<VideoFrameSurface<LIBAV_VER>> videoSurface =
        GetFreeVideoFrameSurface();
-+  RefPtr<DMABufSurfaceYUV> surface =
-+      videoSurface ? videoSurface->GetDMABufSurface() : new DMABufSurfaceYUV();
    if (!videoSurface) {
 -    RefPtr<DMABufSurfaceYUV> surface =
 -        DMABufSurfaceYUV::CreateYUVSurface(aVaDesc, aWidth, aHeight);
@@ -45,10 +46,12 @@ diff -up firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp.18091
 -    }
 -    videoSurface = surf;
 -    mDMABufSurfaces.AppendElement(std::move(surf));
++    surface = new DMABufSurfaceYUV();
 +    videoSurface = new VideoFrameSurface<LIBAV_VER>(surface);
 +    mDMABufSurfaces.AppendElement(videoSurface);
    } else {
 -    RefPtr<DMABufSurfaceYUV> surface = videoSurface->GetDMABufSurface();
++    surface = videoSurface->GetDMABufSurface();
      DMABUF_LOG("Reusing VA-API DMABufSurface UID %d", surface->GetUID());
 -    if (!surface->UpdateYUVData(aVaDesc, aWidth, aHeight)) {
 +  }
@@ -74,7 +77,7 @@ diff -up firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.cpp.18091
  }
 diff -up firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.h.1809162 firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.h
 --- firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.h.1809162	2023-01-12 21:02:00.000000000 +0100
-+++ firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.h	2023-01-17 14:23:30.004040571 +0100
++++ firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.h	2023-01-17 14:34:01.738414382 +0100
 @@ -129,6 +129,8 @@ class VideoFramePool<LIBAV_VER> {
    // We may fail to create texture over DMABuf memory due to driver bugs so
    // check that before we export first DMABuf video frame.
@@ -86,7 +89,7 @@ diff -up firefox-109.0/dom/media/platforms/ffmpeg/FFmpegVideoFramePool.h.1809162
  }  // namespace mozilla
 diff -up firefox-109.0/gfx/thebes/gfxPlatformGtk.cpp.1809162 firefox-109.0/gfx/thebes/gfxPlatformGtk.cpp
 --- firefox-109.0/gfx/thebes/gfxPlatformGtk.cpp.1809162	2023-01-12 21:02:01.000000000 +0100
-+++ firefox-109.0/gfx/thebes/gfxPlatformGtk.cpp	2023-01-17 14:23:30.004040571 +0100
++++ firefox-109.0/gfx/thebes/gfxPlatformGtk.cpp	2023-01-17 14:34:01.738414382 +0100
 @@ -253,6 +253,34 @@ bool gfxPlatformGtk::InitVAAPIConfig(boo
      feature.ForceDisable(FeatureStatus::Unavailable, "Requires EGL",
                           "FEATURE_FAILURE_REQUIRES_EGL"_ns);
@@ -124,7 +127,7 @@ diff -up firefox-109.0/gfx/thebes/gfxPlatformGtk.cpp.1809162 firefox-109.0/gfx/t
                             "Wayland support missing",
 diff -up firefox-109.0/modules/libpref/init/StaticPrefList.yaml.1809162 firefox-109.0/modules/libpref/init/StaticPrefList.yaml
 --- firefox-109.0/modules/libpref/init/StaticPrefList.yaml.1809162	2023-01-12 21:02:07.000000000 +0100
-+++ firefox-109.0/modules/libpref/init/StaticPrefList.yaml	2023-01-17 14:23:30.005040605 +0100
++++ firefox-109.0/modules/libpref/init/StaticPrefList.yaml	2023-01-17 14:34:01.739414416 +0100
 @@ -9836,6 +9836,14 @@
    type: RelaxedAtomicBool
    value: false
@@ -142,7 +145,7 @@ diff -up firefox-109.0/modules/libpref/init/StaticPrefList.yaml.1809162 firefox-
  
 diff -up firefox-109.0/widget/gtk/DMABufLibWrapper.cpp.1809162 firefox-109.0/widget/gtk/DMABufLibWrapper.cpp
 --- firefox-109.0/widget/gtk/DMABufLibWrapper.cpp.1809162	2023-01-12 21:02:18.000000000 +0100
-+++ firefox-109.0/widget/gtk/DMABufLibWrapper.cpp	2023-01-17 14:23:30.005040605 +0100
++++ firefox-109.0/widget/gtk/DMABufLibWrapper.cpp	2023-01-17 14:34:01.739414416 +0100
 @@ -12,12 +12,17 @@
  #include "mozilla/StaticPrefs_media.h"
  #include "mozilla/gfx/gfxVars.h"
@@ -206,7 +209,7 @@ diff -up firefox-109.0/widget/gtk/DMABufLibWrapper.cpp.1809162 firefox-109.0/wid
  }  // namespace mozilla
 diff -up firefox-109.0/widget/gtk/DMABufLibWrapper.h.1809162 firefox-109.0/widget/gtk/DMABufLibWrapper.h
 --- firefox-109.0/widget/gtk/DMABufLibWrapper.h.1809162	2023-01-12 21:02:18.000000000 +0100
-+++ firefox-109.0/widget/gtk/DMABufLibWrapper.h	2023-01-17 14:23:30.005040605 +0100
++++ firefox-109.0/widget/gtk/DMABufLibWrapper.h	2023-01-17 14:34:01.739414416 +0100
 @@ -215,6 +215,7 @@ class nsDMABufDevice {
  };
  
@@ -217,7 +220,7 @@ diff -up firefox-109.0/widget/gtk/DMABufLibWrapper.h.1809162 firefox-109.0/widge
  }  // namespace mozilla
 diff -up firefox-109.0/widget/gtk/DMABufSurface.cpp.1809162 firefox-109.0/widget/gtk/DMABufSurface.cpp
 --- firefox-109.0/widget/gtk/DMABufSurface.cpp.1809162	2023-01-12 21:02:18.000000000 +0100
-+++ firefox-109.0/widget/gtk/DMABufSurface.cpp	2023-01-17 14:23:30.006040639 +0100
++++ firefox-109.0/widget/gtk/DMABufSurface.cpp	2023-01-17 14:34:01.740414450 +0100
 @@ -67,13 +67,14 @@ RefPtr<GLContext> ClaimSnapshotGLContext
      nsCString discardFailureId;
      sSnapshotContext = GLContextProvider::CreateHeadless({}, &discardFailureId);
@@ -428,7 +431,7 @@ diff -up firefox-109.0/widget/gtk/DMABufSurface.cpp.1809162 firefox-109.0/widget
    if (!aPixelData || !aLineSizes) {
 diff -up firefox-109.0/widget/gtk/DMABufSurface.h.1809162 firefox-109.0/widget/gtk/DMABufSurface.h
 --- firefox-109.0/widget/gtk/DMABufSurface.h.1809162	2023-01-12 21:02:18.000000000 +0100
-+++ firefox-109.0/widget/gtk/DMABufSurface.h	2023-01-17 14:23:30.006040639 +0100
++++ firefox-109.0/widget/gtk/DMABufSurface.h	2023-01-17 14:34:01.740414450 +0100
 @@ -323,7 +323,7 @@ class DMABufSurfaceYUV : public DMABufSu
  
    bool UpdateYUVData(void** aPixelData, int* aLineSizes);
@@ -459,8 +462,8 @@ diff -up firefox-109.0/widget/gtk/DMABufSurface.h.1809162 firefox-109.0/widget/g
        const mozilla::layers::SurfaceDescriptorDMABuf& aDesc);
  
 diff -up firefox-109.0/widget/gtk/GfxInfo.cpp.1809162 firefox-109.0/widget/gtk/GfxInfo.cpp
---- firefox-109.0/widget/gtk/GfxInfo.cpp.1809162	2023-01-17 14:23:30.006040639 +0100
-+++ firefox-109.0/widget/gtk/GfxInfo.cpp	2023-01-17 14:24:42.116475502 +0100
+--- firefox-109.0/widget/gtk/GfxInfo.cpp.1809162	2023-01-17 14:34:01.724413908 +0100
++++ firefox-109.0/widget/gtk/GfxInfo.cpp	2023-01-17 14:34:01.740414450 +0100
 @@ -887,6 +887,40 @@ const nsTArray<GfxDriverInfo>& GfxInfo::
          V(0, 0, 0, 0), "FEATURE_HARDWARE_VIDEO_DECODING_NO_LINUX_AMD", "");
  
