@@ -173,7 +173,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        109.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1080,8 +1080,11 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Jan 19 2023 Martin Stransky <stransky@redhat.com>- 109.0-3
+* Thu Jan 19 2023 Martin Stransky <stransky@redhat.com>- 109.0-4
 - Removed mozbz#1809162
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 109.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
 
 * Tue Jan 17 2023 Martin Stransky <stransky@redhat.com>- 109.0-2
 - Added VA-API fixes mozbz#1809162, mozbz#1801576
