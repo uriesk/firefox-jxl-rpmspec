@@ -1,0 +1,93 @@
+diff --git a/extensions/pref/autoconfig/test/unit/test_autoconfig_custom_path.js b/extensions/pref/autoconfig/test/unit/test_autoconfig_custom_path.js
+--- a/extensions/pref/autoconfig/test/unit/test_autoconfig_custom_path.js
++++ b/extensions/pref/autoconfig/test/unit/test_autoconfig_custom_path.js
+@@ -9,10 +9,13 @@
+   let testDirName = do_get_cwd().clone();
+   Services.env.set("MOZ_SYSTEM_CONFIG_DIR", testDirName.path);
+ 
+   updateAppInfo();
+ 
++  try {
++    Services.dirsvc.undefine("SysConfD");
++  } catch (e) {}
+   let customSysConfD = Services.dirsvc.get("SysConfD", Ci.nsIFile);
+   let parent = customSysConfD.parent;
+   let child = customSysConfD.leafName;
+   notEqual("/etc", parent.path, "SysConfD is not in /etc");
+   equal("xpcshell", child, "SysConfD is xpcshell");
+diff --git a/extensions/pref/autoconfig/test/unit/test_autoconfig_default_path.js b/extensions/pref/autoconfig/test/unit/test_autoconfig_default_path.js
+--- a/extensions/pref/autoconfig/test/unit/test_autoconfig_default_path.js
++++ b/extensions/pref/autoconfig/test/unit/test_autoconfig_default_path.js
+@@ -6,8 +6,11 @@
+ );
+ 
+ function run_test() {
+   updateAppInfo();
+ 
++  try {
++    Services.dirsvc.undefine("SysConfD");
++  } catch (e) {}
+   let defaultSysConfD = Services.dirsvc.get("SysConfD", Ci.nsIFile);
+   equal("/etc/xpcshell", defaultSysConfD.path, "SysConfD is in /etc");
+ }
+diff --git a/modules/libpref/Preferences.cpp b/modules/libpref/Preferences.cpp
+--- a/modules/libpref/Preferences.cpp
++++ b/modules/libpref/Preferences.cpp
+@@ -4917,27 +4917,10 @@
+                            ArrayLength(specialFiles));
+   if (NS_FAILED(rv)) {
+     NS_WARNING("Error parsing application default preferences.");
+   }
+ 
+-#if defined(MOZ_WIDGET_GTK)
+-  // Under Flatpak/Snap package, load /etc/firefox/defaults/pref/*.js.
+-  if (mozilla::widget::IsRunningUnderFlatpakOrSnap()) {
+-    nsCOMPtr<nsIFile> defaultSnapPrefDir;
+-    rv = NS_GetSpecialDirectory(NS_OS_SYSTEM_CONFIG_DIR,
+-                                getter_AddRefs(defaultSnapPrefDir));
+-    NS_ENSURE_SUCCESS(rv, rv);
+-    defaultSnapPrefDir->AppendNative("defaults"_ns);
+-    defaultSnapPrefDir->AppendNative("pref"_ns);
+-
+-    rv = pref_LoadPrefsInDir(defaultSnapPrefDir, nullptr, 0);
+-    if (NS_FAILED(rv)) {
+-      NS_WARNING("Error parsing application default preferences under Snap.");
+-    }
+-  }
+-#endif
+-
+   // Load jar:$app/omni.jar!/defaults/preferences/*.js
+   // or jar:$gre/omni.jar!/defaults/preferences/*.js.
+   RefPtr<nsZipArchive> appJarReader = Omnijar::GetReader(Omnijar::APP);
+ 
+   // GetReader(Omnijar::APP) returns null when `$app == $gre`, in
+@@ -5006,10 +4989,28 @@
+       // Do we care if a file provided by this process fails to load?
+       pref_LoadPrefsInDir(path, nullptr, 0);
+     }
+   }
+ 
++#if defined(MOZ_WIDGET_GTK)
++  // To ensure the system-wide preferences are not overwritten by
++  // firefox/browser/defauts/preferences/*.js we need to load
++  // the /etc/firefox/defaults/pref/*.js settings as last.
++  // Under Flatpak, the NS_OS_SYSTEM_CONFIG_DIR points to /app/etc/firefox
++  nsCOMPtr<nsIFile> defaultSystemPrefDir;
++  rv = NS_GetSpecialDirectory(NS_OS_SYSTEM_CONFIG_DIR,
++                              getter_AddRefs(defaultSystemPrefDir));
++  NS_ENSURE_SUCCESS(rv, rv);
++  defaultSystemPrefDir->AppendNative("defaults"_ns);
++  defaultSystemPrefDir->AppendNative("pref"_ns);
++
++  rv = pref_LoadPrefsInDir(defaultSystemPrefDir, nullptr, 0);
++  if (NS_FAILED(rv)) {
++    NS_WARNING("Error parsing application default preferences.");
++  }
++#endif
++
+   if (XRE_IsParentProcess()) {
+     SetupTelemetryPref();
+   }
+ 
+   if (aIsStartup) {
+
