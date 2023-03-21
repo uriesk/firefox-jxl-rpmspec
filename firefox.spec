@@ -6,6 +6,9 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=2129720
 ExcludeArch: i686
 
+# Excluded due to build failure on F36
+ExcludeArch: armv7hl
+
 # Run Mozilla test suite as a part of compile rpm section. Turn off when
 # building locally and don't want to spend 24 hours waiting for results.
 %global run_firefox_tests 0
@@ -173,7 +176,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        111.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1070,6 +1073,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Mar 21 2023 Martin Stransky <stransky@redhat.com>- 111.0-2
+- Disabled arm on F36
+
 * Mon Mar 20 2023 Martin Stransky <stransky@redhat.com>- 111.0-1
 - Updated to 111.0
 
