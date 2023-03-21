@@ -176,7 +176,7 @@ ExcludeArch: armv7hl
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        111.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1073,11 +1073,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Tue Mar 21 2023 Martin Stransky <stransky@redhat.com>- 111.0-2
-- Disabled arm on F36
-
 * Mon Mar 20 2023 Martin Stransky <stransky@redhat.com>- 111.0-1
 - Updated to 111.0
+- Disabled arm on F36
 
 * Tue Feb 14 2023 Martin Stransky <stransky@redhat.com>- 110.0-3
 - Updated to 110.0 build 3
