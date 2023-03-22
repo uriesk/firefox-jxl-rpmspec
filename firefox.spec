@@ -172,8 +172,8 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        111.0
-Release:        3%{?pre_tag}%{?dist}
+Version:        111.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1078,6 +1078,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Mar 22 2023 Martin Stransky <stransky@redhat.com>- 111.0.1-1
+- Updated to 111.0.1
+
 * Tue Mar 21 2023 Jan Grulich <jgrulich@redhat.com> - 111.0-3
 - libwebrtc: backport upstream fix/improvement for DmaBuf screen sharing
 
