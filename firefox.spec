@@ -227,6 +227,7 @@ Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch78:        firefox-i686-build.patch
 Patch79:        firefox-gcc-13-build.patch
 Patch80:        D172126.diff
+Patch81:        D172864.diff
 
 # Test patches
 # Generate without context by
@@ -505,6 +506,7 @@ This package contains results of tests executed during build.
 %patch78 -p1 -b .firefox-i686
 %patch79 -p1 -b .firefox-gcc-13-build
 %patch80 -p1 -b .D172126
+%patch81 -p1 -b .D172864
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
