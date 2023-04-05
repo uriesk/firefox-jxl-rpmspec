@@ -169,6 +169,8 @@ ExcludeArch: i686
 %global __requires_exclude ^(%%(find %{buildroot}%{mozappdir} -name '*.so' | xargs -n1 basename | sort -u | paste -s -d '|' -))
 
 %undefine _package_note_flags
+# for https://bugzilla.redhat.com/show_bug.cgi?id=2184553
+%global _package_note_status 0
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
