@@ -174,13 +174,13 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        111.0.1
-Release:        2%{?pre_tag}%{?dist}
+Version:        112.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20230322.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20230405.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -228,8 +228,8 @@ Patch61:        firefox-glibc-dynstack.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch78:        firefox-i686-build.patch
 Patch79:        firefox-gcc-13-build.patch
-Patch80:        D172126.diff
-Patch81:        D172864.diff
+#Patch80:        D172126.diff
+#Patch81:        D172864.diff
 
 # Test patches
 # Generate without context by
@@ -242,7 +242,6 @@ Patch102:       firefox-tests-xpcshell-freeze.patch
 # Fedora specific patches
 Patch215:        firefox-enable-addons.patch
 Patch219:        rhbz-1173156.patch
-Patch224:        D168799.diff
 #ARM run-time patch
 Patch226:        rhbz-1354671.patch
 Patch228:        disable-openh264-download.patch
@@ -507,8 +506,8 @@ This package contains results of tests executed during build.
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch78 -p1 -b .firefox-i686
 %patch79 -p1 -b .firefox-gcc-13-build
-%patch80 -p1 -b .D172126
-%patch81 -p1 -b .D172864
+#%patch80 -p1 -b .D172126
+#%patch81 -p1 -b .D172864
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -518,7 +517,6 @@ This package contains results of tests executed during build.
 # Fedora patches
 %patch215 -p1 -b .addons
 %patch219 -p1 -b .rhbz-1173156
-%patch224 -p1 -b .D168799.diff
 #ARM run-time patch
 %ifarch aarch64
 %patch226 -p1 -b .1354671
@@ -1080,6 +1078,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Wed Apr 5 2023 Martin Stransky <stransky@redhat.com>- 112.0-1
+- Updated to 112.0
+
 * Wed Apr 5 2023 Martin Stransky <stransky@redhat.com>- 111.0.1-2
 - Don't override MOZ_USE_XINPUT2 in startup script (hrbz#2184297) by GalaxyMaster
 
