@@ -170,7 +170,7 @@ ExcludeArch: i686
 
 %undefine _package_note_flags
 # for https://bugzilla.redhat.com/show_bug.cgi?id=2184553
-%undefine _package_note_status
+%global _package_note_status 0
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
