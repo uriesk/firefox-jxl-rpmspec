@@ -267,6 +267,12 @@ Patch990:        work-around-GCC-ICE-on-arm.patch
 # Work around broken moz.build file on ppc64le (mozb#1779545, mozb#1775202)
 Patch1100:       mozilla-1775202.patch
 
+# tentative patch for RUSTFLAGS parsing issue:
+# https://bugzilla.redhat.com/show_bug.cgi?id=2184743
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1474486
+# not upstreaming till I'm more sure it's correct
+Patch1200:       firefox-112.0-commasplit.patch
+
 %if %{?system_nss}
 BuildRequires:  pkgconfig(nspr) >= %{nspr_version}
 BuildRequires:  pkgconfig(nss) >= %{nss_version}
@@ -543,6 +549,7 @@ This package contains results of tests executed during build.
 
 %patch990 -p1 -b .work-around-GCC-ICE-on-arm
 %patch1100 -p1 -b .ppc-mobzuild
+%patch1200 -p1 -b .rustflags-commasplit
 
 rm -f .mozconfig
 cp %{SOURCE10} .mozconfig
