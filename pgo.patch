@@ -1,6 +1,6 @@
-diff -up firefox-99.0/build/moz.configure/lto-pgo.configure.pgo firefox-99.0/build/moz.configure/lto-pgo.configure
---- firefox-99.0/build/moz.configure/lto-pgo.configure.pgo	2022-03-31 01:24:38.000000000 +0200
-+++ firefox-99.0/build/moz.configure/lto-pgo.configure	2022-04-04 10:15:45.387694143 +0200
+diff -up firefox-112.0/build/moz.configure/lto-pgo.configure.pgo firefox-112.0/build/moz.configure/lto-pgo.configure
+--- firefox-112.0/build/moz.configure/lto-pgo.configure.pgo	2023-04-06 17:27:38.000000000 +0200
++++ firefox-112.0/build/moz.configure/lto-pgo.configure	2023-04-06 21:27:32.537089073 +0200
 @@ -247,8 +247,8 @@ def lto(
              cflags.append("-flto")
              ldflags.append("-flto")
@@ -21,15 +21,15 @@ diff -up firefox-99.0/build/moz.configure/lto-pgo.configure.pgo firefox-99.0/bui
          # With clang-cl, -flto can only be used with -c or -fuse-ld=lld.
          # AC_TRY_LINKs during configure don't have -c, so pass -fuse-ld=lld.
          cflags.append("-fuse-ld=lld")
-diff -up firefox-99.0/build/pgo/profileserver.py.pgo firefox-99.0/build/pgo/profileserver.py
---- firefox-99.0/build/pgo/profileserver.py.pgo	2022-03-31 01:24:38.000000000 +0200
-+++ firefox-99.0/build/pgo/profileserver.py	2022-04-04 10:15:45.387694143 +0200
-@@ -11,7 +11,7 @@ import glob
- import subprocess
+diff -up firefox-112.0/build/pgo/profileserver.py.pgo firefox-112.0/build/pgo/profileserver.py
+--- firefox-112.0/build/pgo/profileserver.py.pgo	2023-04-06 17:27:40.000000000 +0200
++++ firefox-112.0/build/pgo/profileserver.py	2023-04-06 21:29:33.772294479 +0200
+@@ -11,7 +11,7 @@ import subprocess
+ import sys
  
  import mozcrash
--from mozbuild.base import MozbuildObject, BinaryNotFoundException
-+from mozbuild.base import MozbuildObject, BinaryNotFoundException, BuildEnvironmentNotFoundException
+-from mozbuild.base import BinaryNotFoundException, MozbuildObject
++from mozbuild.base import BinaryNotFoundException, MozbuildObject, BuildEnvironmentNotFoundException
  from mozfile import TemporaryDirectory
  from mozhttpd import MozHttpd
  from mozprofile import FirefoxProfile, Preferences
@@ -59,7 +59,7 @@ diff -up firefox-99.0/build/pgo/profileserver.py.pgo firefox-99.0/build/pgo/prof
  
      with TemporaryDirectory() as profilePath:
          # TODO: refactor this into mozprofile
-@@ -212,6 +225,10 @@ if __name__ == "__main__":
+@@ -213,6 +226,10 @@ if __name__ == "__main__":
              print("Firefox exited successfully, but produced a crashreport")
              sys.exit(1)
  
@@ -70,9 +70,9 @@ diff -up firefox-99.0/build/pgo/profileserver.py.pgo firefox-99.0/build/pgo/prof
          llvm_profdata = env.get("LLVM_PROFDATA")
          if llvm_profdata:
              profraw_files = glob.glob("*.profraw")
-diff -up firefox-99.0/build/unix/mozconfig.unix.pgo firefox-99.0/build/unix/mozconfig.unix
---- firefox-99.0/build/unix/mozconfig.unix.pgo	2022-03-31 01:24:38.000000000 +0200
-+++ firefox-99.0/build/unix/mozconfig.unix	2022-04-04 10:15:45.387694143 +0200
+diff -up firefox-112.0/build/unix/mozconfig.unix.pgo firefox-112.0/build/unix/mozconfig.unix
+--- firefox-112.0/build/unix/mozconfig.unix.pgo	2023-04-06 21:27:32.537089073 +0200
++++ firefox-112.0/build/unix/mozconfig.unix	2023-04-06 21:28:54.987949124 +0200
 @@ -4,6 +4,15 @@ if [ -n "$FORCE_GCC" ]; then
      CC="$MOZ_FETCHES_DIR/gcc/bin/gcc"
      CXX="$MOZ_FETCHES_DIR/gcc/bin/g++"
@@ -88,20 +88,20 @@ diff -up firefox-99.0/build/unix/mozconfig.unix.pgo firefox-99.0/build/unix/mozc
 +
      # We want to make sure we use binutils and other binaries in the tooltool
      # package.
-     mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$PATH"
-diff -up firefox-99.0/extensions/spellcheck/src/moz.build.pgo firefox-99.0/extensions/spellcheck/src/moz.build
---- firefox-99.0/extensions/spellcheck/src/moz.build.pgo	2022-03-31 01:24:50.000000000 +0200
-+++ firefox-99.0/extensions/spellcheck/src/moz.build	2022-04-04 10:15:45.387694143 +0200
+     mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$MOZ_FETCHES_DIR/binutils/bin:$PATH"
+diff -up firefox-112.0/extensions/spellcheck/src/moz.build.pgo firefox-112.0/extensions/spellcheck/src/moz.build
+--- firefox-112.0/extensions/spellcheck/src/moz.build.pgo	2023-04-06 17:27:41.000000000 +0200
++++ firefox-112.0/extensions/spellcheck/src/moz.build	2023-04-06 21:27:32.537089073 +0200
 @@ -28,3 +28,5 @@ EXPORTS.mozilla += [
      "mozInlineSpellChecker.h",
      "mozSpellChecker.h",
  ]
 +
 +CXXFLAGS += ['-fno-devirtualize']
-diff -up firefox-99.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-99.0/toolkit/components/terminator/nsTerminator.cpp
---- firefox-99.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2022-04-04 10:15:45.387694143 +0200
-+++ firefox-99.0/toolkit/components/terminator/nsTerminator.cpp	2022-04-04 10:19:07.022239556 +0200
-@@ -466,6 +466,11 @@ void nsTerminator::StartWatchdog() {
+diff -up firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-112.0/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2023-04-06 17:27:57.000000000 +0200
++++ firefox-112.0/toolkit/components/terminator/nsTerminator.cpp	2023-04-06 21:27:32.538089108 +0200
+@@ -460,6 +460,11 @@ void nsTerminator::StartWatchdog() {
    }
  #endif
  
