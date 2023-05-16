@@ -21,13 +21,9 @@ ExcludeArch: i686
 # as the build is *very* slow.
 %global debug_build       0
 
-# See rhbz#2134527 - Use portal Gtk file dialog on Fedora 37+
+# See rhbz#2134527 - Use portal Gtk file dialog
 # Disabled due to various issues now.
-%if 0%{?fedora} >= 37
 %global use_xdg_file_portal 0
-%else
-%global use_xdg_file_portal 0
-%endif
 
 %global system_nss        1
 %global system_libevent   1
@@ -128,9 +124,7 @@ ExcludeArch: i686
 %bcond_without langpacks
 
 %if %{with langpacks}
-%if 0%{?fedora} >= 37
 %bcond_without langpacks_subpkg
-%endif
 %endif
 
 %if !%{release_build}
