@@ -40,14 +40,6 @@ ExcludeArch: i686
 %global build_with_clang 0
 %endif
 
-%ifarch armv7hl
-%global create_debuginfo  0
-
-# always use clang for arm builds
-%global toolchain         clang
-%global build_with_clang  1
-%endif
-
 # Temporary disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
@@ -67,11 +59,7 @@ ExcludeArch: i686
 %endif
 
 %global system_ffi        1
-%ifarch armv7hl
-%global system_libvpx     1
-%else
 %global system_libvpx     0
-%endif
 %global system_jpeg       1
 %global system_pixman     1
 %global use_bundled_cbindgen  1
@@ -148,11 +136,8 @@ ExcludeArch: i686
 %if !%{release_build}
 %global pre_tag .npgo
 %endif
-# Don't use 'clang' suffix on arm
-%ifnarch %{arm}
 %if %{build_with_clang}
 %global pre_tag .clang
-%endif
 %endif
 %if %{build_with_asan}
 %global pre_tag .asan
@@ -582,7 +567,7 @@ echo "ac_add_options --with-system-libevent" >> .mozconfig
 echo "ac_add_options --enable-system-ffi" >> .mozconfig
 %endif
 
-%ifarch %{arm} aarch64
+%ifarch aarch64
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
 %endif
 
@@ -703,7 +688,7 @@ MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | sed -e 's/-O2//')
 # If MOZ_DEBUG_FLAGS is empty, firefox's build will default it to "-g" which
 # overrides the -g1 from line above and breaks building on s390/arm
 # (OOM when linking, rhbz#1238225)
-%ifarch %{arm} %{ix86}
+%ifarch %{ix86}
 MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | sed -e 's/-g/-g0/')
 export MOZ_DEBUG_FLAGS=" "
 %endif
@@ -712,27 +697,13 @@ MOZ_LINK_FLAGS="%{build_ldflags}"
 %ifarch aarch64 %{ix86}
 MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
 %endif
-%ifarch %{arm}
-MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -Wl,--no-keep-memory -Wl,--strip-debug"
-echo "ac_add_options --enable-linker=gold" >> .mozconfig
 %endif
-%endif
-%ifarch %{arm} %{ix86} s390x
+%ifarch %{ix86} s390x
 export RUSTFLAGS="-Cdebuginfo=0"
 %endif
 %if %{build_with_asan}
 MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -fsanitize=address -Dxmalloc=myxmalloc"
 MOZ_LINK_FLAGS="$MOZ_LINK_FLAGS -fsanitize=address -ldl"
-%endif
-
-%ifarch %{arm}
-# disable hard-coded LTO due to RAM constraints
-sed -i '/cargo_rustc_flags += -Clto/d' config/makefiles/rust.mk
-sed -i '/RUSTFLAGS += -Cembed-bitcode=yes/d' config/makefiles/rust.mk
-sed -i 's/codegen-units=1/codegen-units=16/' config/makefiles/rust.mk
-
-# make sure "-g0" is the last flag so there's no debug info
-MOZ_OPT_FLAGS="$MOZ_OPT_FLAGS -g0"
 %endif
 
 # We don't wantfirefox to use CK_GCM_PARAMS_V3 in nss
