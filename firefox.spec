@@ -246,9 +246,6 @@ Patch412:        D178251.diff
 Patch600:        pgo.patch
 Patch602:        mozilla-1516803.patch
 
-# a patch for compiling with gcc on arm (from debian)
-Patch990:        work-around-GCC-ICE-on-arm.patch
-
 # Work around broken moz.build file on ppc64le (mozb#1779545, mozb#1775202)
 Patch1100:       mozilla-1775202.patch
 
@@ -534,7 +531,6 @@ This package contains results of tests executed during build.
 %endif
 %endif
 
-%patch990 -p1 -b .work-around-GCC-ICE-on-arm
 %patch1100 -p1 -b .ppc-mobzuild
 %patch1200 -p1 -b .rustflags-commasplit
 
