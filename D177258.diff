@@ -1,0 +1,181 @@
+diff --git a/layout/reftests/xul/reftest.list b/layout/reftests/xul/reftest.list
+--- a/layout/reftests/xul/reftest.list
++++ b/layout/reftests/xul/reftest.list
+@@ -70,10 +70,12 @@
+ skip == chrome://reftest/content/xul/treecell-image-svg-1b.xhtml chrome://reftest/content/xul/treecell-image-svg-1-ref.xhtml # bug 1218954
+ 
+ != chrome://reftest/content/xul/treetwisty-svg-context-paint-1-not-ref.xhtml chrome://reftest/content/xul/treetwisty-svg-context-paint-1-ref.xhtml
+ test-pref(svg.context-properties.content.enabled,true) fuzzy(0-26,0-2) == chrome://reftest/content/xul/treetwisty-svg-context-paint-1.xhtml chrome://reftest/content/xul/treetwisty-svg-context-paint-1-ref.xhtml
+ 
++== chrome://reftest/content/xul/tree-scrollbar-height-change.xhtml chrome://reftest/content/xul/tree-scrollbar-height-change-ref.xhtml
++
+ # resizer (non-native-themed)
+ 
+ != chrome://reftest/content/xul/resizer-bottomend.xhtml chrome://reftest/content/xul/blank-window.xhtml
+ == chrome://reftest/content/xul/resizer-bottomend.xhtml chrome://reftest/content/xul/resizer-bottomright.xhtml
+ != chrome://reftest/content/xul/resizer-bottomend.xhtml chrome://reftest/content/xul/resizer-bottomend-rtl.xhtml
+diff --git a/layout/reftests/xul/tree-scrollbar-height-change-ref.xhtml b/layout/reftests/xul/tree-scrollbar-height-change-ref.xhtml
+new file mode 100644
+--- /dev/null
++++ b/layout/reftests/xul/tree-scrollbar-height-change-ref.xhtml
+@@ -0,0 +1,32 @@
++<?xml version="1.0"?>
++<?xml-stylesheet href="chrome://global/skin" type="text/css"?>
++
++<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
++        xmlns:html="http://www.w3.org/1999/xhtml">
++
++  <tree seltype="single" rows="5">
++    <treecols>
++      <treecol flex="1"/>
++      <treecol flex="1"/>
++    </treecols>
++    <treechildren>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++    </treechildren>
++  </tree>
++</window>
+diff --git a/layout/reftests/xul/tree-scrollbar-height-change.xhtml b/layout/reftests/xul/tree-scrollbar-height-change.xhtml
+new file mode 100644
+--- /dev/null
++++ b/layout/reftests/xul/tree-scrollbar-height-change.xhtml
+@@ -0,0 +1,39 @@
++<?xml version="1.0"?>
++<?xml-stylesheet href="chrome://global/skin" type="text/css"?>
++
++<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
++        xmlns:html="http://www.w3.org/1999/xhtml">
++
++  <tree id="tree" seltype="single" rows="5" style="min-height: 3000px">
++    <treecols>
++      <treecol flex="1"/>
++      <treecol flex="1"/>
++    </treecols>
++    <treechildren>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++      <treeitem><treerow><treecell label="One"/><treecell label="Two"/></treerow></treeitem>
++    </treechildren>
++  </tree>
++<script>
++<![CDATA[
++  let tree = document.getElementById("tree");
++  tree.getBoundingClientRect();
++  tree.style.minHeight = "";
++]]>
++</script>
++</window>
+diff --git a/layout/xul/tree/nsTreeBodyFrame.h b/layout/xul/tree/nsTreeBodyFrame.h
+--- a/layout/xul/tree/nsTreeBodyFrame.h
++++ b/layout/xul/tree/nsTreeBodyFrame.h
+@@ -114,11 +114,11 @@
+   nsresult ClearStyleAndImageCaches();
+   void RemoveImageCacheEntry(int32_t aRowIndex, nsTreeColumn* aCol);
+ 
+   void CancelImageRequests();
+ 
+-  void ManageReflowCallback(const nsRect& aRect, nscoord aHorzWidth);
++  void ManageReflowCallback();
+ 
+   void DidReflow(nsPresContext*, const ReflowInput*) override;
+ 
+   // nsIReflowCallback
+   bool ReflowFinished() override;
+@@ -566,10 +566,13 @@
+   nscoord mHorzWidth;
+   // The amount by which to adjust the width of the last cell.
+   // This depends on whether or not the columnpicker and scrollbars are present.
+   nscoord mAdjustWidth;
+ 
++  // Our last reflowed rect, used for invalidation, see ManageReflowCallback().
++  Maybe<nsRect> mLastReflowRect;
++
+   // Cached heights and indent info.
+   nsRect mInnerBox;  // 4-byte aligned
+   int32_t mRowHeight;
+   int32_t mIndentation;
+ 
+diff --git a/layout/xul/tree/nsTreeBodyFrame.cpp b/layout/xul/tree/nsTreeBodyFrame.cpp
+--- a/layout/xul/tree/nsTreeBodyFrame.cpp
++++ b/layout/xul/tree/nsTreeBodyFrame.cpp
+@@ -363,34 +363,37 @@
+   // XXX is this optimal if we haven't laid out yet?
+   ScrollToRow(rowIndex);
+   NS_ENSURE_TRUE_VOID(weakFrame.IsAlive());
+ }
+ 
+-void nsTreeBodyFrame::ManageReflowCallback(const nsRect& aRect,
+-                                           nscoord aHorzWidth) {
+-  if (!mReflowCallbackPosted &&
+-      (!aRect.IsEqualEdges(mRect) || mHorzWidth != aHorzWidth)) {
+-    PresShell()->PostReflowCallback(this);
+-    mReflowCallbackPosted = true;
+-    mOriginalHorzWidth = mHorzWidth;
+-  } else if (mReflowCallbackPosted && mHorzWidth != aHorzWidth &&
+-             mOriginalHorzWidth == aHorzWidth) {
++void nsTreeBodyFrame::ManageReflowCallback() {
++  const nscoord horzWidth = CalcHorzWidth(GetScrollParts());
++  if (!mReflowCallbackPosted) {
++    if (!mLastReflowRect || !mLastReflowRect->IsEqualEdges(mRect) ||
++        mHorzWidth != horzWidth) {
++      PresShell()->PostReflowCallback(this);
++      mReflowCallbackPosted = true;
++      mOriginalHorzWidth = mHorzWidth;
++    }
++  } else if (mHorzWidth != horzWidth && mOriginalHorzWidth == horzWidth) {
++    // FIXME(emilio): This doesn't seem sound to me, if the rect changes in the
++    // block axis.
+     PresShell()->CancelReflowCallback(this);
+     mReflowCallbackPosted = false;
+     mOriginalHorzWidth = -1;
+   }
++  mLastReflowRect = Some(mRect);
++  mHorzWidth = horzWidth;
+ }
+ 
+ nscoord nsTreeBodyFrame::GetIntrinsicBSize() {
+   return mHasFixedRowCount ? mRowHeight * mPageLength : 0;
+ }
+ 
+ void nsTreeBodyFrame::DidReflow(nsPresContext* aPresContext,
+                                 const ReflowInput* aReflowInput) {
+-  nscoord horzWidth = CalcHorzWidth(GetScrollParts());
+-  ManageReflowCallback(GetRect(), horzWidth);
+-  mHorzWidth = horzWidth;
++  ManageReflowCallback();
+   SimpleXULLeafFrame::DidReflow(aPresContext, aReflowInput);
+ }
+ 
+ bool nsTreeBodyFrame::ReflowFinished() {
+   if (!mView) {
+
