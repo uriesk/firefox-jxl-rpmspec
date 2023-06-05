@@ -543,6 +543,9 @@ echo "ac_add_options --enable-system-ffi" >> .mozconfig
 %ifarch aarch64
 echo "ac_add_options --disable-elf-hack" >> .mozconfig
 %endif
+%ifarch ppc64le
+echo "ac_add_options --disable-webrtc" >> .mozconfig
+%endif
 
 %if %{?debug_build}
 echo "ac_add_options --enable-debug" >> .mozconfig
@@ -1038,6 +1041,7 @@ fi
 %changelog
 * Mon Jun 05 2023 Martin Stransky <stransky@redhat.com>- 114.0-1
 - Updated to 114.0
+- Disable webrtc on ppc64le
 
 * Wed May 24 2023 Martin Stransky <stransky@redhat.com>- 113.0.1-4
 - Added patches from 113.0.2
