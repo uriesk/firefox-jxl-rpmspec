@@ -89,15 +89,6 @@ diff -up firefox-112.0/build/unix/mozconfig.unix.pgo firefox-112.0/build/unix/mo
      # We want to make sure we use binutils and other binaries in the tooltool
      # package.
      mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$MOZ_FETCHES_DIR/binutils/bin:$PATH"
-diff -up firefox-112.0/extensions/spellcheck/src/moz.build.pgo firefox-112.0/extensions/spellcheck/src/moz.build
---- firefox-112.0/extensions/spellcheck/src/moz.build.pgo	2023-04-06 17:27:41.000000000 +0200
-+++ firefox-112.0/extensions/spellcheck/src/moz.build	2023-04-06 21:27:32.537089073 +0200
-@@ -28,3 +28,5 @@ EXPORTS.mozilla += [
-     "mozInlineSpellChecker.h",
-     "mozSpellChecker.h",
- ]
-+
-+CXXFLAGS += ['-fno-devirtualize']
 diff -up firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-112.0/toolkit/components/terminator/nsTerminator.cpp
 --- firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2023-04-06 17:27:57.000000000 +0200
 +++ firefox-112.0/toolkit/components/terminator/nsTerminator.cpp	2023-04-06 21:27:32.538089108 +0200
@@ -113,3 +104,15 @@ diff -up firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefo
    UniquePtr<Options> options(new Options());
    // crashAfterTicks is guaranteed to be > 0 as
    // crashAfterMS >= ADDITIONAL_WAIT_BEFORE_CRASH_MS >> HEARTBEAT_INTERVAL_MS
+diff -up firefox-114.0.2/build/moz.configure/lto-pgo.configure.pgo firefox-114.0.2/build/moz.configure/lto-pgo.configure
+--- firefox-114.0.2/build/moz.configure/lto-pgo.configure.pgo	2023-06-22 11:17:37.428552356 +0200
++++ firefox-114.0.2/build/moz.configure/lto-pgo.configure	2023-06-22 11:17:51.476033691 +0200
+@@ -86,7 +86,7 @@ def pgo_flags(compiler, profdata, target
+         return namespace(
+             gen_cflags=["-fprofile-generate"],
+             gen_ldflags=["-fprofile-generate"],
+-            use_cflags=["-fprofile-use", "-fprofile-correction", "-Wcoverage-mismatch"],
++            use_cflags=["-fprofile-use", "-fprofile-correction", "-Wno-coverage-mismatch"],
+             use_ldflags=["-fprofile-use"],
+         )
+ 
