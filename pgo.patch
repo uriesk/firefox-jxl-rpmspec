@@ -59,17 +59,6 @@ diff -up firefox-112.0/build/pgo/profileserver.py.pgo firefox-112.0/build/pgo/pr
  
      with TemporaryDirectory() as profilePath:
          # TODO: refactor this into mozprofile
-@@ -213,6 +226,10 @@ if __name__ == "__main__":
-             print("Firefox exited successfully, but produced a crashreport")
-             sys.exit(1)
- 
-+        print('Copying profile data....')
-+        os.system('pwd');
-+        os.system('tar cf profdata.tar.gz `find . -name "*.gcda"`; cd ..; tar xf instrumented/profdata.tar.gz;');
-+
-         llvm_profdata = env.get("LLVM_PROFDATA")
-         if llvm_profdata:
-             profraw_files = glob.glob("*.profraw")
 diff -up firefox-112.0/build/unix/mozconfig.unix.pgo firefox-112.0/build/unix/mozconfig.unix
 --- firefox-112.0/build/unix/mozconfig.unix.pgo	2023-04-06 21:27:32.537089073 +0200
 +++ firefox-112.0/build/unix/mozconfig.unix	2023-04-06 21:28:54.987949124 +0200
