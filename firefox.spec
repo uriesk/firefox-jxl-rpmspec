@@ -31,7 +31,7 @@ ExcludeArch: ppc64le
 %global system_nss        1
 %global system_libevent   1
 %global build_with_asan   0
-%global test_on_wayland   1
+%global test_on_wayland   0
 
 %if "%{toolchain}" == "clang"
 %global build_with_clang 1
@@ -719,6 +719,7 @@ export GCOV_PREFIX_STRIP=$(( $(echo `pwd -P`|tr -c -d '/' |wc -c )+2 ))
 env | grep GCOV
 echo "ac_add_options --enable-lto" >> .mozconfig
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
+echo "ac_add_options --disable-elf-hack" >> .mozconfig
 %endif
 
 # Require 2 GB of RAM per CPU core
