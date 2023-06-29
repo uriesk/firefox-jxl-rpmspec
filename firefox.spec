@@ -158,13 +158,13 @@ ExcludeArch: ppc64le
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        114.0.2
-Release:        3%{?pre_tag}%{?dist}
+Version:        115.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20230620.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20230629.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
@@ -1056,6 +1056,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Jun 29 2023 Martin Stransky <stransky@redhat.com>- 115.0-1
+- Update to 115.0
+
 * Thu Jun 29 2023 Martin Stransky <stransky@redhat.com>- 114.0.2-3
 - Enable Elf-hack for PGO builds.
 
