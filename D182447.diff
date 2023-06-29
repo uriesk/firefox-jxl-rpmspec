@@ -1,0 +1,111 @@
+diff --git a/build/unix/elfhack/elf.cpp b/build/unix/elfhack/elf.cpp
+--- a/build/unix/elfhack/elf.cpp
++++ b/build/unix/elfhack/elf.cpp
+@@ -347,11 +347,11 @@
+     }
+   }
+   return sections[index];
+ }
+ 
+-ElfSection* Elf::getSectionAt(unsigned int offset) {
++ElfSection* Elf::getSectionAt(Elf64_Off offset) {
+   for (int i = 1; i < ehdr->e_shnum; i++) {
+     ElfSection* section = getSection(i);
+     if ((section != nullptr) && (section->getFlags() & SHF_ALLOC) &&
+         !(section->getFlags() & SHF_TLS) && (offset >= section->getAddr()) &&
+         (offset < section->getAddr() + section->getSize()))
+@@ -532,11 +532,11 @@
+     info.section = shdr.sh_info ? parent->getSection(shdr.sh_info) : nullptr;
+   else
+     info.index = shdr.sh_info;
+ }
+ 
+-unsigned int ElfSection::getAddr() {
++Elf64_Addr ElfSection::getAddr() {
+   if (shdr.sh_addr != (Elf64_Addr)-1) return shdr.sh_addr;
+ 
+   // It should be safe to adjust sh_addr for all allocated sections that
+   // are neither SHT_NOBITS nor SHT_PROGBITS
+   if ((previous != nullptr) && isRelocatable()) {
+@@ -548,16 +548,16 @@
+     return (shdr.sh_addr = addr);
+   }
+   return shdr.sh_addr;
+ }
+ 
+-unsigned int ElfSection::getOffset() {
++Elf64_Off ElfSection::getOffset() {
+   if (shdr.sh_offset != (Elf64_Off)-1) return shdr.sh_offset;
+ 
+   if (previous == nullptr) return (shdr.sh_offset = 0);
+ 
+-  unsigned int offset = previous->getOffset();
++  Elf64_Off offset = previous->getOffset();
+ 
+   ElfSegment* ptload = getSegmentByType(PT_LOAD);
+   ElfSegment* prev_ptload = previous->getSegmentByType(PT_LOAD);
+ 
+   if (ptload && (ptload == prev_ptload)) {
+diff --git a/build/unix/elfhack/elfhack.cpp b/build/unix/elfhack/elfhack.cpp
+--- a/build/unix/elfhack/elfhack.cpp
++++ b/build/unix/elfhack/elfhack.cpp
+@@ -1258,12 +1258,12 @@
+       second->getAddr() < first_executable->getAddr()) {
+     // The distance between both sections needs to be preserved because
+     // eh_frame_hdr contains relative offsets to eh_frame. Well, they could be
+     // relocated too, but it's not worth the effort for the few number of bytes
+     // this would save.
+-    unsigned int distance = second->getAddr() - first->getAddr();
+-    unsigned int origAddr = eh_frame->getAddr();
++    Elf64_Off distance = second->getAddr() - first->getAddr();
++    Elf64_Addr origAddr = eh_frame->getAddr();
+     ElfSection* previous = first->getPrevious();
+     first->getShdr().sh_addr = (previous->getAddr() + previous->getSize() +
+                                 first->getAddrAlign() - 1) &
+                                ~(first->getAddrAlign() - 1);
+     second->getShdr().sh_addr =
+diff --git a/build/unix/elfhack/elfxx.h b/build/unix/elfhack/elfxx.h
+--- a/build/unix/elfhack/elfxx.h
++++ b/build/unix/elfhack/elfxx.h
+@@ -283,11 +283,11 @@
+   ~Elf();
+ 
+   /* index == -1 is treated as index == ehdr.e_shstrndx */
+   ElfSection* getSection(int index);
+ 
+-  ElfSection* getSectionAt(unsigned int offset);
++  ElfSection* getSectionAt(Elf64_Off offset);
+ 
+   ElfSegment* getSegmentByType(unsigned int type, ElfSegment* last = nullptr);
+ 
+   ElfDynamic_Section* getDynSection();
+ 
+@@ -332,12 +332,12 @@
+   virtual ~ElfSection() { free(data); }
+ 
+   const char* getName() { return name; }
+   unsigned int getType() { return shdr.sh_type; }
+   unsigned int getFlags() { return shdr.sh_flags; }
+-  unsigned int getAddr();
+-  unsigned int getSize() { return shdr.sh_size; }
++  Elf64_Addr getAddr();
++  Elf64_Off getSize() { return shdr.sh_size; }
+   unsigned int getAddrAlign() { return shdr.sh_addralign; }
+   unsigned int getEntSize() { return shdr.sh_entsize; }
+   const char* getData() { return data; }
+   ElfSection* getLink() { return link; }
+   SectionInfo getInfo() { return info; }
+@@ -356,11 +356,11 @@
+       shdr.sh_size = newsize;
+       markDirty();
+     }
+   }
+ 
+-  unsigned int getOffset();
++  Elf64_Off getOffset();
+   int getIndex();
+   Elf_Shdr& getShdr();
+ 
+   ElfSection* getNext() { return next; }
+   ElfSection* getPrevious() { return previous; }
+

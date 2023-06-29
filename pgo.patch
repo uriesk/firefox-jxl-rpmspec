@@ -1,26 +1,3 @@
-diff -up firefox-112.0/build/moz.configure/lto-pgo.configure.pgo firefox-112.0/build/moz.configure/lto-pgo.configure
---- firefox-112.0/build/moz.configure/lto-pgo.configure.pgo	2023-04-06 17:27:38.000000000 +0200
-+++ firefox-112.0/build/moz.configure/lto-pgo.configure	2023-04-06 21:27:32.537089073 +0200
-@@ -247,8 +247,8 @@ def lto(
-             cflags.append("-flto")
-             ldflags.append("-flto")
-         else:
--            cflags.append("-flto=thin")
--            ldflags.append("-flto=thin")
-+            cflags.append("-flto")
-+            ldflags.append("-flto")
- 
-         if target.os == "Android" and value == "cross":
-             # Work around https://github.com/rust-lang/rust/issues/90088
-@@ -264,7 +264,7 @@ def lto(
-         if value == "full":
-             cflags.append("-flto")
-         else:
--            cflags.append("-flto=thin")
-+            cflags.append("-flto")
-         # With clang-cl, -flto can only be used with -c or -fuse-ld=lld.
-         # AC_TRY_LINKs during configure don't have -c, so pass -fuse-ld=lld.
-         cflags.append("-fuse-ld=lld")
 diff -up firefox-112.0/build/pgo/profileserver.py.pgo firefox-112.0/build/pgo/profileserver.py
 --- firefox-112.0/build/pgo/profileserver.py.pgo	2023-04-06 17:27:40.000000000 +0200
 +++ firefox-112.0/build/pgo/profileserver.py	2023-04-06 21:29:33.772294479 +0200
@@ -59,25 +36,6 @@ diff -up firefox-112.0/build/pgo/profileserver.py.pgo firefox-112.0/build/pgo/pr
  
      with TemporaryDirectory() as profilePath:
          # TODO: refactor this into mozprofile
-diff -up firefox-112.0/build/unix/mozconfig.unix.pgo firefox-112.0/build/unix/mozconfig.unix
---- firefox-112.0/build/unix/mozconfig.unix.pgo	2023-04-06 21:27:32.537089073 +0200
-+++ firefox-112.0/build/unix/mozconfig.unix	2023-04-06 21:28:54.987949124 +0200
-@@ -4,6 +4,15 @@ if [ -n "$FORCE_GCC" ]; then
-     CC="$MOZ_FETCHES_DIR/gcc/bin/gcc"
-     CXX="$MOZ_FETCHES_DIR/gcc/bin/g++"
- 
-+    if [ -n "$MOZ_PGO" ]; then
-+        if [ -z "$USE_ARTIFACT" ]; then
-+            ac_add_options --enable-lto
-+        fi
-+        export AR="$topsrcdir/gcc/bin/gcc-ar"
-+        export NM="$topsrcdir/gcc/bin/gcc-nm"
-+        export RANLIB="$topsrcdir/gcc/bin/gcc-ranlib"
-+    fi
-+
-     # We want to make sure we use binutils and other binaries in the tooltool
-     # package.
-     mk_add_options "export PATH=$MOZ_FETCHES_DIR/gcc/bin:$MOZ_FETCHES_DIR/binutils/bin:$PATH"
 diff -up firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-112.0/toolkit/components/terminator/nsTerminator.cpp
 --- firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2023-04-06 17:27:57.000000000 +0200
 +++ firefox-112.0/toolkit/components/terminator/nsTerminator.cpp	2023-04-06 21:27:32.538089108 +0200
