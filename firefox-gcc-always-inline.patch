@@ -1,22 +1,14 @@
-diff -up firefox-115.0/gfx/skia/generate_mozbuild.py.old firefox-115.0/gfx/skia/generate_mozbuild.py
---- firefox-115.0/gfx/skia/generate_mozbuild.py.old	2023-07-03 15:45:48.324343303 +0200
-+++ firefox-115.0/gfx/skia/generate_mozbuild.py	2023-07-03 15:46:03.098854139 +0200
-@@ -54,7 +54,6 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
- if CONFIG['INTEL_ARCHITECTURE']:
-     SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-mssse3']
-     SOURCES['skia/src/opts/SkOpts_sse42.cpp'].flags += ['-msse4.2']
--    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-mavx']
-     SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-mavx2', '-mf16c', '-mfma']
-     if not CONFIG["MOZ_CODE_COVERAGE"]:
-       SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl']
-diff -up firefox-115.0/gfx/skia/moz.build.old firefox-115.0/gfx/skia/moz.build
---- firefox-115.0/gfx/skia/moz.build.old	2023-07-03 15:45:29.988709343 +0200
-+++ firefox-115.0/gfx/skia/moz.build	2023-07-03 15:45:39.971054486 +0200
-@@ -565,7 +565,6 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
- if CONFIG['INTEL_ARCHITECTURE']:
-     SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-mssse3']
-     SOURCES['skia/src/opts/SkOpts_sse42.cpp'].flags += ['-msse4.2']
--    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-mavx']
-     SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-mavx2', '-mf16c', '-mfma']
-     if not CONFIG["MOZ_CODE_COVERAGE"]:
-         SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl']
+diff -up firefox-114.0.2/gfx/wr/swgl/src/gl.cc.inline firefox-114.0.2/gfx/wr/swgl/src/gl.cc
+--- firefox-114.0.2/gfx/wr/swgl/src/gl.cc.inline	2023-06-22 11:08:53.294593327 +0200
++++ firefox-114.0.2/gfx/wr/swgl/src/gl.cc	2023-06-22 11:12:43.663486734 +0200
+@@ -58,9 +58,7 @@ WINBASEAPI BOOL WINAPI QueryPerformanceF
+ }
+ 
+ #else
+-// GCC is slower when dealing with always_inline, especially in debug builds.
+-// When using Clang, use always_inline more aggressively.
+-#  if defined(__clang__) || defined(NDEBUG)
++#  if defined(__clang__) || defined (__GNUC__) || defined(NDEBUG)
+ #    define ALWAYS_INLINE __attribute__((always_inline)) inline
+ #  else
+ #    define ALWAYS_INLINE inline
