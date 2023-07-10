@@ -60,7 +60,11 @@ ExcludeArch: i686
 %global system_pixman     1
 # Bundled cbindgen makes build slow.
 # Enable only if system cbindgen is not available.
+%if 0%{?rhel}
+%global use_bundled_cbindgen  1
+%else
 %global use_bundled_cbindgen  0
+%endif
 %if %{debug_build}
 %global release_build     0
 %endif
