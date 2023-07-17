@@ -1,6 +1,18 @@
-diff -up firefox-112.0/build/pgo/profileserver.py.pgo firefox-112.0/build/pgo/profileserver.py
---- firefox-112.0/build/pgo/profileserver.py.pgo	2023-04-06 17:27:40.000000000 +0200
-+++ firefox-112.0/build/pgo/profileserver.py	2023-04-06 21:29:33.772294479 +0200
+diff -up firefox-115.0.2/build/moz.configure/lto-pgo.configure.pgo firefox-115.0.2/build/moz.configure/lto-pgo.configure
+--- firefox-115.0.2/build/moz.configure/lto-pgo.configure.pgo	2023-07-10 21:29:37.000000000 +0200
++++ firefox-115.0.2/build/moz.configure/lto-pgo.configure	2023-07-17 12:14:11.504155850 +0200
+@@ -86,7 +86,7 @@ def pgo_flags(compiler, profdata, target
+         return namespace(
+             gen_cflags=["-fprofile-generate"],
+             gen_ldflags=["-fprofile-generate"],
+-            use_cflags=["-fprofile-use", "-fprofile-correction", "-Wcoverage-mismatch"],
++            use_cflags=["-fprofile-use", "-fprofile-correction", "-Wno-coverage-mismatch"],
+             use_ldflags=["-fprofile-use"],
+         )
+ 
+diff -up firefox-115.0.2/build/pgo/profileserver.py.pgo firefox-115.0.2/build/pgo/profileserver.py
+--- firefox-115.0.2/build/pgo/profileserver.py.pgo	2023-07-10 21:29:38.000000000 +0200
++++ firefox-115.0.2/build/pgo/profileserver.py	2023-07-17 12:14:11.503155816 +0200
 @@ -11,7 +11,7 @@ import subprocess
  import sys
  
@@ -36,9 +48,60 @@ diff -up firefox-112.0/build/pgo/profileserver.py.pgo firefox-112.0/build/pgo/pr
  
      with TemporaryDirectory() as profilePath:
          # TODO: refactor this into mozprofile
-diff -up firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-112.0/toolkit/components/terminator/nsTerminator.cpp
---- firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2023-04-06 17:27:57.000000000 +0200
-+++ firefox-112.0/toolkit/components/terminator/nsTerminator.cpp	2023-04-06 21:27:32.538089108 +0200
+diff -up firefox-115.0.2/gfx/2d/moz.build.pgo firefox-115.0.2/gfx/2d/moz.build
+--- firefox-115.0.2/gfx/2d/moz.build.pgo	2023-07-17 12:37:49.532499847 +0200
++++ firefox-115.0.2/gfx/2d/moz.build	2023-07-17 12:38:16.378433587 +0200
+@@ -136,11 +136,11 @@ if CONFIG["INTEL_ARCHITECTURE"]:
+     # The file uses SSE2 intrinsics, so it needs special compile flags on some
+     # compilers.
+     SOURCES["BlurSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
+-    SOURCES["ConvolutionFilterAVX2.cpp"].flags += ["-mavx2"]
++    SOURCES["ConvolutionFilterAVX2.cpp"].flags += ["-mavx2", "-fno-lto"]
+     SOURCES["ConvolutionFilterSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
+     SOURCES["FilterProcessingSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
+     SOURCES["ImageScalingSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
+-    SOURCES["SwizzleAVX2.cpp"].flags += ["-mavx2"]
++    SOURCES["SwizzleAVX2.cpp"].flags += ["-mavx2", "-fno-lto"]
+     SOURCES["SwizzleSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
+     SOURCES["SwizzleSSSE3.cpp"].flags += CONFIG["SSSE3_FLAGS"]
+     SOURCES["ssse3-scaler.c"].flags += CONFIG["SSSE3_FLAGS"]
+diff -up firefox-115.0.2/gfx/skia/generate_mozbuild.py.pgo firefox-115.0.2/gfx/skia/generate_mozbuild.py
+--- firefox-115.0.2/gfx/skia/generate_mozbuild.py.pgo	2023-07-10 21:29:41.000000000 +0200
++++ firefox-115.0.2/gfx/skia/generate_mozbuild.py	2023-07-17 12:35:46.651225829 +0200
+@@ -54,10 +54,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
+ if CONFIG['INTEL_ARCHITECTURE']:
+     SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-mssse3']
+     SOURCES['skia/src/opts/SkOpts_sse42.cpp'].flags += ['-msse4.2']
+-    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-mavx']
+-    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-mavx2', '-mf16c', '-mfma']
++    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-mavx', '-fno-lto']
++    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-mavx2', '-mf16c', '-mfma', '-fno-lto']
+     if not CONFIG["MOZ_CODE_COVERAGE"]:
+-      SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl']
++      SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl', '-fno-lto']
+ elif CONFIG['CPU_ARCH'] == 'aarch64' and CONFIG['CC_TYPE'] in ('clang', 'gcc'):
+     SOURCES['skia/src/opts/SkOpts_crc32.cpp'].flags += ['-march=armv8-a+crc']
+ 
+diff -up firefox-115.0.2/gfx/skia/moz.build.pgo firefox-115.0.2/gfx/skia/moz.build
+--- firefox-115.0.2/gfx/skia/moz.build.pgo	2023-07-10 21:29:41.000000000 +0200
++++ firefox-115.0.2/gfx/skia/moz.build	2023-07-17 12:37:21.626529230 +0200
+@@ -565,10 +565,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
+ if CONFIG['INTEL_ARCHITECTURE']:
+     SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-mssse3']
+     SOURCES['skia/src/opts/SkOpts_sse42.cpp'].flags += ['-msse4.2']
+-    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-mavx']
+-    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-mavx2', '-mf16c', '-mfma']
++    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-mavx', '-fno-lto']
++    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-mavx2', '-mf16c', '-mfma', '-fno-lto']
+     if not CONFIG["MOZ_CODE_COVERAGE"]:
+-        SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl']
++        SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl', '-fno-lto']
+ elif CONFIG['CPU_ARCH'] == 'aarch64' and CONFIG['CC_TYPE'] in ('clang', 'gcc'):
+     SOURCES['skia/src/opts/SkOpts_crc32.cpp'].flags += ['-march=armv8-a+crc']
+ 
+diff -up firefox-115.0.2/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-115.0.2/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-115.0.2/toolkit/components/terminator/nsTerminator.cpp.pgo	2023-07-10 21:29:58.000000000 +0200
++++ firefox-115.0.2/toolkit/components/terminator/nsTerminator.cpp	2023-07-17 12:14:11.503155816 +0200
 @@ -460,6 +460,11 @@ void nsTerminator::StartWatchdog() {
    }
  #endif
@@ -51,15 +114,3 @@ diff -up firefox-112.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefo
    UniquePtr<Options> options(new Options());
    // crashAfterTicks is guaranteed to be > 0 as
    // crashAfterMS >= ADDITIONAL_WAIT_BEFORE_CRASH_MS >> HEARTBEAT_INTERVAL_MS
-diff -up firefox-114.0.2/build/moz.configure/lto-pgo.configure.pgo firefox-114.0.2/build/moz.configure/lto-pgo.configure
---- firefox-114.0.2/build/moz.configure/lto-pgo.configure.pgo	2023-06-22 11:17:37.428552356 +0200
-+++ firefox-114.0.2/build/moz.configure/lto-pgo.configure	2023-06-22 11:17:51.476033691 +0200
-@@ -86,7 +86,7 @@ def pgo_flags(compiler, profdata, target
-         return namespace(
-             gen_cflags=["-fprofile-generate"],
-             gen_ldflags=["-fprofile-generate"],
--            use_cflags=["-fprofile-use", "-fprofile-correction", "-Wcoverage-mismatch"],
-+            use_cflags=["-fprofile-use", "-fprofile-correction", "-Wno-coverage-mismatch"],
-             use_ldflags=["-fprofile-use"],
-         )
- 
