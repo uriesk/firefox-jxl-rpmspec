@@ -1052,6 +1052,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jul 17 2023 Martin Stransky <stransky@redhat.com>- 115.0.2-1
+- Update to 115.0.2
+
 * Tue Jul 11 2023 Dan Horák <dan[at]danny.cz> - 115.0-3
 - re-enable ppc64le (rhbz#2212748)
 
