@@ -131,7 +131,7 @@ export FONTCONFIG_PATH
 ##
 ## We want Firefox to use Openh264 provided by Fedora
 ##
-if [ -z "$MOZ_GMP_PATH" ]
+if [ -z "$MOZ_GMP_PATH" ]; then
   export MOZ_GMP_PATH=$MOZ_LIB_DIR/mozilla/plugins/gmp-gmpopenh264/system-installed
 fi
 
