@@ -129,11 +129,14 @@ FONTCONFIG_PATH="/etc/fonts:${MOZILLA_FIVE_HOME}/res/Xft"
 export FONTCONFIG_PATH
 
 ##
-## We want Firefox to use Openh264 provided by Fedora
+## We want Firefox to use Openh264 provided by Fedora.
 ##
-if [ -z "$MOZ_GMP_PATH" ]; then
-  export MOZ_GMP_PATH=$MOZ_LIB_DIR/mozilla/plugins/gmp-gmpopenh264/system-installed
-fi
+## We used to configure it here but It's set by /etc/profile.d/gmpopenh264.sh
+## script from mozilla-openh264 package now. Let's keep it here just
+## for the record.
+##
+## export MOZ_GMP_PATH=$MOZ_LIB_DIR/mozilla/plugins/gmp-gmpopenh264/system-installed
+##
 
 ##
 ## In order to better support certain scripts (such as Indic and some CJK
