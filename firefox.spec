@@ -990,7 +990,6 @@ fi
 %{mozappdir}/firefox
 %{mozappdir}/firefox-bin
 %{mozappdir}/glxtest
-%{mozappdir}/vaapitest
 %doc %{_mandir}/man1/*
 %dir %{_sysconfdir}/%{name}
 %dir %{_sysconfdir}/%{name}/*
@@ -1044,6 +1043,13 @@ fi
 %{mozappdir}/plugin-container
 %{mozappdir}/gmp-clearkey
 %{mozappdir}/fonts/TwemojiMozilla.ttf
+%ifarch aarch64
+%{mozappdir}/v4l2test
+%{mozappdir}/vaapitest
+%endif
+%ifarch x86_64
+%{mozappdir}/vaapitest
+%endif
 %if !%{?system_nss}
 %exclude %{mozappdir}/libnssckbi.so
 %endif
