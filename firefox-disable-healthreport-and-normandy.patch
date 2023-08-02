@@ -1,0 +1,8 @@
+--- firefox-116.0/browser/moz.configure	2023-07-27 20:36:02.000000000 +0200
++++ firefox-116.0-telemetry/browser/moz.configure	2023-08-02 22:36:12.198165339 +0200
+@@ -8 +8 @@
+-imply_option("MOZ_SERVICES_HEALTHREPORT", True)
++imply_option("MOZ_SERVICES_HEALTHREPORT", False)
+@@ -12 +12 @@
+-imply_option("MOZ_NORMANDY", True)
++imply_option("MOZ_NORMANDY", False)
