@@ -273,6 +273,8 @@ Patch801:        bmo-1559213-fix-system-av1-libs.patch
 %if %{build_with_jxl}
 Patch700:        firefox-enable-jxl.patch
 %endif
+Patch701:        firefox-disable-healthreport-and-normandy.patch
+Patch702:        firefox-disable-telemetry.patch
 
 # tentative patch for RUSTFLAGS parsing issue:
 # https://bugzilla.redhat.com/show_bug.cgi?id=2184743
@@ -578,6 +580,8 @@ This package contains results of tests executed during build.
 %if %{build_with_jxl}
 %patch700 -p1 -b .firefox-enable-jxl
 %endif
+%patch701 -p1 -b .firefox-disable-rep
+%patch702 -p1 -b .firefox-disable-tele
 
 %patch1200 -p1 -b .rustflags-commasplit
 
