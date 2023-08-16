@@ -1068,7 +1068,7 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Aug 16 2023 Martin Stransky <stransky@redhat.com>- 116.0.2-2
+* Wed Aug 16 2023 Martin Stransky <stransky@redhat.com>- 116.0.2-2
 - Added Fedora customization patch
 
 * Mon Aug 7 2023 Martin Stransky <stransky@redhat.com>- 116.0.2-1
