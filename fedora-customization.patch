@@ -1,0 +1,34 @@
+diff --git a/toolkit/xre/nsAppRunner.cpp b/toolkit/xre/nsAppRunner.cpp
+--- a/toolkit/xre/nsAppRunner.cpp
++++ b/toolkit/xre/nsAppRunner.cpp
+@@ -5762,6 +5762,12 @@ int XREMain::XRE_main(int argc, char* ar
+   if (!mAppData->remotingName) {
+     mAppData->remotingName = mAppData->name;
+   }
++
++  const char* appRemotingName = getenv("MOZ_APP_REMOTINGNAME");
++  if (appRemotingName) {
++    mAppData->remotingName = strdup(appRemotingName);
++  }
++
+   // used throughout this file
+   gAppData = mAppData.get();
+ 
+diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
+--- a/widget/gtk/nsWindow.cpp
++++ b/widget/gtk/nsWindow.cpp
+@@ -3448,7 +3448,13 @@ void* nsWindow::GetNativeData(uint32_t a
+ nsresult nsWindow::SetTitle(const nsAString& aTitle) {
+   if (!mShell) return NS_OK;
+ 
+-    // convert the string into utf8 and set the title.
++  const char* appTitle = getenv("MOZ_APP_TITLE");
++  if (appTitle) {
++    gtk_window_set_title(GTK_WINDOW(mShell), appTitle);
++    return NS_OK;
++  }
++
++  // convert the string into utf8 and set the title.
+ #define UTF8_FOLLOWBYTE(ch) (((ch)&0xC0) == 0x80)
+   NS_ConvertUTF16toUTF8 titleUTF8(aTitle);
+   if (titleUTF8.Length() > NS_WINDOW_TITLE_MAX_LENGTH) {
