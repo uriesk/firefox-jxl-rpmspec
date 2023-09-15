@@ -624,7 +624,7 @@ echo "ac_add_options --with-google-safebrowsing-api-keyfile=`pwd`/google-api-key
 # https://bugzilla.redhat.com/show_bug.cgi?id=2239046
 # with clang 17 upstream's detection fails, so let's just tell it
 # where to look
-echo "ac_add_options --with-clang-path=%{_libdir}" >> .mozconfig
+echo "ac_add_options --with-libclang-path=%{_libdir}" >> .mozconfig
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
 
