@@ -170,7 +170,7 @@ Source1:        firefox-langpacks-%{version}%{?pre_version}-20230925.tar.xz
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
-Source20:       firefox.desktop
+Source20:       org.mozilla.firefox.desktop
 Source21:       firefox.sh.in
 Source23:       firefox.1
 Source24:       mozilla-api-key
@@ -1009,7 +1009,7 @@ fi
 %dir %{_sysconfdir}/%{name}/*
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
-%{_datadir}/applications/%{name}.desktop
+%{_datadir}/applications/*.desktop
 %{_datadir}/metainfo/*.appdata.xml
 %{_datadir}/gnome-shell/search-providers/*.ini
 %{_datadir}/dbus-1/services/*
