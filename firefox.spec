@@ -1111,11 +1111,11 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Wed Sep 27 2023 Neal Gompa <ngompa@fedoraproject.org> - 118.0.1-1
-- Use system libraries for AV1, VP8, VP9, and WebP
-
 * Fri Sep 29 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-1
 - Updated to 118.0.1
+
+* Wed Sep 27 2023 Neal Gompa <ngompa@fedoraproject.org> - 118.0.1-1
+- Use system libraries for AV1, VP8, VP9, and WebP
 
 * Wed Sep 27 2023 Martin Stransky <stransky@redhat.com>- 118.0-2
 - Fixed Gnome search provider
