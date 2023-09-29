@@ -169,7 +169,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        118.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -179,7 +179,7 @@ Source1:        firefox-langpacks-%{version}%{?pre_version}-20230929.tar.xz
 Source2:        cbindgen-vendor.tar.xz
 Source10:       firefox-mozconfig
 Source12:       firefox-redhat-default-prefs.js
-Source20:       org.mozilla.firefox.desktop
+Source20:       firefox.desktop
 Source21:       firefox.sh.in
 Source23:       firefox.1
 Source24:       mozilla-api-key
@@ -837,7 +837,13 @@ DESTDIR=%{buildroot} make -C objdir install
 
 mkdir -p %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
-desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
+# TODO
+# We can't use desktop-file-install as it refuses to install firefox.desktop file.
+# We need to change it to org.mozilla.firefox.desktop and also update
+# gnome shell default applications.
+# 
+#desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
+cp %{SOURCE20} %{buildroot}%{_datadir}/applications
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE31}
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
 
@@ -1111,6 +1117,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Sep 29 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-2
+- Use firefox.desktop again
+
 * Fri Sep 29 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-1
 - Updated to 118.0.1
 
