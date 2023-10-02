@@ -1,4 +1,4 @@
-.TH FIREFOX 1 "November 30, 2017" firefox "Linux User's Manual"
+.TH FIREFOX 1 "July 10, 2019" firefox "Linux User's Manual"
 .SH NAME
 firefox \- a Web browser for X11 derived from the Mozilla browser
 
@@ -33,10 +33,10 @@ Make all warnings fatal
 
 .SS "Firefox options"
 .TP
-.B \-h, \-help
+.B \-h, \--help
 Show summary of options.
 .TP
-.B \-v, \-version
+.B \-v, \--version
 Print Firefox version.
 .TP
 \fB\-P\fR \fIprofile\fR
@@ -63,11 +63,22 @@ Start with \fIlocale\fR resources as UI Locale.
 \fB\-\-safe\-mode\fR
 Disables extensions and themes for this session.
 .TP
+\fB\--allow-downgrade\fR
+Allows downgrading a profile.                                              
+.TP
+\fB\--MOZ_LOG\fR=\fImodules\fR
+Treated as \fBMOZ_LOG\fR=\fImodules\fR environment variable, overrides it.           
+.TP
+\fB\--MOZ_LOG_FILE\fR=\fIfile\fR
+Treated as \fBMOZ_LOG_FILE\fR=\fIfile\fR environment variable, overrides it.  If
+MOZ_LOG_FILE is not specified as an argument or as an environment variable,
+logging will be written to stdout.
+.TP
 \fB\-\-headless\fR
 Run without a GUI.
 .TP
-\fB\-\-marionette\fR
-Enable remote control server.
+\fB\-\-save-recordings\fR
+Save recordings for all content processes to a directory.
 .TP
 \fB\-\-browser\fR
 Open a browser window.
@@ -93,8 +104,9 @@ Width and optionally height of screenshot.
 \fB\-\-search\fR \fIterm\fR
 Search \fIterm\fR with your default search engine.
 .TP
-
-
+\fB\-\-setDefaultBrowser\fR
+Set this app as the default browser.
+.TP
 \fB\-\-jsconsole\fR
 Open the Browser Console.
 .TP
@@ -115,9 +127,6 @@ Record drawing for a given URL.
 .TP
 \fB\-\-recording-output\fR \fIfile\fR
 Specify destination file for a drawing recording.
-.TP
-\fB\-\-setDefaultBrowser\fR
-Set this app as the default browser.
 
 .SH FILES
 \fI/usr/bin/firefox\fR - shell script wrapping
@@ -127,7 +136,7 @@ Set this app as the default browser.
 executable
 
 .SH VERSION
-57.0
+68.0
 
 .SH BUGS
 To report a bug, please visit \fIhttp://bugzilla.mozilla.org/\fR
