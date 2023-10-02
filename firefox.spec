@@ -1117,7 +1117,7 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Mon Oct 1 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-3
+* Mon Oct 2 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-3
 - Avoid to launch Firefox by gnome-shell search
 
 * Fri Sep 29 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-2
