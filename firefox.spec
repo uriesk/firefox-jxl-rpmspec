@@ -450,7 +450,7 @@ and translations langpack add-ons.
 %global uname_m %(uname -m)
 %global symbols_file_name %{name}-%{version}.en-US.%{_os}-%{uname_m}.crashreporter-symbols.zip
 %global symbols_file_path %{moz_debug_dir}/%{symbols_file_name}
-%global _find_debuginfo_opts -p %{symbols_file_path} -o debugcrashreporter.list
+%global _find_debuginfo_opts %{limit_build -m 32768} -p %{symbols_file_path} -o debugcrashreporter.list
 %global crashreporter_pkg_name mozilla-crashreporter-%{name}-debuginfo
 %package -n %{crashreporter_pkg_name}
 Summary: Debugging symbols used by Mozilla's crash reporter servers
