@@ -459,6 +459,8 @@ This package provides debug information for Firefox, for use by
 Mozilla's crash reporter servers.  If you are trying to locally
 debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
+%else
+%global _find_debuginfo_opts %{limit_build -m 32768}
 %endif
 
 %package x11
