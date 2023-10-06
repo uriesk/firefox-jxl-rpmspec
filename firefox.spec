@@ -169,7 +169,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        118.0.1
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -450,7 +450,7 @@ and translations langpack add-ons.
 %global uname_m %(uname -m)
 %global symbols_file_name %{name}-%{version}.en-US.%{_os}-%{uname_m}.crashreporter-symbols.zip
 %global symbols_file_path %{moz_debug_dir}/%{symbols_file_name}
-%global _find_debuginfo_opts -p %{symbols_file_path} -o debugcrashreporter.list
+%global _find_debuginfo_opts %{limit_build -m 32768} -p %{symbols_file_path} -o debugcrashreporter.list
 %global crashreporter_pkg_name mozilla-crashreporter-%{name}-debuginfo
 %package -n %{crashreporter_pkg_name}
 Summary: Debugging symbols used by Mozilla's crash reporter servers
@@ -459,6 +459,8 @@ This package provides debug information for Firefox, for use by
 Mozilla's crash reporter servers.  If you are trying to locally
 debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
+%else
+%global _find_debuginfo_opts %{limit_build -m 32768}
 %endif
 
 %package x11
@@ -659,7 +661,7 @@ echo "ac_add_options --with-google-safebrowsing-api-keyfile=`pwd`/google-api-key
 # https://bugzilla.redhat.com/show_bug.cgi?id=2239046
 # with clang 17 upstream's detection fails, so let's just tell it
 # where to look
-echo "ac_add_options --with-libclang-path=%{_libdir}" >> .mozconfig
+echo "ac_add_options --with-libclang-path=`llvm-config --libdir`" >> .mozconfig
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
 
@@ -1117,8 +1119,11 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Fri Oct 6 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-5
+* Fri Oct 6 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-6
 - Removed DBusActivatable flag from desktop file as it crashes KDE (rhbz#2242454).
+
+* Thu Oct 05 2023 Kalev Lember <klember@redhat.com> - 118.0.1-5
+- Fix flatpak build
 
 * Mon Oct 2 2023 Martin Stransky <stransky@redhat.com>- 118.0.1-4
 - Updated man page
