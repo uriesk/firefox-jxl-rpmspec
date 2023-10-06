@@ -51,7 +51,8 @@ StartupNotify=true
 Categories=Network;WebBrowser;
 Keywords=web;browser;internet;
 Actions=new-window;new-private-window;profile-manager-window;
-DBusActivatable=true
+# Activable desktop file crashes KDE so remove it for now
+# DBusActivatable=true
 
 [Desktop Action new-window]
 Name=Open a New Window
