@@ -460,7 +460,7 @@ Mozilla's crash reporter servers.  If you are trying to locally
 debug %{name}, you want to install %{name}-debuginfo instead.
 %files -n %{crashreporter_pkg_name} -f debugcrashreporter.list
 %else
-%global _find_debuginfo_opts %{limit_build -m 32768}
+%global _find_debuginfo_opts %{limit_build -m 32768} -g1
 %endif
 
 %package x11
