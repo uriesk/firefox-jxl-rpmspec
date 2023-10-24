@@ -40,7 +40,7 @@ ExcludeArch: i686
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
-%global enable_mozilla_crashreporter 0
+%global enable_mozilla_crashreporter 1
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -1123,6 +1123,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Oct 24 2023 Martin Stransky <stransky@redhat.com>- 119.0-1
+- Updated to 119.0
+
 * Tue Oct 10 2023 Martin Stransky <stransky@redhat.com>- 118.0.2-1
 - Updated to 118.0.2
 
