@@ -40,7 +40,7 @@ ExcludeArch: i686
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
-%global enable_mozilla_crashreporter 0
+%global enable_mozilla_crashreporter 1
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
