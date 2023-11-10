@@ -169,12 +169,12 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        119.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20231023.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20231110.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source3:        dump_syms-vendor.tar.xz
@@ -1153,6 +1153,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Nov 10 2023 Martin Stransky <stransky@redhat.com>- 119.0-6
+- Updated to 119.0.1
+
 * Tue Nov 07 2023 Martin Stransky <stransky@redhat.com>- 119.0-5
 - Added fix for rhbz#2247665
 
