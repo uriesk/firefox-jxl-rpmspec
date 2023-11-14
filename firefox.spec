@@ -40,7 +40,7 @@ ExcludeArch: i686
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
-%global enable_mozilla_crashreporter 0
+%global enable_mozilla_crashreporter 1
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -707,8 +707,8 @@ export CBINDGEN=/usr/bin/cbindgen
 %endif
 
 %if %{enable_mozilla_crashreporter}
-mkdir -p my_rust_vendor
-cd my_rust_vendor
+mkdir -p my_rust_vendor_dump_syms
+cd my_rust_vendor_dump_syms
 tar xf %{SOURCE3}
 mkdir -p .cargo
 cat > .cargo/config <<EOL
@@ -1152,7 +1152,7 @@ fi
 * Tue Nov 14 2023 Martin Stransky <stransky@redhat.com>- 120.0-1
 - Updated to 120.0
 
-* Fri Nov 10 2023 Martin Stransky <stransky@redhat.com>- 119.0.1-1
+* Fri Nov 10 2023 Martin Stransky <stransky@redhat.com>- 119.0.1-2
 - Updated to 119.0.1
 
 * Tue Nov 07 2023 Martin Stransky <stransky@redhat.com>- 119.0-5
