@@ -1,0 +1,17 @@
+diff --git a/toolkit/components/resistfingerprinting/nsRFPService.cpp b/toolkit/components/resistfingerprinting/nsRFPService.cpp
+--- a/toolkit/components/resistfingerprinting/nsRFPService.cpp
++++ b/toolkit/components/resistfingerprinting/nsRFPService.cpp
+@@ -1375,11 +1375,11 @@
+   }
+ #ifdef __clang__
+ #  pragma clang diagnostic pop
+ #endif
+ 
+-  for (uint8_t i = 0; i <= numNoises; i++) {
++  while (numNoises--) {
+     // Choose which RGB channel to add a noise. The pixel data is in either
+     // the BGRA or the ARGB format depending on the endianess. To choose the
+     // color channel we need to add the offset according the endianess.
+     uint32_t channel;
+     if (aSurfaceFormat == gfx::SurfaceFormat::B8G8R8A8) {
+
