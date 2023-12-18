@@ -168,13 +168,13 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        120.0.1
+Version:        121.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20231201.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20231218.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source3:        dump_syms-vendor.tar.xz
@@ -248,7 +248,6 @@ Patch242:        0026-Add-KDE-integration-to-Firefox.patch
 Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 Patch408:        D167159.diff
-Patch411:        mozilla-1762816.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -540,7 +539,6 @@ This package contains results of tests executed during build.
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
 %patch408 -p1 -b .D167159
-%patch411 -p1 -b .mozilla-1762816
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1149,6 +1147,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Dec 18 2023 Martin Stransky <stransky@redhat.com>- 121.0-1
+- Updated to 121.0
+
 * Fri Dec 01 2023 Martin Stransky <stransky@redhat.com>- 120.0.1-1
 - Updated to 120.0.1
 
