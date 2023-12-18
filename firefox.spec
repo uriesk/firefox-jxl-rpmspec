@@ -36,6 +36,11 @@ ExcludeArch: i686
 %global build_with_clang 0
 %endif
 
+%global gnome_shell_search_provider 0
+%if 0%{?fedora} >= 40
+%global gnome_shell_search_provider 1
+%endif
+
 # Temporary disabled due to
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
@@ -124,7 +129,7 @@ ExcludeArch: i686
 %if %{?system_nss}
 %global nspr_version 4.32
 %global nspr_build_version %{nspr_version}
-%global nss_version 3.94
+%global nss_version 3.95
 %global nss_build_version %{nss_version}
 %endif
 
@@ -205,6 +210,7 @@ Source43:       print_failures
 Source44:       print-error-reftest
 Source45:       run-wayland-compositor
 Source46:       org.mozilla.firefox.SearchProvider.service
+Source47:       org.mozilla.firefox.desktop
 
 # Build patches
 #Patch3:         mozilla-build-arm.patch
@@ -466,6 +472,7 @@ debug %{name}, you want to install %{name}-debuginfo instead.
 %global _find_debuginfo_opts %{limit_build -m 32768}
 %endif
 
+%if 0%{?fedora} < 40
 %package x11
 Summary: Firefox X11 launcher.
 Requires: %{name}
@@ -485,6 +492,7 @@ to run Firefox explicitly on Wayland.
 %files wayland
 %{_bindir}/firefox-wayland
 %{_datadir}/applications/firefox-wayland.desktop
+%endif
 
 %if 0%{?run_firefox_tests}
 %global testsuite_pkg_name %{name}-testresults
@@ -868,15 +876,25 @@ DESTDIR=%{buildroot} make -C objdir install
 
 mkdir -p %{buildroot}{%{_libdir},%{_bindir},%{_datadir}/applications}
 
-# TODO
+%if %{gnome_shell_search_provider}
+# Install Gnome search provider files
+mkdir -p %{buildroot}%{_datadir}/gnome-shell/search-providers
+cp %{SOURCE34} %{buildroot}%{_datadir}/gnome-shell/search-providers
+mkdir -p %{buildroot}%{_datadir}/dbus-1/services
+cp %{SOURCE46} %{buildroot}%{_datadir}/dbus-1/services
+%endif
+
+%if %{gnome_shell_search_provider}
+desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE47}
+%else
 # We can't use desktop-file-install as it refuses to install firefox.desktop file.
-# We need to change it to org.mozilla.firefox.desktop and also update
-# gnome shell default applications.
-#
-#desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE20}
 cp %{SOURCE20} %{buildroot}%{_datadir}/applications
+%endif
+
+%if 0%{?fedora} < 40
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE31}
 desktop-file-install --dir %{buildroot}%{_datadir}/applications %{SOURCE29}
+%endif
 
 # set up the firefox start script
 rm -rf %{buildroot}%{_bindir}/firefox
@@ -889,10 +907,12 @@ sed -i -e 's|%FLATPAK_ENV_VARS%|export TMPDIR="$XDG_CACHE_HOME/tmp"|' %{buildroo
 sed -i -e 's|%FLATPAK_ENV_VARS%||' %{buildroot}%{_bindir}/firefox
 %endif
 
+%if 0%{?fedora} < 40
 sed -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE30} > %{buildroot}%{_bindir}/firefox-x11
 chmod 755 %{buildroot}%{_bindir}/firefox-x11
 sed -e 's,/__PREFIX__,%{_prefix},g' %{SOURCE28} > %{buildroot}%{_bindir}/firefox-wayland
 chmod 755 %{buildroot}%{_bindir}/firefox-wayland
+%endif
 
 install -p -D -m 644 %{SOURCE23} %{buildroot}%{_mandir}/man1/firefox.1
 
@@ -1014,12 +1034,6 @@ sed -e "s/__VERSION__/%{version}/" \
     -e "s/__DATE__/$(date '+%F')/" \
     %{SOURCE33} > %{buildroot}%{_datadir}/metainfo/firefox.appdata.xml
 
-# Install Gnome search provider files
-mkdir -p %{buildroot}%{_datadir}/gnome-shell/search-providers
-cp %{SOURCE34} %{buildroot}%{_datadir}/gnome-shell/search-providers
-mkdir -p %{buildroot}%{_datadir}/dbus-1/services
-cp %{SOURCE46} %{buildroot}%{_datadir}/dbus-1/services
-
 # Remove copied libraries to speed up build
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozjs.so
 rm -f %{buildroot}%{mozappdirdev}/sdk/lib/libmozalloc.so
@@ -1082,10 +1096,14 @@ fi
 %dir %{_sysconfdir}/%{name}/*
 %dir %{_datadir}/mozilla/extensions/*
 %dir %{_libdir}/mozilla/extensions/*
-%{_datadir}/applications/firefox.desktop
-%{_datadir}/metainfo/*.appdata.xml
-%{_datadir}/gnome-shell/search-providers/*.ini
+%if %{gnome_shell_search_provider}
+%{_datadir}/applications/org.mozilla.firefox.desktop
 %{_datadir}/dbus-1/services/*
+%{_datadir}/gnome-shell/search-providers/*.ini
+%else
+%{_datadir}/applications/firefox.desktop
+%endif
+%{_datadir}/metainfo/*.appdata.xml
 %dir %{mozappdir}
 %license %{mozappdir}/LICENSE
 %{mozappdir}/browser/chrome
@@ -1147,6 +1165,10 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Dec 18 2023 Martin Stransky <stransky@redhat.com>- 121.0-2
+- Enable Gnome Shell Search provider for Fedora 40+
+- Don't ship firefox-x11 and firefox-wayland on Fedora 40+
+
 * Mon Dec 18 2023 Martin Stransky <stransky@redhat.com>- 121.0-1
 - Updated to 121.0
 
