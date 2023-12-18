@@ -1147,7 +1147,7 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Fri Dec 18 2023 Martin Stransky <stransky@redhat.com>- 121.0-1
+* Mon Dec 18 2023 Martin Stransky <stransky@redhat.com>- 121.0-1
 - Updated to 121.0
 
 * Fri Dec 01 2023 Martin Stransky <stransky@redhat.com>- 120.0.1-1
