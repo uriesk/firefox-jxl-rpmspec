@@ -23,7 +23,7 @@ diff --git a/third_party/wayland-proxy/wayland-proxy.h b/third_party/wayland-pro
 new file mode 100644
 --- /dev/null
 +++ b/third_party/wayland-proxy/wayland-proxy.h
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,55 @@
 +/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 + * This Source Code Form is subject to the terms of the Mozilla Public
 + * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -36,6 +36,7 @@ new file mode 100644
 +#include <vector>
 +#include <fcntl.h>
 +#include <atomic>
++#include <memory>
 +
 +typedef unsigned char byte;
 +
@@ -50,7 +51,7 @@ new file mode 100644
 +  bool RunThread();
 +
 +  void SetWaylandDisplay();
-+  void SetVerbose(bool aVerbose);
++  static void SetVerbose(bool aVerbose);
 +
 +  ~WaylandProxy();
 +
@@ -82,7 +83,7 @@ diff --git a/third_party/wayland-proxy/wayland-proxy.cpp b/third_party/wayland-p
 new file mode 100644
 --- /dev/null
 +++ b/third_party/wayland-proxy/wayland-proxy.cpp
-@@ -0,0 +1,731 @@
+@@ -0,0 +1,742 @@
 +/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 + * This Source Code Form is subject to the terms of the Mozilla Public
 + * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -90,6 +91,8 @@ new file mode 100644
 +
 +// This code is based on Rust implementation at
 +// https://github.com/the8472/weyland-p5000
++
++// Version 1.0
 +
 +#include <stdio.h>
 +#include <stdlib.h>
@@ -179,6 +182,7 @@ new file mode 100644
 +class ProxiedConnection {
 + public:
 +  bool Init(int aChildSocket);
++  bool IsConnected() { return mCompositorConnected; }
 +
 +  struct pollfd* AddToPollFd(struct pollfd* aPfds);
 +  struct pollfd* LoadPollFd(struct pollfd* aPfds);
@@ -365,7 +369,7 @@ new file mode 100644
 +  mCompositorSocket =
 +      socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
 +  if (mCompositorSocket == -1) {
-+    Error("ConnectToCompositor() socket()");
++    Error("ProxiedConnection::Init() socket()");
 +  }
 +  return mApplicationSocket > 0 && mCompositorSocket > 0;
 +}
@@ -516,6 +520,7 @@ new file mode 100644
 +  } else {
 +    // Try to reconnect to compositor.
 +    if (!ConnectToCompositor()) {
++      Info("Failed to connect to compositor\n");
 +      return false;
 +    }
 +    // We're not connected yet but ConnectToCompositor() didn't return
@@ -571,6 +576,7 @@ new file mode 100644
 +    return false;
 +  }
 +
++  Info("WaylandProxy Wayland '%s' proxy '%s'\n", sWaylandDisplay, sWaylandProxy);
 +  return true;
 +}
 +
@@ -645,13 +651,18 @@ new file mode 100644
 +  for (auto const& connection : mConnections) {
 +    addedPollfd = connection->AddToPollFd(addedPollfd);
 +  }
++  int nfds = (addedPollfd - pollfds);
 +
-+  // Add extra listening socket
-+  addedPollfd->fd = mProxyServerSocket;
-+  addedPollfd->events = POLLIN;
++  // If all connections are attached to compositor, add another one
++  // for new potential connection from application.
++  bool addNewConnection = mConnections.empty() ||
++                          mConnections.back()->IsConnected();
++  if (addNewConnection) {
++    addedPollfd->fd = mProxyServerSocket;
++    addedPollfd->events = POLLIN;
++    nfds++;
++  }
 +  assert(addedPollfd < pollfds + nfds_max);
-+
-+  int nfds = (addedPollfd - pollfds) + 1;
 +
 +  while (1) {
 +    int ret = poll(pollfds, nfds, POLL_TIMEOUT);
@@ -685,7 +696,7 @@ new file mode 100644
 +  assert(loadedPollfd < pollfds + nfds_max);
 +
 +  // Create a new connection if there's a new client waiting
-+  if (loadedPollfd->revents & POLLIN) {
++  if (addNewConnection && (loadedPollfd->revents & POLLIN)) {
 +    Info("WaylandProxy: new child connection\n");
 +    int applicationSocket = accept4(loadedPollfd->fd, nullptr, nullptr,
 +                                    SOCK_NONBLOCK | SOCK_CLOEXEC);
@@ -744,6 +755,7 @@ new file mode 100644
 +  if (mProxyServerSocket != -1) {
 +    close(mProxyServerSocket);
 +  }
++  SetWaylandDisplay();
 +}
 +
 +void* WaylandProxy::RunProxyThread(WaylandProxy* aProxy) {
@@ -817,18 +829,21 @@ new file mode 100644
 diff --git a/widget/gtk/moz.build b/widget/gtk/moz.build
 --- a/widget/gtk/moz.build
 +++ b/widget/gtk/moz.build
-@@ -23,10 +23,13 @@
+@@ -21,11 +21,15 @@
+ 
+ if CONFIG["COMPILE_ENVIRONMENT"]:
      DIRS += ["mozgtk"]
  
  if CONFIG["MOZ_WAYLAND"]:
-     DIRS += ["wayland", "mozwayland"]
+-    DIRS += ["wayland", "mozwayland"]
++    DIRS += [
++        "wayland",
++        "mozwayland",
++        "../../third_party/wayland-proxy"
++    ]
  
-+if CONFIG["MOZ_WAYLAND_PROXY"]:
-+    DIRS += ["../../third_party/wayland-proxy"]
-+
  if CONFIG["MOZ_ENABLE_VAAPI"]:
      DIRS += ["vaapitest"]
  
  if CONFIG["MOZ_ENABLE_V4L2"]:
-     DIRS += ["v4l2test"]
 

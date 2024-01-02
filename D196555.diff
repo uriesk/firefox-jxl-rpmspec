@@ -1,19 +1,23 @@
 diff --git a/toolkit/xre/nsAppRunner.cpp b/toolkit/xre/nsAppRunner.cpp
 --- a/toolkit/xre/nsAppRunner.cpp
 +++ b/toolkit/xre/nsAppRunner.cpp
-@@ -343,16 +343,24 @@
+@@ -342,17 +342,28 @@
+ #  include "mozilla/WidgetUtilsGtk.h"
  #  include <gtk/gtk.h>
  #  ifdef MOZ_WAYLAND
  #    include <gdk/gdkwayland.h>
  #    include "mozilla/widget/nsWaylandDisplay.h"
- #  endif
-+#  ifdef MOZ_WAYLAND_PROXY
 +#    include "wayland-proxy.h"
-+#  endif
+ #  endif
  #  ifdef MOZ_X11
  #    include <gdk/gdkx.h>
  #  endif /* MOZ_X11 */
  #endif
++
++#if defined(MOZ_WAYLAND)
++std::unique_ptr<WaylandProxy> gWaylandProxy;
++#endif
++
  #include "BinaryPath.h"
  
 +#ifdef MOZ_LOGGING
@@ -26,52 +30,54 @@ diff --git a/toolkit/xre/nsAppRunner.cpp b/toolkit/xre/nsAppRunner.cpp
  
  namespace mozilla {
  FuzzerRunner* fuzzerRunner = 0;
-@@ -3670,10 +3678,13 @@
- class XREMain {
-  public:
-   XREMain() = default;
- 
-   ~XREMain() {
-+#if defined(MOZ_WAYLAND_PROXY)
-+    mWaylandProxy = nullptr;
-+#endif
-     mScopedXPCOM = nullptr;
-     mAppData = nullptr;
-   }
- 
-   int XRE_main(int argc, char* argv[], const BootstrapConfig& aConfig);
-@@ -3689,10 +3700,13 @@
-   nsCOMPtr<nsIFile> mProfLD;
-   nsCOMPtr<nsIProfileLock> mProfileLock;
- #if defined(MOZ_HAS_REMOTE)
-   RefPtr<nsRemoteService> mRemoteService;
+@@ -2790,10 +2801,13 @@
+         if (gRemoteService) {
+           gRemoteService->UnlockStartup();
+           gRemoteService = nullptr;
+         }
  #endif
-+#if defined(MOZ_WAYLAND_PROXY)
-+  std::unique_ptr<WaylandProxy> mWaylandProxy;
++#if defined(MOZ_WAYLAND)
++        gWaylandProxy = nullptr;
 +#endif
+         return LaunchChild(false, true);
+       }
+     } else {
+       rv = ps->Alert(nullptr, killTitle.get(), killMessage.get());
+       NS_ENSURE_SUCCESS_LOG(rv, rv);
+@@ -2904,10 +2918,13 @@
+   if (gRemoteService) {
+     gRemoteService->UnlockStartup();
+     gRemoteService = nullptr;
+   }
+ #endif
++#if defined(MOZ_WAYLAND)
++  gWaylandProxy = nullptr;
++#endif
+   return LaunchChild(false, true);
+ }
  
-   UniquePtr<ScopedXPCOMStartup> mScopedXPCOM;
-   UniquePtr<XREAppData> mAppData;
- 
-   nsXREDirProvider mDirProvider;
-@@ -4709,20 +4723,34 @@
+ static bool gDoMigration = false;
+ static bool gDoProfileReset = false;
+@@ -4709,20 +4726,36 @@
  #if defined(MOZ_WIDGET_GTK)
    if (!isBackgroundTaskMode && !gfxPlatform::IsHeadless()) {
      const char* display_name = nullptr;
      bool saveDisplayArg = false;
  
 +    bool waylandEnabled = IsWaylandEnabled();
-+#  ifdef MOZ_WAYLAND_PROXY
++#  ifdef MOZ_WAYLAND
 +    auto* proxyEnv = getenv("MOZ_DISABLE_WAYLAND_PROXY");
 +    bool disableWaylandProxy = proxyEnv && *proxyEnv;
 +    if (!disableWaylandProxy && XRE_IsParentProcess() && waylandEnabled) {
-+      mWaylandProxy = WaylandProxy::Create();
-+      mWaylandProxy->RunThread();
 +#    ifdef MOZ_LOGGING
 +      if (MOZ_LOG_TEST(gWidgetWaylandLog, mozilla::LogLevel::Debug)) {
-+        mWaylandProxy->SetVerbose(true);
++        WaylandProxy::SetVerbose(true);
 +      }
 +#    endif
++      gWaylandProxy = WaylandProxy::Create();
++      if (gWaylandProxy) {
++        gWaylandProxy->RunThread();
++      }
 +    }
 +#  endif
 +
@@ -90,20 +96,16 @@ diff --git a/toolkit/xre/nsAppRunner.cpp b/toolkit/xre/nsAppRunner.cpp
      if (!waylandEnabled && !display_name) {
        display_name = PR_GetEnv("DISPLAY");
        if (!display_name) {
-@@ -5953,10 +5981,15 @@
+@@ -5952,10 +5985,11 @@
+   // gdk_display_close also calls gdk_display_manager_set_default_display
    // appropriately when necessary.
    if (!gfxPlatform::IsHeadless()) {
  #  ifdef MOZ_WAYLAND
      WaylandDisplayRelease();
++    gWaylandProxy = nullptr;
  #  endif
-+#  ifdef MOZ_WAYLAND_PROXY
-+    if (mWaylandProxy) {
-+      mWaylandProxy = nullptr;
-+    }
-+#  endif
    }
  #endif
  
    XRE_DeinitCommandLine();
- 
 
