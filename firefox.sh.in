@@ -265,6 +265,12 @@ do
   esac
 done
 
+# We need to link Firefox with desktop file name
+if [ -z "$MOZ_APP_REMOTINGNAME" ]
+then
+  export MOZ_APP_REMOTINGNAME=__APP_NAME__
+fi
+
 # Flatpak specific environment variables
 %FLATPAK_ENV_VARS%
 
