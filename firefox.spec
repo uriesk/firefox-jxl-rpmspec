@@ -174,7 +174,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        121.0.1
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1173,6 +1173,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jan 12 2024 Fabio Valentini <decathorpe@gmail.com> - 121.0.1-2
+- Rebuild for dav1d 1.3.0
+
 * Fri Jan 12 2024 Martin Stransky <stransky@redhat.com>- 121.0.1-1
 - Update to 121.0.1
 - Fixed Firefox icon on Rawhide
