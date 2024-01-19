@@ -221,8 +221,17 @@ if [ $MOZILLA_DOWN -ne 0 ]; then
             if [ -h $MOZ_LANGPACKS_DIR/$langpack ]; then
                 langpack=`readlink $MOZ_LANGPACKS_DIR/$langpack`
             fi
-            ln -s $MOZ_LANGPACKS_DIR/$langpack \
-                  $MOZ_EXTENSIONS_PROFILE_DIR/$langpack
+            if [ -e "/run/ostree-booted" ]; then
+               # Files on Silverblue has file create time set to 0,
+               # so in case the langpack is updated Firefox does not
+               # check for changes because it compares the file
+               # creation date to do so.
+                cp -f $MOZ_LANGPACKS_DIR/$langpack \
+                      $MOZ_EXTENSIONS_PROFILE_DIR/$langpack
+            else
+                ln -s $MOZ_LANGPACKS_DIR/$langpack \
+                      $MOZ_EXTENSIONS_PROFILE_DIR/$langpack
+            fi
             echo $MOZ_EXTENSIONS_PROFILE_DIR/$langpack > $FEDORA_LANGPACK_CONFIG
             return 0
         fi
