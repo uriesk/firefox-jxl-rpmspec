@@ -1176,6 +1176,9 @@ fi
 * Fri Jan 19 2024 Martin Stransky <stransky@redhat.com>- 122.0-1
 - Update to 122.0
 
+* Fri Jan 19 2024 Fedora Release Engineering <releng@fedoraproject.org> - 121.0.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
+
 * Fri Jan 12 2024 Fabio Valentini <decathorpe@gmail.com> - 121.0.1-2
 - Rebuild for dav1d 1.3.0
 
