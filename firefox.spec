@@ -1158,11 +1158,8 @@ fi
 %{mozappdir}/fonts/TwemojiMozilla.ttf
 %ifarch aarch64
 %{mozappdir}/v4l2test
-%{mozappdir}/vaapitest
 %endif
-%ifarch x86_64
 %{mozappdir}/vaapitest
-%endif
 %if !%{?system_nss}
 %exclude %{mozappdir}/libnssckbi.so
 %endif
