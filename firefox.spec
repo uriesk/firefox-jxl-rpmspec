@@ -174,7 +174,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        122.0
-Release:        3%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1177,6 +1177,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jan 30 2024 Martin Stransky <stransky@redhat.com>- 122.0-4
+- Build with --enable-replace-malloc (rhbz#2260766)
+
 * Tue Jan 30 2024 Martin Stransky <stransky@redhat.com>- 122.0-3
 - Added version to obsolete firefox-wayland/x11
 
