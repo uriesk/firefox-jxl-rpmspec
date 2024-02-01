@@ -436,6 +436,8 @@ BuildRequires:  make
 BuildRequires:  pciutils-libs
 BuildRequires:  mesa-libgbm-devel
 BuildRequires:  libproxy-devel
+# Required for --enable-replace-malloc
+BuildRequires:  libstdc++-static
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
