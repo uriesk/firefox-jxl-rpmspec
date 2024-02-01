@@ -698,7 +698,7 @@ echo "ac_add_options --with-google-safebrowsing-api-keyfile=`pwd`/google-api-key
 echo "ac_add_options --with-libclang-path=`llvm-config --libdir`" >> .mozconfig
 
 %if %{enable_replace_malloc}
-ac_add_options --enable-replace-malloc
+echo "ac_add_options --enable-replace-malloc" >> .mozconfig
 %endif
 
 echo 'export NODEJS="%{_buildrootdir}/bin/node-stdout-nonblocking-wrapper"' >> .mozconfig
