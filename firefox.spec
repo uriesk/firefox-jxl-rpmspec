@@ -178,8 +178,8 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        122.0
-Release:        7%{?pre_tag}%{?dist}
+Version:        122.0.1
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1199,6 +1199,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Feb 13 2024 Martin Stransky <stransky@redhat.com>- 122.0.1-1
+- Update to 122.0.1
+
 * Mon Feb 12 2024 Jan Grulich <jgrulich@redhat.com> - 122.0-7
 - Backport upstream fixes to PipeWire camera support
 
