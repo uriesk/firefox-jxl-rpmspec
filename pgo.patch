@@ -1,7 +1,7 @@
-diff -up firefox-122.0/build/moz.configure/lto-pgo.configure.pgo firefox-122.0/build/moz.configure/lto-pgo.configure
---- firefox-122.0/build/moz.configure/lto-pgo.configure.pgo	2024-01-18 21:41:19.000000000 +0100
-+++ firefox-122.0/build/moz.configure/lto-pgo.configure	2024-01-19 18:21:17.974681504 +0100
-@@ -86,7 +86,7 @@ def pgo_flags(compiler, profdata, target
+diff -up firefox-123.0/build/moz.configure/lto-pgo.configure.pgo firefox-123.0/build/moz.configure/lto-pgo.configure
+--- firefox-123.0/build/moz.configure/lto-pgo.configure.pgo	2024-02-14 08:18:40.000000000 +0100
++++ firefox-123.0/build/moz.configure/lto-pgo.configure	2024-02-19 10:51:40.900650193 +0100
+@@ -130,7 +130,7 @@ def pgo_flags(compiler, linker, profdata
          return namespace(
              gen_cflags=["-fprofile-generate"],
              gen_ldflags=["-fprofile-generate"],
@@ -10,9 +10,9 @@ diff -up firefox-122.0/build/moz.configure/lto-pgo.configure.pgo firefox-122.0/b
              use_ldflags=["-fprofile-use"],
          )
  
-diff -up firefox-122.0/build/pgo/profileserver.py.pgo firefox-122.0/build/pgo/profileserver.py
---- firefox-122.0/build/pgo/profileserver.py.pgo	2024-01-18 21:41:20.000000000 +0100
-+++ firefox-122.0/build/pgo/profileserver.py	2024-01-19 18:21:17.974681504 +0100
+diff -up firefox-123.0/build/pgo/profileserver.py.pgo firefox-123.0/build/pgo/profileserver.py
+--- firefox-123.0/build/pgo/profileserver.py.pgo	2024-02-14 08:18:40.000000000 +0100
++++ firefox-123.0/build/pgo/profileserver.py	2024-02-19 10:51:40.900650193 +0100
 @@ -11,7 +11,7 @@ import subprocess
  import sys
  
@@ -48,10 +48,10 @@ diff -up firefox-122.0/build/pgo/profileserver.py.pgo firefox-122.0/build/pgo/pr
  
      with TemporaryDirectory() as profilePath:
          # TODO: refactor this into mozprofile
-diff -up firefox-122.0/gfx/2d/moz.build.pgo firefox-122.0/gfx/2d/moz.build
---- firefox-122.0/gfx/2d/moz.build.pgo	2024-01-18 21:41:22.000000000 +0100
-+++ firefox-122.0/gfx/2d/moz.build	2024-01-19 18:21:17.974681504 +0100
-@@ -137,11 +137,11 @@ if CONFIG["INTEL_ARCHITECTURE"]:
+diff -up firefox-123.0/gfx/2d/moz.build.pgo firefox-123.0/gfx/2d/moz.build
+--- firefox-123.0/gfx/2d/moz.build.pgo	2024-02-19 10:51:40.900650193 +0100
++++ firefox-123.0/gfx/2d/moz.build	2024-02-19 10:57:34.770832810 +0100
+@@ -134,11 +134,11 @@ if CONFIG["INTEL_ARCHITECTURE"]:
      # The file uses SSE2 intrinsics, so it needs special compile flags on some
      # compilers.
      SOURCES["BlurSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
@@ -64,10 +64,10 @@ diff -up firefox-122.0/gfx/2d/moz.build.pgo firefox-122.0/gfx/2d/moz.build
 +    SOURCES["SwizzleAVX2.cpp"].flags += ["-mavx2", "-fno-lto"]
      SOURCES["SwizzleSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
      SOURCES["SwizzleSSSE3.cpp"].flags += CONFIG["SSSE3_FLAGS"]
-     SOURCES["ssse3-scaler.c"].flags += CONFIG["SSSE3_FLAGS"]
-diff -up firefox-122.0/gfx/skia/generate_mozbuild.py.pgo firefox-122.0/gfx/skia/generate_mozbuild.py
---- firefox-122.0/gfx/skia/generate_mozbuild.py.pgo	2024-01-19 18:21:17.975681537 +0100
-+++ firefox-122.0/gfx/skia/generate_mozbuild.py	2024-01-19 18:24:15.494934133 +0100
+ elif CONFIG["TARGET_CPU"].startswith("mips"):
+diff -up firefox-123.0/gfx/skia/generate_mozbuild.py.pgo firefox-123.0/gfx/skia/generate_mozbuild.py
+--- firefox-123.0/gfx/skia/generate_mozbuild.py.pgo	2024-02-14 08:18:42.000000000 +0100
++++ firefox-123.0/gfx/skia/generate_mozbuild.py	2024-02-19 10:51:40.901650227 +0100
 @@ -54,10 +54,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
  if CONFIG['INTEL_ARCHITECTURE']:
      SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-Dskvx=skvx_ssse3', '-mssse3']
@@ -82,9 +82,9 @@ diff -up firefox-122.0/gfx/skia/generate_mozbuild.py.pgo firefox-122.0/gfx/skia/
  elif CONFIG['TARGET_CPU'] == 'aarch64' and CONFIG['CC_TYPE'] in ('clang', 'gcc'):
      SOURCES['skia/src/opts/SkOpts_crc32.cpp'].flags += ['-Dskvx=skvx_crc32', '-march=armv8-a+crc']
  
-diff -up firefox-122.0/gfx/skia/moz.build.pgo firefox-122.0/gfx/skia/moz.build
---- firefox-122.0/gfx/skia/moz.build.pgo	2024-01-19 18:21:17.975681537 +0100
-+++ firefox-122.0/gfx/skia/moz.build	2024-01-19 18:25:13.472039275 +0100
+diff -up firefox-123.0/gfx/skia/moz.build.pgo firefox-123.0/gfx/skia/moz.build
+--- firefox-123.0/gfx/skia/moz.build.pgo	2024-02-14 08:18:42.000000000 +0100
++++ firefox-123.0/gfx/skia/moz.build	2024-02-19 10:51:40.901650227 +0100
 @@ -564,10 +564,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
  if CONFIG['INTEL_ARCHITECTURE']:
      SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-Dskvx=skvx_ssse3', '-mssse3']
@@ -99,9 +99,9 @@ diff -up firefox-122.0/gfx/skia/moz.build.pgo firefox-122.0/gfx/skia/moz.build
  elif CONFIG['TARGET_CPU'] == 'aarch64' and CONFIG['CC_TYPE'] in ('clang', 'gcc'):
      SOURCES['skia/src/opts/SkOpts_crc32.cpp'].flags += ['-Dskvx=skvx_crc32', '-march=armv8-a+crc']
  
-diff -up firefox-122.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-122.0/toolkit/components/terminator/nsTerminator.cpp
---- firefox-122.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2024-01-18 21:41:36.000000000 +0100
-+++ firefox-122.0/toolkit/components/terminator/nsTerminator.cpp	2024-01-19 18:21:17.976681572 +0100
+diff -up firefox-123.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-123.0/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-123.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2024-02-14 08:18:56.000000000 +0100
++++ firefox-123.0/toolkit/components/terminator/nsTerminator.cpp	2024-02-19 10:51:40.901650227 +0100
 @@ -460,6 +460,11 @@ void nsTerminator::StartWatchdog() {
    }
  #endif
