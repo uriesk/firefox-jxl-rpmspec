@@ -54,6 +54,7 @@
     <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/b.png</screenshot>
     <screenshot>https://raw.githubusercontent.com/hughsie/fedora-appstream/master/screenshots-extra/firefox/c.png</screenshot>
   </screenshots>
+  <content_rating type="oars-1.1"/>
   <releases>
     <release version="__VERSION__" date="__DATE__"/>
   </releases>
