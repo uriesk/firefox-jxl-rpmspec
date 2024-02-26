@@ -80,6 +80,8 @@ ExcludeArch: i686
 %global system_jpeg       1
 %global system_pixman     1
 %global system_webp       1
+# enable jxl
+%global build_with_jxl    1
 # Bundled cbindgen makes build slow.
 # Enable only if system cbindgen is not available.
 %if 0%{?rhel}
@@ -173,6 +175,9 @@ ExcludeArch: i686
 %endif
 %if !%{system_nss}
 %global nss_tag .nss
+%endif
+%if %{build_with_jxl}
+%global pre_tag .jxl
 %endif
 %if %{debug_build}
 %global pre_tag .debug
@@ -288,6 +293,9 @@ Patch603:        firefox-gcc-always-inline.patch
 # system AV1 patches (from Gentoo)
 Patch800:        bmo-1559213-Support-system-av1.patch
 Patch801:        bmo-1559213-fix-system-av1-libs.patch
+%if %{build_with_jxl}
+Patch700:        firefox-enable-jxl.patch
+%endif
 
 # tentative patch for RUSTFLAGS parsing issue:
 # https://bugzilla.redhat.com/show_bug.cgi?id=2184743
@@ -301,6 +309,9 @@ BuildRequires:  pkgconfig(nss) >= %{nss_version}
 BuildRequires:  nss-static >= %{nss_version}
 %endif
 BuildRequires:  pkgconfig(libpng)
+%if %{build_with_jxl}
+BuildRequires:  pkgconfig(libjxl)
+%endif
 %if %{?system_jpeg}
 BuildRequires:  libjpeg-devel
 %endif
@@ -606,6 +617,10 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 
 #%patch800 -p1 -b .system-av1
 #%patch801 -p1 -b .system-av1-fixup
+# Enable JPEG XL
+%if %{build_with_jxl}
+%patch700 -p1 -b .firefox-enable-jxl
+%endif
 
 %patch -P1200 -p1 -b .rustflags-commasplit
 
@@ -1082,6 +1097,11 @@ cp failures-* %{buildroot}/%{version}-%{release}/ || true
 cp %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 %if %{?use_xdg_file_portal}
 echo 'pref("widget.use-xdg-desktop-portal.file-picker", 1);' >> %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
+%endif
+
+# enable jxl in perfs
+%if %{build_with_jxl}
+echo 'pref("image.jxl.enabled", true);' >> %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
 %endif
 
 # Add distribution.ini
