@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2019 Firefox contributors -->
 <component type="desktop-application">
-  <id>org.mozilla.firefox.desktop</id>
+  <id>org.mozilla.firefox</id>
   <metadata_license>CC0-1.0</metadata_license>
   <name>Firefox</name>
   <summary>Web Browser</summary>
