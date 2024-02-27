@@ -26,14 +26,14 @@ if [ -z "$XDG_RUNTIME_DIR" ]; then
   export XDG_RUNTIME_DIR=$HOME
 fi
 
-export WAYLAND_DISPLAY=firefox-wayland-0
-
+export WAYLAND_DISPLAY=firefox-pgo-wayland-0
 if [ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; then
   rm -f $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+  rm -f $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY.lock
 fi
 
 echo "Launch mutter for $WAYLAND_DISPLAY"
-mutter --wayland --wayland-display=$WAYLAND_DISPLAY --headless --virtual-monitor=1600x1200 & MUTTER_PID=$!
+xvfb-run -s "-screen 0 1600x1200x24" mutter --nested --wayland --wayland-display=$WAYLAND_DISPLAY & MUTTER_PID=$!
 export MUTTER_PID
 echo "Mutter PID $MUTTER_PID"
 
@@ -51,6 +51,10 @@ until [ $retry_count -gt $max_retries ]; do
   fi
 done
 
-if [ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; then
-  echo "Mutter is running, $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY is here."
+if [ ! -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; then
+  echo "Mutter failed to start!"
+  exit 1
 fi
+
+echo "Mutter is running, $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY is here."
+
