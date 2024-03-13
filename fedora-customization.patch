@@ -1,31 +1,17 @@
-diff -up firefox-120.0/toolkit/xre/nsAppRunner.cpp.fedora-customization firefox-120.0/toolkit/xre/nsAppRunner.cpp
---- firefox-120.0/toolkit/xre/nsAppRunner.cpp.fedora-customization	2023-11-13 21:48:38.000000000 +0100
-+++ firefox-120.0/toolkit/xre/nsAppRunner.cpp	2023-11-14 10:39:13.001603081 +0100
-@@ -5765,6 +5765,12 @@ int XREMain::XRE_main(int argc, char* ar
-   if (!mAppData->remotingName) {
-     mAppData->remotingName = mAppData->name;
+diff -up firefox-124.0/toolkit/xre/nsAppRunner.cpp.fedora-customization firefox-124.0/toolkit/xre/nsAppRunner.cpp
+diff -up firefox-124.0/widget/gtk/nsWindow.cpp.fedora-customization firefox-124.0/widget/gtk/nsWindow.cpp
+--- firefox-124.0/widget/gtk/nsWindow.cpp.fedora-customization	2024-03-13 12:35:57.098591719 +0100
++++ firefox-124.0/widget/gtk/nsWindow.cpp	2024-03-13 12:43:17.375928494 +0100
+@@ -3459,6 +3459,12 @@ nsresult nsWindow::SetTitle(const nsAStr
+     return NS_OK;
    }
-+
-+  const char* appRemotingName = getenv("MOZ_APP_REMOTINGNAME");
-+  if (appRemotingName) {
-+    mAppData->remotingName = strdup(appRemotingName);
-+  }
-+
-   // used throughout this file
-   gAppData = mAppData.get();
- 
-diff -up firefox-120.0/widget/gtk/nsWindow.cpp.fedora-customization firefox-120.0/widget/gtk/nsWindow.cpp
---- firefox-120.0/widget/gtk/nsWindow.cpp.fedora-customization	2023-11-14 10:39:13.003603150 +0100
-+++ firefox-120.0/widget/gtk/nsWindow.cpp	2023-11-14 10:41:06.339532735 +0100
-@@ -3457,6 +3457,11 @@ void* nsWindow::GetNativeData(uint32_t a
- nsresult nsWindow::SetTitle(const nsAString& aTitle) {
-   if (!mShell) return NS_OK;
  
 +  const char* appTitle = getenv("MOZ_APP_TITLE");
 +  if (appTitle) {
 +    gtk_window_set_title(GTK_WINDOW(mShell), appTitle);
 +    return NS_OK;
 +  }
-     // convert the string into utf8 and set the title.
++
+   // convert the string into utf8 and set the title.
  #define UTF8_FOLLOWBYTE(ch) (((ch) & 0xC0) == 0x80)
    NS_ConvertUTF16toUTF8 titleUTF8(aTitle);
