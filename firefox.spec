@@ -33,12 +33,12 @@ ExcludeArch: i686
 %else
 %global enable_replace_malloc 0
 %endif
-+# wasi_sdk is for sandboxing third party c/c++ libs by using rlbox
-+%ifarch s390x
-+%bcond wasi_sdk 0
-+%else
-+%bcond wasi_sdk 1
-+%endif
+# wasi_sdk is for sandboxing third party c/c++ libs by using rlbox
+%ifarch s390x
+%bcond wasi_sdk 0
+%else
+%bcond wasi_sdk 1
+%endif
 
 %if "%{toolchain}" == "clang"
 %global build_with_clang 1
@@ -184,7 +184,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        124.0.1
-Release:        2%{?pre_tag}%{?dist}
+Release:        4%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1247,6 +1247,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Mar 28 2024 Jan Horak <jhorak@redhat.com> - 124.0.1-4
+- Enable rlbox sandboxing
+
 * Mon Mar 25 2024 Martin Stransky <stransky@redhat.com>- 124.0-2
 - Reverted IM patch
 
