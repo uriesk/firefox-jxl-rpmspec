@@ -33,6 +33,12 @@ ExcludeArch: i686
 %else
 %global enable_replace_malloc 0
 %endif
++# wasi_sdk is for sandboxing third party c/c++ libs by using rlbox
++%ifarch s390x
++%bcond wasi_sdk 0
++%else
++%bcond wasi_sdk 1
++%endif
 
 %if "%{toolchain}" == "clang"
 %global build_with_clang 1
@@ -216,6 +222,8 @@ Source45:       run-wayland-compositor
 Source46:       org.mozilla.firefox.SearchProvider.service
 Source47:       org.mozilla.firefox.desktop
 Source48:       org.mozilla.firefox.appdata.xml.in
+Source49:       wasi.patch.template
+Source50:      wasi-sdk-20-1.fc39.src.rpm
 
 # Build patches
 #Patch3:         mozilla-build-arm.patch
@@ -234,6 +242,7 @@ Patch61:        firefox-glibc-dynstack.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
 Patch78:        firefox-i686-build.patch
 Patch79:        firefox-gcc-13-build.patch
+Patch80:        wasi.patch
 
 # Test patches
 # Generate without context by
@@ -320,7 +329,7 @@ BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
-%if %{build_with_clang}
+%if %{build_with_clang} || %{with wasi_sdk}
 BuildRequires:  lld
 %endif
 
@@ -443,6 +452,9 @@ BuildRequires:  libproxy-devel
 %if %{enable_replace_malloc}
 BuildRequires:  libstdc++-static
 %endif
+%if %{with wasi_sdk}
+BuildRequires:  clang cmake ninja-build
+%endif
 
 Obsoletes:      mozilla <= 37:1.7.13
 Provides:       webclient
@@ -539,6 +551,13 @@ This package contains results of tests executed during build.
 %patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch78 -p1 -b .firefox-i686
 %patch79 -p1 -b .firefox-gcc-13-build
+
+# We need to create the wasi.patch with the correct path to the wasm libclang_rt.
+%if %{with wasi_sdk}
+export LIBCLANG_RT=%{_topdir}/BUILDROOT/usr/share/wasi-sysroot/lib/libclang_rt.builtins-wasm32.a; cat %{SOURCE49} | envsubst > %{_sourcedir}/wasi.patch
+cat %{_sourcedir}/wasi.patch
+%patch80 -p1 -b .wasi
+%endif
 
 # Test patches
 #%patch100 -p1 -b .firefox-tests-xpcshell
@@ -711,6 +730,43 @@ chmod a-x third_party/rust/ash/src/extensions/nv/*.rs
 # Is that already fixed?
 %define _lto_cflags %{nil}
 
+#WASI SDK
+%if %{with wasi_sdk}
+function install_rpms_to_current_dir() {
+    PACKAGE_RPM=$(eval echo $1)
+    #PACKAGE_DIR=%{_rpmdir}
+    PACKAGE_DIR=%{_topdir}/RPMS
+
+    if [ ! -f $PACKAGE_DIR/$PACKAGE_RPM ]; then
+        # Hack for tps tests
+        ARCH_STR=%{_arch}
+        %ifarch %{ix86}
+            ARCH_STR="i?86"
+        %endif
+        PACKAGE_DIR="$PACKAGE_DIR/$ARCH_STR"
+     fi
+
+     for package in $(ls $PACKAGE_DIR/$PACKAGE_RPM)
+     do
+         echo "$package"
+         rpm2cpio "$package" | cpio -idu
+         rm -f "$package"
+     done
+}
+
+rpm -ivh %{SOURCE50}
+#export CC="clang"
+#export CXX="clang++"
+#eport AR="clang-ar"
+#export NM="clang-nm"
+#export RANLIB="clang-ranlib"
+rpmbuild --nodeps -bb --noclean %{_topdir}/SPECS/wasi-sdk.spec
+pushd %{_buildrootdir}
+install_rpms_to_current_dir wasi-sdk-20*.rpm
+popd
+%endif 
+# ^ with wasi_sdk
+
 %if 0%{?use_bundled_cbindgen}
 mkdir -p my_rust_vendor
 cd my_rust_vendor
@@ -823,6 +879,13 @@ export GCOV_PREFIX_STRIP=$(( $(echo `pwd -P`|tr -c -d '/' |wc -c )+2 ))
 env | grep GCOV
 echo "ac_add_options --enable-lto" >> .mozconfig
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
+%endif
+ 
+%if %{with wasi_sdk}
+echo "ac_add_options --with-wasi-sysroot=%{_topdir}/BUILDROOT/usr/share/wasi-sysroot" >> .mozconfig
+%else
+echo "ac_add_options --without-sysroot" >> .mozconfig
+echo "ac_add_options --without-wasm-sandboxed-libraries" >> .mozconfig
 %endif
 
 # Require 4 GB of RAM per CPU core
