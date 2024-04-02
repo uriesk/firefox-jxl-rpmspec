@@ -760,7 +760,7 @@ rpm -ivh %{SOURCE50}
 #eport AR="clang-ar"
 #export NM="clang-nm"
 #export RANLIB="clang-ranlib"
-rpmbuild --nodeps -bb --noclean %{_topdir}/SPECS/wasi-sdk.spec
+rpmbuild -D "toolchain clang" --nodeps -bb --noclean %{_topdir}/SPECS/wasi-sdk.spec
 pushd %{_buildrootdir}
 install_rpms_to_current_dir wasi-sdk-20*.rpm
 popd
