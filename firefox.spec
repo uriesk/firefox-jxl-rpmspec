@@ -33,9 +33,14 @@ ExcludeArch: i686
 %else
 %global enable_replace_malloc 0
 %endif
-# wasi_sdk is for sandboxing third party c/c++ libs by using rlbox
+
+# wasi_sdk is for sandboxing third party c/c++ libs by using rlbox, exclude s390x on the f39.
+%if 0%{?fedora} < 40
 %ifarch s390x
 %bcond wasi_sdk 0
+%else
+%bcond wasi_sdk 1
+%endif
 %else
 %bcond wasi_sdk 1
 %endif
