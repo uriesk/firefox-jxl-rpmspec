@@ -754,13 +754,9 @@ function install_rpms_to_current_dir() {
      done
 }
 
+
 rpm -ivh %{SOURCE50}
-#export CC="clang"
-#export CXX="clang++"
-#eport AR="clang-ar"
-#export NM="clang-nm"
-#export RANLIB="clang-ranlib"
-rpmbuild -D "toolchain clang" --nodeps -bb --noclean %{_topdir}/SPECS/wasi-sdk.spec
+rpmbuild --nodeps -bb --noclean %{_topdir}/SPECS/wasi-sdk.spec
 pushd %{_buildrootdir}
 install_rpms_to_current_dir wasi-sdk-20*.rpm
 popd
