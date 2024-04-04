@@ -188,13 +188,13 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        124.0.1
-Release:        4%{?pre_tag}%{?dist}
+Version:        124.0.2
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20240322.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20240404.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source3:        dump_syms-vendor.tar.xz
@@ -1248,6 +1248,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Thu Apr 4 2024 Martin Stransky <stransky@redhat.com>- 124.0.2-1
+- Updated to 124.0.2
+
 * Thu Mar 28 2024 Jan Horak <jhorak@redhat.com> - 124.0.1-4
 - Enable rlbox sandboxing
 
