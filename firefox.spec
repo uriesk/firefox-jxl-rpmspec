@@ -228,7 +228,10 @@ Source46:       org.mozilla.firefox.SearchProvider.service
 Source47:       org.mozilla.firefox.desktop
 Source48:       org.mozilla.firefox.appdata.xml.in
 Source49:       wasi.patch.template
-Source50:      wasi-sdk-20-1.fc39.src.rpm
+# Created by:
+# git clone --recursive https://github.com/WebAssembly/wasi-sdk.git
+# cd wasi-sdk && git-archive-all --force-submodules wasi-sdk-20.tar.gz
+Source50:       wasi-sdk-20.tar.gz
 
 # Build patches
 #Patch3:         mozilla-build-arm.patch
@@ -543,6 +546,9 @@ This package contains results of tests executed during build.
 
 %prep
 %setup -q -n %{tarballdir}
+%if %{with wasi_sdk}
+%setup -q -T -D -a 50
+%endif
 
 # Build patches, can't change backup suffix from default because during build
 # there is a compare of config and js/config directories and .orig suffix is
@@ -559,8 +565,7 @@ This package contains results of tests executed during build.
 
 # We need to create the wasi.patch with the correct path to the wasm libclang_rt.
 %if %{with wasi_sdk}
-export LIBCLANG_RT=%{_topdir}/BUILDROOT/usr/share/wasi-sysroot/lib/libclang_rt.builtins-wasm32.a; cat %{SOURCE49} | envsubst > %{_sourcedir}/wasi.patch
-cat %{_sourcedir}/wasi.patch
+export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.builtins-wasm32.a; cat %{SOURCE49} | envsubst > %{_sourcedir}/wasi.patch
 %patch80 -p1 -b .wasi
 %endif
 
@@ -737,33 +742,8 @@ chmod a-x third_party/rust/ash/src/extensions/nv/*.rs
 
 #WASI SDK
 %if %{with wasi_sdk}
-function install_rpms_to_current_dir() {
-    PACKAGE_RPM=$(eval echo $1)
-    #PACKAGE_DIR=%{_rpmdir}
-    PACKAGE_DIR=%{_topdir}/RPMS
-
-    if [ ! -f $PACKAGE_DIR/$PACKAGE_RPM ]; then
-        # Hack for tps tests
-        ARCH_STR=%{_arch}
-        %ifarch %{ix86}
-            ARCH_STR="i?86"
-        %endif
-        PACKAGE_DIR="$PACKAGE_DIR/$ARCH_STR"
-     fi
-
-     for package in $(ls $PACKAGE_DIR/$PACKAGE_RPM)
-     do
-         echo "$package"
-         rpm2cpio "$package" | cpio -idu
-         rm -f "$package"
-     done
-}
-
-
-rpm -ivh %{SOURCE50}
-rpmbuild --nodeps -bb --noclean %{_topdir}/SPECS/wasi-sdk.spec
-pushd %{_buildrootdir}
-install_rpms_to_current_dir wasi-sdk-20*.rpm
+pushd wasi-sdk-20
+NINJA_FLAGS=-v CC=clang CXX=clang++ env -u CFLAGS -u CXXFLAGS -u FFLAGS -u VALFLAGS -u RUSTFLAGS -u LDFLAGS -u LT_SYS_LIBRARY_PATH make package
 popd
 %endif 
 # ^ with wasi_sdk
@@ -883,7 +863,7 @@ echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 %endif
  
 %if %{with wasi_sdk}
-echo "ac_add_options --with-wasi-sysroot=%{_topdir}/BUILDROOT/usr/share/wasi-sysroot" >> .mozconfig
+echo "ac_add_options --with-wasi-sysroot=`pwd`/wasi-sdk-20/build/install/opt/wasi-sdk/share/wasi-sysroot" >> .mozconfig
 %else
 echo "ac_add_options --without-sysroot" >> .mozconfig
 echo "ac_add_options --without-wasm-sandboxed-libraries" >> .mozconfig
