@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        124.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1228,7 +1228,7 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
-* Thu Apr 4 2024 Martin Stransky <stransky@redhat.com>- 124.0.2-1
+* Thu Apr 4 2024 Martin Stransky <stransky@redhat.com>- 124.0.2-2
 - Updated to 124.0.2
 
 * Thu Mar 28 2024 Jan Horak <jhorak@redhat.com> - 124.0.1-4
