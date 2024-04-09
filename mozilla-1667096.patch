@@ -1,6 +1,6 @@
-diff -up firefox-108.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-108.0/media/ffvpx/libavcodec/codec_list.c
---- firefox-108.0/media/ffvpx/libavcodec/codec_list.c.1667096	2022-12-05 21:18:00.000000000 +0100
-+++ firefox-108.0/media/ffvpx/libavcodec/codec_list.c	2022-12-08 08:29:54.513562296 +0100
+diff -up firefox-125.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-125.0/media/ffvpx/libavcodec/codec_list.c
+--- firefox-125.0/media/ffvpx/libavcodec/codec_list.c.1667096	2024-04-08 22:17:52.000000000 +0200
++++ firefox-125.0/media/ffvpx/libavcodec/codec_list.c	2024-04-09 10:40:58.727006437 +0200
 @@ -11,6 +11,9 @@ static const FFCodec * const codec_list[
  #if CONFIG_MP3_DECODER
      &ff_mp3_decoder,
@@ -11,9 +11,9 @@ diff -up firefox-108.0/media/ffvpx/libavcodec/codec_list.c.1667096 firefox-108.0
  #if CONFIG_LIBDAV1D
      &ff_libdav1d_decoder,
  #endif
-diff -up firefox-108.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-108.0/media/ffvpx/libavcodec/libfdk-aacdec.c
---- firefox-108.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096	2022-12-08 08:29:54.514562328 +0100
-+++ firefox-108.0/media/ffvpx/libavcodec/libfdk-aacdec.c	2022-09-03 18:20:04.000000000 +0200
+diff -up firefox-125.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-125.0/media/ffvpx/libavcodec/libfdk-aacdec.c
+--- firefox-125.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096	2024-04-09 10:40:58.727006437 +0200
++++ firefox-125.0/media/ffvpx/libavcodec/libfdk-aacdec.c	2024-04-09 10:40:58.727006437 +0200
 @@ -0,0 +1,497 @@
 +/*
 + * AAC decoder wrapper
@@ -512,12 +512,12 @@ diff -up firefox-108.0/media/ffvpx/libavcodec/libfdk-aacdec.c.1667096 firefox-10
 +    .caps_internal  = FF_CODEC_CAP_INIT_CLEANUP,
 +    .p.wrapper_name = "libfdk",
 +};
-diff -up firefox-108.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-108.0/media/ffvpx/libavcodec/moz.build
---- firefox-108.0/media/ffvpx/libavcodec/moz.build.1667096	2022-12-05 21:18:01.000000000 +0100
-+++ firefox-108.0/media/ffvpx/libavcodec/moz.build	2022-12-08 08:29:54.514562328 +0100
-@@ -130,6 +130,12 @@ if CONFIG['MOZ_LIBAV_FFT']:
-         'avfft.c',
-     ]
+diff -up firefox-125.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-125.0/media/ffvpx/libavcodec/moz.build
+--- firefox-125.0/media/ffvpx/libavcodec/moz.build.1667096	2024-04-09 10:40:58.727006437 +0200
++++ firefox-125.0/media/ffvpx/libavcodec/moz.build	2024-04-09 10:57:10.584104658 +0200
+@@ -146,6 +146,12 @@ else:
+   CXXFLAGS += CONFIG["MOZ_LIBVPX_CFLAGS"]
+   OS_LIBS += CONFIG["MOZ_LIBVPX_LIBS"]
  
 +if CONFIG['MOZ_FDK_AAC']:
 +    SOURCES += [
@@ -528,10 +528,10 @@ diff -up firefox-108.0/media/ffvpx/libavcodec/moz.build.1667096 firefox-108.0/me
  SYMBOLS_FILE = 'avcodec.symbols'
  NoVisibilityFlags()
  
-diff -up firefox-108.0/toolkit/moz.configure.1667096 firefox-108.0/toolkit/moz.configure
---- firefox-108.0/toolkit/moz.configure.1667096	2022-12-05 21:21:08.000000000 +0100
-+++ firefox-108.0/toolkit/moz.configure	2022-12-08 08:29:54.514562328 +0100
-@@ -2134,6 +2134,15 @@ with only_when(compile_environment):
+diff -up firefox-125.0/toolkit/moz.configure.1667096 firefox-125.0/toolkit/moz.configure
+--- firefox-125.0/toolkit/moz.configure.1667096	2024-04-09 10:40:58.711005876 +0200
++++ firefox-125.0/toolkit/moz.configure	2024-04-09 10:40:58.728006472 +0200
+@@ -2395,6 +2395,15 @@ with only_when(compile_environment):
  
      set_config("MOZ_SYSTEM_PNG", True, when="--with-system-png")
  
