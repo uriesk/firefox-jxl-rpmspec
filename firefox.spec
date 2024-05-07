@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        125.0.3
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -360,6 +360,7 @@ Recommends:     firefox-langpacks = %{version}-%{release}
 %else
 Obsoletes:      firefox-langpacks < %{version}-%{release}
 %endif
+Recommends:     ffmpeg-free
 Recommends:     libva
 Requires:       p11-kit-trust
 Requires:       pciutils-libs
@@ -1226,6 +1227,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue May 7 2024 Martin Stransky <stransky@redhat.com>- 125.0.3-2
+- Added ffmpeg-free to recommends (rhbz#2023833).
+
 * Mon Apr 29 2024 Martin Stransky <stransky@redhat.com>- 125.0.3-1
 - Updated to 125.0.3
 
