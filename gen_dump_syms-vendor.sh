@@ -12,7 +12,7 @@ to be used with 'cargo vendor' commmand.
 """
 
 [dependencies]
-dump_syms = "2.2.2"
+dump_syms = "2.3.1"
 
 [[bin]]
 name = "dummy"
