@@ -1,0 +1,54 @@
+changeset:   743537:1bf2a3b85d0a
+tag:         tip
+parent:      743535:29f24b1fbada
+user:        stransky <stransky@redhat.com>
+date:        Thu May 09 10:38:21 2024 +0200
+files:       toolkit/xre/nsAppRunner.cpp
+description:
+Bug 1894912 [Linux] Launch DBusService on --dbus-service param r?emilio
+
+Differential Revision: https://phabricator.services.mozilla.com/D209911
+
+
+diff --git a/toolkit/xre/nsAppRunner.cpp b/toolkit/xre/nsAppRunner.cpp
+--- a/toolkit/xre/nsAppRunner.cpp
++++ b/toolkit/xre/nsAppRunner.cpp
+@@ -267,6 +267,9 @@
+ #ifdef MOZ_WIDGET_GTK
+ #  include "nsAppShell.h"
+ #endif
++#ifdef MOZ_ENABLE_DBUS
++#  include "DBusService.h"
++#endif
+ 
+ extern uint32_t gRestartMode;
+ extern void InstallSignalHandlers(const char* ProgramName);
+@@ -2134,6 +2137,10 @@ static void DumpHelp() {
+   printf("  --headless         Run without a GUI.\n");
+ #endif
+ 
++#if defined(MOZ_ENABLE_DBUS)
++  printf("  --dbus-service     Run as DBus service.\n");
++#endif
++
+   // this works, but only after the components have registered.  so if you drop
+   // in a new command line handler, --help won't not until the second run. out
+   // of the bug, because we ship a component.reg file, it works correctly.
+@@ -4372,6 +4379,16 @@ int XREMain::XRE_mainInit(bool* aExitFla
+     return 0;
+   }
+ 
++#ifdef MOZ_ENABLE_DBUS
++  if (CheckArg("dbus-service")) {
++    DBusService* dbusService = new DBusService(gArgv[0]);
++    if (dbusService->Init()) {
++      dbusService->Run();
++    }
++    return 1;
++  }
++#endif
++
+   rv = XRE_InitCommandLine(gArgc, gArgv);
+   NS_ENSURE_SUCCESS(rv, 1);
+ 
+

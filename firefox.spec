@@ -60,7 +60,7 @@ ExcludeArch: i686
 # https://bugzilla.redhat.com/show_bug.cgi?id=1951606
 %global enable_mozilla_crashreporter 0
 %ifarch x86_64 %{ix86}
-%global enable_mozilla_crashreporter 1
+%global enable_mozilla_crashreporter 0
 %endif
 %if %{build_with_asan}
 %global enable_mozilla_crashreporter 0
@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        126.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -224,7 +224,7 @@ Source42:       psummary
 Source43:       print_failures
 Source44:       print-error-reftest
 Source45:       run-wayland-compositor
-Source46:       org.mozilla.firefox.SearchProvider.service
+Source46:       org.mozilla.firefox.service
 Source47:       org.mozilla.firefox.desktop
 Source48:       org.mozilla.firefox.appdata.xml.in
 Source49:       wasi.patch.template
@@ -275,6 +275,10 @@ Patch242:        0026-Add-KDE-integration-to-Firefox.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
+Patch408:        D209910.diff
+Patch409:        D209911.diff
+# https://webrtc-review.googlesource.com/c/src/+/349881
+Patch410:        libwebrtc-video-capture-pipewire-drop-corrupted-buffers.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -590,6 +594,9 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
+%patch408 -p1 -b .D209910
+%patch409 -p1 -b .D209911
+%patch410 -p1 -b .libwebrtc-video-capture-pipewire-drop-corrupted-buffers
 
 # PGO patches
 %if %{build_with_pgo}
@@ -744,7 +751,7 @@ chmod a-x third_party/rust/ash/src/extensions/nv/*.rs
 pushd wasi-sdk-20
 NINJA_FLAGS=-v CC=clang CXX=clang++ env -u CFLAGS -u CXXFLAGS -u FFLAGS -u VALFLAGS -u RUSTFLAGS -u LDFLAGS -u LT_SYS_LIBRARY_PATH make package
 popd
-%endif 
+%endif
 # ^ with wasi_sdk
 
 %if 0%{?use_bundled_cbindgen}
@@ -860,7 +867,7 @@ env | grep GCOV
 echo "ac_add_options --enable-lto" >> .mozconfig
 echo "ac_add_options MOZ_PGO=1" >> .mozconfig
 %endif
- 
+
 %if %{with wasi_sdk}
 echo "ac_add_options --with-wasi-sysroot=`pwd`/wasi-sdk-20/build/install/opt/wasi-sdk/share/wasi-sysroot" >> .mozconfig
 %else
@@ -1227,6 +1234,12 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Fri May 10 2024 Martin Stransky <stransky@redhat.com>- 126.0-2
+- Fix Gnome search provider for Fedora 40+
+
+* Fri May 10 2024 Jan Grulich <jgrulich@redhat.com> - 126.0-1
+- Backport WebRTC fix for screen cast glitches in KDE
+
 * Thu May 9 2024 Martin Stransky <stransky@redhat.com>- 126.0-1
 - Updated to 126.0
 
