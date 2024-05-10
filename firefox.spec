@@ -1200,10 +1200,7 @@ fi
 %{_datadir}/icons/hicolor/symbolic/apps/firefox-symbolic.svg
 %if %{enable_mozilla_crashreporter}
 %{mozappdir}/crashreporter
-%{mozappdir}/crashreporter.ini
 %{mozappdir}/minidump-analyzer
-%{mozappdir}/Throbber-small.gif
-%{mozappdir}/browser/crashreporter-override.ini
 %endif
 %{mozappdir}/*.so
 %{mozappdir}/defaults/pref/channel-prefs.js
