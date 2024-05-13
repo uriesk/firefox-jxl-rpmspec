@@ -279,6 +279,7 @@ if [ -z "$MOZ_APP_REMOTINGNAME" ]
 then
   export MOZ_APP_REMOTINGNAME=__APP_NAME__
 fi
+export MOZ_DBUS_APP_NAME=firefox
 
 # Flatpak specific environment variables
 %FLATPAK_ENV_VARS%
