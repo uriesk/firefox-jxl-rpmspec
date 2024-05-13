@@ -1,7 +1,80 @@
-diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit/xre/DBusService.cpp
---- firefox-126.0/toolkit/xre/DBusService.cpp.D209910	2024-05-09 12:20:44.081565311 +0200
-+++ firefox-126.0/toolkit/xre/DBusService.cpp	2024-05-09 12:59:43.865983543 +0200
-@@ -0,0 +1,299 @@
+diff --git a/widget/gtk/DBusService.h b/widget/gtk/DBusService.h
+new file mode 100644
+--- /dev/null
++++ b/widget/gtk/DBusService.h
+@@ -0,0 +1,67 @@
++/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++#ifndef DBusService_h__
++#define DBusService_h__
++
++#include <glib.h>
++#include <gio/gio.h>
++#include "mozilla/RefPtr.h"
++#include "mozilla/GRefPtr.h"
++
++namespace mozilla::widget {
++
++class DBusService final {
++ public:
++  explicit DBusService(const char* aAppFile) : mAppFile(aAppFile) {}
++  ~DBusService();
++
++  // nsBaseAppShell overrides:
++  bool Init();
++  void Run();
++
++  void StartDBusListening();
++  void StopDBusListening();
++
++  static void DBusSessionSleepCallback(GDBusProxy* aProxy, gchar* aSenderName,
++                                       gchar* aSignalName,
++                                       GVariant* aParameters,
++                                       gpointer aUserData);
++  static void DBusTimedatePropertiesChangedCallback(GDBusProxy* aProxy,
++                                                    gchar* aSenderName,
++                                                    gchar* aSignalName,
++                                                    GVariant* aParameters,
++                                                    gpointer aUserData);
++  static void DBusConnectClientResponse(GObject* aObject, GAsyncResult* aResult,
++                                        gpointer aUserData);
++
++  bool LaunchApp(const char* aCommand, const char** aURIList, int aURIListLen);
++
++  void HandleFreedesktopActivate(GVariant* aParameters,
++                                 GDBusMethodInvocation* aReply);
++  void HandleFreedesktopOpen(GVariant* aParameters,
++                             GDBusMethodInvocation* aReply);
++  void HandleFreedesktopActivateAction(GVariant* aParameters,
++                                       GDBusMethodInvocation* aReply);
++
++  bool StartFreedesktopListener();
++  void StopFreedesktopListener();
++
++  void OnBusAcquired(GDBusConnection* aConnection);
++  void OnNameAcquired(GDBusConnection* aConnection);
++  void OnNameLost(GDBusConnection* aConnection);
++
++ private:
++  // The connection is owned by DBus library
++  uint mDBusID = 0;
++  uint mRegistrationId = 0;
++  GDBusConnection* mConnection = nullptr;
++  RefPtr<GDBusNodeInfo> mIntrospectionData;
++  const char* mAppFile = nullptr;
++};
++
++}  // namespace mozilla::widget
++
++#endif  // DBusService_h__
+diff --git a/widget/gtk/DBusService.cpp b/widget/gtk/DBusService.cpp
+new file mode 100644
+--- /dev/null
++++ b/widget/gtk/DBusService.cpp
+@@ -0,0 +1,327 @@
 +/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 +/* This Source Code Form is subject to the terms of the Mozilla Public
 + * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -21,6 +94,7 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +#include "nsIObserverService.h"
 +#include "WidgetUtilsGtk.h"
 +#include "prproces.h"
++#include "mozilla/XREAppData.h"
 +#include "nsPrintfCString.h"
 +
 +using namespace mozilla;
@@ -62,7 +136,10 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +  return path;
 +}
 +
-+static const char* introspect_template =
++// See
++// https://specifications.freedesktop.org/desktop-entry-spec/1.1/ar01s07.html
++// for details
++static const char* kIntrospectTemplate =
 +    "<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection "
 +    "1.0//EN\"\n"
 +    "\"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">\n"
@@ -83,7 +160,7 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +    "</interface>\n"
 +    "</node>\n";
 +
-+void DBusService::LaunchApp(const char* aCommand, const char** aURIList,
++bool DBusService::LaunchApp(const char* aCommand, const char** aURIList,
 +                            int aURIListLen) {
 +  // Allocate space for all uris, executable name, command if supplied and
 +  // null terminator
@@ -92,7 +169,7 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +    paramsNum++;
 +  }
 +
-+  char** argv = (char**)moz_xmalloc(sizeof(char*) * (paramsNum));
++  char** argv = (char**)moz_xmalloc(sizeof(char*) * paramsNum);
 +  int argc = 0;
 +  argv[argc++] = strdup(mAppFile);
 +  if (aCommand) {
@@ -105,9 +182,11 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +
 +  nsAutoCString exePath;
 +  nsCOMPtr<nsIFile> lf;
++  bool ret = false;
 +  if (NS_SUCCEEDED(XRE_GetBinaryPath(getter_AddRefs(lf)))) {
 +    if (NS_SUCCEEDED(lf->GetNativePath(exePath))) {
-+      PR_CreateProcessDetached(exePath.get(), argv, nullptr, nullptr);
++      ret = (PR_CreateProcessDetached(exePath.get(), argv, nullptr, nullptr) !=
++             PR_FAILURE);
 +    }
 +  }
 +
@@ -115,6 +194,7 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +    free(argv[i]);
 +  }
 +  free(argv);
++  return ret;
 +}
 +
 +// The Activate method is called when the application is started without
@@ -122,7 +202,12 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +// Open :: (a{sv}) → ()
 +void DBusService::HandleFreedesktopActivate(GVariant* aParameters,
 +                                            GDBusMethodInvocation* aReply) {
-+  LaunchApp(nullptr, nullptr, 0);
++  if (!LaunchApp(nullptr, nullptr, 0)) {
++    g_dbus_method_invocation_return_error(aReply, G_DBUS_ERROR,
++                                          G_DBUS_ERROR_FAILED,
++                                          "Failed to run target application.");
++    return;
++  }
 +  g_dbus_method_invocation_return_value(aReply, nullptr);
 +}
 +
@@ -134,8 +219,13 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +  RefPtr<GVariant> variant =
 +      dont_AddRef(g_variant_get_child_value(aParameters, 0));
 +  gsize uriNum = 0;
-+  const char** uriArray = g_variant_get_strv(variant, &uriNum);
-+  LaunchApp(nullptr, uriArray, uriNum);
++  GUniquePtr<const char*> uriArray(g_variant_get_strv(variant, &uriNum));
++  if (!LaunchApp(nullptr, uriArray.get(), uriNum)) {
++    g_dbus_method_invocation_return_error(aReply, G_DBUS_ERROR,
++                                          G_DBUS_ERROR_FAILED,
++                                          "Failed to run target application.");
++    return;
++  }
 +  g_dbus_method_invocation_return_value(aReply, nullptr);
 +}
 +
@@ -159,14 +249,20 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +  // actionName matches desktop action defined in .desktop file.
 +  // We implement it for .desktop file shipped by flatpak
 +  // (taskcluster/docker/firefox-flatpak/org.mozilla.firefox.desktop)
++  bool ret = false;
 +  if (!strcmp(actionName, "new-window")) {
-+    LaunchApp(nullptr, nullptr, 0);
++    ret = LaunchApp(nullptr, nullptr, 0);
 +  } else if (!strcmp(actionName, "new-private-window")) {
-+    LaunchApp("--private-window", nullptr, 0);
++    ret = LaunchApp("--private-window", nullptr, 0);
 +  } else if (!strcmp(actionName, "profile-manager-window")) {
-+    LaunchApp("--ProfileManager", nullptr, 0);
++    ret = LaunchApp("--ProfileManager", nullptr, 0);
 +  }
-+
++  if (!ret) {
++    g_dbus_method_invocation_return_error(aReply, G_DBUS_ERROR,
++                                          G_DBUS_ERROR_FAILED,
++                                          "Failed to run target application.");
++    return;
++  }
 +  g_dbus_method_invocation_return_value(aReply, nullptr);
 +}
 +
@@ -179,19 +275,22 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +  MOZ_ASSERT(aUserData);
 +  MOZ_ASSERT(NS_IsMainThread());
 +
-+  if (strcmp("org.freedesktop.Application", aInterfaceName) == 0) {
-+    if (strcmp("Activate", aMethodName) == 0) {
-+      static_cast<DBusService*>(aUserData)->HandleFreedesktopActivate(
-+          aParameters, aInvocation);
-+    } else if (strcmp("Open", aMethodName) == 0) {
-+      static_cast<DBusService*>(aUserData)->HandleFreedesktopOpen(aParameters,
-+                                                                  aInvocation);
-+    } else if (strcmp("ActivateAction", aMethodName) == 0) {
-+      static_cast<DBusService*>(aUserData)->HandleFreedesktopActivateAction(
-+          aParameters, aInvocation);
-+    } else {
-+      g_warning("DBusService: HandleMethodCall() wrong method %s", aMethodName);
-+    }
++  if (strcmp("org.freedesktop.Application", aInterfaceName) != 0) {
++    g_warning("DBusService: HandleMethodCall() wrong interface name %s",
++              aInterfaceName);
++    return;
++  }
++  if (strcmp("Activate", aMethodName) == 0) {
++    static_cast<DBusService*>(aUserData)->HandleFreedesktopActivate(
++        aParameters, aInvocation);
++  } else if (strcmp("Open", aMethodName) == 0) {
++    static_cast<DBusService*>(aUserData)->HandleFreedesktopOpen(aParameters,
++                                                                aInvocation);
++  } else if (strcmp("ActivateAction", aMethodName) == 0) {
++    static_cast<DBusService*>(aUserData)->HandleFreedesktopActivateAction(
++        aParameters, aInvocation);
++  } else {
++    g_warning("DBusService: HandleMethodCall() wrong method %s", aMethodName);
 +  }
 +}
 +
@@ -227,7 +326,7 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +void DBusService::OnBusAcquired(GDBusConnection* aConnection) {
 +  GUniquePtr<GError> error;
 +  mIntrospectionData = dont_AddRef(g_dbus_node_info_new_for_xml(
-+      introspect_template, getter_Transfers(error)));
++      kIntrospectTemplate, getter_Transfers(error)));
 +  if (!mIntrospectionData) {
 +    g_warning("DBusService: g_dbus_node_info_new_for_xml() failed! %s",
 +              error->message);
@@ -270,6 +369,8 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +  }
 +
 +  mDBusID = g_bus_own_name(
++      // if org.mozilla.Firefox is taken it means we're already running
++      // so use G_BUS_NAME_OWNER_FLAGS_DO_NOT_QUEUE and quit.
 +      G_BUS_TYPE_SESSION, GetDBusBusName(), G_BUS_NAME_OWNER_FLAGS_DO_NOT_QUEUE,
 +      [](GDBusConnection* aConnection, const gchar*,
 +         gpointer aUserData) -> void {
@@ -301,85 +402,18 @@ diff -up firefox-126.0/toolkit/xre/DBusService.cpp.D209910 firefox-126.0/toolkit
 +  }
 +  mIntrospectionData = nullptr;
 +}
-diff -up firefox-126.0/toolkit/xre/DBusService.h.D209910 firefox-126.0/toolkit/xre/DBusService.h
---- firefox-126.0/toolkit/xre/DBusService.h.D209910	2024-05-09 12:20:44.081565311 +0200
-+++ firefox-126.0/toolkit/xre/DBusService.h	2024-05-09 12:20:44.081565311 +0200
-@@ -0,0 +1,64 @@
-+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-+/* This Source Code Form is subject to the terms of the Mozilla Public
-+ * License, v. 2.0. If a copy of the MPL was not distributed with this
-+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-+
-+#ifndef DBusService_h__
-+#define DBusService_h__
-+
-+#include <glib.h>
-+#include <gio/gio.h>
-+#include "mozilla/RefPtr.h"
-+#include "mozilla/GRefPtr.h"
-+
-+class DBusService final {
-+ public:
-+  DBusService(const char* aAppFile) : mAppFile(aAppFile){};
-+
-+  // nsBaseAppShell overrides:
-+  bool Init();
-+  void Run();
-+
-+  void StartDBusListening();
-+  void StopDBusListening();
-+
-+  static void DBusSessionSleepCallback(GDBusProxy* aProxy, gchar* aSenderName,
-+                                       gchar* aSignalName,
-+                                       GVariant* aParameters,
-+                                       gpointer aUserData);
-+  static void DBusTimedatePropertiesChangedCallback(GDBusProxy* aProxy,
-+                                                    gchar* aSenderName,
-+                                                    gchar* aSignalName,
-+                                                    GVariant* aParameters,
-+                                                    gpointer aUserData);
-+  static void DBusConnectClientResponse(GObject* aObject, GAsyncResult* aResult,
-+                                        gpointer aUserData);
-+
-+  void LaunchApp(const char* aCommand, const char** aURIList, int aURIListLen);
-+
-+  void HandleFreedesktopActivate(GVariant* aParameters,
-+                                 GDBusMethodInvocation* aReply);
-+  void HandleFreedesktopOpen(GVariant* aParameters,
-+                             GDBusMethodInvocation* aReply);
-+  void HandleFreedesktopActivateAction(GVariant* aParameters,
-+                                       GDBusMethodInvocation* aReply);
-+
-+  bool StartFreedesktopListener();
-+  void StopFreedesktopListener();
-+
-+  void OnBusAcquired(GDBusConnection* aConnection);
-+  void OnNameAcquired(GDBusConnection* aConnection);
-+  void OnNameLost(GDBusConnection* aConnection);
-+
-+ private:
-+  virtual ~DBusService();
-+
-+  // The connection is owned by DBus library
-+  uint mDBusID = 0;
-+  uint mRegistrationId = 0;
-+  GDBusConnection* mConnection = nullptr;
-+  RefPtr<GDBusNodeInfo> mIntrospectionData;
-+  const char* mAppFile = nullptr;
-+};
-+
-+#endif  // DBusService_h__
-diff -up firefox-126.0/toolkit/xre/moz.build.D209910 firefox-126.0/toolkit/xre/moz.build
---- firefox-126.0/toolkit/xre/moz.build.D209910	2024-05-06 22:50:25.000000000 +0200
-+++ firefox-126.0/toolkit/xre/moz.build	2024-05-09 12:20:44.081565311 +0200
-@@ -99,6 +99,10 @@ elif CONFIG["MOZ_WIDGET_TOOLKIT"] == "gt
-     UNIFIED_SOURCES += [
-         "nsNativeAppSupportUnix.cpp",
+diff --git a/widget/gtk/moz.build b/widget/gtk/moz.build
+--- a/widget/gtk/moz.build
++++ b/widget/gtk/moz.build
+@@ -172,9 +172,10 @@
+         "AsyncDBus.h",
      ]
-+    if CONFIG["MOZ_ENABLE_DBUS"]:
-+        UNIFIED_SOURCES += [
-+            "DBusService.cpp",
-+        ]
-     CXXFLAGS += CONFIG["MOZ_X11_SM_CFLAGS"]
- else:
      UNIFIED_SOURCES += [
+         "AsyncDBus.cpp",
+         "DBusMenu.cpp",
++        "DBusService.cpp",
+     ]
+     CXXFLAGS += CONFIG["MOZ_DBUS_CFLAGS"]
+ 
+ CXXFLAGS += ["-Werror=switch"]
+

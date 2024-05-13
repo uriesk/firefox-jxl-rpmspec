@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        126.0
-Release:        2%{?pre_tag}%{?dist}
+Release:        3%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -275,10 +275,13 @@ Patch242:        0026-Add-KDE-integration-to-Firefox.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
-Patch408:        D209910.diff
-Patch409:        D209911.diff
 # https://webrtc-review.googlesource.com/c/src/+/349881
 Patch410:        libwebrtc-video-capture-pipewire-drop-corrupted-buffers.patch
+
+Patch420:        D209910.1715685533.diff
+Patch421:        D209911.1715685535.diff
+Patch422:        D210158.1715685536.diff
+Patch423:        D210159.1715685538.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -594,9 +597,12 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 
 %patch402 -p1 -b .1196777
 %patch407 -p1 -b .1667096
-%patch408 -p1 -b .D209910
-%patch409 -p1 -b .D209911
 %patch410 -p1 -b .libwebrtc-video-capture-pipewire-drop-corrupted-buffers
+
+%patch420 -p1 -b .D209910.1715685533
+%patch421 -p1 -b .D209911.1715685535
+%patch422 -p1 -b .D210158.1715685536
+%patch423 -p1 -b .D210159.1715685538
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1231,6 +1237,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Mon May 13 2024 Martin Stransky <stransky@redhat.com>- 126.0-3
+- More upstream patches for Gnome search provider.
+
 * Fri May 10 2024 Martin Stransky <stransky@redhat.com>- 126.0-2
 - Fix Gnome search provider for Fedora 40+
 
