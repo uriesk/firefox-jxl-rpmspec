@@ -1,9 +1,7 @@
-diff --git a/widget/gtk/DBusService.cpp b/widget/gtk/DBusService.cpp
---- a/widget/gtk/DBusService.cpp
-+++ b/widget/gtk/DBusService.cpp
-@@ -83,42 +83,27 @@
-     "</interface>\n"
-     "</node>\n";
+diff -up firefox-126.0/widget/gtk/DBusService.cpp.D210158.1715685536 firefox-126.0/widget/gtk/DBusService.cpp
+--- firefox-126.0/widget/gtk/DBusService.cpp.D210158.1715685536	2024-05-14 11:19:02.098199593 +0200
++++ firefox-126.0/widget/gtk/DBusService.cpp	2024-05-14 11:24:44.236939835 +0200
+@@ -85,38 +85,24 @@ static const char* kIntrospectTemplate =
  
  bool DBusService::LaunchApp(const char* aCommand, const char** aURIList,
                              int aURIListLen) {
@@ -37,7 +35,8 @@ diff --git a/widget/gtk/DBusService.cpp b/widget/gtk/DBusService.cpp
 -             PR_FAILURE);
 -    }
 +    param.Append(" ");
-+    param.Append(aURIList[i]);
++    GUniquePtr<char> escUri(g_shell_quote(aURIList[i]));
++    param.Append(escUri.get());
    }
  
 -  for (int i = 0; i < argc; i++) {
@@ -53,6 +52,3 @@ diff --git a/widget/gtk/DBusService.cpp b/widget/gtk/DBusService.cpp
    return ret;
  }
  
- // The Activate method is called when the application is started without
- // files to open.
-
