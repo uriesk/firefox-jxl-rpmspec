@@ -1,0 +1,121 @@
+diff --git a/toolkit/components/remote/nsDBusRemoteClient.h b/toolkit/components/remote/nsDBusRemoteClient.h
+--- a/toolkit/components/remote/nsDBusRemoteClient.h
++++ b/toolkit/components/remote/nsDBusRemoteClient.h
+@@ -29,10 +29,10 @@
+   void Shutdown();
+ 
+  private:
+   bool GetRemoteDestinationName(const char* aProgram, const char* aProfile,
+                                 nsCString& aDestinationName);
+-  nsresult DoSendDBusCommandLine(const char* aProgram, const char* aProfile,
+-                                 const char* aBuffer, int aLength);
++  nsresult DoSendDBusCommandLine(const char* aProfile, const char* aBuffer,
++                                 int aLength);
+ };
+ 
+ #endif  // DBusRemoteClient_h__
+diff --git a/toolkit/components/remote/nsDBusRemoteClient.cpp b/toolkit/components/remote/nsDBusRemoteClient.cpp
+--- a/toolkit/components/remote/nsDBusRemoteClient.cpp
++++ b/toolkit/components/remote/nsDBusRemoteClient.cpp
+@@ -6,10 +6,11 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ #include "nsDBusRemoteClient.h"
+ #include "RemoteUtils.h"
++#include "nsAppRunner.h"
+ #include "mozilla/XREAppData.h"
+ #include "mozilla/Logging.h"
+ #include "mozilla/Base64.h"
+ #include "nsPrintfCString.h"
+ #include "mozilla/GUniquePtr.h"
+@@ -36,11 +37,11 @@
+ }
+ 
+ nsresult nsDBusRemoteClient::SendCommandLine(
+     const char* aProgram, const char* aProfile, int32_t argc, char** argv,
+     const char* aStartupToken, char** aResponse, bool* aWindowFound) {
+-  NS_ENSURE_TRUE(aProgram, NS_ERROR_INVALID_ARG);
++  NS_ENSURE_TRUE(aProfile, NS_ERROR_INVALID_ARG);
+ 
+   LOG("nsDBusRemoteClient::SendCommandLine");
+ 
+   int commandLineLength;
+   char* commandLine =
+@@ -48,12 +49,11 @@
+   if (!commandLine) {
+     LOG("  failed to create command line");
+     return NS_ERROR_FAILURE;
+   }
+ 
+-  nsresult rv =
+-      DoSendDBusCommandLine(aProgram, aProfile, commandLine, commandLineLength);
++  nsresult rv = DoSendDBusCommandLine(aProfile, commandLine, commandLineLength);
+   free(commandLine);
+ 
+   *aWindowFound = NS_SUCCEEDED(rv);
+ 
+   LOG("DoSendDBusCommandLine %s", NS_SUCCEEDED(rv) ? "OK" : "FAILED");
+@@ -97,18 +97,17 @@
+   }
+ 
+   return true;
+ }
+ 
+-nsresult nsDBusRemoteClient::DoSendDBusCommandLine(const char* aProgram,
+-                                                   const char* aProfile,
++nsresult nsDBusRemoteClient::DoSendDBusCommandLine(const char* aProfile,
+                                                    const char* aBuffer,
+                                                    int aLength) {
+   LOG("nsDBusRemoteClient::DoSendDBusCommandLine()");
+ 
+-  nsAutoCString appName(aProgram);
+-  mozilla::XREAppData::SanitizeNameForDBus(appName);
++  nsAutoCString appName;
++  gAppData->GetDBusAppName(appName);
+ 
+   nsAutoCString destinationName;
+   if (!GetRemoteDestinationName(appName.get(), aProfile, destinationName)) {
+     LOG("  failed to get remote destination name");
+     return NS_ERROR_FAILURE;
+diff --git a/toolkit/components/remote/nsDBusRemoteServer.cpp b/toolkit/components/remote/nsDBusRemoteServer.cpp
+--- a/toolkit/components/remote/nsDBusRemoteServer.cpp
++++ b/toolkit/components/remote/nsDBusRemoteServer.cpp
+@@ -6,10 +6,11 @@
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ #include "nsDBusRemoteServer.h"
+ 
+ #include "nsCOMPtr.h"
++#include "nsAppRunner.h"
+ #include "mozilla/XREAppData.h"
+ #include "mozilla/Base64.h"
+ #include "mozilla/ScopeExit.h"
+ #include "mozilla/GUniquePtr.h"
+ #include "MainThreadUtils.h"
+@@ -186,17 +187,18 @@
+ 
+ nsresult nsDBusRemoteServer::Startup(const char* aAppName,
+                                      const char* aProfileName) {
+   MOZ_DIAGNOSTIC_ASSERT(!mDBusID);
+ 
+-  // Don't even try to start without any application/profile name
+-  if (!aAppName || aAppName[0] == '\0' || !aProfileName ||
+-      aProfileName[0] == '\0')
+-    return NS_ERROR_INVALID_ARG;
++  // Don't even try to start without any profile name
++  if (!aProfileName || aProfileName[0] == '\0') return NS_ERROR_INVALID_ARG;
+ 
+-  mAppName = aAppName;
+-  mozilla::XREAppData::SanitizeNameForDBus(mAppName);
++  // aAppName is remoting name which can be something like org.mozilla.appname
++  // or so.
++  // For DBus service we rather use general application DBus identifier
++  // which is shared by all DBus services.
++  gAppData->GetDBusAppName(mAppName);
+ 
+   nsAutoCString profileName;
+   MOZ_TRY(
+       mozilla::Base64Encode(aProfileName, strlen(aProfileName), profileName));
+ 
+

@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        126.0
-Release:        5%{?pre_tag}%{?dist}
+Release:        6%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -282,6 +282,7 @@ Patch420:        D209910.1715685533.diff
 Patch421:        D209911.1715685535.diff
 Patch422:        D210158.1715685536.diff
 Patch423:        D210159.1715685538.diff
+Patch424:        D210430.1715848796.diff
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -603,6 +604,7 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 %patch421 -p1 -b .D209911.1715685535
 %patch422 -p1 -b .D210158.1715685536
 %patch423 -p1 -b .D210159.1715685538
+%patch424 -p1 -b .D210430.1715848796
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1237,6 +1239,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Wed May 15 2024 Martin Stransky <stransky@redhat.com>- 126.0-6
+- Added fix for mzbz#1896846
+
 * Tue May 14 2024 Martin Stransky <stransky@redhat.com>- 126.0-5
 - Updated upstream patches
 
