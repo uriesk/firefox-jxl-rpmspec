@@ -224,7 +224,7 @@ Source42:       psummary
 Source43:       print_failures
 Source44:       print-error-reftest
 Source45:       run-wayland-compositor
-Source46:       org.mozilla.firefox.service
+Source46:       org.mozilla.firefox.SearchProvider.service
 Source47:       org.mozilla.firefox.desktop
 Source48:       org.mozilla.firefox.appdata.xml.in
 Source49:       wasi.patch.template
