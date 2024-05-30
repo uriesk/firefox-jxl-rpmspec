@@ -562,19 +562,19 @@ This package contains results of tests executed during build.
 # there is a compare of config and js/config directories and .orig suffix is
 # ignored during this compare.
 
-%patch40 -p1 -b .aarch64-skia
-%patch44 -p1 -b .build-arm-libopus
-%patch47 -p1 -b .fedora-shebang
-%patch53 -p1 -b .firefox-gcc-build
-%patch54 -p1 -b .1669639
-%patch71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
-%patch78 -p1 -b .firefox-i686
-%patch79 -p1 -b .firefox-gcc-13-build
+%patch -P40 -p1 -b .aarch64-skia
+%patch -P44 -p1 -b .build-arm-libopus
+%patch -P47 -p1 -b .fedora-shebang
+%patch -P53 -p1 -b .firefox-gcc-build
+%patch -P54 -p1 -b .1669639
+%patch -P71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
+%patch -P78 -p1 -b .firefox-i686
+%patch -P79 -p1 -b .firefox-gcc-13-build
 
 # We need to create the wasi.patch with the correct path to the wasm libclang_rt.
 %if %{with wasi_sdk}
 export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.builtins-wasm32.a; cat %{SOURCE49} | envsubst > %{_sourcedir}/wasi.patch
-%patch80 -p1 -b .wasi
+%patch -P80 -p1 -b .wasi
 %endif
 
 # Test patches
@@ -583,42 +583,42 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 #%patch102 -p1 -b .firefox-tests-xpcshell-freeze
 
 # Fedora patches
-%patch215 -p1 -b .addons
-%patch219 -p1 -b .rhbz-1173156
+%patch -P215 -p1 -b .addons
+%patch -P219 -p1 -b .rhbz-1173156
 #ARM run-time patch
 %ifarch aarch64
-%patch226 -p1 -b .1354671
+%patch -P226 -p1 -b .1354671
 %endif
-%patch228 -p1 -b .disable-openh264-download
-%patch229 -p1 -b .firefox-nss-addon-hack
-%patch230 -p1 -b .firefox-enable-vaapi
-%patch231 -p1 -b .fedora-customization
+%patch -P228 -p1 -b .disable-openh264-download
+%patch -P229 -p1 -b .firefox-nss-addon-hack
+%patch -P230 -p1 -b .firefox-enable-vaapi
+%patch -P231 -p1 -b .fedora-customization
 #%patch241 -p1 -b .kde-integration-toolkit
 #%patch242 -p1 -b .kde-integration
 
-%patch402 -p1 -b .1196777
-%patch407 -p1 -b .1667096
-%patch410 -p1 -b .libwebrtc-video-capture-pipewire-drop-corrupted-buffers
+%patch -P402 -p1 -b .1196777
+%patch -P407 -p1 -b .1667096
+%patch -P410 -p1 -b .libwebrtc-video-capture-pipewire-drop-corrupted-buffers
 
-%patch420 -p1 -b .D209910.1715685533
-%patch421 -p1 -b .D209911.1715685535
-%patch422 -p1 -b .D210158.1715685536
-%patch423 -p1 -b .D210159.1715685538
-%patch424 -p1 -b .D210430.1715848796
+%patch -P420 -p1 -b .D209910.1715685533
+%patch -P421 -p1 -b .D209911.1715685535
+%patch -P422 -p1 -b .D210158.1715685536
+%patch -P423 -p1 -b .D210159.1715685538
+%patch -P424 -p1 -b .D210430.1715848796
 
 # PGO patches
 %if %{build_with_pgo}
 %if !%{build_with_clang}
-%patch600 -p1 -b .pgo
-%patch602 -p1 -b .1516803
+%patch -P600 -p1 -b .pgo
+%patch -P602 -p1 -b .1516803
 %endif
 %endif
-%patch603 -p1 -b .inline
+%patch -P603 -p1 -b .inline
 
 #%patch800 -p1 -b .system-av1
 #%patch801 -p1 -b .system-av1-fixup
 
-%patch1200 -p1 -b .rustflags-commasplit
+%patch -P1200 -p1 -b .rustflags-commasplit
 
 rm -f .mozconfig
 cp %{SOURCE10} .mozconfig
