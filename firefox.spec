@@ -188,13 +188,13 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        126.0
-Release:        8%{?pre_tag}%{?dist}
+Version:        127.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20240507.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20240610.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source3:        dump_syms-vendor.tar.xz
@@ -244,7 +244,6 @@ Patch44:        build-arm-libopus.patch
 Patch46:        firefox-nss-version.patch
 Patch47:        fedora-shebang-build.patch
 Patch53:        firefox-gcc-build.patch
-Patch54:        mozilla-1669639.patch
 Patch55:        firefox-testing.patch
 Patch61:        firefox-glibc-dynstack.patch
 Patch71:        0001-GLIBCXX-fix-for-GCC-12.patch
@@ -566,7 +565,6 @@ This package contains results of tests executed during build.
 %patch -P44 -p1 -b .build-arm-libopus
 %patch -P47 -p1 -b .fedora-shebang
 %patch -P53 -p1 -b .firefox-gcc-build
-%patch -P54 -p1 -b .1669639
 %patch -P71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch -P78 -p1 -b .firefox-i686
 %patch -P79 -p1 -b .firefox-gcc-13-build
@@ -1239,6 +1237,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Mon Jun 10 2024 Jan Horak <jhorak@redhat.com> - 127.0-1
+- Update to 127.0
+
 * Tue May 21 2024 Jan Horak <jhorak@redhat.com> - 126.0-8
 - Enabled crashreporter again
 
