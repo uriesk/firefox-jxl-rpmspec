@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        127.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -276,6 +276,8 @@ Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
 # https://webrtc-review.googlesource.com/c/src/+/349881
 Patch410:        libwebrtc-video-capture-pipewire-drop-corrupted-buffers.patch
+# https://phabricator.services.mozilla.com/D213749
+Patch411:        libwebrtc-fix-pipewire-camera-duplicates.patch
 
 Patch420:        D209910.1715685533.diff
 Patch421:        D209911.1715685535.diff
@@ -597,6 +599,7 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 %patch -P402 -p1 -b .1196777
 %patch -P407 -p1 -b .1667096
 %patch -P410 -p1 -b .libwebrtc-video-capture-pipewire-drop-corrupted-buffers
+%patch -P411 -p1 -b .libwebrtc-fix-pipewire-camera-duplicates
 
 %patch -P420 -p1 -b .D209910.1715685533
 %patch -P421 -p1 -b .D209911.1715685535
@@ -1237,6 +1240,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jun 14 2024 Jan Grulich <jgrulich@redhat.com> - 127.0-2
+- Fix duplicated camera entries with PipeWire
+
 * Mon Jun 10 2024 Jan Horak <jhorak@redhat.com> - 127.0-1
 - Update to 127.0
 
