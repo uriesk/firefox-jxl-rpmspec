@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        127.0.2
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -1240,6 +1240,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul 2 2024 Martin Stransky <stransky@redhat.com> - 127.0.2-2
+- Allow to override MOZ_DBUS_APP_NAME
+
 * Tue Jun 25 2024 Martin Stransky <stransky@redhat.com> - 127.0.2-1
 - Update to 127.0.2
 

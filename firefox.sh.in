@@ -274,12 +274,19 @@ do
   esac
 done
 
-# We need to link Firefox with desktop file name
+# MOZ_APP_REMOTINGNAME links Firefox with desktop file name
 if [ -z "$MOZ_APP_REMOTINGNAME" ]
 then
   export MOZ_APP_REMOTINGNAME=__APP_NAME__
 fi
-export MOZ_DBUS_APP_NAME=firefox
+
+# MOZ_DBUS_APP_NAME sets app name for DBus services like Gnome Shell
+# search provider or remote launcher
+# DBus interface name (or prefix) is org.mozilla.MOZ_DBUS_APP_NAME
+if [ -z "$MOZ_DBUS_APP_NAME" ]
+then
+  export MOZ_DBUS_APP_NAME=firefox
+fi
 
 # Flatpak specific environment variables
 %FLATPAK_ENV_VARS%
