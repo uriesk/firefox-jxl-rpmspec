@@ -1,25 +1,35 @@
-diff -up firefox-114.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h.aarch64-skia firefox-114.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h
---- firefox-114.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h.aarch64-skia	2023-06-02 03:15:22.000000000 +0200
-+++ firefox-114.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h	2023-06-05 10:18:46.942777997 +0200
-@@ -189,8 +189,6 @@ SI F F_from_Half(U16 half) {
+diff -up firefox-128.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h.aarch64-skia firefox-128.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h
+--- firefox-128.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h.aarch64-skia	2024-07-02 11:10:25.047099913 +0200
++++ firefox-128.0/gfx/skia/skia/modules/skcms/src/Transform_inl.h	2024-07-02 11:15:43.855410571 +0200
+@@ -151,7 +151,7 @@ SI U32 to_fixed(F f) {  return (U32)cast
+ 
+ 
+ SI F F_from_Half(U16 half) {
+-#if defined(USING_NEON_F16C)
++#if 0 // defined(USING_NEON_F16C)
+     return vcvt_f32_f16((float16x4_t)half);
+ #elif defined(USING_AVX512F)
+     return (F)_mm512_cvtph_ps((__m256i)half);
+@@ -178,7 +178,7 @@ SI F F_from_Half(U16 half) {
+     __attribute__((no_sanitize("unsigned-integer-overflow")))
+ #endif
  SI U16 Half_from_F(F f) {
- #if defined(USING_NEON_FP16)
-     return bit_pun<U16>(f);
--#elif defined(USING_NEON_F16C)
--    return (U16)vcvt_f16_f32(f);
+-#if defined(USING_NEON_F16C)
++#if 0 //defined(USING_NEON_F16C)
+     return (U16)vcvt_f16_f32(f);
  #elif defined(USING_AVX512F)
      return (U16)_mm512_cvtps_ph((__m512 )f, _MM_FROUND_CUR_DIRECTION );
- #elif defined(USING_AVX_F16C)
-diff -up firefox-114.0/gfx/skia/skia/src/base/SkHalf.h.aarch64-skia firefox-114.0/gfx/skia/skia/src/base/SkHalf.h
-diff -up firefox-114.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h.aarch64-skia firefox-114.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h
---- firefox-114.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h.aarch64-skia	2023-06-05 10:18:46.941777963 +0200
-+++ firefox-114.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h	2023-06-05 10:20:44.924843847 +0200
-@@ -1128,7 +1128,7 @@ SI F from_half(U16 h) {
+diff -up firefox-128.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h.aarch64-skia firefox-128.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h
+--- firefox-128.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h.aarch64-skia	2024-07-02 11:10:25.048099949 +0200
++++ firefox-128.0/gfx/skia/skia/src/opts/SkRasterPipeline_opts.h	2024-07-02 11:13:33.384783413 +0200
+@@ -1425,8 +1425,8 @@ SI F from_half(U16 h) {
  }
  
  SI U16 to_half(F f) {
--#if defined(JUMPER_IS_NEON) && defined(SK_CPU_ARM64) \
-+#if 0 //defined(JUMPER_IS_NEON) && defined(SK_CPU_ARM64) \
-     && !defined(SK_BUILD_FOR_GOOGLE3)  // Temporary workaround for some Google3 builds.
-     return sk_bit_cast<U16>(vcvt_f16_f32(f));
+-#if defined(JUMPER_IS_NEON) && defined(SK_CPU_ARM64)
+-    return (U16)vcvt_f16_f32(f);
++#if 0 //defined(JUMPER_IS_NEON) && defined(SK_CPU_ARM64)
++    return (U16)vcvt_f16_f32(f);
  
+ #elif defined(JUMPER_IS_SKX)
+     return (U16)_mm512_cvtps_ph(f, _MM_FROUND_CUR_DIRECTION);

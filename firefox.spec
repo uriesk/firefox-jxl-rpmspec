@@ -188,13 +188,13 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        127.0.2
-Release:        2%{?pre_tag}%{?dist}
+Version:        128.0
+Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20240625.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20240708.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source3:        dump_syms-vendor.tar.xz
@@ -242,7 +242,6 @@ Patch38:        build-cacheFlush-missing.patch
 Patch40:        build-aarch64-skia.patch
 Patch44:        build-arm-libopus.patch
 Patch46:        firefox-nss-version.patch
-Patch47:        fedora-shebang-build.patch
 Patch53:        firefox-gcc-build.patch
 Patch55:        firefox-testing.patch
 Patch61:        firefox-glibc-dynstack.patch
@@ -274,16 +273,12 @@ Patch242:        0026-Add-KDE-integration-to-Firefox.patch
 # Upstream patches
 Patch402:        mozilla-1196777.patch
 Patch407:        mozilla-1667096.patch
-# https://webrtc-review.googlesource.com/c/src/+/349881
-Patch410:        libwebrtc-video-capture-pipewire-drop-corrupted-buffers.patch
-# https://phabricator.services.mozilla.com/D213749
-Patch411:        libwebrtc-fix-pipewire-camera-duplicates.patch
-
 Patch420:        D209910.1715685533.diff
 Patch421:        D209911.1715685535.diff
 Patch422:        D210158.1715685536.diff
 Patch423:        D210159.1715685538.diff
 Patch424:        D210430.1715848796.diff
+Patch450:        mozilla-1898476-sync.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -565,7 +560,6 @@ This package contains results of tests executed during build.
 
 %patch -P40 -p1 -b .aarch64-skia
 %patch -P44 -p1 -b .build-arm-libopus
-%patch -P47 -p1 -b .fedora-shebang
 %patch -P53 -p1 -b .firefox-gcc-build
 %patch -P71 -p1 -b .0001-GLIBCXX-fix-for-GCC-12
 %patch -P78 -p1 -b .firefox-i686
@@ -598,14 +592,8 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 
 %patch -P402 -p1 -b .1196777
 %patch -P407 -p1 -b .1667096
-%patch -P410 -p1 -b .libwebrtc-video-capture-pipewire-drop-corrupted-buffers
-%patch -P411 -p1 -b .libwebrtc-fix-pipewire-camera-duplicates
 
-%patch -P420 -p1 -b .D209910.1715685533
-%patch -P421 -p1 -b .D209911.1715685535
-%patch -P422 -p1 -b .D210158.1715685536
-%patch -P423 -p1 -b .D210159.1715685538
-%patch -P424 -p1 -b .D210430.1715848796
+%patch -P450 -p1 -b mozilla-1898476-sync
 
 # PGO patches
 %if %{build_with_pgo}
@@ -809,6 +797,8 @@ cp %{SOURCE32} %{_buildrootdir}/bin || :
 find ./ -path ./third_party/rust -prune -o -name config.guess -exec cp /usr/lib/rpm/config.guess {} ';'
 
 MOZ_OPT_FLAGS=$(echo "%{optflags}" | sed -e 's/-Wall//')
+# Firefox is not supposed to build with exceptions globally enabled
+MOZ_OPT_FLAGS=$(echo "$MOZ_OPT_FLAGS" | sed -e 's/-fexceptions//')
 #rhbz#1037063
 # -Werror=format-security causes build failures when -Wno-format is explicitly given
 # for some sources
@@ -1094,9 +1084,6 @@ cp %{SOURCE12} %{buildroot}%{mozappdir}/browser/defaults/preferences
 echo 'pref("widget.use-xdg-desktop-portal.file-picker", 1);' >> %{buildroot}%{mozappdir}/browser/defaults/preferences/firefox-redhat-default-prefs.js
 %endif
 
-# Copy over run-mozilla.sh
-cp build/unix/run-mozilla.sh %{buildroot}%{mozappdir}
-
 # Add distribution.ini
 mkdir -p %{buildroot}%{mozappdir}/distribution
 cp %{SOURCE26} %{buildroot}%{mozappdir}/distribution
@@ -1199,7 +1186,6 @@ fi
 %endif
 %endif
 %{mozappdir}/browser/omni.ja
-%{mozappdir}/run-mozilla.sh
 %{mozappdir}/application.ini
 %{mozappdir}/pingsender
 %exclude %{mozappdir}/removed-files
@@ -1240,6 +1226,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul 2 2024 Martin Stransky <stransky@redhat.com> - 128.0-1
+- Update to 128.0
+
 * Tue Jul 2 2024 Martin Stransky <stransky@redhat.com> - 127.0.2-2
 - Allow to override MOZ_DBUS_APP_NAME
 

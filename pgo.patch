@@ -1,6 +1,6 @@
-diff -up firefox-123.0/build/moz.configure/lto-pgo.configure.pgo firefox-123.0/build/moz.configure/lto-pgo.configure
---- firefox-123.0/build/moz.configure/lto-pgo.configure.pgo	2024-02-22 10:53:12.608509264 +0100
-+++ firefox-123.0/build/moz.configure/lto-pgo.configure	2024-02-22 10:56:14.911881765 +0100
+diff -up firefox-128.0/build/moz.configure/lto-pgo.configure.pgo firefox-128.0/build/moz.configure/lto-pgo.configure
+--- firefox-128.0/build/moz.configure/lto-pgo.configure.pgo	2024-07-02 00:34:14.000000000 +0200
++++ firefox-128.0/build/moz.configure/lto-pgo.configure	2024-07-02 17:59:44.425650444 +0200
 @@ -90,12 +90,16 @@ set_config("PGO_PROFILE_PATH", pgo_profi
  
  @depends(
@@ -19,7 +19,7 @@ diff -up firefox-123.0/build/moz.configure/lto-pgo.configure.pgo firefox-123.0/b
      if not profile_use:
          return None
  
-@@ -130,7 +134,7 @@ def pgo_flags(compiler, linker, profdata
+@@ -133,7 +137,7 @@ def pgo_flags(
          return namespace(
              gen_cflags=["-fprofile-generate"],
              gen_ldflags=["-fprofile-generate"],
@@ -28,9 +28,9 @@ diff -up firefox-123.0/build/moz.configure/lto-pgo.configure.pgo firefox-123.0/b
              use_ldflags=["-fprofile-use"],
          )
  
-diff -up firefox-123.0/build/pgo/profileserver.py.pgo firefox-123.0/build/pgo/profileserver.py
---- firefox-123.0/build/pgo/profileserver.py.pgo	2024-02-14 08:18:40.000000000 +0100
-+++ firefox-123.0/build/pgo/profileserver.py	2024-02-22 10:06:42.665963053 +0100
+diff -up firefox-128.0/build/pgo/profileserver.py.pgo firefox-128.0/build/pgo/profileserver.py
+--- firefox-128.0/build/pgo/profileserver.py.pgo	2024-07-02 00:34:15.000000000 +0200
++++ firefox-128.0/build/pgo/profileserver.py	2024-07-02 17:59:44.425650444 +0200
 @@ -11,7 +11,7 @@ import subprocess
  import sys
  
@@ -40,7 +40,7 @@ diff -up firefox-123.0/build/pgo/profileserver.py.pgo firefox-123.0/build/pgo/pr
  from mozfile import TemporaryDirectory
  from mozhttpd import MozHttpd
  from mozprofile import FirefoxProfile, Preferences
-@@ -98,9 +98,22 @@ if __name__ == "__main__":
+@@ -97,9 +97,22 @@ if __name__ == "__main__":
      locations = ServerLocations()
      locations.add_host(host="127.0.0.1", port=PORT, options="primary,privileged")
  
@@ -66,10 +66,10 @@ diff -up firefox-123.0/build/pgo/profileserver.py.pgo firefox-123.0/build/pgo/pr
  
      with TemporaryDirectory() as profilePath:
          # TODO: refactor this into mozprofile
-diff -up firefox-123.0/gfx/2d/moz.build.pgo firefox-123.0/gfx/2d/moz.build
---- firefox-123.0/gfx/2d/moz.build.pgo	2024-02-14 08:18:41.000000000 +0100
-+++ firefox-123.0/gfx/2d/moz.build	2024-02-22 10:06:42.665963053 +0100
-@@ -134,11 +134,11 @@ if CONFIG["INTEL_ARCHITECTURE"]:
+diff -up firefox-128.0/gfx/2d/moz.build.pgo firefox-128.0/gfx/2d/moz.build
+--- firefox-128.0/gfx/2d/moz.build.pgo	2024-07-02 00:34:17.000000000 +0200
++++ firefox-128.0/gfx/2d/moz.build	2024-07-02 17:59:44.425650444 +0200
+@@ -135,11 +135,11 @@ if CONFIG["INTEL_ARCHITECTURE"]:
      # The file uses SSE2 intrinsics, so it needs special compile flags on some
      # compilers.
      SOURCES["BlurSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
@@ -83,44 +83,38 @@ diff -up firefox-123.0/gfx/2d/moz.build.pgo firefox-123.0/gfx/2d/moz.build
      SOURCES["SwizzleSSE2.cpp"].flags += CONFIG["SSE2_FLAGS"]
      SOURCES["SwizzleSSSE3.cpp"].flags += CONFIG["SSSE3_FLAGS"]
  elif CONFIG["TARGET_CPU"].startswith("mips"):
-diff -up firefox-123.0/gfx/skia/generate_mozbuild.py.pgo firefox-123.0/gfx/skia/generate_mozbuild.py
---- firefox-123.0/gfx/skia/generate_mozbuild.py.pgo	2024-02-14 08:18:42.000000000 +0100
-+++ firefox-123.0/gfx/skia/generate_mozbuild.py	2024-02-22 10:06:42.665963053 +0100
-@@ -54,10 +54,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
+diff -up firefox-128.0/gfx/skia/generate_mozbuild.py.pgo firefox-128.0/gfx/skia/generate_mozbuild.py
+--- firefox-128.0/gfx/skia/generate_mozbuild.py.pgo	2024-07-02 17:59:44.425650444 +0200
++++ firefox-128.0/gfx/skia/generate_mozbuild.py	2024-07-02 18:17:40.973081400 +0200
+@@ -54,8 +54,8 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
  if CONFIG['INTEL_ARCHITECTURE']:
-     SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-Dskvx=skvx_ssse3', '-mssse3']
-     SOURCES['skia/src/opts/SkOpts_sse42.cpp'].flags += ['-Dskvx=skvx_sse42', '-msse4.2']
--    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-Dskvx=skvx_avx', '-mavx']
--    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma']
-+    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-Dskvx=skvx_avx', '-mavx', '-fno-lto']
-+    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma', '-fno-lto']
-     if not CONFIG["MOZ_CODE_COVERAGE"]:
--        SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-Dskvx=skvx_skx', '-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl']
-+        SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-Dskvx=skvx_skx', '-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl', '-fno-lto']
- elif CONFIG['TARGET_CPU'] == 'aarch64' and CONFIG['CC_TYPE'] in ('clang', 'gcc'):
-     SOURCES['skia/src/opts/SkOpts_crc32.cpp'].flags += ['-Dskvx=skvx_crc32', '-march=armv8-a+crc']
- 
-diff -up firefox-123.0/gfx/skia/moz.build.pgo firefox-123.0/gfx/skia/moz.build
---- firefox-123.0/gfx/skia/moz.build.pgo	2024-02-14 08:18:42.000000000 +0100
-+++ firefox-123.0/gfx/skia/moz.build	2024-02-22 10:06:42.666963088 +0100
-@@ -564,10 +564,10 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
+     SOURCES['skia/modules/skcms/skcms.cc'].flags += ['-DSKCMS_DISABLE_SKX']
+     skia_ssse3_flags = ['-Dskvx=skvx_ssse3', '-mssse3']
+-    skia_avx_flags = ['-Dskvx=skvx_avx', '-mavx']
+-    skia_hsw_flags = ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma']
++    skia_avx_flags = ['-Dskvx=skvx_avx', '-mavx', '-fno-lto']
++    skia_hsw_flags = ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma', '-fno-lto']
+     SOURCES['skia/src/core/SkBitmapProcState_opts_ssse3.cpp'].flags += skia_ssse3_flags
+     SOURCES['skia/src/core/SkBlitMask_opts_ssse3.cpp'].flags += skia_ssse3_flags
+     SOURCES['skia/src/core/SkSwizzler_opts_ssse3.cpp'].flags += ['-Dskvx=skvx_ssse3']
+diff -up firefox-128.0/gfx/skia/moz.build.pgo firefox-128.0/gfx/skia/moz.build
+--- firefox-128.0/gfx/skia/moz.build.pgo	2024-07-02 17:59:44.425650444 +0200
++++ firefox-128.0/gfx/skia/moz.build	2024-07-02 18:19:21.092831537 +0200
+@@ -582,8 +582,8 @@ if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'wind
  if CONFIG['INTEL_ARCHITECTURE']:
-     SOURCES['skia/src/opts/SkOpts_ssse3.cpp'].flags += ['-Dskvx=skvx_ssse3', '-mssse3']
-     SOURCES['skia/src/opts/SkOpts_sse42.cpp'].flags += ['-Dskvx=skvx_sse42', '-msse4.2']
--    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-Dskvx=skvx_avx', '-mavx']
--    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma']
-+    SOURCES['skia/src/opts/SkOpts_avx.cpp'].flags += ['-Dskvx=skvx_avx', '-mavx', '-fno-lto']
-+    SOURCES['skia/src/opts/SkOpts_hsw.cpp'].flags += ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma', '-fno-lto']
-     if not CONFIG["MOZ_CODE_COVERAGE"]:
--        SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-Dskvx=skvx_skx', '-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl']
-+        SOURCES['skia/src/opts/SkOpts_skx.cpp'].flags += ['-Dskvx=skvx_skx', '-mavx512f', '-mavx512dq', '-mavx512cd', '-mavx512bw', '-mavx512vl', '-fno-lto']
- elif CONFIG['TARGET_CPU'] == 'aarch64' and CONFIG['CC_TYPE'] in ('clang', 'gcc'):
-     SOURCES['skia/src/opts/SkOpts_crc32.cpp'].flags += ['-Dskvx=skvx_crc32', '-march=armv8-a+crc']
- 
-diff -up firefox-123.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-123.0/toolkit/components/terminator/nsTerminator.cpp
---- firefox-123.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2024-02-14 08:18:56.000000000 +0100
-+++ firefox-123.0/toolkit/components/terminator/nsTerminator.cpp	2024-02-22 10:06:42.666963088 +0100
-@@ -460,6 +460,11 @@ void nsTerminator::StartWatchdog() {
+     SOURCES['skia/modules/skcms/skcms.cc'].flags += ['-DSKCMS_DISABLE_SKX']
+     skia_ssse3_flags = ['-Dskvx=skvx_ssse3', '-mssse3']
+-    skia_avx_flags = ['-Dskvx=skvx_avx', '-mavx']
+-    skia_hsw_flags = ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma']
++    skia_avx_flags = ['-Dskvx=skvx_avx', '-mavx', '-fno-lto']
++    skia_hsw_flags = ['-Dskvx=skvx_hsw', '-mavx2', '-mf16c', '-mfma', '-fno-lto']
+     SOURCES['skia/src/core/SkBitmapProcState_opts_ssse3.cpp'].flags += skia_ssse3_flags
+     SOURCES['skia/src/core/SkBlitMask_opts_ssse3.cpp'].flags += skia_ssse3_flags
+     SOURCES['skia/src/core/SkSwizzler_opts_ssse3.cpp'].flags += ['-Dskvx=skvx_ssse3']
+diff -up firefox-128.0/toolkit/components/terminator/nsTerminator.cpp.pgo firefox-128.0/toolkit/components/terminator/nsTerminator.cpp
+--- firefox-128.0/toolkit/components/terminator/nsTerminator.cpp.pgo	2024-07-02 00:34:32.000000000 +0200
++++ firefox-128.0/toolkit/components/terminator/nsTerminator.cpp	2024-07-02 17:59:44.425650444 +0200
+@@ -332,6 +332,11 @@ void nsTerminator::StartWatchdog() {
    }
  #endif
  
