@@ -24,7 +24,7 @@ diff --git a/widget/gtk/GtkCompositorWidget.cpp b/widget/gtk/GtkCompositorWidget
  
 +#if defined(MOZ_WAYLAND)
 +UniquePtr<MozContainerSurfaceLock> GtkCompositorWidget::LockSurface() {
-+  return mWidget->LockSurface();
++  return mWidget ? mWidget->LockSurface() : nullptr;
 +}
 +#endif
 +

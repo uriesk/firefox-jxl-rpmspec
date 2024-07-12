@@ -279,7 +279,6 @@ Patch422:        D210158.1715685536.diff
 Patch423:        D210159.1715685538.diff
 Patch424:        D210430.1715848796.diff
 Patch450:        mozilla-1898476-sync.patch
-Patch451:        mozilla-1907511.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -595,7 +594,6 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 %patch -P407 -p1 -b .1667096
 
 %patch -P450 -p1 -b mozilla-1898476-sync
-%patch -P451 -b1 -b mozilla-1907511
 
 # PGO patches
 %if %{build_with_pgo}
