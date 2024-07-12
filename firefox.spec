@@ -189,7 +189,7 @@ ExcludeArch: i686
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
 Version:        128.0
-Release:        1%{?pre_tag}%{?dist}
+Release:        2%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
@@ -279,6 +279,7 @@ Patch422:        D210158.1715685536.diff
 Patch423:        D210159.1715685538.diff
 Patch424:        D210430.1715848796.diff
 Patch450:        mozilla-1898476-sync.patch
+Patch451:        mozilla-1907511.patch
 
 # PGO/LTO patches
 Patch600:        pgo.patch
@@ -594,6 +595,7 @@ export LIBCLANG_RT=`pwd`/wasi-sdk-20/build/compiler-rt/lib/wasi/libclang_rt.buil
 %patch -P407 -p1 -b .1667096
 
 %patch -P450 -p1 -b mozilla-1898476-sync
+%patch -P451 -b1 -b mozilla-1907511
 
 # PGO patches
 %if %{build_with_pgo}
@@ -1226,6 +1228,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Fri Jul 12 2024 Martin Stransky <stransky@redhat.com> - 128.0-2
+- Added fix for mzbz#1907511
+
 * Tue Jul 2 2024 Martin Stransky <stransky@redhat.com> - 128.0-1
 - Update to 128.0
 

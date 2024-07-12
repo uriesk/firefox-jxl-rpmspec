@@ -1,0 +1,25 @@
+changeset:   751907:6bc8793df6c5
+tag:         tip
+parent:      751905:a52fa2f14d1d
+user:        stransky <stransky@redhat.com>
+date:        Fri Jul 12 11:26:34 2024 +0200
+files:       widget/gtk/GtkCompositorWidget.cpp
+description:
+Bug 1907511 [Linux/X11] Check mWindow at GtkCompositorWidget::LockSurface() r?emilio
+
+Differential Revision: https://phabricator.services.mozilla.com/D216380
+
+
+diff --git a/widget/gtk/GtkCompositorWidget.cpp b/widget/gtk/GtkCompositorWidget.cpp
+--- a/widget/gtk/GtkCompositorWidget.cpp
++++ b/widget/gtk/GtkCompositorWidget.cpp
+@@ -212,7 +212,7 @@ bool GtkCompositorWidget::IsPopup() {
+ #endif
+ 
+ UniquePtr<MozContainerSurfaceLock> GtkCompositorWidget::LockSurface() {
+-  return mWidget->LockSurface();
++  return mWidget ? mWidget->LockSurface() : nullptr;
+ }
+ 
+ }  // namespace widget
+
