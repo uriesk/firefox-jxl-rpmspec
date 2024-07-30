@@ -188,13 +188,13 @@ ExcludeArch: i686
 
 Summary:        Mozilla Firefox Web browser
 Name:           firefox
-Version:        128.0.3
+Version:        129.0
 Release:        1%{?pre_tag}%{?dist}
 URL:            https://www.mozilla.org/firefox/
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 Source0:        https://archive.mozilla.org/pub/firefox/releases/%{version}%{?pre_version}/source/firefox-%{version}%{?pre_version}.source.tar.xz
 %if %{with langpacks}
-Source1:        firefox-langpacks-%{version}%{?pre_version}-20240729.tar.xz
+Source1:        firefox-langpacks-%{version}%{?pre_version}-20240730.tar.xz
 %endif
 Source2:        cbindgen-vendor.tar.xz
 Source3:        dump_syms-vendor.tar.xz
@@ -1226,6 +1226,9 @@ fi
 #---------------------------------------------------------------------
 
 %changelog
+* Tue Jul 30 2024 Martin Stransky <stransky@redhat.com> - 129.0-1
+- Update to 129.0
+
 * Mon Jul 29 2024 Martin Stransky <stransky@redhat.com> - 128.0.3-1
 - Update to 128.0.3
 
